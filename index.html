@@ -1170,7 +1170,6 @@
         <span data-fr>Je suis :</span>
       </p>
         <div class="cat-toggle" id="catToggle"></div>
-        <!-- DEV NOTE: Replace YOUR_FORM_ID below with the real Formspree form ID once created at formspree.io (see form action URL). -->
         <form id="contactForm" action="https://formspree.io/f/xbdndzzd" method="POST" enctype="multipart/form-data">
           <input type="hidden" name="inquiry_type" id="inquiryTypeField" value="Community Member">
           <input type="hidden" name="_subject" value="New message from the CJHQ website">
@@ -2467,7 +2466,33 @@ function renderAccordion(){
       const escAttr = (s) => (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
       const ov = RESOURCE_OVERRIDES_CACHE[it.slug];
       if(ov && ov.hidden) return '';
-      const effective = ov ? { ...it, en: ov.title_en || it.en, desc_en: ov.desc_en || it.desc_en, url: ov.url || it.url } : it;
+      let effective = it;
+      if(ov){
+        const use = (key) => (ov[key] !== undefined && ov[key] !== null && ov[key] !== '') ? ov[key] : it[key];
+        effective = {
+          ...it,
+          en: use('title_en'), fr: use('title_fr'),
+          desc_en: use('desc_en'), desc_fr: use('desc_fr'),
+          url: use('url'),
+          what_en: use('what_en'), what_fr: use('what_fr'),
+          question_en: use('question_en'), question_fr: use('question_fr'),
+          answer_en: use('answer_en'), answer_fr: use('answer_fr'),
+          need_heading_en: use('need_heading_en'), need_heading_fr: use('need_heading_fr'),
+          need_intro_en: use('need_intro_en'), need_intro_fr: use('need_intro_fr'),
+          need_list_en: (ov.need_list_en && ov.need_list_en.length) ? ov.need_list_en : it.need_list_en,
+          need_list_fr: (ov.need_list_fr && ov.need_list_fr.length) ? ov.need_list_fr : it.need_list_fr,
+          steps_heading_en: use('steps_heading_en'), steps_heading_fr: use('steps_heading_fr'),
+          steps_list_en: (ov.steps_list_en && ov.steps_list_en.length) ? ov.steps_list_en : it.steps_list_en,
+          steps_list_fr: (ov.steps_list_fr && ov.steps_list_fr.length) ? ov.steps_list_fr : it.steps_list_fr,
+          tips_heading_en: use('tips_heading_en'), tips_heading_fr: use('tips_heading_fr'),
+          tips_list_en: (ov.tips_list_en && ov.tips_list_en.length) ? ov.tips_list_en : it.tips_list_en,
+          tips_list_fr: (ov.tips_list_fr && ov.tips_list_fr.length) ? ov.tips_list_fr : it.tips_list_fr,
+          official_links: (ov.official_links && ov.official_links.length) ? ov.official_links : it.official_links,
+          related: (ov.related && ov.related.length) ? ov.related : it.related,
+          label_en1: use('label_en1'), label_fr1: use('label_fr1'),
+          url2: use('url2'), label_en2: use('label_en2'), label_fr2: use('label_fr2'),
+        };
+      }
       RESOURCE_BY_SLUG[it.slug] = effective;
       return `<li class="res-item" data-slug="${escAttr(effective.slug)}">
           <div class="res-item-text">
@@ -3933,6 +3958,7 @@ function populateResourceCategoryDropdown(){
   });
 }
 
+let OPEN_RESOURCE_EDITORS = new Set();
 async function renderExistingResourcesList(){
   populateResourceCategoryDropdown();
   const overrides = await fetchCollection('resource_overrides');
@@ -3942,12 +3968,14 @@ async function renderExistingResourcesList(){
   const filtered = query ? all.filter(it => it.en.toLowerCase().includes(query) || it.url.toLowerCase().includes(query)) : all;
   const list = document.getElementById('existingResourcesList');
   if(!filtered.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No matches.</p>`; return; }
+  const esc = (s) => (s||'').replace(/"/g,'&quot;');
+  const joinLines = (arr) => (arr||[]).join('\n');
+  const joinLinks = (arr) => (arr||[]).map(l => `${l.label_en}|${l.label_fr}|${l.url}`).join('\n');
   list.innerHTML = filtered.map(it => {
     const ov = RESOURCE_OVERRIDES_CACHE[it.slug];
     const isHidden = ov && ov.hidden;
-    const titleEn = (ov && ov.title_en) || it.en;
-    const descEn = (ov && ov.desc_en) || it.desc_en || '';
-    const url = (ov && ov.url) || it.url;
+    const titleEn = it.en, descEn = it.desc_en || '', url = it.url;
+    const id = it.slug;
     return `
     <div class="card" style="margin-bottom:8px; ${isHidden?'opacity:.55;':''}">
       <div class="admin-row" style="align-items:flex-start;">
@@ -3956,20 +3984,83 @@ async function renderExistingResourcesList(){
           <p style="margin:2px 0 0; font-size:.78rem; color:var(--muted); word-break:break-all;">${url}</p>
         </div>
         <div style="display:flex; gap:6px; flex-shrink:0;">
-          <button class="admin-small-btn" onclick="toggleExistingResourceEditor('${it.slug}')">Edit</button>
-          <button class="admin-small-btn" onclick="toggleResourceHidden('${it.slug}')">${isHidden ? 'Unhide' : 'Hide'}</button>
+          <button class="admin-small-btn" onclick="toggleExistingResourceEditor('${id}')">Edit</button>
+          <button class="admin-small-btn" onclick="toggleResourceHidden('${id}')">${isHidden ? 'Unhide' : 'Hide'}</button>
         </div>
       </div>
-      <div id="editor-res-${it.slug}" style="display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
+      <div id="editor-res-${id}" style="display:${OPEN_RESOURCE_EDITORS.has(id)?'block':'none'}; margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:0 0 8px;">Cell &amp; Basics</h4>
         <label class="admin-label">Title — English</label>
-        <input type="text" class="admin-input" id="ov-title-${it.slug}" value="${(titleEn||'').replace(/"/g,'&quot;')}">
-        <label class="admin-label">Summary — English</label>
-        <input type="text" class="admin-input" id="ov-desc-${it.slug}" value="${(descEn||'').replace(/"/g,'&quot;')}">
-        <label class="admin-label">URL</label>
-        <input type="text" class="admin-input" id="ov-url-${it.slug}" value="${(url||'').replace(/"/g,'&quot;')}">
-        <div style="margin-top:10px; display:flex; gap:8px;">
-          <button class="admin-small-btn" onclick="saveExistingResourceOverride('${it.slug}')">Save Changes</button>
-          ${ov ? `<button class="admin-small-btn" style="color:#A23B3B;" onclick="resetExistingResourceOverride('${it.slug}')">Reset to Default</button>` : ''}
+        <input type="text" class="admin-input" id="ov-title_en-${id}" value="${esc(it.en)}">
+        <label class="admin-label">Title — French</label>
+        <input type="text" class="admin-input" id="ov-title_fr-${id}" value="${esc(it.fr)}">
+        <label class="admin-label">Summary — English (shown on the cell itself)</label>
+        <input type="text" class="admin-input" id="ov-desc_en-${id}" value="${esc(descEn)}">
+        <label class="admin-label">Summary — French</label>
+        <input type="text" class="admin-input" id="ov-desc_fr-${id}" value="${esc(it.desc_fr)}">
+        <label class="admin-label">Primary Link (URL)</label>
+        <input type="text" class="admin-input" id="ov-url-${id}" value="${esc(url)}">
+        <label class="admin-label">"Go to Application" Button Label — English (optional, defaults to "Go to Application →")</label>
+        <input type="text" class="admin-input" id="ov-label_en1-${id}" value="${esc(it.label_en1)}">
+        <label class="admin-label">Button Label — French</label>
+        <input type="text" class="admin-input" id="ov-label_fr1-${id}" value="${esc(it.label_fr1)}">
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: What Is This?</h4>
+        <label class="admin-label">English</label>
+        <textarea class="admin-input" rows="2" id="ov-what_en-${id}">${esc(it.what_en)}</textarea>
+        <label class="admin-label">French</label>
+        <textarea class="admin-input" rows="2" id="ov-what_fr-${id}">${esc(it.what_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: Question &amp; Answer (optional)</h4>
+        <label class="admin-label">Question — English</label>
+        <input type="text" class="admin-input" id="ov-question_en-${id}" value="${esc(it.question_en)}">
+        <label class="admin-label">Question — French</label>
+        <input type="text" class="admin-input" id="ov-question_fr-${id}" value="${esc(it.question_fr)}">
+        <label class="admin-label">Answer — English</label>
+        <textarea class="admin-input" rows="2" id="ov-answer_en-${id}">${esc(it.answer_en)}</textarea>
+        <label class="admin-label">Answer — French</label>
+        <textarea class="admin-input" rows="2" id="ov-answer_fr-${id}">${esc(it.answer_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: What You'll Need</h4>
+        <label class="admin-label">Section Heading — English</label>
+        <input type="text" class="admin-input" id="ov-need_heading_en-${id}" value="${esc(it.need_heading_en)}">
+        <label class="admin-label">Section Heading — French</label>
+        <input type="text" class="admin-input" id="ov-need_heading_fr-${id}" value="${esc(it.need_heading_fr)}">
+        <label class="admin-label">Intro Line — English (optional)</label>
+        <input type="text" class="admin-input" id="ov-need_intro_en-${id}" value="${esc(it.need_intro_en)}">
+        <label class="admin-label">Intro Line — French</label>
+        <input type="text" class="admin-input" id="ov-need_intro_fr-${id}" value="${esc(it.need_intro_fr)}">
+        <label class="admin-label">List Items — English (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-need_list_en-${id}">${joinLines(it.need_list_en)}</textarea>
+        <label class="admin-label">List Items — French (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-need_list_fr-${id}">${joinLines(it.need_list_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: How to Apply</h4>
+        <label class="admin-label">Section Heading — English</label>
+        <input type="text" class="admin-input" id="ov-steps_heading_en-${id}" value="${esc(it.steps_heading_en)}">
+        <label class="admin-label">Section Heading — French</label>
+        <input type="text" class="admin-input" id="ov-steps_heading_fr-${id}" value="${esc(it.steps_heading_fr)}">
+        <label class="admin-label">Steps — English (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-steps_list_en-${id}">${joinLines(it.steps_list_en)}</textarea>
+        <label class="admin-label">Steps — French (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-steps_list_fr-${id}">${joinLines(it.steps_list_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: Good to Know (optional tips)</h4>
+        <label class="admin-label">Tips — English (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-tips_list_en-${id}">${joinLines(it.tips_list_en)}</textarea>
+        <label class="admin-label">Tips — French (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-tips_list_fr-${id}">${joinLines(it.tips_list_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Official Links (optional — one per line, format: Label EN | Label FR | URL)</h4>
+        <textarea class="admin-input" rows="3" id="ov-official_links-${id}" placeholder="Passport Processing Times|Délais de traitement|https://...">${joinLinks(it.official_links)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Related Resources (optional — comma-separated page addresses, e.g. passport-renewal, child-passport)</h4>
+        <input type="text" class="admin-input" id="ov-related-${id}" value="${esc((it.related||[]).join(', '))}">
+
+        <div style="margin-top:14px; display:flex; gap:8px;">
+          <button class="admin-small-btn" onclick="saveExistingResourceOverride('${id}')">Save All Changes</button>
+          ${ov ? `<button class="admin-small-btn" style="color:#A23B3B;" onclick="resetExistingResourceOverride('${id}')">Reset to Default</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -3977,19 +4068,44 @@ async function renderExistingResourcesList(){
 }
 function toggleExistingResourceEditor(slug){
   const el = document.getElementById('editor-res-'+slug);
-  if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if(!el) return;
+  const willOpen = el.style.display === 'none';
+  el.style.display = willOpen ? 'block' : 'none';
+  if(willOpen) OPEN_RESOURCE_EDITORS.add(slug); else OPEN_RESOURCE_EDITORS.delete(slug);
 }
 async function saveExistingResourceOverride(slug){
-  const title_en = document.getElementById('ov-title-'+slug).value;
-  const desc_en = document.getElementById('ov-desc-'+slug).value;
-  const url = document.getElementById('ov-url-'+slug).value;
+  const v = (field) => { const el = document.getElementById(`ov-${field}-${slug}`); return el ? el.value : ''; };
+  const lines = (field) => v(field).split('\n').map(s=>s.trim()).filter(Boolean);
+  const links = () => v('official_links').split('\n').map(s=>s.trim()).filter(Boolean).map(line => {
+    const [label_en, label_fr, url] = line.split('|').map(s=>(s||'').trim());
+    return { label_en: label_en||'', label_fr: label_fr||'', url: url||'' };
+  });
+  const relatedSlugs = () => v('related').split(',').map(s=>s.trim()).filter(Boolean);
   const existing = RESOURCE_OVERRIDES_CACHE[slug] || {};
-  await saveToCollection('resource_overrides', { id: slug, slug, title_en, desc_en, url, hidden: existing.hidden || false });
+  const record = {
+    id: slug, slug, hidden: existing.hidden || false,
+    title_en: v('title_en'), title_fr: v('title_fr'),
+    desc_en: v('desc_en'), desc_fr: v('desc_fr'),
+    url: v('url'),
+    label_en1: v('label_en1'), label_fr1: v('label_fr1'),
+    what_en: v('what_en'), what_fr: v('what_fr'),
+    question_en: v('question_en'), question_fr: v('question_fr'),
+    answer_en: v('answer_en'), answer_fr: v('answer_fr'),
+    need_heading_en: v('need_heading_en'), need_heading_fr: v('need_heading_fr'),
+    need_intro_en: v('need_intro_en'), need_intro_fr: v('need_intro_fr'),
+    need_list_en: lines('need_list_en'), need_list_fr: lines('need_list_fr'),
+    steps_heading_en: v('steps_heading_en'), steps_heading_fr: v('steps_heading_fr'),
+    steps_list_en: lines('steps_list_en'), steps_list_fr: lines('steps_list_fr'),
+    tips_list_en: lines('tips_list_en'), tips_list_fr: lines('tips_list_fr'),
+    official_links: links(),
+    related: relatedSlugs(),
+  };
+  await saveToCollection('resource_overrides', record);
   await applyResourceOverrides();
   renderExistingResourcesList();
 }
 async function resetExistingResourceOverride(slug){
-  if(!confirm('Reset this resource to its original text and link?')) return;
+  if(!confirm('Reset this resource to its original text and link? This clears every field you\'ve customized for it.')) return;
   const existing = RESOURCE_OVERRIDES_CACHE[slug];
   const hiddenState = existing ? existing.hidden : false;
   if(hiddenState){
