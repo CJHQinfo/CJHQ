@@ -105,9 +105,6 @@
     box-shadow:0 10px 28px rgba(14,33,73,.14); padding:6px; z-index:60;
   }
   .nav-dropdown.open .nav-dropdown-menu{display:block;}
-  @media (hover:hover){
-    .nav-dropdown:hover .nav-dropdown-menu{display:block;}
-  }
   .nav-dropdown-menu a{
     display:block; padding:9px 12px; font-size:.86rem; color:var(--ink-soft); border-radius:6px; text-decoration:none;
   }
@@ -1030,26 +1027,26 @@
 <!-- ============ STAY INFORMED ============ -->
 <div class="page" id="page-stay-informed">
   <section style="padding-top:56px;">
-    <div class="section-inner">
+    <div class="section-inner" style="text-align:center;">
       <span class="eyebrow" data-en>Stay Informed</span>
       <span class="eyebrow" data-fr>Restez informés</span>
       <h1 data-cid="stay-informed-1" style="font-size:clamp(2rem,4vw,2.8rem); margin-top:10px;">
         <span data-en>Stay Connected with CJHQ</span>
         <span data-fr>Restez branchés avec le CJHQ</span>
       </h1>
-      <p data-cid="stay-informed-2" style="max-width:680px; font-size:1.05rem;">
+      <p data-cid="stay-informed-2" style="max-width:680px; margin:0 auto; font-size:1.05rem;">
         <span data-en>Timely, accurate communication is an important part of serving Quebec's Hasidic Jewish communities.</span>
         <span data-fr>Une communication rapide et exacte est un élément important du service aux communautés juives hassidiques du Québec.</span>
       </p>
-      <p data-cid="stay-informed-3" style="max-width:680px;">
+      <p data-cid="stay-informed-3" style="max-width:680px; margin:16px auto 0;">
         <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) shares important information through two official communication channels, each serving a different purpose.</span>
         <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) diffuse de l'information importante par deux canaux de communication officiels, chacun ayant un objectif distinct.</span>
       </p>
-      <p data-cid="stay-informed-4" style="max-width:680px;">
+      <p data-cid="stay-informed-4" style="max-width:680px; margin:16px auto 0;">
         <span data-en>Community members receive direct Community Information Updates by email, while official statements and public announcements are shared through CJHQ's social media channels.</span>
         <span data-fr>Les membres de la communauté reçoivent directement les mises à jour d'information communautaire par courriel, tandis que les déclarations et annonces publiques officielles sont diffusées par les réseaux sociaux du CJHQ.</span>
       </p>
-      <p data-cid="stay-informed-5" style="max-width:680px;">
+      <p data-cid="stay-informed-5" style="max-width:680px; margin:16px auto 0;">
         <span data-en>Whether the information relates to government services, travel, public safety, holidays, or community matters, CJHQ is committed to providing reliable and timely communication.</span>
         <span data-fr>Qu'il s'agisse de services gouvernementaux, de voyages, de sécurité publique, de fêtes ou d'enjeux communautaires, le CJHQ s'engage à offrir une communication fiable et rapide.</span>
       </p>
@@ -1058,20 +1055,22 @@
 
   <section class="alt">
     <div class="section-inner">
-      <span class="eyebrow" data-en>Public Statements &amp; Announcements</span>
-      <span class="eyebrow" data-fr>Déclarations et annonces publiques</span>
-      <h2 data-cid="stay-informed-11" style="margin-top:10px;">
-        <span data-en>Follow CJHQ</span>
-        <span data-fr>Suivre le CJHQ</span>
-      </h2>
-      <p data-cid="stay-informed-12" style="max-width:680px;">
-        <span data-en>Official statements, public announcements, organizational updates, and other information intended for the broader public are shared through CJHQ's official social media channels.</span>
-        <span data-fr>Les déclarations officielles, les annonces publiques, les mises à jour organisationnelles et d'autres renseignements destinés au grand public sont diffusés par les réseaux sociaux officiels du CJHQ.</span>
-      </p>
-      <p data-cid="stay-informed-13" style="max-width:680px; margin-bottom:14px;">
-        <span data-en>Follow CJHQ for:</span>
-        <span data-fr>Suivez le CJHQ pour :</span>
-      </p>
+      <div style="text-align:center; max-width:680px; margin:0 auto;">
+        <span class="eyebrow" data-en>Public Statements &amp; Announcements</span>
+        <span class="eyebrow" data-fr>Déclarations et annonces publiques</span>
+        <h2 data-cid="stay-informed-11" style="margin-top:10px;">
+          <span data-en>Follow CJHQ</span>
+          <span data-fr>Suivre le CJHQ</span>
+        </h2>
+        <p data-cid="stay-informed-12">
+          <span data-en>Official statements, public announcements, organizational updates, and other information intended for the broader public are shared through CJHQ's official social media channels.</span>
+          <span data-fr>Les déclarations officielles, les annonces publiques, les mises à jour organisationnelles et d'autres renseignements destinés au grand public sont diffusés par les réseaux sociaux officiels du CJHQ.</span>
+        </p>
+        <p data-cid="stay-informed-13" style="margin-bottom:14px;">
+          <span data-en>Follow CJHQ for:</span>
+          <span data-fr>Suivez le CJHQ pour :</span>
+        </p>
+      </div>
       <div class="pill-row" style="margin-bottom:24px;">
         <span class="pill"><span data-en>Official statements</span><span data-fr>Déclarations officielles</span></span>
         <span class="pill"><span data-en>Public announcements</span><span data-fr>Annonces publiques</span></span>
@@ -1103,6 +1102,7 @@
             <blockquote cite="https://www.facebook.com/CJHQinfo" class="fb-xfbml-parse-ignore">
               <a href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener">CJHQ on Facebook</a>
             </blockquote>
+
           </div>
         </div>
         <div>
@@ -3360,28 +3360,37 @@ function goPage(name){
   if(typeof show404 === 'function') show404(name);
 }
 function highlightActiveNav(name){
-  document.querySelectorAll('#mainNav button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+  document.querySelectorAll('#mainNav button').forEach(b=>{
+    const isMatch = b.dataset.page===name || (b.classList.contains('nav-dropdown-trigger') && name==='work');
+    b.classList.toggle('active', isMatch);
+  });
   document.querySelectorAll('#mobileDrawerNav a').forEach(a=>a.classList.toggle('active', a.dataset.page===name));
 }
 document.querySelectorAll('#mainNav button').forEach(b=>{
-  b.addEventListener('click', (e)=>{
-    if(e.target.closest('.nav-dropdown-caret')) return; // caret handled separately below
-    goPage(b.dataset.page);
-  });
+  if(b.classList.contains('nav-dropdown-trigger')) return; // handled separately below
+  b.addEventListener('click', ()=>goPage(b.dataset.page));
 });
 
-// Nav dropdown: caret toggles open/closed; hovering (desktop, has fine pointer) also reveals it
+// Nav dropdown: clicking "About" toggles the menu open/closed. Simple and
+// reliable on purpose — no hover-to-reveal (fragile across trackpads/gaps)
+// and no split click-target between the label and the caret.
 (function initNavDropdown(){
   const dropdown = document.getElementById('aboutDropdown');
   if(!dropdown) return;
-  const caret = dropdown.querySelector('.nav-dropdown-caret');
-  caret.addEventListener('click', (e)=>{
+  const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+  trigger.addEventListener('click', (e)=>{
     e.preventDefault();
     e.stopPropagation();
     dropdown.classList.toggle('open');
   });
+  dropdown.querySelectorAll('.nav-dropdown-menu a').forEach(a=>{
+    a.addEventListener('click', ()=>dropdown.classList.remove('open'));
+  });
   document.addEventListener('click', (e)=>{
     if(!dropdown.contains(e.target)) dropdown.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') dropdown.classList.remove('open');
   });
 })();
 
