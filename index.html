@@ -431,7 +431,9 @@
   /* social embeds */
   #xFeedContainer{width:100%; overflow:hidden;}
   #xFeedContainer iframe{width:100% !important; max-width:100%; min-width:0 !important;}
-  .fb-page, .fb-page iframe{width:100% !important; max-width:100%;}
+  .fb-page{width:100% !important; max-width:100%; display:block;}
+  .fb-page span{width:100% !important; max-width:100%; display:block !important;}
+  .fb-page iframe{width:100% !important; max-width:100%;}
 
   /* search box */
   .search-box-wrap{position:relative;}
@@ -1089,10 +1091,10 @@
         <span data-fr>Fil Facebook</span>
       </h3>
           <div id="fb-root"></div>
-          <div class="fb-page"
+          <div class="fb-page" style="width:100%;"
                data-href="https://www.facebook.com/CJHQinfo"
                data-tabs="timeline"
-               data-width=""
+               data-width="500"
                data-height="500"
                data-small-header="true"
                data-adapt-container-width="true"
