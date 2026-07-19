@@ -236,6 +236,11 @@
   }
   .icon-badge svg{width:20px; height:20px; stroke:var(--bronze);}
 
+  .core-values-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;
+  }
+  @media (max-width:700px){ .core-values-grid{grid-template-columns:1fr;} }
+
   /* resource categories — expandable cells */
   .accordion-item{
     background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
@@ -431,6 +436,9 @@
   .fb-page{width:100% !important; max-width:100%; display:block;}
   .fb-page span{width:100% !important; max-width:100%; display:block !important;}
   .fb-page iframe{width:100% !important; max-width:100%;}
+  @media (max-width:700px){
+    #socialEmbedGrid{display:none;}
+  }
 
   /* search box */
   .search-box-wrap{position:relative;}
@@ -652,23 +660,23 @@
         <span data-en>About the Jewish Hasidic Council of Quebec</span>
         <span data-fr>À propos du Conseil des Juifs Hassidiques du Québec</span>
       </h1>
-      <p data-cid="about-2" style="max-width:680px; font-size:1.05rem;">
+      <p data-cid="about-2" style="font-size:1.05rem;">
         <span data-en>The Jewish Hasidic Council of Quebec, known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.</span>
         <span data-fr>Le Conseil des Juifs Hassidiques du Québec, connu en anglais sous le nom de The Jewish Hasidic Council of Quebec, est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.</span>
       </p>
-      <p data-cid="about-3" style="max-width:680px;">
+      <p data-cid="about-3">
         <span data-en>CJHQ acts as a central point of contact for community members seeking information, assistance, services, or advocacy. We help individuals, families, institutions, and community organizations navigate matters involving government services, municipal regulations, public safety, immigration and border issues, religious accommodations, transportation, community events, and other concerns affecting daily life.</span>
         <span data-fr>Le CJHQ agit comme point de contact central pour les membres de la communauté à la recherche d'information, d'assistance, de services ou de représentation. Nous aidons les individus, les familles, les institutions et les organismes communautaires à s'y retrouver dans les questions touchant les services gouvernementaux, les règlements municipaux, la sécurité publique, l'immigration et les questions frontalières, les accommodements religieux, le transport, les événements communautaires et d'autres enjeux touchant la vie quotidienne.</span>
       </p>
-      <p data-cid="about-4" style="max-width:680px;">
+      <p data-cid="about-4">
         <span data-en>We also serve as a bridge between the Hasidic community and all levels of government, municipal authorities, law enforcement agencies, public institutions, service providers, and other organizations. Our role is to ensure that the community's needs and concerns are clearly communicated, properly understood, and addressed through practical and respectful solutions.</span>
         <span data-fr>Nous servons également de pont entre la communauté hassidique et tous les paliers de gouvernement, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et d'autres organisations. Notre rôle est de veiller à ce que les besoins et les préoccupations de la communauté soient clairement communiqués, bien compris et résolus par des solutions pratiques et respectueuses.</span>
       </p>
-      <p data-cid="about-5" style="max-width:680px;">
+      <p data-cid="about-5">
         <span data-en>CJHQ provides timely notices, guidance, referrals, and practical assistance to community members. During religious holidays, emergencies, major events, or changes to public services and regulations, we help coordinate arrangements and ensure that important information reaches the community clearly and quickly.</span>
         <span data-fr>Le CJHQ offre des avis rapides, des conseils, des références et une assistance pratique aux membres de la communauté. Lors des fêtes religieuses, des urgences, des événements majeurs ou des changements aux services publics et aux règlements, nous aidons à coordonner les arrangements et à veiller à ce que l'information importante rejoigne la communauté clairement et rapidement.</span>
       </p>
-      <p data-cid="about-6" style="max-width:680px;">
+      <p data-cid="about-6">
         <span data-en>We also work to promote greater understanding of Hasidic Jewish life, religious practices, and community needs. Through constructive dialogue and lasting partnerships, CJHQ seeks to strengthen relationships between the Hasidic community, public authorities, institutions, and neighbouring communities.</span>
         <span data-fr>Nous travaillons également à promouvoir une meilleure compréhension de la vie juive hassidique, des pratiques religieuses et des besoins de la communauté. Par le dialogue constructif et des partenariats durables, le CJHQ cherche à renforcer les relations entre la communauté hassidique, les autorités publiques, les institutions et les communautés voisines.</span>
       </p>
@@ -720,7 +728,7 @@
         <span data-fr>Les principes qui guident notre travail</span>
       </h2>
       </div>
-      <div id="coreValuesGrid" style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px;"></div>
+      <div id="coreValuesGrid" class="core-values-grid"></div>
     </div>
   </section>
 
@@ -1075,15 +1083,12 @@
         <span class="pill"><span data-en>Official statements</span><span data-fr>Déclarations officielles</span></span>
         <span class="pill"><span data-en>Public announcements</span><span data-fr>Annonces publiques</span></span>
         <span class="pill"><span data-en>Community updates</span><span data-fr>Mises à jour communautaires</span></span>
-        <span class="pill"><span data-en>Government information</span><span data-fr>Information gouvernementale</span></span>
-        <span class="pill"><span data-en>Public notices</span><span data-fr>Avis publics</span></span>
-        <span class="pill"><span data-en>Organizational news</span><span data-fr>Nouvelles organisationnelles</span></span>
       </div>
       <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:32px;">
         <a class="btn dark" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Facebook →</span><span data-fr>Suivre le CJHQ sur Facebook →</span></a>
         <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on X →</span><span data-fr>Suivre le CJHQ sur X →</span></a>
       </div>
-      <div class="grid-2" style="align-items:start;">
+      <div class="grid-2" id="socialEmbedGrid" style="align-items:start;">
         <div>
           <h3 data-cid="stay-informed-14" style="font-size:.95rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
         <span data-en>Facebook Feed</span>
@@ -1111,7 +1116,7 @@
         <span data-fr>Fil X</span>
       </h3>
           <div id="xFeedContainer">
-            <a class="twitter-timeline" data-dnt="true" data-height="500" href="https://x.com/CJHQinfo?ref_src=twsrc%5Etfw">Posts by CJHQinfo</a>
+            <a class="twitter-timeline" data-height="600" href="https://twitter.com/CJHQinfo?ref_src=twsrc%5Etfw">Posts by CJHQinfo</a>
           </div>
         </div>
       </div>
@@ -2484,21 +2489,21 @@ const contactFieldGroups = [
 ];
 
 const coreValues = [
+  { icon:'scale', en:'Integrity', fr:'Intégrité',
+    body_en:'We are committed to acting honestly, responsibly, and transparently while maintaining the trust placed in us by the community and our partners.',
+    body_fr:'Nous nous engageons à agir honnêtement, de façon responsable et transparente, tout en maintenant la confiance que nous accordent la communauté et nos partenaires.' },
   { icon:'heart', en:'Service', fr:'Service',
     body_en:'Serving the community is the foundation of everything we do. Every initiative, resource, and relationship is guided by a commitment to helping community members and strengthening community life.',
     body_fr:'Servir la communauté est le fondement de tout ce que nous faisons. Chaque initiative, ressource et relation est guidée par un engagement à aider les membres de la communauté et à renforcer la vie communautaire.' },
   { icon:'briefcase', en:'Professionalism', fr:'Professionnalisme',
     body_en:'We believe that respectful communication, thoughtful collaboration, and responsible leadership produce the strongest and most lasting results.',
     body_fr:'Nous croyons qu\'une communication respectueuse, une collaboration réfléchie et un leadership responsable produisent les résultats les plus solides et les plus durables.' },
-  { icon:'scale', en:'Integrity', fr:'Intégrité',
-    body_en:'We are committed to acting honestly, responsibly, and transparently while maintaining the trust placed in us by the community and our partners.',
-    body_fr:'Nous nous engageons à agir honnêtement, de façon responsable et transparente, tout en maintenant la confiance que nous accordent la communauté et nos partenaires.' },
-  { icon:'handshake', en:'Collaboration', fr:'Collaboration',
-    body_en:'Many of the issues affecting the community require cooperation among governments, public institutions, community organizations, and individuals. We believe lasting progress is achieved by working together.',
-    body_fr:'Plusieurs enjeux touchant la communauté nécessitent une coopération entre les gouvernements, les institutions publiques, les organisations communautaires et les individus. Nous croyons que des progrès durables s\'obtiennent en travaillant ensemble.' },
   { icon:'people', en:'Respect', fr:'Respect',
     body_en:'We value respectful dialogue, mutual understanding, and constructive engagement with everyone we work alongside.',
     body_fr:'Nous accordons de la valeur au dialogue respectueux, à la compréhension mutuelle et à l\'engagement constructif avec toutes les personnes avec qui nous travaillons.' },
+  { icon:'handshake', en:'Collaboration', fr:'Collaboration',
+    body_en:'Many of the issues affecting the community require cooperation among governments, public institutions, community organizations, and individuals. We believe lasting progress is achieved by working together.',
+    body_fr:'Plusieurs enjeux touchant la communauté nécessitent une coopération entre les gouvernements, les institutions publiques, les organisations communautaires et les individus. Nous croyons que des progrès durables s\'obtiennent en travaillant ensemble.' },
   { icon:'shield', en:'Non-Partisanship', fr:'Non-partisanerie',
     body_en:'CJHQ does not endorse political parties or political candidates. Our responsibility is to represent and serve Quebec\'s Hasidic Jewish communities, regardless of which political party forms government. Maintaining a non-partisan approach allows us to work professionally with elected officials and public institutions at every level of government.',
     body_fr:'Le CJHQ n\'appuie aucun parti politique ni aucun candidat. Notre responsabilité est de représenter et de servir les communautés juives hassidiques du Québec, peu importe le parti politique au pouvoir. Le maintien d\'une approche non partisane nous permet de travailler de façon professionnelle avec les élus et les institutions publiques à tous les paliers de gouvernement.' },
@@ -3184,7 +3189,7 @@ function renderCoreValues(){
   const grid = document.getElementById('coreValuesGrid');
   if(!grid) return;
   coreValues.forEach(v=>{
-    grid.innerHTML += `<div class="card" style="text-align:center; flex:0 1 260px;">
+    grid.innerHTML += `<div class="card" style="text-align:center;">
       <div class="icon-badge" style="margin:0 auto 12px;">${iconSVG(v.icon)}</div>
       <h3 data-en>${v.en}</h3><h3 data-fr>${v.fr}</h3>
       <p style="font-size:.88rem;" data-en>${v.body_en}</p>
@@ -4698,7 +4703,7 @@ window.addEventListener('hashchange', checkAdminHash);
 <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"></script>
 
 <!-- X (Twitter) hashtag button loader (renders the .twitter-hashtag-button) -->
-<script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 </body>
 </html>
