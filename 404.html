@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CJHQ</title>
+  <!--
+    GitHub Pages is a static host — it has no idea what "/contact" or
+    "/about" mean as real server paths. When someone visits one of those
+    addresses directly (bookmark, typed in the address bar, or hits
+    refresh), GitHub Pages serves this file instead of a real 404, and
+    this script silently bounces them back to the main site with the
+    intended page restored. This is the standard, widely-used fix for
+    single-page apps hosted on GitHub Pages:
+    https://github.com/rafgraph/spa-github-pages
+
+    pathSegmentsToKeep = 0 assumes this site is served from the root of
+    a domain (e.g. cjhq.org/contact). If you are instead using the raw
+    GitHub Pages address without a custom domain (e.g.
+    yourusername.github.io/cjhq-website/contact), change this to 1 so
+    the "/cjhq-website" part of the path isn't dropped.
+  -->
+  <script>
+    var pathSegmentsToKeep = 0;
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+<body>
+</body>
+</html>

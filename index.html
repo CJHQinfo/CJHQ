@@ -434,8 +434,6 @@
   .ctct-inline-form iframe{width:100% !important; max-width:100%;}
 
   /* social embeds */
-  #xFeedContainer{width:100%; overflow:hidden;}
-  #xFeedContainer iframe{width:100% !important; max-width:100%; min-width:0 !important;}
   .fb-page{width:100% !important; max-width:100%; display:block;}
   .fb-page span{width:100% !important; max-width:100%; display:block !important;}
   .fb-page iframe{width:100% !important; max-width:100%;}
@@ -528,6 +526,20 @@
 </style>
 </head>
 <body>
+<script>
+  // Restores the real path after a bounce through 404.html.
+  // Must run before any other routing logic. See 404.html for context.
+  (function(l){
+    if(l.search[1] === '/'){
+      var decoded = l.search.slice(1).split('&').map(function(s){
+        return s.replace(/~and~/g, '&');
+      }).join('?');
+      window.history.replaceState(null, null,
+        l.pathname.slice(0, -1) + decoded + l.hash
+      );
+    }
+  }(window.location));
+</script>
 <div id="siteNoticeBanner" style="display:none;"></div>
 <!-- ============ HEADER ============ -->
 <header>
@@ -540,16 +552,7 @@
       <button data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></button>
       <button data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></button>
       <button data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></button>
-      <div class="nav-dropdown" id="aboutDropdown">
-        <button data-page="about" class="nav-dropdown-trigger">
-          <span data-en>About</span><span data-fr>À propos</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" class="nav-dropdown-caret"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="nav-dropdown-menu">
-          <a href="#" onclick="goPage('about');return false;"><span data-en>About CJHQ</span><span data-fr>À propos du CJHQ</span></a>
-          <a href="#" onclick="goPage('work');return false;"><span data-en>Our Work</span><span data-fr>Notre travail</span></a>
-        </div>
-      </div>
+      <button data-page="about"><span data-en>About</span><span data-fr>À propos</span></button>
     </nav>
 
     <div style="display:flex; align-items:center; gap:10px;">
@@ -587,7 +590,6 @@
     <a href="#" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
     <a href="#" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
     <a href="#" data-page="about"><span data-en>About CJHQ</span><span data-fr>À propos du CJHQ</span></a>
-    <a href="#" data-page="work" class="mobile-drawer-sublink"><span data-en>Our Work</span><span data-fr>Notre travail</span></a>
   </nav>
   <div class="mobile-drawer-foot">
     <div class="lang-toggle">
@@ -664,43 +666,59 @@
         <span data-fr>À propos du Conseil des Juifs Hassidiques du Québec</span>
       </h1>
       <p data-cid="about-2" style="font-size:1.05rem;">
-        <span data-en>The Jewish Hasidic Council of Quebec, known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.</span>
-        <span data-fr>Le Conseil des Juifs Hassidiques du Québec, connu en anglais sous le nom de The Jewish Hasidic Council of Quebec, est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.</span>
+        <span data-en>The Jewish Hasidic Council of Quebec (CJHQ), known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.</span>
+        <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.</span>
       </p>
       <p data-cid="about-3">
-        <span data-en>CJHQ acts as a central point of contact for community members seeking information, assistance, services, or advocacy. We help individuals, families, institutions, and community organizations navigate matters involving government services, municipal regulations, public safety, immigration and border issues, religious accommodations, transportation, community events, and other concerns affecting daily life.</span>
-        <span data-fr>Le CJHQ agit comme point de contact central pour les membres de la communauté à la recherche d'information, d'assistance, de services ou de représentation. Nous aidons les individus, les familles, les institutions et les organismes communautaires à s'y retrouver dans les questions touchant les services gouvernementaux, les règlements municipaux, la sécurité publique, l'immigration et les questions frontalières, les accommodements religieux, le transport, les événements communautaires et d'autres enjeux touchant la vie quotidienne.</span>
+        <span data-en>CJHQ acts as a central point of contact for individuals, families, institutions, and community organizations seeking practical assistance, services, representation, advocacy, guidance, or reliable information. At the heart of our work is a commitment to helping community members address the issues affecting their daily lives and ensuring that the community's needs and concerns are properly represented.</span>
+        <span data-fr>Le CJHQ agit comme point de contact central pour les personnes, les familles, les institutions et les organismes communautaires à la recherche d'assistance pratique, de services, de représentation, de défense des intérêts, de conseils ou d'information fiable. Au cœur de notre travail se trouve un engagement à aider les membres de la communauté à résoudre les enjeux touchant leur vie quotidienne et à veiller à ce que les besoins et les préoccupations de la communauté soient adéquatement représentés.</span>
       </p>
       <p data-cid="about-4">
-        <span data-en>We also serve as a bridge between the Hasidic community and all levels of government, municipal authorities, law enforcement agencies, public institutions, service providers, and other organizations. Our role is to ensure that the community's needs and concerns are clearly communicated, properly understood, and addressed through practical and respectful solutions.</span>
-        <span data-fr>Nous servons également de pont entre la communauté hassidique et tous les paliers de gouvernement, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et d'autres organisations. Notre rôle est de veiller à ce que les besoins et les préoccupations de la communauté soient clairement communiqués, bien compris et résolus par des solutions pratiques et respectueuses.</span>
+        <span data-en>We work closely with governments, municipal authorities, law enforcement agencies, public institutions, service providers, and community organizations. Through these relationships, CJHQ helps address concerns, improve access to services, strengthen public safety, and develop practical solutions that respect the community's religious practices and way of life.</span>
+        <span data-fr>Nous travaillons en étroite collaboration avec les gouvernements, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et les organismes communautaires. Grâce à ces relations, le CJHQ contribue à résoudre des préoccupations, à améliorer l'accès aux services, à renforcer la sécurité publique et à élaborer des solutions pratiques qui respectent les pratiques religieuses et le mode de vie de la communauté.</span>
       </p>
       <p data-cid="about-5">
-        <span data-en>CJHQ provides timely notices, guidance, referrals, and practical assistance to community members. During religious holidays, emergencies, major events, or changes to public services and regulations, we help coordinate arrangements and ensure that important information reaches the community clearly and quickly.</span>
-        <span data-fr>Le CJHQ offre des avis rapides, des conseils, des références et une assistance pratique aux membres de la communauté. Lors des fêtes religieuses, des urgences, des événements majeurs ou des changements aux services publics et aux règlements, nous aidons à coordonner les arrangements et à veiller à ce que l'information importante rejoigne la communauté clairement et rapidement.</span>
-      </p>
-      <p data-cid="about-6">
-        <span data-en>We also work to promote greater understanding of Hasidic Jewish life, religious practices, and community needs. Through constructive dialogue and lasting partnerships, CJHQ seeks to strengthen relationships between the Hasidic community, public authorities, institutions, and neighbouring communities.</span>
-        <span data-fr>Nous travaillons également à promouvoir une meilleure compréhension de la vie juive hassidique, des pratiques religieuses et des besoins de la communauté. Par le dialogue constructif et des partenariats durables, le CJHQ cherche à renforcer les relations entre la communauté hassidique, les autorités publiques, les institutions et les communautés voisines.</span>
+        <span data-en>CJHQ also works to promote greater understanding of Hasidic Jewish life and to strengthen communication between the Hasidic community, public authorities, institutions, and the broader public.</span>
+        <span data-fr>Le CJHQ travaille également à favoriser une meilleure compréhension de la vie juive hassidique et à renforcer la communication entre la communauté hassidique, les autorités publiques, les institutions et le grand public.</span>
       </p>
     </div>
   </section>
 
   <section>
     <div class="section-inner" style="max-width:720px;">
-      <span class="eyebrow" data-en>Our Mission</span><span class="eyebrow" data-fr>Notre mission</span>
       <h2 data-cid="about-7" style="margin-top:10px;">
-        <span data-en>Why CJHQ Exists</span>
-        <span data-fr>La raison d'être du CJHQ</span>
+        <span data-en>Our Mission</span>
+        <span data-fr>Notre mission</span>
       </h2>
       <p data-cid="about-8" style="font-size:1.05rem;">
-        <span data-en>Our mission is to serve and strengthen Quebec's Hasidic Jewish communities by providing practical services and trusted information, advocating for community needs, and building effective relationships with governments, public institutions, service providers, and community partners.</span>
-        <span data-fr>Notre mission est de servir et de renforcer les communautés juives hassidiques du Québec en offrant des services pratiques et une information fiable, en défendant les besoins de la communauté et en bâtissant des relations efficaces avec les gouvernements, les institutions publiques, les fournisseurs de services et les partenaires communautaires.</span>
+        <span data-en>Our mission is to serve and strengthen Quebec's Hasidic Jewish communities through practical assistance, effective advocacy, trusted representation, and strong relationships with governments, public institutions, service providers, and community partners.</span>
+        <span data-fr>Notre mission est de servir et de renforcer les communautés juives hassidiques du Québec par une assistance pratique, une défense efficace des intérêts, une représentation fiable et des relations solides avec les gouvernements, les institutions publiques, les fournisseurs de services et les partenaires communautaires.</span>
+      </p>
+      <p data-cid="about-8b">
+        <span data-en>We are committed to promoting the safety, dignity, well-being, and full participation of Hasidic Jewish residents throughout Quebec.</span>
+        <span data-fr>Nous nous engageons à promouvoir la sécurité, la dignité, le bien-être et la pleine participation des résidents juifs hassidiques partout au Québec.</span>
       </p>
     </div>
   </section>
 
   <section class="alt">
+    <div class="section-inner" style="max-width:720px;">
+      <h2 data-cid="about-8c" style="margin-top:10px;">
+        <span data-en>How We Serve the Community</span>
+        <span data-fr>Comment nous servons la communauté</span>
+      </h2>
+      <p data-cid="about-8d" style="font-size:1.05rem;">
+        <span data-en>CJHQ assists individuals, families, institutions, and community organizations with matters involving government and municipal services, public safety, religious accommodations, travel and border issues, community events, and other concerns affecting daily life.</span>
+        <span data-fr>Le CJHQ aide les personnes, les familles, les institutions et les organismes communautaires pour des enjeux touchant les services gouvernementaux et municipaux, la sécurité publique, les accommodements religieux, les questions de voyage et de frontière, les événements communautaires et d'autres préoccupations touchant la vie quotidienne.</span>
+      </p>
+      <p data-cid="about-8e">
+        <span data-en>We represent the needs of Quebec's Hasidic Jewish communities before governments, law enforcement agencies, public institutions, service providers, and other decision-makers. We also provide timely guidance and reliable information when changes, emergencies, or public developments affect the community.</span>
+        <span data-fr>Nous représentons les besoins des communautés juives hassidiques du Québec auprès des gouvernements, des services policiers, des institutions publiques, des fournisseurs de services et d'autres décideurs. Nous fournissons également des conseils rapides et une information fiable lorsque des changements, des urgences ou des événements publics touchent la communauté.</span>
+      </p>
+    </div>
+  </section>
+
+  <section>
     <div class="section-inner" style="max-width:720px;">
       <span class="eyebrow" data-en>Our Approach</span><span class="eyebrow" data-fr>Notre approche</span>
       <h2 data-cid="about-9" style="margin-top:10px;">
@@ -735,24 +753,6 @@
     </div>
   </section>
 
-  <section class="alt">
-    <div class="section-inner" style="max-width:720px;">
-      <span class="eyebrow" data-en>Our Commitment</span><span class="eyebrow" data-fr>Notre engagement</span>
-      <h2 data-cid="about-14" style="margin-top:10px;">
-        <span data-en>Our Commitment</span>
-        <span data-fr>Notre engagement</span>
-      </h2>
-      <p data-cid="about-15">
-        <span data-en>As the needs of Quebec's Hasidic Jewish communities continue to evolve, CJHQ remains committed to serving the community with professionalism, integrity, and respect.</span>
-        <span data-fr>Alors que les besoins des communautés juives hassidiques du Québec continuent d'évoluer, le CJHQ demeure engagé à servir la communauté avec professionnalisme, intégrité et respect.</span>
-      </p>
-      <p data-cid="about-16">
-        <span data-en>We will continue to provide practical assistance, trusted information, effective advocacy, and responsible representation while working collaboratively with governments, public institutions, and community partners to strengthen the community and improve everyday life.</span>
-        <span data-fr>Nous continuerons d'offrir une assistance pratique, une information fiable, une représentation efficace et responsable, tout en travaillant en collaboration avec les gouvernements, les institutions publiques et les partenaires communautaires afin de renforcer la communauté et d'améliorer la vie quotidienne.</span>
-      </p>
-    </div>
-  </section>
-
   <section>
     <div class="section-inner" style="max-width:680px; text-align:center; margin:0 auto;">
       <h2 data-cid="about-17">
@@ -768,178 +768,6 @@
         <span data-fr>Si vous avez une question, avez besoin d'aide ou souhaitez en apprendre davantage sur notre travail, notre équipe est là pour vous aider.</span>
       </p>
       <button class="btn dark" onclick="goPage('contact')" style="margin-top:10px;"><span data-en>Contact CJHQ →</span><span data-fr>Contacter le CJHQ →</span></button>
-    </div>
-  </section>
-</div>
-<div class="page" id="page-work">
-  <section style="padding-top:56px;">
-    <div class="section-inner">
-      <span class="eyebrow" data-en>Our Work</span>
-      <span class="eyebrow" data-fr>Notre travail</span>
-      <h1 data-cid="work-1" style="font-size:clamp(2rem,4vw,2.8rem); margin-top:10px;">
-        <span data-en>Serving Quebec's Hasidic Jewish Communities</span>
-        <span data-fr>Servir les communautés juives hassidiques du Québec</span>
-      </h1>
-      <p data-cid="work-2" style="max-width:680px; font-size:1.05rem;">
-        <span data-en>CJHQ responds to both individual and community-wide needs by providing practical assistance, representing community concerns, and working directly with the institutions and decision-makers whose policies and services affect daily life.</span>
-        <span data-fr>Le CJHQ répond aux besoins individuels et collectifs en offrant une assistance pratique, en représentant les préoccupations de la communauté et en travaillant directement avec les institutions et les décideurs dont les politiques et les services touchent la vie quotidienne.</span>
-      </p>
-    </div>
-  </section>
-
-  <section class="alt">
-    <div class="section-inner" style="max-width:720px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M10 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
-        <h2 data-cid="work-3" style="margin-top:6px;">
-        <span data-en>Community Services and Practical Assistance</span>
-        <span data-fr>Services communautaires et assistance pratique</span>
-      </h2>
-      <p data-cid="work-4">
-        <span data-en>CJHQ assists community members, families, institutions, and organizations with a wide range of practical concerns.</span>
-        <span data-fr>Le CJHQ aide les membres de la communauté, les familles, les institutions et les organismes avec un large éventail de préoccupations pratiques.</span>
-      </p>
-      <p data-cid="work-5">
-        <span data-en>We provide information, guidance, referrals, and assistance in navigating government services, municipal regulations, public programs, travel and border matters, and other issues affecting everyday life.</span>
-        <span data-fr>Nous offrons de l'information, des conseils, des références et de l'assistance pour s'y retrouver dans les services gouvernementaux, les règlements municipaux, les programmes publics, les questions de voyage et de frontière, ainsi que d'autres enjeux touchant la vie quotidienne.</span>
-      </p>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-inner" style="max-width:720px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><path d="M12 3v18M5 8l-3 6a3 3 0 006 0L5 8zM19 8l-3 6a3 3 0 006 0l-3-6zM5 8h14M8 21h8"/></svg></div>
-      <h2 data-cid="work-6" style="margin-top:6px;">
-        <span data-en>Advocacy and Representation</span>
-        <span data-fr>Défense des intérêts et représentation</span>
-      </h2>
-      <p data-cid="work-7">
-        <span data-en>CJHQ represents the needs and concerns of Quebec's Hasidic Jewish communities before governments, public institutions, law enforcement agencies, service providers, and other decision-makers.</span>
-        <span data-fr>Le CJHQ représente les besoins et les préoccupations des communautés juives hassidiques du Québec auprès des gouvernements, des institutions publiques, des services policiers, des fournisseurs de services et d'autres décideurs.</span>
-      </p>
-      <p data-cid="work-8">
-        <span data-en>We advocate for fair treatment, appropriate services, practical accommodations, and solutions that recognize the community's circumstances and religious way of life.</span>
-        <span data-fr>Nous défendons un traitement équitable, des services appropriés, des accommodements pratiques et des solutions qui tiennent compte de la réalité de la communauté et de son mode de vie religieux.</span>
-      </p>
-    </div>
-  </section>
-
-  <section class="alt">
-    <div class="section-inner" style="max-width:720px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><path d="M4 21h16M5 21V10M19 21V10M3 10l9-6 9 6M8 10v7M12 10v7M16 10v7"/></svg></div>
-      <h2 data-cid="work-9" style="margin-top:6px;">
-        <span data-en>Government and Institutional Relations</span>
-        <span data-fr>Relations gouvernementales et institutionnelles</span>
-      </h2>
-      <p data-cid="work-10">
-        <span data-en>CJHQ maintains active relationships with municipal, provincial, and federal governments, elected officials, public agencies, law enforcement, border authorities, healthcare institutions, service providers, and community partners.</span>
-        <span data-fr>Le CJHQ entretient des relations actives avec les gouvernements municipaux, provinciaux et fédéraux, les élus, les organismes publics, les services policiers, les autorités frontalières, les institutions de santé, les fournisseurs de services et les partenaires communautaires.</span>
-      </p>
-      <p data-cid="work-11">
-        <span data-en>These relationships allow CJHQ to raise concerns, share relevant community information, address emerging issues, and work toward timely and practical solutions.</span>
-        <span data-fr>Ces relations permettent au CJHQ de soulever des préoccupations, de partager de l'information communautaire pertinente, de résoudre des enjeux émergents et de travailler vers des solutions rapides et pratiques.</span>
-      </p>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-inner" style="max-width:720px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></div>
-      <h2 data-cid="work-12" style="margin-top:6px;">
-        <span data-en>Public Safety and Security</span>
-        <span data-fr>Sécurité publique et sécurité</span>
-      </h2>
-      <p data-cid="work-13">
-        <span data-en>CJHQ works closely with law enforcement agencies, public-safety authorities, and community organizations on matters involving security, hate incidents, emergency preparedness, major gatherings, and the safety of community institutions and residents.</span>
-        <span data-fr>Le CJHQ collabore étroitement avec les services policiers, les autorités de sécurité publique et les organismes communautaires sur les questions de sécurité, les incidents haineux, la préparation aux urgences, les grands rassemblements et la sécurité des institutions et des résidents de la communauté.</span>
-      </p>
-      <p data-cid="work-14">
-        <span data-en>We help strengthen communication between the community and public-safety agencies and advocate for appropriate attention and resources when concerns arise.</span>
-        <span data-fr>Nous aidons à renforcer la communication entre la communauté et les organismes de sécurité publique et défendons l'obtention d'une attention et de ressources appropriées lorsque des préoccupations surviennent.</span>
-      </p>
-    </div>
-  </section>
-
-  <section class="alt">
-    <div class="section-inner" style="max-width:720px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><path d="M12 20s-7-4.6-9.5-9C.7 7.4 3 4 6.5 4 9 4 11 6 12 7.5 13 6 15 4 17.5 4 21 4 23.3 7.4 21.5 11 19 15.4 12 20 12 20z"/></svg></div>
-      <h2 data-cid="work-15" style="margin-top:6px;">
-        <span data-en>Religious Accommodation and Community Life</span>
-        <span data-fr>Accommodements religieux et vie communautaire</span>
-      </h2>
-      <p data-cid="work-16">
-        <span data-en>CJHQ works with governments, municipalities, public institutions, and service providers to address matters relating to religious observance and community life.</span>
-        <span data-fr>Le CJHQ travaille avec les gouvernements, les municipalités, les institutions publiques et les fournisseurs de services pour résoudre les enjeux liés à l'observance religieuse et à la vie communautaire.</span>
-      </p>
-      <p data-cid="work-17">
-        <span data-en>This may include holiday arrangements, municipal services, parking and transportation, public works, community events, religious accommodations, and other practical needs affecting individuals and institutions.</span>
-        <span data-fr>Cela peut inclure les arrangements pour les fêtes, les services municipaux, le stationnement et le transport, les travaux publics, les événements communautaires, les accommodements religieux et d'autres besoins pratiques touchant les individus et les institutions.</span>
-      </p>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-inner" style="max-width:720px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/></svg></div>
-      <h2 data-cid="work-18" style="margin-top:6px;">
-        <span data-en>Community Information and Communication</span>
-        <span data-fr>Information et communication communautaires</span>
-      </h2>
-      <p data-cid="work-19">
-        <span data-en>CJHQ provides community members with timely and reliable information about government services, public-safety matters, travel, road closures, municipal services, religious-holiday arrangements, emergencies, and other developments affecting daily life.</span>
-        <span data-fr>Le CJHQ fournit aux membres de la communauté une information rapide et fiable sur les services gouvernementaux, les questions de sécurité publique, les voyages, les fermetures de routes, les services municipaux, les arrangements pour les fêtes religieuses, les urgences et d'autres développements touchant la vie quotidienne.</span>
-      </p>
-      <p data-cid="work-20">
-        <span data-en>We also issue public statements and communicate with government representatives, public institutions, community partners, the media, and the broader public when necessary.</span>
-        <span data-fr>Nous publions également des déclarations publiques et communiquons avec les représentants gouvernementaux, les institutions publiques, les partenaires communautaires, les médias et le grand public au besoin.</span>
-      </p>
-    </div>
-  </section>
-
-  <section class="alt">
-    <div class="section-inner" style="max-width:720px;">
-      <span class="eyebrow" data-en>Our Approach</span><span class="eyebrow" data-fr>Notre approche</span>
-      <h2 data-cid="work-21" style="margin-top:10px;">
-        <span data-en>Our Approach</span>
-        <span data-fr>Notre approche</span>
-      </h2>
-      <p data-cid="work-22">
-        <span data-en>CJHQ believes that lasting results are achieved through professionalism, constructive engagement, and responsible advocacy.</span>
-        <span data-fr>Le CJHQ croit que des résultats durables s'obtiennent par le professionnalisme, l'engagement constructif et une représentation responsable.</span>
-      </p>
-      <p data-cid="work-23">
-        <span data-en>We work collaboratively with governments, public institutions, community organizations, and public officials to help address challenges, improve services, and strengthen mutual understanding.</span>
-        <span data-fr>Nous travaillons en collaboration avec les gouvernements, les institutions publiques, les organisations communautaires et les représentants publics pour aider à relever des défis, améliorer les services et renforcer la compréhension mutuelle.</span>
-      </p>
-      <p data-cid="work-24">
-        <span data-en>Our work is guided by respect, professionalism, and a commitment to finding practical solutions that benefit both the community and the broader public.</span>
-        <span data-fr>Notre travail est guidé par le respect, le professionnalisme et un engagement à trouver des solutions pratiques qui profitent à la fois à la communauté et au public en général.</span>
-      </p>
-      <p data-cid="work-25">
-        <span data-en>As a non-partisan organization, CJHQ works with governments of every political affiliation. Our commitment is not to politics, but to serving Quebec's Hasidic Jewish communities.</span>
-        <span data-fr>En tant qu'organisme non partisan, le CJHQ travaille avec des gouvernements de toutes allégeances politiques. Notre engagement n'est pas envers la politique, mais envers le service aux communautés juives hassidiques du Québec.</span>
-      </p>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-inner" style="max-width:680px; text-align:center; margin:0 auto;">
-      <div class="divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="12" r="7" stroke="#2F4C7A" stroke-width="1.2"/><circle cx="15" cy="12" r="7" stroke="#0E2149" stroke-width="1.2"/></svg><span class="line"></span></div>
-      <h2 data-cid="work-26">
-        <span data-en>Our Commitment</span>
-        <span data-fr>Notre engagement</span>
-      </h2>
-      <p data-cid="work-27">
-        <span data-en>Every day, CJHQ works to strengthen Quebec's Hasidic Jewish communities through service, advocacy, trusted information, and effective representation.</span>
-        <span data-fr>Chaque jour, le CJHQ travaille à renforcer les communautés juives hassidiques du Québec par le service, la représentation, l'information fiable et une représentation efficace.</span>
-      </p>
-      <p data-cid="work-28">
-        <span data-en>Whether assisting community members, working with public institutions, improving access to services, or helping resolve issues affecting daily life, our commitment remains the same:</span>
-        <span data-fr>Que ce soit en aidant les membres de la communauté, en travaillant avec les institutions publiques, en améliorant l'accès aux services ou en aidant à résoudre des enjeux touchant la vie quotidienne, notre engagement demeure le même :</span>
-      </p>
-      <p data-cid="work-29" style="font-weight:500; color:var(--ink-soft);">
-        <span data-en>To serve the community with professionalism, integrity, and respect while working collaboratively to build practical solutions that benefit both the community and Quebec as a whole.</span>
-        <span data-fr>Servir la communauté avec professionnalisme, intégrité et respect, tout en travaillant en collaboration pour bâtir des solutions pratiques qui profitent à la fois à la communauté et au Québec dans son ensemble.</span>
-      </p>
     </div>
   </section>
 </div>
@@ -1091,7 +919,7 @@
         <a class="btn dark" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Facebook →</span><span data-fr>Suivre le CJHQ sur Facebook →</span></a>
         <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on X →</span><span data-fr>Suivre le CJHQ sur X →</span></a>
       </div>
-      <div class="grid-2" id="socialEmbedGrid" style="align-items:start;">
+      <div id="socialEmbedGrid" style="max-width:500px;">
         <div>
           <h3 data-cid="stay-informed-14" style="font-size:.95rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
         <span data-en>Facebook Feed</span>
@@ -1112,13 +940,6 @@
             </blockquote>
 
           </div>
-        </div>
-        <div>
-          <h3 data-cid="stay-informed-15" style="font-size:.95rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
-        <span data-en>X Feed</span>
-        <span data-fr>Fil X</span>
-      </h3>
-          <div id="xFeedContainer"></div>
         </div>
       </div>
     </div>
@@ -1231,7 +1052,7 @@
   </section>
 
   <section class="alt" style="padding-top:0;">
-    <div class="section-inner grid-2">
+    <div class="section-inner grid-2" style="grid-template-columns:1.6fr 1fr;">
       <div>
         <h3 data-cid="contact-4" style="margin-top:24px; margin-bottom:2px;">
         <span data-en>How can we assist you?</span>
@@ -1262,7 +1083,7 @@
         <p style="font-weight:600; margin-bottom:8px;"><span data-en id="contactOrgEn">The Jewish Hasidic Council of Quebec</span><span data-fr id="contactOrgFr">Le Conseil des Juifs Hassidiques du Québec</span></p>
         <div class="contact-info-item">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11a7 7 0 1114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
-          <div><span data-en id="contactAddrEn">6750 Hutchison Street, Suite 204<br>Montréal, Quebec H3N 1Y4</span><span data-fr id="contactAddrFr">6750, rue Hutchison, bureau 204<br>Montréal (Québec) H3N 1Y4</span></div>
+          <div><span data-en id="contactAddrEn">1040 Van Horne Ave, 2nd floor<br>Outremont, QC, H2V 1J5, CANADA</span><span data-fr id="contactAddrFr">1040, avenue Van Horne, 2e étage<br>Outremont (Québec) H2V 1J5, CANADA</span></div>
         </div>
         <div class="contact-info-item">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 5c0 8.3 6.7 15 15 15l3-3-5-4-2 2c-2-1-4.5-3.5-5.5-5.5l2-2-4-5-3 3z"/></svg>
@@ -1272,94 +1093,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
           <div id="contactEmail">info@cjhq.org</div>
         </div>
-
-        <div class="divider" style="margin:32px 0;"><span class="line"></span><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="12" r="7" stroke="#2F4C7A" stroke-width="1.2"/><circle cx="15" cy="12" r="7" stroke="#0E2149" stroke-width="1.2"/></svg><span class="line"></span></div>
-
-        <h3 data-en>Before Contacting CJHQ</h3>
-        <h3 data-fr>Avant de communiquer avec le CJHQ</h3>
-        <p data-cid="contact-7" style="font-size:.9rem;">
-        <span data-en>Many of the questions we receive relate to passports, travel, border crossings, government benefits, healthcare, family services, and other public programs.</span>
-        <span data-fr>Plusieurs des questions que nous recevons concernent les passeports, les voyages, les passages frontaliers, les prestations gouvernementales, les soins de santé, les services aux familles et d'autres programmes publics.</span>
-      </p>
-        <p data-cid="contact-8" style="font-size:.9rem;">
-        <span data-en>Our Community Resource Centre provides trusted information, practical guidance, and direct links to official government resources covering many of these topics. You may find the information you need immediately without waiting for a response.</span>
-        <span data-fr>Notre Centre de ressources communautaires offre de l'information fiable, des conseils pratiques et des liens directs vers des ressources gouvernementales officielles couvrant plusieurs de ces sujets. Vous y trouverez peut-être l'information recherchée sans attendre une réponse.</span>
-      </p>
-        <button class="btn dark" onclick="goPage('resources')" style="margin-top:6px;"><span data-en>Visit the Community Resource Centre →</span><span data-fr>Consulter le Centre de ressources communautaires →</span></button>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-inner grid-2">
-      <div>
-        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><path d="M4 21h16M5 21V10M19 21V10M3 10l9-6 9 6M8 10v7M12 10v7M16 10v7"/></svg></div>
-        <h3 data-cid="contact-9" style="margin-top:6px;">
-        <span data-en>Government &amp; Institutional Inquiries</span>
-        <span data-fr>Demandes gouvernementales et institutionnelles</span>
-      </h3>
-        <p data-cid="contact-10">
-        <span data-en>CJHQ works regularly with municipal, provincial, federal, and international governments, public agencies, law enforcement, healthcare institutions, border authorities, and other public organizations.</span>
-        <span data-fr>Le CJHQ travaille régulièrement avec les gouvernements municipaux, provinciaux, fédéraux et internationaux, les organismes publics, les services policiers, les institutions de santé, les autorités frontalières et d'autres organisations publiques.</span>
-      </p>
-        <p data-cid="contact-11">
-        <span data-en>Government representatives are encouraged to use the contact form and select Government or Public Institution so that their inquiry is directed to the appropriate member of our team.</span>
-        <span data-fr>Les représentants gouvernementaux sont invités à utiliser le formulaire de contact et à sélectionner Gouvernement ou institution publique afin que leur demande soit acheminée au bon membre de notre équipe.</span>
-      </p>
-      </div>
-      <div>
-        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.4"/></svg></div>
-        <h3 data-cid="contact-12" style="margin-top:6px;">
-        <span data-en>Media Inquiries</span>
-        <span data-fr>Demandes des médias</span>
-      </h3>
-        <p data-cid="contact-13">
-        <span data-en>Members of the media are welcome to contact CJHQ regarding community matters, official statements, or interview requests.</span>
-        <span data-fr>Les représentants des médias sont invités à communiquer avec le CJHQ pour des enjeux communautaires, des déclarations officielles ou des demandes d'entrevue.</span>
-      </p>
-        <p data-cid="contact-14">
-        <span data-en>Please select Media Representative when completing the contact form and include your organization, deadline, and the nature of your request to help us respond as efficiently as possible.</span>
-        <span data-fr>Veuillez sélectionner Représentant des médias en remplissant le formulaire de contact et indiquer votre organisation, votre échéance et la nature de votre demande afin de nous aider à répondre le plus efficacement possible.</span>
-      </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="alt">
-    <div class="section-inner grid-2">
-      <div>
-        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><rect x="4" y="3" width="16" height="18"/><path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1"/></svg></div>
-        <h3 data-cid="contact-15" style="margin-top:6px;">
-        <span data-en>Community Organizations</span>
-        <span data-fr>Organismes communautaires</span>
-      </h3>
-        <p data-cid="contact-16">
-        <span data-en>CJHQ values collaboration with community organizations, charitable organizations, educational institutions, healthcare providers, and other partners.</span>
-        <span data-fr>Le CJHQ accorde une grande valeur à la collaboration avec les organismes communautaires, les organismes de bienfaisance, les établissements d'enseignement, les fournisseurs de soins de santé et d'autres partenaires.</span>
-      </p>
-        <p data-cid="contact-17">
-        <span data-en>If your organization would like to connect with CJHQ regarding collaboration, community initiatives, or other matters, please select Community Organization when submitting your inquiry.</span>
-        <span data-fr>Si votre organisme souhaite entrer en contact avec le CJHQ pour une collaboration, des initiatives communautaires ou d'autres enjeux, veuillez sélectionner Organisme communautaire en soumettant votre demande.</span>
-      </p>
-      </div>
-      <div>
-        <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#2F4C7A" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
-        <h3 data-cid="contact-18" style="margin-top:6px;">
-        <span data-en>Response Times</span>
-        <span data-fr>Délais de réponse</span>
-      </h3>
-        <p data-cid="contact-19">
-        <span data-en>We make every effort to respond to inquiries as promptly as possible.</span>
-        <span data-fr>Nous mettons tout en œuvre pour répondre aux demandes le plus rapidement possible.</span>
-      </p>
-        <p data-cid="contact-20">
-        <span data-en>Response times may vary depending on the nature of the request, supporting documentation required, and the volume of inquiries received.</span>
-        <span data-fr>Les délais de réponse peuvent varier selon la nature de la demande, la documentation requise et le volume de demandes reçues.</span>
-      </p>
-        <p data-cid="contact-21">
-        <span data-en>If your matter is urgent, please indicate this clearly when submitting your message.</span>
-        <span data-fr>Si votre situation est urgente, veuillez l'indiquer clairement en soumettant votre message.</span>
-      </p>
       </div>
     </div>
   </section>
@@ -1729,10 +1462,10 @@
 </div>
 
 
-<!-- ============ ADMIN (hidden — access via #admin) ============ -->
+<!-- ============ ADMIN (hidden — access via /admin) ============ -->
 
 
-<!-- ============ ADMIN (hidden — access via #admin) ============ -->
+<!-- ============ ADMIN (hidden — access via /admin) ============ -->
 <div class="page" id="page-admin">
   <section style="padding-top:56px; min-height:70vh;">
     <div class="section-inner" style="max-width:840px;">
@@ -1761,7 +1494,6 @@
           <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
           <button class="admin-tab-btn" data-tab="linkaudit">Link Audit</button>
           <button class="admin-tab-btn" data-tab="messages">Messages</button>
-          <button class="admin-tab-btn" data-tab="xposts">Featured Posts (X)</button>
         </div>
 
         <!-- ===== TAB: PAGES ===== -->
@@ -1868,9 +1600,9 @@
 
             <h3 style="font-size:.95rem; margin-top:18px;">Contact Information</h3>
             <label class="admin-label">Street Address — English</label>
-            <input type="text" id="setAddrEn" class="admin-input" placeholder="6750 Hutchison Street, Suite 204, Montréal, Quebec H3N 1Y4">
+            <input type="text" id="setAddrEn" class="admin-input" placeholder="1040 Van Horne Ave, 2nd floor, Outremont, QC, H2V 1J5, CANADA">
             <label class="admin-label">Street Address — French</label>
-            <input type="text" id="setAddrFr" class="admin-input" placeholder="6750, rue Hutchison, bureau 204, Montréal (Québec) H3N 1Y4">
+            <input type="text" id="setAddrFr" class="admin-input" placeholder="1040, avenue Van Horne, 2e étage, Outremont (Québec) H2V 1J5, CANADA">
             <label class="admin-label">Phone</label>
             <input type="text" id="setPhone" class="admin-input" placeholder="(514) 819-9440">
             <label class="admin-label">Email</label>
@@ -2046,29 +1778,6 @@
           <div id="messagesList"></div>
         </div>
 
-        <!-- ===== TAB: FEATURED X POSTS ===== -->
-        <div class="admin-tab-panel" id="tab-xposts" style="display:none;">
-          <h2 style="font-size:1.2rem;">Featured Posts (X)</h2>
-          <p style="font-size:.88rem; color:var(--muted);">
-            The "X Feed" on the Stay Informed page shows specific posts you choose here, rather than a live
-            timeline — X's live-timeline widget has proven unreliable. This is more robust: each post's real
-            text is saved directly, so it still shows even if X's script fails to load.
-          </p>
-          <p style="font-size:.82rem; color:var(--muted); margin-top:8px;">
-            To add a post: open it on x.com, click the "···" menu on the post → <strong>Embed Post</strong>,
-            copy the code X gives you, and paste it below.
-          </p>
-          <form id="xPostForm" class="card" style="margin:16px 0;">
-            <label class="admin-label">Paste the embed code from X</label>
-            <textarea id="xPostEmbedInput" rows="6" class="admin-input" placeholder="&lt;blockquote class=&quot;twitter-tweet&quot;&gt;...&lt;/blockquote&gt;"></textarea>
-            <div style="margin-top:10px;">
-              <button type="submit" class="btn dark" id="xPostSaveBtn">Add Featured Post</button>
-            </div>
-          </form>
-          <h3 style="font-size:.95rem; margin-top:20px;">Currently Featured</h3>
-          <div id="xPostsList"></div>
-        </div>
-
         <button class="btn admin-btn-outline" style="margin-top:28px; font-size:.82rem; color:var(--muted); border-color:var(--line);" id="adminLogoutBtn">Lock admin panel</button>
       </div>
     </div>
@@ -2097,18 +1806,17 @@
         <span class="eyebrow" style="color:#8FA3C7;" data-en>Quick Links</span>
         <span class="eyebrow" style="color:#8FA3C7;" data-fr>Liens rapides</span>
         <a href="#" onclick="goPage('home');return false;" style="margin-top:8px;"><span data-en>Home</span><span data-fr>Accueil</span></a>
-        <a href="#" onclick="goPage('resources');return false;"><span data-en>Community Resources</span><span data-fr>Ressources communautaires</span></a>
-        <a href="#" onclick="goPage('stay-informed');return false;"><span data-en>Stay Informed</span><span data-fr>Restez informés</span></a>
-        <a href="#" onclick="goPage('work');return false;"><span data-en>Our Work</span><span data-fr>Notre travail</span></a>
+        <a href="#" onclick="goPage('resources');return false;"><span data-en>Resources</span><span data-fr>Ressources</span></a>
+        <a href="#" onclick="goPage('stay-informed');return false;"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
         <a href="#" onclick="goPage('contact');return false;"><span data-en>Contact</span><span data-fr>Contact</span></a>
-        <a href="#" onclick="goPage('about');return false;"><span data-en>About CJHQ</span><span data-fr>À propos</span></a>
+        <a href="#" onclick="goPage('about');return false;"><span data-en>About</span><span data-fr>À propos</span></a>
       </nav>
 
       <div>
         <span class="eyebrow" style="color:#8FA3C7;" data-en>Contact</span>
         <span class="eyebrow" style="color:#8FA3C7;" data-fr>Contact</span>
         <div style="font-size:.85rem; margin-top:8px; line-height:1.8;">
-          <span data-en id="footerAddrEn">6750 Hutchison Street, Suite 204<br>Montréal, Quebec H3N 1Y4</span><span data-fr id="footerAddrFr">6750, rue Hutchison, bureau 204<br>Montréal (Québec) H3N 1Y4</span><br><span id="footerPhone">(514) 819-9440</span> · <span id="footerEmail">info@cjhq.org</span>
+          <span data-en id="footerAddrEn">1040 Van Horne Ave, 2nd floor<br>Outremont, QC, H2V 1J5, CANADA</span><span data-fr id="footerAddrFr">1040, avenue Van Horne, 2e étage<br>Outremont (Québec) H2V 1J5, CANADA</span><br><span id="footerPhone">(514) 819-9440</span> · <span id="footerEmail">info@cjhq.org</span>
         </div>
       </div>
 
@@ -2188,30 +1896,6 @@ const searchIndex = [
   { page:'about', en:'Our Values', fr:'Nos valeurs',
     body_en:'Service, professionalism, integrity, collaboration, respect, and non-partisanship.',
     body_fr:'Service, professionnalisme, intégrité, collaboration, respect et non-partisanerie.' },
-  { page:'about', en:'Our Commitment', fr:'Notre engagement',
-    body_en:'CJHQ\'s ongoing commitment to serving the community with professionalism, integrity, and respect.',
-    body_fr:'L\'engagement continu du CJHQ à servir la communauté avec professionnalisme, intégrité et respect.' },
-  { page:'work', en:'Our Work', fr:'Notre travail',
-    body_en:'How CJHQ provides practical assistance, represents community concerns, and works with institutions and decision-makers.',
-    body_fr:'Comment le CJHQ offre une assistance pratique, représente les préoccupations de la communauté et travaille avec les institutions et les décideurs.' },
-  { page:'work', en:'Community Services and Practical Assistance', fr:'Services communautaires et assistance pratique',
-    body_en:'Helping community members, families, institutions, and organizations navigate government services and public programs.',
-    body_fr:'Aider les membres de la communauté, les familles, les institutions et les organismes à s\'y retrouver dans les services gouvernementaux et les programmes publics.' },
-  { page:'work', en:'Advocacy and Representation', fr:'Défense des intérêts et représentation',
-    body_en:'Representing the needs and concerns of Quebec\'s Hasidic Jewish communities before governments and decision-makers.',
-    body_fr:'Représenter les besoins et les préoccupations des communautés juives hassidiques du Québec auprès des gouvernements et des décideurs.' },
-  { page:'work', en:'Government and Institutional Relations', fr:'Relations gouvernementales et institutionnelles',
-    body_en:'CJHQ\'s active relationships with governments, law enforcement, and public institutions.',
-    body_fr:'Les relations actives du CJHQ avec les gouvernements, les services policiers et les institutions publiques.' },
-  { page:'work', en:'Public Safety and Security', fr:'Sécurité publique et sécurité',
-    body_en:'CJHQ\'s work with law enforcement and public-safety authorities on security and emergency preparedness.',
-    body_fr:'Le travail du CJHQ avec les services policiers et les autorités de sécurité publique sur la sécurité et la préparation aux urgences.' },
-  { page:'work', en:'Religious Accommodation and Community Life', fr:'Accommodements religieux et vie communautaire',
-    body_en:'Working with governments and institutions on matters relating to religious observance and community life.',
-    body_fr:'Travailler avec les gouvernements et les institutions sur les enjeux liés à l\'observance religieuse et à la vie communautaire.' },
-  { page:'work', en:'Community Information and Communication', fr:'Information et communication communautaires',
-    body_en:'Timely and reliable information about government services, public safety, travel, and other developments.',
-    body_fr:'Une information rapide et fiable sur les services gouvernementaux, la sécurité publique, les voyages et d\'autres développements.' },
   { page:'resources', en:'Community Resource Centre', fr:'Centre de ressources communautaires',
     body_en:'Trusted government resources, applications, and services for Quebec\'s Hasidic Jewish communities.',
     body_fr:'Ressources gouvernementales fiables, demandes et services pour les communautés juives hassidiques du Québec.' },
@@ -2240,8 +1924,8 @@ const searchIndex = [
     body_en:'What to expect when contacting CJHQ, and how to flag an urgent matter.',
     body_fr:'À quoi s\'attendre en communiquant avec le CJHQ, et comment signaler une situation urgente.' },
   { page:'contact', en:'Office Address & Phone', fr:'Adresse et téléphone du bureau',
-    body_en:'6750 Hutchison Street, Suite 204, Montréal, Quebec H3N 1Y4 · (514) 819-9440 · info@cjhq.org',
-    body_fr:'6750, rue Hutchison, bureau 204, Montréal (Québec) H3N 1Y4 · (514) 819-9440 · info@cjhq.org' },
+    body_en:'1040 Van Horne Ave, 2nd floor, Outremont, QC, H2V 1J5, CANADA · (514) 819-9440 · info@cjhq.org',
+    body_fr:'1040, avenue Van Horne, 2e étage, Outremont (Québec) H2V 1J5, CANADA · (514) 819-9440 · info@cjhq.org' },
   { page:'privacy', en:'Privacy Policy', fr:'Politique de confidentialité',
     body_en:'What information CJHQ collects, how it is used, and how it is protected.',
     body_fr:'Quels renseignements le CJHQ recueille, comment ils sont utilisés et protégés.' },
@@ -2319,9 +2003,9 @@ const categories = [
   </div>
 </details>` }
     ] },
-  { icon:'globe', en:'Border Crossing Information', fr:'Renseignements sur le passage frontalier',
-    intro_en:'Wait times, duty-free limits, advisories, and documentation for crossing the Canada–U.S. border.',
-    intro_fr:'Temps d\'attente, limites hors taxes, avis et documents pour traverser la frontière Canada–États-Unis.',
+  { icon:'globe', en:'Travel & Border Crossing', fr:'Voyage et passage frontalier',
+    intro_en:'Wait times, duty-free limits, advisories, travel insurance, and documentation for crossing the Canada–U.S. border.',
+    intro_fr:'Temps d\'attente, limites hors taxes, avis, assurance voyage et documents pour traverser la frontière Canada–États-Unis.',
     groups:[
       { heading_en:'', heading_fr:'', items:[
         {en:'Canada Border Services Agency (CBSA)', fr:'Agence des services frontaliers du Canada (ASFC)', desc_en:'Official information for returning to Canada.', desc_fr:'Renseignements officiels pour le retour au Canada.', url:"https://www.cbsa-asfc.gc.ca/menu-eng.html", what_en:'Use this if you\'re returning to Canada and need information about what you must declare, what you can bring back, and border rules and customs requirements.', what_fr:'Utilisez ceci si vous revenez au Canada et avez besoin d\'information sur ce que vous devez déclarer, ce que vous pouvez rapporter, et les règles frontalières et exigences douanières.', need_heading_en:'Before You Cross', need_heading_fr:'Avant de traverser', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your passport or other accepted travel document','Receipts for purchases made outside Canada','Details of any alcohol, tobacco, food, gifts, or high-value items you\'re bringing back'], need_list_fr:['Votre passeport ou autre document de voyage accepté','Les reçus de vos achats effectués à l\'extérieur du Canada','Les détails de tout alcool, tabac, nourriture, cadeaux ou articles de grande valeur que vous rapportez'], steps_en:'A good page to check before any trip, especially if you\'re unsure what needs to be declared.', steps_fr:'Une bonne page à consulter avant tout voyage, surtout si vous n\'êtes pas certain de ce qui doit être déclaré.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['You must declare everything you purchased or are bringing back into Canada, even if it qualifies for a duty-free exemption.','Failure to declare goods may result in fines, seizure of goods, or additional penalties.'], tips_list_fr:['Vous devez déclarer tout ce que vous avez acheté ou rapportez au Canada, même si cela est admissible à une exemption hors taxes.','Omettre de déclarer des biens peut entraîner des amendes, la saisie de biens ou des pénalités supplémentaires.'], official_links:[{label_en:'Canada Border Services Agency', label_fr:'Agence des services frontaliers du Canada', url:"https://www.cbsa-asfc.gc.ca/menu-eng.html"}], related:['duty-free-exemptions','border-wait-times','children-travelling'], reviewed:'July 2026', slug:'canada-border-services-agency-cbsa'},
@@ -2330,12 +2014,7 @@ const categories = [
         {en:'Duty-Free Allowances', fr:'Exemptions hors taxes', desc_en:'Understand what you can bring back to Canada without paying duty or taxes.', desc_fr:'Comprenez ce que vous pouvez rapporter au Canada sans payer de droits ou de taxes.', url:"https://travel.gc.ca/returning/customs", what_en:'Review these exemptions before returning to Canada after travelling outside the country.', what_fr:'Consultez ces exemptions avant de revenir au Canada après un voyage à l\'extérieur du pays.', need_heading_en:'Duty-Free Exemptions', need_heading_fr:'Exemptions hors taxes', need_list_en:['Less than 24 hours: No personal exemption.','24 hours or more: Up to $200 CAD worth of goods. Alcohol and tobacco products are not included in this exemption.','48 hours or more: Up to $800 CAD worth of goods, plus limited alcohol (up to 1.5 litres of wine, 1.14 litres of liquor, or 8.5 litres of beer/ale) and one tobacco exemption (200 cigarettes, 50 cigars, 200g manufactured tobacco, or 200 tobacco sticks).','7 days or more: The same $800 CAD personal exemption. Goods can be shipped separately, provided they arrive after you return.'], need_list_fr:['Moins de 24 heures : Aucune exemption personnelle.','24 heures ou plus : Jusqu\'à 200 $ CA de biens. L\'alcool et le tabac ne sont pas inclus dans cette exemption.','48 heures ou plus : Jusqu\'à 800 $ CA de biens, plus une quantité limitée d\'alcool (jusqu\'à 1,5 litre de vin, 1,14 litre de spiritueux, ou 8,5 litres de bière) et une exemption de tabac (200 cigarettes, 50 cigares, 200 g de tabac manufacturé, ou 200 bâtonnets de tabac).','7 jours ou plus : La même exemption personnelle de 800 $ CA. Les biens peuvent être expédiés séparément, à condition qu\'ils arrivent après votre retour.'], steps_en:'We\'ve put together a quick reference table further down this page showing the exemption amounts by trip length.', steps_fr:'Nous avons préparé un tableau de référence rapide plus bas sur cette page montrant les montants d\'exemption selon la durée du voyage.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Keep receipts for everything you purchased while travelling — border officers may ask to see them.','If you exceed your exemption, you generally only pay duty and taxes on the amount over your allowance — not on everything you purchased.'], tips_list_fr:['Conservez les reçus de tous vos achats en voyage — les agents frontaliers pourraient les demander.','Si vous dépassez votre exemption, vous payez généralement des droits et taxes seulement sur le montant excédentaire — pas sur la totalité de vos achats.'], official_links:[{label_en:'Duty-Free Exemptions', label_fr:'Exemptions hors taxes', url:"https://travel.gc.ca/returning/customs"}], related:['canada-border-services-agency-cbsa'], reviewed:'July 2026', slug:'duty-free-allowances'},
         {en:'Travel Advisories', fr:'Avis de voyage', desc_en:'Current travel advisories issued by the Government of Canada.', desc_fr:'Avis de voyage actuels émis par le gouvernement du Canada.', url:"https://travel.gc.ca/travelling/advisories", what_en:'This page shows the government\'s current travel advisories for destinations around the world.', what_fr:'Cette page présente les avis de voyage actuels du gouvernement pour des destinations à travers le monde.', steps_en:'Search for your destination before booking or travelling, since advisories can change closer to your trip date.', steps_fr:'Recherchez votre destination avant de réserver ou de voyager, puisque les avis peuvent changer à l\'approche de votre voyage.', slug:'travel-advisories'},
         {en:'Children Travelling', fr:'Enfants voyageant', desc_en:'Recommended documents when travelling with children.', desc_fr:'Documents recommandés lors de voyages avec des enfants.', url:"https://travel.gc.ca/travelling/children", what_en:'Review this information if only one parent is travelling with a child, a grandparent or relative is travelling with a child, or someone other than the child\'s parent is travelling with the child.', what_fr:'Consultez cette information si un seul parent voyage avec un enfant, un grand-parent ou un proche voyage avec un enfant, ou une personne autre que le parent voyage avec l\'enfant.', need_heading_en:'Bring With You', need_heading_fr:'Apportez avec vous', need_intro_en:'It is strongly recommended to carry:', need_intro_fr:'Il est fortement recommandé d\'apporter :', need_list_en:['The child\'s passport','A consent letter signed by the parent(s) or legal guardian(s) who are not travelling','Contact information for the parent(s)'], need_list_fr:['Le passeport de l\'enfant','Une lettre de consentement signée par le ou les parents ou tuteurs légaux qui ne voyagent pas','Les coordonnées des parents'], steps_en:'Prepare this documentation before you travel — border officers may ask for it, and having it ready avoids delays.', steps_fr:'Préparez ces documents avant votre voyage — les agents frontaliers peuvent les demander, et les avoir en main évite des délais.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Although a consent letter is not always legally required, border officers in Canada and the United States may ask for it.','Having it ready can help prevent delays.'], tips_list_fr:['Bien qu\'une lettre de consentement ne soit pas toujours légalement requise, les agents frontaliers au Canada et aux États-Unis peuvent la demander.','L\'avoir en main peut aider à éviter des délais.'], official_links:[{label_en:'Children Travelling', label_fr:'Enfants voyageant', url:"https://travel.gc.ca/travelling/children"}], related:['child-passport','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'July 2026', slug:'children-travelling'}
-      ] }
-    ] },
-  { icon:'globe', en:'Travel', fr:'Voyage',
-    intro_en:'Travel insurance and alternative border-crossing documents for community members travelling to or from the United States.',
-    intro_fr:'Assurance voyage et documents alternatifs de passage frontalier pour les membres de la communauté voyageant vers ou depuis les États-Unis.',
-    groups:[
+      ] },
       { heading_en:'Travel Insurance', heading_fr:'Assurance voyage', items:[
         {en:'Manulife Travel Insurance', fr:'Assurance voyage Manulife', desc_en:'Purchase travel medical insurance before leaving Canada.', desc_fr:'Achetez une assurance médicale voyage avant de quitter le Canada.', url:"https://manulife-travel.ca/dist/home.html?as=wllebovits", what_en:'Travel medical insurance helps protect you against unexpected medical expenses while travelling outside your home province or country.', what_fr:'L\'assurance médicale voyage vous protège contre des dépenses médicales imprévues lors d\'un voyage à l\'extérieur de votre province ou pays.', need_heading_en:'Before You Buy', need_heading_fr:'Avant d\'acheter', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your travel dates','Destination','Traveller information','Basic health information'], need_list_fr:['Vos dates de voyage','La destination','Les renseignements du voyageur','Des renseignements de santé de base'], steps_en:'Get a quote directly on their site, compare coverage options, and purchase your policy before you leave.', steps_fr:'Obtenez une soumission directement sur leur site, comparez les options de couverture, et achetez votre police avant de partir.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Provincial health coverage generally pays only a small portion of medical costs outside Canada.','Travel medical insurance can help cover emergency medical treatment, hospital stays, and medical transportation.'], tips_list_fr:['La couverture santé provinciale ne couvre généralement qu\'une petite partie des frais médicaux à l\'extérieur du Canada.','L\'assurance médicale voyage peut couvrir les traitements médicaux d\'urgence, les séjours hospitaliers et le transport médical.'], official_links:[{label_en:'Manulife Travel Insurance', label_fr:'Assurance voyage Manulife', url:"https://manulife-travel.ca/dist/home.html?as=wllebovits"}], related:['tugo-travel-insurance'], reviewed:'July 2026', slug:'manulife-travel-insurance'},
         {en:'TuGo Travel Insurance', fr:'Assurance voyage TuGo', desc_en:'Purchase emergency medical and trip protection insurance.', desc_fr:'Achetez une assurance médicale d\'urgence et de protection de voyage.', url:"https://shop.tugo.com/store/IAB48720", what_en:'Travel insurance helps protect against unexpected medical expenses and certain travel interruptions while away from home.', what_fr:'L\'assurance voyage protège contre des dépenses médicales imprévues et certaines interruptions de voyage loin de la maison.', need_heading_en:'Before You Buy', need_heading_fr:'Avant d\'acheter', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Travel dates','Destination','Traveller information','Basic health information'], need_list_fr:['Les dates de voyage','La destination','Les renseignements du voyageur','Des renseignements de santé de base'], steps_en:'Compare plans and purchase directly through their site before your trip.', steps_fr:'Comparez les régimes et achetez directement sur leur site avant votre voyage.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Compare coverage options and limits before purchasing a policy.','Coverage varies depending on age, destination, trip length, and pre-existing medical conditions.'], tips_list_fr:['Comparez les options et limites de couverture avant d\'acheter une police.','La couverture varie selon l\'âge, la destination, la durée du voyage et les conditions médicales préexistantes.'], official_links:[{label_en:'TuGo Travel Insurance', label_fr:'Assurance voyage TuGo', url:"https://shop.tugo.com/store/IAB48720"}], related:['manulife-travel-insurance'], reviewed:'July 2026', slug:'tugo-travel-insurance'},
@@ -2368,7 +2047,7 @@ const categories = [
     <p class="res-fee-note">Les enfants de moins de 16 ans ont généralement seulement besoin d'une preuve de citoyenneté (comme un certificat de naissance) pour les déplacements terrestres et maritimes — vérifiez les exigences actuelles avant de voyager.</p>
   </div>
 </details>` },
-  { icon:'globe', en:'Canadians Abroad', fr:'Canadiens à l\'étranger',
+  { icon:'globe', en:'Canadian Citizens Living Abroad', fr:'Citoyens canadiens vivant à l\'étranger',
     intro_en:'Services for Canadian citizens living outside Canada, including emergency assistance, voting, and passport services.',
     intro_fr:'Services pour les citoyens canadiens vivant à l\'extérieur du Canada, incluant l\'aide d\'urgence, le vote et les services de passeport.',
     groups:[
@@ -2465,7 +2144,6 @@ const contactFieldGroups = [
       {name:'community', en:'Community (optional)', fr:'Communauté (facultatif)', type:'text', required:false},
       {name:'subject', en:'Subject', fr:'Sujet', type:'text', required:true},
       {name:'message', en:'How can we help?', fr:'Comment pouvons-nous vous aider?', type:'textarea', required:true},
-      {name:'attachment', en:'Supporting Documents (optional)', fr:'Documents à l\'appui (facultatif)', type:'file', required:false},
     ] },
   { en:'Government or Public Institution', fr:'Gouvernement ou institution publique',
     fields:[
@@ -2477,7 +2155,6 @@ const contactFieldGroups = [
       {name:'phone', en:'Telephone Number', fr:'Numéro de téléphone', type:'tel', required:true},
       {name:'nature', en:'Nature of Inquiry', fr:'Nature de la demande', type:'text', required:true},
       {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
-      {name:'attachment', en:'Supporting Documents (optional)', fr:'Documents à l\'appui (facultatif)', type:'file', required:false},
     ] },
   { en:'Media Representative', fr:'Représentant des médias',
     fields:[
@@ -2489,7 +2166,6 @@ const contactFieldGroups = [
       {name:'phone', en:'Telephone Number', fr:'Numéro de téléphone', type:'tel', required:true},
       {name:'nature', en:'Nature of Media Inquiry', fr:'Nature de la demande médiatique', type:'text', required:true},
       {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
-      {name:'attachment', en:'Supporting Documents (optional)', fr:'Documents à l\'appui (facultatif)', type:'file', required:false},
     ] },
   { en:'Community Organization', fr:'Organisme communautaire',
     fields:[
@@ -2500,7 +2176,6 @@ const contactFieldGroups = [
       {name:'phone', en:'Telephone Number', fr:'Numéro de téléphone', type:'tel', required:true},
       {name:'nature', en:'Nature of Inquiry', fr:'Nature de la demande', type:'text', required:true},
       {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
-      {name:'attachment', en:'Supporting Documents (optional)', fr:'Documents à l\'appui (facultatif)', type:'file', required:false},
     ] },
   { en:'General Inquiry', fr:'Demande générale',
     fields:[
@@ -2509,29 +2184,15 @@ const contactFieldGroups = [
       {name:'phone', en:'Telephone Number (optional)', fr:'Numéro de téléphone (facultatif)', type:'tel', required:false},
       {name:'subject', en:'Subject', fr:'Sujet', type:'text', required:true},
       {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
-      {name:'attachment', en:'Supporting Documents (optional)', fr:'Documents à l\'appui (facultatif)', type:'file', required:false},
     ] },
 ];
 
 const coreValues = [
-  { icon:'scale', en:'Integrity', fr:'Intégrité',
-    body_en:'We are committed to acting honestly, responsibly, and transparently while maintaining the trust placed in us by the community and our partners.',
-    body_fr:'Nous nous engageons à agir honnêtement, de façon responsable et transparente, tout en maintenant la confiance que nous accordent la communauté et nos partenaires.' },
-  { icon:'heart', en:'Service', fr:'Service',
-    body_en:'Serving the community is the foundation of everything we do. Every initiative, resource, and relationship is guided by a commitment to helping community members and strengthening community life.',
-    body_fr:'Servir la communauté est le fondement de tout ce que nous faisons. Chaque initiative, ressource et relation est guidée par un engagement à aider les membres de la communauté et à renforcer la vie communautaire.' },
-  { icon:'briefcase', en:'Professionalism', fr:'Professionnalisme',
-    body_en:'We believe that respectful communication, thoughtful collaboration, and responsible leadership produce the strongest and most lasting results.',
-    body_fr:'Nous croyons qu\'une communication respectueuse, une collaboration réfléchie et un leadership responsable produisent les résultats les plus solides et les plus durables.' },
-  { icon:'people', en:'Respect', fr:'Respect',
-    body_en:'We value respectful dialogue, mutual understanding, and constructive engagement with everyone we work alongside.',
-    body_fr:'Nous accordons de la valeur au dialogue respectueux, à la compréhension mutuelle et à l\'engagement constructif avec toutes les personnes avec qui nous travaillons.' },
-  { icon:'handshake', en:'Collaboration', fr:'Collaboration',
-    body_en:'Many of the issues affecting the community require cooperation among governments, public institutions, community organizations, and individuals. We believe lasting progress is achieved by working together.',
-    body_fr:'Plusieurs enjeux touchant la communauté nécessitent une coopération entre les gouvernements, les institutions publiques, les organisations communautaires et les individus. Nous croyons que des progrès durables s\'obtiennent en travaillant ensemble.' },
-  { icon:'shield', en:'Non-Partisanship', fr:'Non-partisanerie',
-    body_en:'CJHQ does not endorse political parties or political candidates. Our responsibility is to represent and serve Quebec\'s Hasidic Jewish communities, regardless of which political party forms government. Maintaining a non-partisan approach allows us to work professionally with elected officials and public institutions at every level of government.',
-    body_fr:'Le CJHQ n\'appuie aucun parti politique ni aucun candidat. Notre responsabilité est de représenter et de servir les communautés juives hassidiques du Québec, peu importe le parti politique au pouvoir. Le maintien d\'une approche non partisane nous permet de travailler de façon professionnelle avec les élus et les institutions publiques à tous les paliers de gouvernement.' },
+  { icon:'scale', en:'Integrity', fr:'Intégrité' },
+  { icon:'heart', en:'Service', fr:'Service' },
+  { icon:'briefcase', en:'Professionalism', fr:'Professionnalisme' },
+  { icon:'people', en:'Respect', fr:'Respect' },
+  { icon:'handshake', en:'Collaboration', fr:'Collaboration' },
 ];
 
 const initiatives = [
@@ -2695,21 +2356,6 @@ const CONTENT_MANIFEST = [
   {cid:'contact-4', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h3', label:'How can we assist you?', default_en:'How can we assist you?', default_fr:'Comment pouvons-nous vous aider?'},
   {cid:'contact-5', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Please begin by selecting the option that best describes you. The form', default_en:'Please begin by selecting the option that best describes you. The form will automatically display the questions most relevant to your inquiry.', default_fr:'Veuillez d\'abord sélectionner l\'option qui vous décrit le mieux. Le formulaire affichera automatiquement les questions les plus pertinentes pour votre demande.'},
   {cid:'contact-6', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'I am a:', default_en:'I am a:', default_fr:'Je suis :'},
-  {cid:'contact-7', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Many of the questions we receive relate to passports, travel, border c', default_en:'Many of the questions we receive relate to passports, travel, border crossings, government benefits, healthcare, family services, and other public programs.', default_fr:'Plusieurs des questions que nous recevons concernent les passeports, les voyages, les passages frontaliers, les prestations gouvernementales, les soins de santé, les services aux familles et d\'autres programmes publics.'},
-  {cid:'contact-8', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Our Community Resource Centre provides trusted information, practical ', default_en:'Our Community Resource Centre provides trusted information, practical guidance, and direct links to official government resources covering many of these topics. You may find the information you need immediately without waiting for a response.', default_fr:'Notre Centre de ressources communautaires offre de l\'information fiable, des conseils pratiques et des liens directs vers des ressources gouvernementales officielles couvrant plusieurs de ces sujets. Vous y trouverez peut-être l\'information recherchée sans attendre une réponse.'},
-  {cid:'contact-9', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h3', label:'Government & Institutional Inquiries', default_en:'Government &amp; Institutional Inquiries', default_fr:'Demandes gouvernementales et institutionnelles'},
-  {cid:'contact-10', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'CJHQ works regularly with municipal, provincial, federal, and internat', default_en:'CJHQ works regularly with municipal, provincial, federal, and international governments, public agencies, law enforcement, healthcare institutions, border authorities, and other public organizations.', default_fr:'Le CJHQ travaille régulièrement avec les gouvernements municipaux, provinciaux, fédéraux et internationaux, les organismes publics, les services policiers, les institutions de santé, les autorités frontalières et d\'autres organisations publiques.'},
-  {cid:'contact-11', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Government representatives are encouraged to use the contact form and ', default_en:'Government representatives are encouraged to use the contact form and select Government or Public Institution so that their inquiry is directed to the appropriate member of our team.', default_fr:'Les représentants gouvernementaux sont invités à utiliser le formulaire de contact et à sélectionner Gouvernement ou institution publique afin que leur demande soit acheminée au bon membre de notre équipe.'},
-  {cid:'contact-12', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h3', label:'Media Inquiries', default_en:'Media Inquiries', default_fr:'Demandes des médias'},
-  {cid:'contact-13', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Members of the media are welcome to contact CJHQ regarding community m', default_en:'Members of the media are welcome to contact CJHQ regarding community matters, official statements, or interview requests.', default_fr:'Les représentants des médias sont invités à communiquer avec le CJHQ pour des enjeux communautaires, des déclarations officielles ou des demandes d\'entrevue.'},
-  {cid:'contact-14', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Please select Media Representative when completing the contact form an', default_en:'Please select Media Representative when completing the contact form and include your organization, deadline, and the nature of your request to help us respond as efficiently as possible.', default_fr:'Veuillez sélectionner Représentant des médias en remplissant le formulaire de contact et indiquer votre organisation, votre échéance et la nature de votre demande afin de nous aider à répondre le plus efficacement possible.'},
-  {cid:'contact-15', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h3', label:'Community Organizations', default_en:'Community Organizations', default_fr:'Organismes communautaires'},
-  {cid:'contact-16', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'CJHQ values collaboration with community organizations, charitable org', default_en:'CJHQ values collaboration with community organizations, charitable organizations, educational institutions, healthcare providers, and other partners.', default_fr:'Le CJHQ accorde une grande valeur à la collaboration avec les organismes communautaires, les organismes de bienfaisance, les établissements d\'enseignement, les fournisseurs de soins de santé et d\'autres partenaires.'},
-  {cid:'contact-17', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'If your organization would like to connect with CJHQ regarding collabo', default_en:'If your organization would like to connect with CJHQ regarding collaboration, community initiatives, or other matters, please select Community Organization when submitting your inquiry.', default_fr:'Si votre organisme souhaite entrer en contact avec le CJHQ pour une collaboration, des initiatives communautaires ou d\'autres enjeux, veuillez sélectionner Organisme communautaire en soumettant votre demande.'},
-  {cid:'contact-18', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h3', label:'Response Times', default_en:'Response Times', default_fr:'Délais de réponse'},
-  {cid:'contact-19', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'We make every effort to respond to inquiries as promptly as possible.', default_en:'We make every effort to respond to inquiries as promptly as possible.', default_fr:'Nous mettons tout en œuvre pour répondre aux demandes le plus rapidement possible.'},
-  {cid:'contact-20', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Response times may vary depending on the nature of the request, suppor', default_en:'Response times may vary depending on the nature of the request, supporting documentation required, and the volume of inquiries received.', default_fr:'Les délais de réponse peuvent varier selon la nature de la demande, la documentation requise et le volume de demandes reçues.'},
-  {cid:'contact-21', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'If your matter is urgent, please indicate this clearly when submitting', default_en:'If your matter is urgent, please indicate this clearly when submitting your message.', default_fr:'Si votre situation est urgente, veuillez l\'indiquer clairement en soumettant votre message.'},
   {cid:'contact-22', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h2', label:'Thank You', default_en:'Thank You', default_fr:'Merci'},
   {cid:'contact-23', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Thank you for contacting the Jewish Hasidic Council of Quebec.', default_en:'Thank you for contacting the Jewish Hasidic Council of Quebec.', default_fr:'Merci d\'avoir communiqué avec le Conseil des Juifs Hassidiques du Québec.'},
   {cid:'contact-24', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'We appreciate the opportunity to assist you and look forward to workin', default_en:'We appreciate the opportunity to assist you and look forward to working with you.', default_fr:'Nous apprécions l\'occasion de vous venir en aide et avons hâte de travailler avec vous.'},
@@ -2727,7 +2373,6 @@ const CONTENT_MANIFEST = [
   {cid:'stay-informed-12', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Official statements, public announcements, organizational updates, and', default_en:'Official statements, public announcements, organizational updates, and other information intended for the broader public are shared through CJHQ\'s official social media channels.', default_fr:'Les déclarations officielles, les annonces publiques, les mises à jour organisationnelles et d\'autres renseignements destinés au grand public sont diffusés par les réseaux sociaux officiels du CJHQ.'},
   {cid:'stay-informed-13', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Follow CJHQ for:', default_en:'Follow CJHQ for:', default_fr:'Suivez le CJHQ pour :'},
   {cid:'stay-informed-14', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h3', label:'Facebook Feed', default_en:'Facebook Feed', default_fr:'Fil Facebook'},
-  {cid:'stay-informed-15', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h3', label:'X Feed', default_en:'X Feed', default_fr:'Fil X'},
   {cid:'stay-informed-16', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h2', label:'Why Two Communication Channels?', default_en:'Why Two Communication Channels?', default_fr:'Pourquoi deux canaux de communication?'},
   {cid:'stay-informed-17', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'CJHQ communicates through two complementary channels because different', default_en:'CJHQ communicates through two complementary channels because different information serves different audiences.', default_fr:'Le CJHQ communique par deux canaux complémentaires, car différents types d\'information s\'adressent à différents publics.'},
   {cid:'stay-informed-18', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Delivered directly by email to subscribers within the community.', default_en:'Delivered directly by email to subscribers within the community.', default_fr:'Livrées directement par courriel aux abonnés de la communauté.'},
@@ -2745,51 +2390,22 @@ const CONTENT_MANIFEST = [
   {cid:'resources-8', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'h2', label:'Can\'t Find What You\'re Looking For?', default_en:'Can\'t Find What You\'re Looking For?', default_fr:'Vous ne trouvez pas ce que vous cherchez?'},
   {cid:'resources-9', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'If you cannot find the service or information you\'re looking for, CJHQ', default_en:'If you cannot find the service or information you\'re looking for, CJHQ is here to help.', default_fr:'Si vous ne trouvez pas le service ou l\'information que vous cherchez, le CJHQ est là pour vous aider.'},
   {cid:'resources-10', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'Use our contact form and we\'ll do our best to direct you to the approp', default_en:'Use our contact form and we\'ll do our best to direct you to the appropriate government department, application, or official resource.', default_fr:'Utilisez notre formulaire de contact et nous ferons de notre mieux pour vous diriger vers le bon ministère, la bonne demande ou la bonne ressource officielle.'},
-  {cid:'work-1', page:'page-work', pageLabel:'Our Work', tag:'h1', label:'Serving Quebec\'s Hasidic Jewish Communities', default_en:'Serving Quebec\'s Hasidic Jewish Communities', default_fr:'Servir les communautés juives hassidiques du Québec'},
-  {cid:'work-2', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ responds to both individual and community-wide needs by providing', default_en:'CJHQ responds to both individual and community-wide needs by providing practical assistance, representing community concerns, and working directly with the institutions and decision-makers whose policies and services affect daily life.', default_fr:'Le CJHQ répond aux besoins individuels et collectifs en offrant une assistance pratique, en représentant les préoccupations de la communauté et en travaillant directement avec les institutions et les décideurs dont les politiques et les services touchent la vie quotidienne.'},
-  {cid:'work-3', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Community Services and Practical Assistance', default_en:'Community Services and Practical Assistance', default_fr:'Services communautaires et assistance pratique'},
-  {cid:'work-4', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ assists community members, families, institutions, and organizati', default_en:'CJHQ assists community members, families, institutions, and organizations with a wide range of practical concerns.', default_fr:'Le CJHQ aide les membres de la communauté, les familles, les institutions et les organismes avec un large éventail de préoccupations pratiques.'},
-  {cid:'work-5', page:'page-work', pageLabel:'Our Work', tag:'p', label:'We provide information, guidance, referrals, and assistance in navigat', default_en:'We provide information, guidance, referrals, and assistance in navigating government services, municipal regulations, public programs, travel and border matters, and other issues affecting everyday life.', default_fr:'Nous offrons de l\'information, des conseils, des références et de l\'assistance pour s\'y retrouver dans les services gouvernementaux, les règlements municipaux, les programmes publics, les questions de voyage et de frontière, ainsi que d\'autres enjeux touchant la vie quotidienne.'},
-  {cid:'work-6', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Advocacy and Representation', default_en:'Advocacy and Representation', default_fr:'Défense des intérêts et représentation'},
-  {cid:'work-7', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ represents the needs and concerns of Quebec\'s Hasidic Jewish comm', default_en:'CJHQ represents the needs and concerns of Quebec\'s Hasidic Jewish communities before governments, public institutions, law enforcement agencies, service providers, and other decision-makers.', default_fr:'Le CJHQ représente les besoins et les préoccupations des communautés juives hassidiques du Québec auprès des gouvernements, des institutions publiques, des services policiers, des fournisseurs de services et d\'autres décideurs.'},
-  {cid:'work-8', page:'page-work', pageLabel:'Our Work', tag:'p', label:'We advocate for fair treatment, appropriate services, practical accomm', default_en:'We advocate for fair treatment, appropriate services, practical accommodations, and solutions that recognize the community\'s circumstances and religious way of life.', default_fr:'Nous défendons un traitement équitable, des services appropriés, des accommodements pratiques et des solutions qui tiennent compte de la réalité de la communauté et de son mode de vie religieux.'},
-  {cid:'work-9', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Government and Institutional Relations', default_en:'Government and Institutional Relations', default_fr:'Relations gouvernementales et institutionnelles'},
-  {cid:'work-10', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ maintains active relationships with municipal, provincial, and fe', default_en:'CJHQ maintains active relationships with municipal, provincial, and federal governments, elected officials, public agencies, law enforcement, border authorities, healthcare institutions, service providers, and community partners.', default_fr:'Le CJHQ entretient des relations actives avec les gouvernements municipaux, provinciaux et fédéraux, les élus, les organismes publics, les services policiers, les autorités frontalières, les institutions de santé, les fournisseurs de services et les partenaires communautaires.'},
-  {cid:'work-11', page:'page-work', pageLabel:'Our Work', tag:'p', label:'These relationships allow CJHQ to raise concerns, share relevant commu', default_en:'These relationships allow CJHQ to raise concerns, share relevant community information, address emerging issues, and work toward timely and practical solutions.', default_fr:'Ces relations permettent au CJHQ de soulever des préoccupations, de partager de l\'information communautaire pertinente, de résoudre des enjeux émergents et de travailler vers des solutions rapides et pratiques.'},
-  {cid:'work-12', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Public Safety and Security', default_en:'Public Safety and Security', default_fr:'Sécurité publique et sécurité'},
-  {cid:'work-13', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ works closely with law enforcement agencies, public-safety author', default_en:'CJHQ works closely with law enforcement agencies, public-safety authorities, and community organizations on matters involving security, hate incidents, emergency preparedness, major gatherings, and the safety of community institutions and residents.', default_fr:'Le CJHQ collabore étroitement avec les services policiers, les autorités de sécurité publique et les organismes communautaires sur les questions de sécurité, les incidents haineux, la préparation aux urgences, les grands rassemblements et la sécurité des institutions et des résidents de la communauté.'},
-  {cid:'work-14', page:'page-work', pageLabel:'Our Work', tag:'p', label:'We help strengthen communication between the community and public-safe', default_en:'We help strengthen communication between the community and public-safety agencies and advocate for appropriate attention and resources when concerns arise.', default_fr:'Nous aidons à renforcer la communication entre la communauté et les organismes de sécurité publique et défendons l\'obtention d\'une attention et de ressources appropriées lorsque des préoccupations surviennent.'},
-  {cid:'work-15', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Religious Accommodation and Community Life', default_en:'Religious Accommodation and Community Life', default_fr:'Accommodements religieux et vie communautaire'},
-  {cid:'work-16', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ works with governments, municipalities, public institutions, and ', default_en:'CJHQ works with governments, municipalities, public institutions, and service providers to address matters relating to religious observance and community life.', default_fr:'Le CJHQ travaille avec les gouvernements, les municipalités, les institutions publiques et les fournisseurs de services pour résoudre les enjeux liés à l\'observance religieuse et à la vie communautaire.'},
-  {cid:'work-17', page:'page-work', pageLabel:'Our Work', tag:'p', label:'This may include holiday arrangements, municipal services, parking and', default_en:'This may include holiday arrangements, municipal services, parking and transportation, public works, community events, religious accommodations, and other practical needs affecting individuals and institutions.', default_fr:'Cela peut inclure les arrangements pour les fêtes, les services municipaux, le stationnement et le transport, les travaux publics, les événements communautaires, les accommodements religieux et d\'autres besoins pratiques touchant les individus et les institutions.'},
-  {cid:'work-18', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Community Information and Communication', default_en:'Community Information and Communication', default_fr:'Information et communication communautaires'},
-  {cid:'work-19', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ provides community members with timely and reliable information a', default_en:'CJHQ provides community members with timely and reliable information about government services, public-safety matters, travel, road closures, municipal services, religious-holiday arrangements, emergencies, and other developments affecting daily life.', default_fr:'Le CJHQ fournit aux membres de la communauté une information rapide et fiable sur les services gouvernementaux, les questions de sécurité publique, les voyages, les fermetures de routes, les services municipaux, les arrangements pour les fêtes religieuses, les urgences et d\'autres développements touchant la vie quotidienne.'},
-  {cid:'work-20', page:'page-work', pageLabel:'Our Work', tag:'p', label:'We also issue public statements and communicate with government repres', default_en:'We also issue public statements and communicate with government representatives, public institutions, community partners, the media, and the broader public when necessary.', default_fr:'Nous publions également des déclarations publiques et communiquons avec les représentants gouvernementaux, les institutions publiques, les partenaires communautaires, les médias et le grand public au besoin.'},
-  {cid:'work-21', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Our Approach', default_en:'Our Approach', default_fr:'Notre approche'},
-  {cid:'work-22', page:'page-work', pageLabel:'Our Work', tag:'p', label:'CJHQ believes that lasting results are achieved through professionalis', default_en:'CJHQ believes that lasting results are achieved through professionalism, constructive engagement, and responsible advocacy.', default_fr:'Le CJHQ croit que des résultats durables s\'obtiennent par le professionnalisme, l\'engagement constructif et une représentation responsable.'},
-  {cid:'work-23', page:'page-work', pageLabel:'Our Work', tag:'p', label:'We work collaboratively with governments, public institutions, communi', default_en:'We work collaboratively with governments, public institutions, community organizations, and public officials to help address challenges, improve services, and strengthen mutual understanding.', default_fr:'Nous travaillons en collaboration avec les gouvernements, les institutions publiques, les organisations communautaires et les représentants publics pour aider à relever des défis, améliorer les services et renforcer la compréhension mutuelle.'},
-  {cid:'work-24', page:'page-work', pageLabel:'Our Work', tag:'p', label:'Our work is guided by respect, professionalism, and a commitment to fi', default_en:'Our work is guided by respect, professionalism, and a commitment to finding practical solutions that benefit both the community and the broader public.', default_fr:'Notre travail est guidé par le respect, le professionnalisme et un engagement à trouver des solutions pratiques qui profitent à la fois à la communauté et au public en général.'},
-  {cid:'work-25', page:'page-work', pageLabel:'Our Work', tag:'p', label:'As a non-partisan organization, CJHQ works with governments of every p', default_en:'As a non-partisan organization, CJHQ works with governments of every political affiliation. Our commitment is not to politics, but to serving Quebec\'s Hasidic Jewish communities.', default_fr:'En tant qu\'organisme non partisan, le CJHQ travaille avec des gouvernements de toutes allégeances politiques. Notre engagement n\'est pas envers la politique, mais envers le service aux communautés juives hassidiques du Québec.'},
-  {cid:'work-26', page:'page-work', pageLabel:'Our Work', tag:'h2', label:'Our Commitment', default_en:'Our Commitment', default_fr:'Notre engagement'},
-  {cid:'work-27', page:'page-work', pageLabel:'Our Work', tag:'p', label:'Every day, CJHQ works to strengthen Quebec\'s Hasidic Jewish communitie', default_en:'Every day, CJHQ works to strengthen Quebec\'s Hasidic Jewish communities through service, advocacy, trusted information, and effective representation.', default_fr:'Chaque jour, le CJHQ travaille à renforcer les communautés juives hassidiques du Québec par le service, la représentation, l\'information fiable et une représentation efficace.'},
-  {cid:'work-28', page:'page-work', pageLabel:'Our Work', tag:'p', label:'Whether assisting community members, working with public institutions,', default_en:'Whether assisting community members, working with public institutions, improving access to services, or helping resolve issues affecting daily life, our commitment remains the same:', default_fr:'Que ce soit en aidant les membres de la communauté, en travaillant avec les institutions publiques, en améliorant l\'accès aux services ou en aidant à résoudre des enjeux touchant la vie quotidienne, notre engagement demeure le même :'},
-  {cid:'work-29', page:'page-work', pageLabel:'Our Work', tag:'p', label:'To serve the community with professionalism, integrity, and respect wh', default_en:'To serve the community with professionalism, integrity, and respect while working collaboratively to build practical solutions that benefit both the community and Quebec as a whole.', default_fr:'Servir la communauté avec professionnalisme, intégrité et respect, tout en travaillant en collaboration pour bâtir des solutions pratiques qui profitent à la fois à la communauté et au Québec dans son ensemble.'},
   {cid:'about-1', page:'page-about', pageLabel:'About CJHQ', tag:'h1', label:'About the Jewish Hasidic Council of Quebec', default_en:'About the Jewish Hasidic Council of Quebec', default_fr:'À propos du Conseil des Juifs Hassidiques du Québec'},
-  {cid:'about-2', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'The Jewish Hasidic Council of Quebec, known in French as Le Conseil de', default_en:'The Jewish Hasidic Council of Quebec, known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec\'s Hasidic Jewish communities.', default_fr:'Le Conseil des Juifs Hassidiques du Québec, connu en anglais sous le nom de The Jewish Hasidic Council of Quebec, est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.'},
-  {cid:'about-3', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ acts as a central point of contact for community members seeking ', default_en:'CJHQ acts as a central point of contact for community members seeking information, assistance, services, or advocacy. We help individuals, families, institutions, and community organizations navigate matters involving government services, municipal regulations, public safety, immigration and border issues, religious accommodations, transportation, community events, and other concerns affecting daily life.', default_fr:'Le CJHQ agit comme point de contact central pour les membres de la communauté à la recherche d\'information, d\'assistance, de services ou de représentation. Nous aidons les individus, les familles, les institutions et les organismes communautaires à s\'y retrouver dans les questions touchant les services gouvernementaux, les règlements municipaux, la sécurité publique, l\'immigration et les questions frontalières, les accommodements religieux, le transport, les événements communautaires et d\'autres enjeux touchant la vie quotidienne.'},
-  {cid:'about-4', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We also serve as a bridge between the Hasidic community and all levels', default_en:'We also serve as a bridge between the Hasidic community and all levels of government, municipal authorities, law enforcement agencies, public institutions, service providers, and other organizations. Our role is to ensure that the community\'s needs and concerns are clearly communicated, properly understood, and addressed through practical and respectful solutions.', default_fr:'Nous servons également de pont entre la communauté hassidique et tous les paliers de gouvernement, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et d\'autres organisations. Notre rôle est de veiller à ce que les besoins et les préoccupations de la communauté soient clairement communiqués, bien compris et résolus par des solutions pratiques et respectueuses.'},
-  {cid:'about-5', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ provides timely notices, guidance, referrals, and practical assis', default_en:'CJHQ provides timely notices, guidance, referrals, and practical assistance to community members. During religious holidays, emergencies, major events, or changes to public services and regulations, we help coordinate arrangements and ensure that important information reaches the community clearly and quickly.', default_fr:'Le CJHQ offre des avis rapides, des conseils, des références et une assistance pratique aux membres de la communauté. Lors des fêtes religieuses, des urgences, des événements majeurs ou des changements aux services publics et aux règlements, nous aidons à coordonner les arrangements et à veiller à ce que l\'information importante rejoigne la communauté clairement et rapidement.'},
-  {cid:'about-6', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We also work to promote greater understanding of Hasidic Jewish life, ', default_en:'We also work to promote greater understanding of Hasidic Jewish life, religious practices, and community needs. Through constructive dialogue and lasting partnerships, CJHQ seeks to strengthen relationships between the Hasidic community, public authorities, institutions, and neighbouring communities.', default_fr:'Nous travaillons également à promouvoir une meilleure compréhension de la vie juive hassidique, des pratiques religieuses et des besoins de la communauté. Par le dialogue constructif et des partenariats durables, le CJHQ cherche à renforcer les relations entre la communauté hassidique, les autorités publiques, les institutions et les communautés voisines.'},
-  {cid:'about-7', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Why CJHQ Exists', default_en:'Why CJHQ Exists', default_fr:'La raison d\'être du CJHQ'},
-  {cid:'about-8', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Our mission is to serve and strengthen Quebec\'s Hasidic Jewish communi', default_en:'Our mission is to serve and strengthen Quebec\'s Hasidic Jewish communities by providing practical services and trusted information, advocating for community needs, and building effective relationships with governments, public institutions, service providers, and community partners.', default_fr:'Notre mission est de servir et de renforcer les communautés juives hassidiques du Québec en offrant des services pratiques et une information fiable, en défendant les besoins de la communauté et en bâtissant des relations efficaces avec les gouvernements, les institutions publiques, les fournisseurs de services et les partenaires communautaires.'},
+  {cid:'about-2', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ), known in French as Le Co', default_en:'The Jewish Hasidic Council of Quebec (CJHQ), known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec\'s Hasidic Jewish communities.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.'},
+  {cid:'about-3', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ acts as a central point of contact for individuals, families, in', default_en:'CJHQ acts as a central point of contact for individuals, families, institutions, and community organizations seeking practical assistance, services, representation, advocacy, guidance, or reliable information. At the heart of our work is a commitment to helping community members address the issues affecting their daily lives and ensuring that the community\'s needs and concerns are properly represented.', default_fr:'Le CJHQ agit comme point de contact central pour les personnes, les familles, les institutions et les organismes communautaires à la recherche d\'assistance pratique, de services, de représentation, de défense des intérêts, de conseils ou d\'information fiable. Au cœur de notre travail se trouve un engagement à aider les membres de la communauté à résoudre les enjeux touchant leur vie quotidienne et à veiller à ce que les besoins et les préoccupations de la communauté soient adéquatement représentés.'},
+  {cid:'about-4', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We work closely with governments, municipal authorities, law enforce', default_en:'We work closely with governments, municipal authorities, law enforcement agencies, public institutions, service providers, and community organizations. Through these relationships, CJHQ helps address concerns, improve access to services, strengthen public safety, and develop practical solutions that respect the community\'s religious practices and way of life.', default_fr:'Nous travaillons en étroite collaboration avec les gouvernements, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et les organismes communautaires. Grâce à ces relations, le CJHQ contribue à résoudre des préoccupations, à améliorer l\'accès aux services, à renforcer la sécurité publique et à élaborer des solutions pratiques qui respectent les pratiques religieuses et le mode de vie de la communauté.'},
+  {cid:'about-5', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ also works to promote greater understanding of Hasidic Jewish li', default_en:'CJHQ also works to promote greater understanding of Hasidic Jewish life and to strengthen communication between the Hasidic community, public authorities, institutions, and the broader public.', default_fr:'Le CJHQ travaille également à favoriser une meilleure compréhension de la vie juive hassidique et à renforcer la communication entre la communauté hassidique, les autorités publiques, les institutions et le grand public.'},
+  {cid:'about-7', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Our Mission', default_en:'Our Mission', default_fr:'Notre mission'},
+  {cid:'about-8', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Our mission is to serve and strengthen Quebec\'s Hasidic Jewish communi', default_en:'Our mission is to serve and strengthen Quebec\'s Hasidic Jewish communities through practical assistance, effective advocacy, trusted representation, and strong relationships with governments, public institutions, service providers, and community partners.', default_fr:'Notre mission est de servir et de renforcer les communautés juives hassidiques du Québec par une assistance pratique, une défense efficace des intérêts, une représentation fiable et des relations solides avec les gouvernements, les institutions publiques, les fournisseurs de services et les partenaires communautaires.'},
+  {cid:'about-8b', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We are committed to promoting the safety, dignity, well-being, and fu', default_en:'We are committed to promoting the safety, dignity, well-being, and full participation of Hasidic Jewish residents throughout Quebec.', default_fr:'Nous nous engageons à promouvoir la sécurité, la dignité, le bien-être et la pleine participation des résidents juifs hassidiques partout au Québec.'},
+  {cid:'about-8c', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'How We Serve the Community', default_en:'How We Serve the Community', default_fr:'Comment nous servons la communauté'},
+  {cid:'about-8d', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ assists individuals, families, institutions, and community organ', default_en:'CJHQ assists individuals, families, institutions, and community organizations with matters involving government and municipal services, public safety, religious accommodations, travel and border issues, community events, and other concerns affecting daily life.', default_fr:'Le CJHQ aide les personnes, les familles, les institutions et les organismes communautaires pour des enjeux touchant les services gouvernementaux et municipaux, la sécurité publique, les accommodements religieux, les questions de voyage et de frontière, les événements communautaires et d\'autres préoccupations touchant la vie quotidienne.'},
+  {cid:'about-8e', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We represent the needs of Quebec\'s Hasidic Jewish communities before ', default_en:'We represent the needs of Quebec\'s Hasidic Jewish communities before governments, law enforcement agencies, public institutions, service providers, and other decision-makers. We also provide timely guidance and reliable information when changes, emergencies, or public developments affect the community.', default_fr:'Nous représentons les besoins des communautés juives hassidiques du Québec auprès des gouvernements, des services policiers, des institutions publiques, des fournisseurs de services et d\'autres décideurs. Nous fournissons également des conseils rapides et une information fiable lorsque des changements, des urgences ou des événements publics touchent la communauté.'},
   {cid:'about-9', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Constructive Engagement. Practical Solutions.', default_en:'Constructive Engagement. Practical Solutions.', default_fr:'Engagement constructif. Solutions pratiques.'},
   {cid:'about-10', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ believes that effective advocacy combines strong relationships wi', default_en:'CJHQ believes that effective advocacy combines strong relationships with a clear and responsible community voice.', default_fr:'Le CJHQ croit qu\'une représentation efficace combine des relations solides avec une voix communautaire claire et responsable.'},
   {cid:'about-11', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Whenever possible, we seek practical solutions through respectful dial', default_en:'Whenever possible, we seek practical solutions through respectful dialogue, direct engagement, and professional collaboration. When circumstances require public advocacy, CJHQ speaks clearly and firmly on behalf of the community.', default_fr:'Dans la mesure du possible, nous recherchons des solutions pratiques par le dialogue respectueux, l\'engagement direct et la collaboration professionnelle. Lorsque les circonstances exigent une représentation publique, le CJHQ s\'exprime clairement et fermement au nom de la communauté.'},
   {cid:'about-12', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'As a non-partisan organization, CJHQ works constructively with elected', default_en:'As a non-partisan organization, CJHQ works constructively with elected officials and governments of every political affiliation. Our commitment is to the community and to achieving meaningful, lasting results.', default_fr:'En tant qu\'organisme non partisan, le CJHQ travaille de façon constructive avec les élus et les gouvernements de toutes allégeances politiques. Notre engagement est envers la communauté et l\'atteinte de résultats significatifs et durables.'},
   {cid:'about-13', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'The Principles That Guide Our Work', default_en:'The Principles That Guide Our Work', default_fr:'Les principes qui guident notre travail'},
-  {cid:'about-14', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Our Commitment', default_en:'Our Commitment', default_fr:'Notre engagement'},
-  {cid:'about-15', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'As the needs of Quebec\'s Hasidic Jewish communities continue to evolve', default_en:'As the needs of Quebec\'s Hasidic Jewish communities continue to evolve, CJHQ remains committed to serving the community with professionalism, integrity, and respect.', default_fr:'Alors que les besoins des communautés juives hassidiques du Québec continuent d\'évoluer, le CJHQ demeure engagé à servir la communauté avec professionnalisme, intégrité et respect.'},
-  {cid:'about-16', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We will continue to provide practical assistance, trusted information,', default_en:'We will continue to provide practical assistance, trusted information, effective advocacy, and responsible representation while working collaboratively with governments, public institutions, and community partners to strengthen the community and improve everyday life.', default_fr:'Nous continuerons d\'offrir une assistance pratique, une information fiable, une représentation efficace et responsable, tout en travaillant en collaboration avec les gouvernements, les institutions publiques et les partenaires communautaires afin de renforcer la communauté et d\'améliorer la vie quotidienne.'},
   {cid:'about-17', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Connect With CJHQ', default_en:'Connect With CJHQ', default_fr:'Communiquer avec le CJHQ'},
   {cid:'about-18', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Whether you are a community member, government representative, public ', default_en:'Whether you are a community member, government representative, public institution, journalist, community organization, or member of the public, we welcome the opportunity to connect with you.', default_fr:'Que vous soyez un membre de la communauté, un représentant gouvernemental, une institution publique, un journaliste, un organisme communautaire ou un membre du public, nous serions heureux d\'entrer en contact avec vous.'},
   {cid:'about-19', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'If you have a question, require assistance, or would like to learn mor', default_en:'If you have a question, require assistance, or would like to learn more about our work, our team is here to help.', default_fr:'Si vous avez une question, avez besoin d\'aide ou souhaitez en apprendre davantage sur notre travail, notre équipe est là pour vous aider.'},
@@ -2836,7 +2452,7 @@ let currentResourceSlug = null;
 async function submitErrorReport(extra){
   const report = {
     type: extra.type || 'broken_link',
-    attemptedUrl: location.origin + location.pathname + '#' + (extra.hash || window.__last404Hash || ''),
+    attemptedUrl: location.origin + (extra.path || window.__last404Path || location.pathname),
     message: extra.message || '',
     referrer: document.referrer || '',
     userAgent: navigator.userAgent,
@@ -2862,7 +2478,7 @@ async function submitErrorReport(extra){
     if(!btn) return;
     btn.addEventListener('click', async ()=>{
       btn.disabled = true;
-      await submitErrorReport({ type:'broken_link', hash: window.__last404Hash });
+      await submitErrorReport({ type:'broken_link', path: window.__last404Path });
       btn.style.display = 'none';
       document.getElementById('reportBrokenLinkStatus').style.display = 'block';
     });
@@ -2880,7 +2496,8 @@ function initResourceCellHandlers(){
   });
 }
 
-function openResourcePopup(slug){
+function openResourcePopup(slug, opts){
+  opts = opts || {};
   const it = RESOURCE_BY_SLUG[slug];
   if(!it) return;
   currentResourceSlug = slug;
@@ -2983,15 +2600,17 @@ function openResourcePopup(slug){
   });
 
   document.getElementById('resourceShareModal').classList.add('open');
-  const newHash = `#resources/${slug}`;
-  if(location.hash !== newHash) history.replaceState(null, '', newHash);
+  if(!opts.skipHistory){
+    const newPath = `/resources/${slug}`;
+    if(location.pathname !== newPath) history.pushState({page:'resources', slug}, '', newPath);
+  }
 }
 function closeResourceShareModal(){
   document.getElementById('resourceShareModal').classList.remove('open');
-  if(location.hash.startsWith('#resources/')) history.replaceState(null, '', '#resources');
+  if(location.pathname.startsWith('/resources/')) history.pushState({page:'resources'}, '', '/resources');
 }
 function resourceDeepLink(slug){
-  return location.origin + location.pathname + '#resources/' + slug;
+  return location.origin + '/resources/' + slug;
 }
 function shareResourceVia(method){
   const slug = currentResourceSlug;
@@ -3136,7 +2755,7 @@ function renderNewsTopics(){
 }
 
 const pageLabels = {
-  'home':{en:'Home', fr:'Accueil'}, 'about':{en:'About', fr:'À propos'}, 'work':{en:'Our Work', fr:'Notre travail'},
+  'home':{en:'Home', fr:'Accueil'}, 'about':{en:'About', fr:'À propos'},
   'resources':{en:'Resources', fr:'Ressources'}, 'stay-informed':{en:'News & Updates', fr:'Actualités'},
   'contact':{en:'Contact', fr:'Contact'}, 'privacy':{en:'Privacy Policy', fr:'Politique de confidentialité'},
   'terms':{en:'Terms of Use', fr:'Conditions d\'utilisation'}, 'accessibility':{en:'Accessibility', fr:'Accessibilité'},
@@ -3217,8 +2836,6 @@ function renderCoreValues(){
     grid.innerHTML += `<div class="card" style="text-align:center;">
       <div class="icon-badge" style="margin:0 auto 12px;">${iconSVG(v.icon)}</div>
       <h3 data-en>${v.en}</h3><h3 data-fr>${v.fr}</h3>
-      <p style="font-size:.88rem;" data-en>${v.body_en}</p>
-      <p style="font-size:.88rem;" data-fr>${v.body_fr}</p>
     </div>`;
   });
 }
@@ -3229,42 +2846,6 @@ renderContactCats();
 renderDynamicFields(0);
 renderNewsTopics();
 renderCoreValues();
-
-/* X feed graceful fallback — X's embed widget frequently fails to render
-   (a widely-reported issue on X's side, not something fixable from here).
-   If it hasn't converted into a live timeline after a few seconds, swap in
-   a clean "follow us" card instead of leaving a broken-looking plain link. */
-/* X Feed: shows admin-curated "Featured Posts" (individual tweet embeds)
-   rather than a live timeline. This is deliberately more reliable than
-   X's timeline widget: each post's real text is baked into the HTML, so
-   even if widgets.js fails to load, the content is still visible — it
-   just won't get the fancy styled-card treatment. */
-const DEFAULT_X_POSTS = [
-  { id: 'default-1', embed_html: `<blockquote class="twitter-tweet" data-width="220"><p lang="en" dir="ltr">CJHQ welcomes the arrests made in connection with the targeted July 3 incidents in Outremont and Le Plateau-Mont-Royal.<br><br>We thank the <a href="https://x.com/SPVM?ref_src=twsrc%5Etfw">@SPVM</a>. Anyone with information about other suspects is encouraged to contact the SPVM or Info-Crime Montréal.<br><br>Full statement below. <a href="https://t.co/6ZHRyG15xT">pic.twitter.com/6ZHRyG15xT</a></p>&mdash; CJHQ (@CJHQinfo) <a href="https://x.com/CJHQinfo/status/2077479454440378599?ref_src=twsrc%5Etfw">July 15, 2026</a></blockquote>` }
-];
-async function renderXFeed(){
-  const container = document.getElementById('xFeedContainer');
-  if(!container) return;
-  let posts = [];
-  try{ posts = await fetchCollection('featured_x_posts'); }catch(e){ posts = []; }
-  if(!posts || !posts.length) posts = DEFAULT_X_POSTS;
-  container.innerHTML = posts.map(p => `<div class="x-post-embed" style="margin-bottom:16px;">${p.embed_html}</div>`).join('');
-  // Ask X's widget script to hydrate the blockquotes into styled cards, if it's loaded
-  if(window.twttr && window.twttr.widgets) window.twttr.widgets.load(container);
-  // Graceful fallback: if nothing hydrates within a few seconds, the raw
-  // blockquote text (already in the HTML above) remains visible either way,
-  // but also offer a direct follow link underneath.
-  setTimeout(()=>{
-    if(!container.querySelector('iframe')){
-      const note = document.createElement('div');
-      note.className = 'card';
-      note.style.cssText = 'text-align:center; padding:16px 20px; margin-top:8px; font-size:.82rem; color:var(--muted);';
-      note.innerHTML = `<span data-en>Having trouble viewing the embedded post above? </span><span data-fr>Le message intégré ci-dessus ne s'affiche pas? </span><a href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>View it directly on X →</span><span data-fr>Voir directement sur X →</span></a>`;
-      container.appendChild(note);
-    }
-  }, 6000);
-}
-renderXFeed();
 
 let PARTNERS_DATA = [
   {type:'img', src:"data:image/png;base64,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EZHLL79cAHnxxRdFRKR58+Z+H73+Nm3aVGbPni0iIg888ID/vDfeeENERP7xj38IIDfeeKOIiAwZMkQAadOmjXTu3Fl69OghNTU18v777wsgPXv2FBGRN998UwAZNGiQRKPRlHafeOKJ/rOLi4sFkEAg4D9TROT666/329KqVSv//cMPPywiIvPmzfM/u+qqq0REZPXq1QLI4YcfnrJubrrpJv/aW265RUREHMeRTz/9VLp16yZt27YVQEKhkHTr1k0uvfRSsW1bcnJyBJDy8vKd7nPYYYf57//whz+IiMjChQv9zy6//HIREVm3bp0A0qFDhx/k3k4D4F4A4Ny5c8UwDBk3blzK997GmD59umitpWvXrqKU8he24ziyaNEiUUpJq1atZPbs2RKJROTtt9+WLl26SK9evcSyLHnzzTfFMAy55pprRERk4sSJYhiGfPzxxykA2Lx5cykpKZGqqir/89tuu00Mw5C33nrLb7PXrkGDBkl2dra0adNGcnJypLS0VERE4vG4iIhs2bJFDMOQfv36pfTr5JNPFsMwZPHixVJRUeFvqGSAyc3NlbZt24qIyFtvvSWA9OnTR5YtWyYiIpMnT5azzz5bfvnLX/pj4bVr9OjRYhiGfPrpp9K7d28B5NNPP/Wff+ONN4phGPLaa6+JiEinTp0kHA7L5s2bpb6+3ge8Y445RkREHnnkETEMw9/g0WhUXn/9dTEMQ371q1+lPHP16tX+c7xxGD16tAAyZcoUGTVqlCilZM6cOf4ce+0+/fTTxTAMmTVrlti2LS+//LIEAgFp1qyZxONxmTVrlgDSo0cPWbp0qViWJZ999pkUFhZKKBSSsrIyWblypZimKUopAWTGjBlSXV0thmFI//79/bGKRCLSunVrKSkpkeLiYmnXrp1Eo9GUcfTW5fjx4/0+eb/LyckRy7Lk66+/FkC6du0q3377rViWJbNmzZKSkhIJBoOyadMmWbt2rQSDQb9NU6dOlbq6OtFaS69evX6QezstAu8F2baNbdt8+eWXXHbZZVxxxRVs3rzZF8FeeOEFHMfhd7/7He3atWPSpEnU1tailGL69OmICBdccAF9+vQhGAwyevRo5s+fz9SpU33xybbtFFExWYzesR3JIlc0GsW2berr63EcB8uyMAyDZcuWMWPGDE4++WRuuOEGqqurffHYU3jX1dVh2zaxWMz/bfLzPcV6JBKhVatWtGjRgiuvvJINGzYQCoWIxWIAfPDBB2itufXWW+nYsSMvvfQS0WiUc845h4EDB1JXV7eTAca2bS6//HK++uorHnvsMQYPHkwkEmmw/17bRIRwOMwNN9xAx44d+eyzz6ivrycUCmHbNv3792fdunX86le/IicnJ2VMvWdefPHFnHrqqdx+++3+/N1+++0opbjwwgt57733GDVqFL1798ZxnJ0MBcnGhHHjxnHyySezadMmli1bxtSpU1FK8bOf/YxOnTphWRYDBgzg7LPPJhqN8tlnn5GVlYVlWbRv356CggIuvfRSKisrUUr546+UYubMmaxdu5aLL76Y888/n1WrVjFz5kz/OsdxqK+vT5k/TwS3bZt4PI5hGLz//vsopbjsssvo0qULlmXRr18/zj33XGKxGNOnTycrK4tYLEbbtm0pKiri0ksvZdu2bZim6bcprQP8kRsxPJ3aa6+9xmuvveZv6pqaGl5++WVatmzJmDFjOO2009i8eTNTpkxBRKitrUVrTV5enq/LAwgGg+Tk5Pg6q10Br2VZu7XY7soC+Oqrr6K15txzz2XixIkEg0H++c9/+ta/HS3MO1qJk+8bj8dp1aoVjz/+ON999x3XXHMNgUAgRT8J0KRJE+rq6pg4cSJjx4719VNbtmxJGUeP1qxZg1KKkpKSRs2DZVn+hszKykJEsCwL03SdGi644AIuvfRS7r//fiZNmtSgtXvlypXMmzePlStX+mAyYMAAxo4dy5o1awgGg9x1110p1uFdzQuQMq/xeByllN+2eNytA+zNcyQS8eesa9euPProoyxatIhbbrmFjIyMFMvuv/71LwzDYOLEiZxzzjkYhsHzzz+fMtfefO3472SKRqN+m4Cd2hSNRv02de7cmb/+9a8sXbqUX/ziF2RmZvJDtZWmAXAvyDRNlFIcf/zxlJWV8d1339GyZUsAPv74YzZv3szmzZtp3749f//73/0FrJTyOYmXX36ZmpoawuEwq1ev5sILL+Tss8/2T+pkQPLeN2nSBNM0fXeNHUGrIVeZQCCAbdu8+OKLOI7DlVdeSe/evYnFYnz22WcsXbo0hatpzD211mzbto3Ro0czceJEXnnlFTZu3EhGRgYA/fr1w3EcnnnmGTIzM6mrq2PdunV06tSJnJwcHyR2vP9f//pXCgsLOf/881m4cCHhcLjB53v/LigowDRNpk2bxuLFi2nTpg05OTk+8ESjUR588EEKCgp48sknGwT4KVOmsHr1al544QX/viLCNddcg9aaE088kaOOOqpBdybv+ry8PEzTZNWqVXz88ccEAgE6duxIr169cBzHH/vs7GzKy8t58803ERF69+5NJBJBKcXWrVsZP348w4cP51//+hc1NTX+obJt2zbefvttbNtmxIgRnHrqqdi2zVtvvUVFRUXK4bOr+fMMHAMHDsRxHCZNmoRlWWRnZ1NZWcnrr7+OiNCnTx8fJLdu3cq4ceMYPXo0zz//PJWVlQSDwTQApjlA2cknyzs1n376aQBGjhxJ//79GTFiBHl5ebzzzjts2rSJwYMHc8opp/Dll1/Sp08fJkyYQP/+/fnHP/6BUopAIEA0GvX96DxOR0R48skn+d3vfsfLL79MIBAgFov5J3gyN5LMrRiGwRdffMG8efPo2LEjQ4YMoW/fvgwdOpRYLMZLL720U992FHO85yeLoN5zHnroIVq2bOl/Z9s2Z555Jj169ODZZ59lwIABXH311Zx88sksW7aM22+/nby8PN+nLFkEHzhwIE899RQ1NTWcccYZbN682edSkp/viXQXXnghY8eO9fvy29/+FoBYLIaIUFNTQ05ODn/4wx/8Z3hz5vXp7rvv5o477uDOO++ksrLSB8asrCwcx/G5t4Y4H69dN910E+PHj+fII49k48aN3HLLLWRnZzNs2DBOOOEE/v3vf9O7d28mTpzIUUcdxaJFi7j00kvp0KED1dXVPncoIjz66KMUFBSkcIzvvvsuZWVl9O3bl4EDBzJo0CB69epFaWkp7733Xoo/YEPzF4/HcRyH6upqhg0bxsknn8wHH3xAr169/DYtWLCACy+8kC5duvjWaG+MHn30UYqKinbpb5i2Av/IjCDz58+XvLw8GTdunDiO4yvPS0tLpUWLFtKtW7eU3910002Sm5srzz33nIiIVFZWys9//nPfctiiRQv59a9/7d/nzTfflPz8fLnppptEROSSSy6R/Px8yczMFEBGjx4tIiIdOnSQdu3aSU1NjTiOIyIit99+u+Tn58vrr7/uP//WW2+V/Px8ef755/3PVq1aJYWFhTJo0CDfyrh+/XrJy8uTwYMHpxh1TjvtNMnPz5dvv/1WqqurpUmTJtK/f39/PF555RXJz8+Xfv36STQaFRGRtWvXynnnnecbTFq3bi2PPPJIyjh69z/zzDMlPz9fZs2aJSIi11xzjWRmZsoFF1wgjuPIbbfdJnl5eb5hp2/fvpKXlyeGYUgoFJKBAwfKq6++6vft6aeflry8PHnwwQf9cTnvvPMkPz9f7rrrLhERGTdunOTn50swGBRAMjIyZO3atf49vvrqK8nLy5OLL744pa3J78855xz/HqZpSs+ePeXRRx9N6WNFRYVcddVVvrW6WbNmcscdd/jjtGTJEsnLy5OTTz7Zv/8TTzwheXl5csIJJ4iIyPjx4yU/P18+//xz/5pPP/1U8vPz5dxzz/X7OGvWLMnPz5fzzjsvxXjStWtXadWqlVRWVvrr7+qrr06xoP/yl7+USCQiIiIrVqyQvLw8+clPfrLTmA4bNuwHubfTjtB7QfF4nKqqKkzTJDc31z+BI5EIVVVVZGZmkpWV5XNwtm1TXV1NMBgkNzfXv09dXR01NTXk5ub64p7HwVRXVxMKhcjKyqKmpoZYLObrtkzTJDMzk/Lycl/X5rWhpqaGaDRKdnY2oVAIx3EoLy9HKZXybK01lZWVWJZFfn6+LyqXl5djmiZ5eXn+PauqqojH4+Tl5aG1pry8HK01TZo08UXxLVu2+J95Ypf320gkQmFhYYronsxxVldXE4/Hyc3NRWuNYRiUl5dTX19Ps2bNqK+vp76+npycHEKhEOXl5b5IahgG2dnZKY68kUiEmpoaMjMzfb2V4zhUVFSQmZlJRkaG33dPnSEiZGdn+2KuZVm+yJeTk9PgOvDGxTAMtNb++Hp9TO5rdXU1lZWVFBYW+qqC5Od4Y+71YevWrRiGQW5uLtu2bfPnOTlKxfu8sLDQ181WVVURDAbJzs72I14qKysRkZR1ktymgoICMjMzG9UmrTX5+fn/defyg01pAPwvi9A7WhSTw8YOxf7s2O5d9bGhULiDMZ7/Sw+B5Hbsyzgc7OiVfVl//4uImjQAHgKW4IY2/o6fJw9tYz7f8T4NTU3y5w3dc0+f7c21O362L89o6LvGPnNXz9/T2O3qN7sb08bMcUPP2d11yfq5howUe9v//Z2/A9GmNACmKU1pStMPhNJW4DSlKU1pAExTmtKUpjQApilNaUpTGgDTlKY0pemHTf8fNWkqwRwpIsEAAAAASUVORK5CYII=", alt:"Renewal Canada", url:"https://www.renewalcanada.org/"},
@@ -3374,17 +2955,22 @@ async function applyPartnerOverrides(){
 
 
 // ---------- NAVIGATION ----------
-function goPage(name){
+function pathForPage(name){
+  return name === 'home' ? '/' : '/' + name;
+}
+function goPage(name, opts){
+  opts = opts || {};
   // Deactivated built-in page -> show 404 instead
   if(HIDDEN_PAGES_CACHE[name] && HIDDEN_PAGES_CACHE[name].hidden){
-    if(typeof show404 === 'function'){ show404(name); return; }
+    if(typeof show404 === 'function'){ show404(name, opts); return; }
   }
   const builtIn = document.getElementById('page-'+name);
   if(builtIn){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     builtIn.classList.add('active');
     highlightActiveNav(name);
-    window.scrollTo({top:0, behavior:'instant'});
+    if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
+    if(!opts.skipHistory) updateUrlForPage(name);
     return;
   }
   // Not a built-in page -> check custom pages
@@ -3397,17 +2983,21 @@ function goPage(name){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-custom').classList.add('active');
     highlightActiveNav(name);
-    window.scrollTo({top:0, behavior:'instant'});
+    if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
+    if(!opts.skipHistory) updateUrlForPage(name);
     return;
   }
   // Nothing matches -> 404
-  if(typeof show404 === 'function') show404(name);
+  if(typeof show404 === 'function') show404(name, opts);
+}
+function updateUrlForPage(name){
+  const path = pathForPage(name);
+  if(location.pathname !== path){
+    history.pushState({page:name}, '', path);
+  }
 }
 function highlightActiveNav(name){
-  document.querySelectorAll('#mainNav button').forEach(b=>{
-    const isMatch = b.dataset.page===name || (b.classList.contains('nav-dropdown-trigger') && name==='work');
-    b.classList.toggle('active', isMatch);
-  });
+  document.querySelectorAll('#mainNav button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
   document.querySelectorAll('#mobileDrawerNav a').forEach(a=>a.classList.toggle('active', a.dataset.page===name));
 }
 document.querySelectorAll('#mainNav button').forEach(b=>{
@@ -3455,6 +3045,35 @@ function setLang(lang){
   }
   const drawerSearch = document.getElementById('drawerSearch');
   if(drawerSearch) drawerSearch.placeholder = lang==='fr' ? drawerSearch.dataset.frPh : drawerSearch.dataset.enPh;
+  if(lang === 'fr') translateCtctForm();
+}
+// Best-effort translation of the Constant Contact signup form's labels/button
+// when French is selected. NOTE: Constant Contact's widget renders inside a
+// cross-origin iframe (constantcontact's own domain), and browsers block
+// JavaScript on our page from reaching into a cross-origin iframe's contents
+// — this is a hard security boundary, not something any script can work
+// around. This function is included as requested and will translate the
+// form if it turns out to render as same-page elements, but if it stays in
+// English after switching to French on the live site, that confirms the
+// iframe boundary is blocking it, and the fix would need to come from
+// Constant Contact's own form-language setting instead.
+function translateCtctForm(){
+  function translateOnce(){
+    document.querySelectorAll('label').forEach(function(label){
+      switch(label.textContent.trim()){
+        case 'Email': label.textContent = 'Courriel'; break;
+        case 'First Name': label.textContent = 'Prénom'; break;
+        case 'Last Name': label.textContent = 'Nom de famille'; break;
+        case 'Phone': label.textContent = 'Téléphone'; break;
+        case 'Email Lists': label.textContent = "Listes d'envoi"; break;
+      }
+    });
+    document.querySelectorAll("button,input[type='submit']").forEach(function(btn){
+      if(btn.value === 'Sign Up!') btn.value = "S'inscrire";
+      if(btn.innerHTML === 'Sign Up!') btn.innerHTML = "S'inscrire";
+    });
+  }
+  setTimeout(translateOnce, 1000);
 }
 document.getElementById('btnEN').addEventListener('click', ()=>setLang('en'));
 document.getElementById('btnFR').addEventListener('click', ()=>setLang('fr'));
@@ -3539,7 +3158,7 @@ if(contactForm){
    ================================================================
    DEV NOTE — FIREBASE CONFIG:
    This site currently has NO backend database connected. Content added
-   in the admin panel (#admin) will only be visible in the browser that
+   in the admin panel (/admin) will only be visible in the browser that
    created it — it will NOT appear for other site visitors until Firebase
    is connected.
 
@@ -3781,7 +3400,6 @@ function showAdminPanel(){
   renderLinkAuditList();
   renderErrorReportsList();
   renderMessagesList();
-  renderXPostsList();
   loadSettingsIntoForm();
 }
 
@@ -3795,7 +3413,6 @@ const SITE_PAGES = [
   { id:'home', en:'Home', fr:'Accueil' },
   { id:'resources', en:'Community Resource Centre', fr:'Centre de ressources communautaires' },
   { id:'stay-informed', en:'Stay Informed', fr:'Restez informés' },
-  { id:'work', en:'Our Work', fr:'Notre travail' },
   { id:'contact', en:'Contact CJHQ', fr:'Contacter le CJHQ' },
   { id:'about', en:'About CJHQ', fr:'À propos du CJHQ' },
   { id:'privacy', en:'Privacy Policy', fr:'Politique de confidentialité' },
@@ -3813,7 +3430,7 @@ async function renderPagesList(){
       <div><p style="margin:0; font-weight:600;">${p.en}${isHidden ? ' <span style="color:#A23B3B; font-weight:600; font-size:.75rem;">(deactivated)</span>' : ''}</p>
         <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">${p.fr} · #${p.id}</p></div>
       <div style="display:flex; gap:6px; flex-shrink:0;">
-        <button class="admin-small-btn" onclick="window.open('${location.pathname}#${p.id}', '_blank')">View</button>
+        <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.id}'), '_blank')">View</button>
         <button class="admin-small-btn" onclick="toggleBuiltInPageHidden('${p.id}')">${isHidden ? 'Reactivate' : 'Deactivate'}</button>
       </div>
     </div>`;
@@ -3841,7 +3458,7 @@ async function renderCustomPagesList(){
         <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">#${p.slug}</p>
       </div>
       <div style="display:flex; gap:6px; flex-shrink:0;">
-        <button class="admin-small-btn" onclick="window.open('${location.pathname}#${p.slug}', '_blank')">View</button>
+        <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.slug}'), '_blank')">View</button>
         <button class="admin-small-btn" onclick="editCustomPage('${p.slug}')">Edit</button>
         <button class="admin-small-btn" style="color:#A23B3B;" onclick="deleteCustomPage('${p.slug}')">Delete</button>
       </div>
@@ -4472,31 +4089,6 @@ async function renderMessagesList(){
   }).join('');
 }
 
-/* ---------- Admin panel: Featured X Posts ---------- */
-function extractTweetStatusId(html){
-  const m = html.match(/status\/(\d+)/);
-  return m ? m[1] : ('post-' + Date.now());
-}
-async function renderXPostsList(){
-  const posts = await fetchCollection('featured_x_posts');
-  const list = document.getElementById('xPostsList');
-  if(!posts || !posts.length){
-    list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No posts added yet — the "Default" statement below is showing on the live site until you add one.</p>`;
-    return;
-  }
-  list.innerHTML = posts.map(p => {
-    const preview = (p.embed_html.match(/<p[^>]*>(.*?)<\/p>/s) || ['', ''])[1]
-      .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
-    return `
-    <div class="card admin-row" style="margin-bottom:8px; align-items:flex-start;">
-      <div style="flex:1; min-width:0;">
-        <p style="margin:0; font-size:.85rem; color:var(--ink-soft);">${preview || '(preview unavailable)'}${preview.length >= 140 ? '…' : ''}</p>
-      </div>
-      <button class="admin-small-btn" style="color:#A23B3B;" onclick="deleteFromCollection('featured_x_posts','${p.id}').then(renderXPostsList)">Remove</button>
-    </div>`;
-  }).join('');
-}
-
 async function markResourceReviewed(slug){
   const today = new Date().toLocaleDateString('en-US', { month:'long', year:'numeric' });
   await saveToCollection('reviewed_overrides', { id: slug, slug, reviewed: today });
@@ -4523,20 +4115,6 @@ async function publishChangeNotice(slug){
   document.getElementById('refreshAuditBtn').addEventListener('click', renderLinkAuditList);
   document.getElementById('existingResourceSearch').addEventListener('input', renderExistingResourcesList);
   document.getElementById('messagesSearch').addEventListener('input', renderMessagesList);
-
-  document.getElementById('xPostForm').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const html = document.getElementById('xPostEmbedInput').value.trim();
-    if(!html || !html.includes('twitter-tweet')){
-      alert('Paste the full embed code from X\'s "Embed Post" option — it should contain a blockquote with class "twitter-tweet".');
-      return;
-    }
-    const id = extractTweetStatusId(html);
-    await saveToCollection('featured_x_posts', { id, embed_html: html });
-    document.getElementById('xPostForm').reset();
-    renderXPostsList();
-    if(typeof renderXFeed === 'function') renderXFeed();
-  });
 
   document.getElementById('customPageShowNav').addEventListener('change', (e)=>{
     document.getElementById('customPageNavLabelFields').style.display = e.target.checked ? 'block' : 'none';
@@ -4731,30 +4309,43 @@ async function publishChangeNotice(slug){
   });
 })();
 
-function checkAdminHash(){
-  const hash = location.hash.replace('#','');
-  if(!hash) return;
-  if(hash.startsWith('resources/')){
-    const slug = hash.slice('resources/'.length);
-    goPage('resources');
+function checkCurrentPath(opts){
+  opts = opts || {};
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  if(path === '/'){
+    goPage('home', {skipHistory:true, skipScroll:opts.skipScroll});
+    return;
+  }
+  const parts = path.split('/').filter(Boolean);
+  if(parts[0] === 'resources' && parts[1]){
+    const slug = parts[1];
+    goPage('resources', {skipHistory:true, skipScroll:opts.skipScroll});
     // wait a tick for accordion to be rendered/populated
     setTimeout(()=>{
-      if(RESOURCE_BY_SLUG[slug]) openResourcePopup(slug);
-      else show404(hash);
+      if(RESOURCE_BY_SLUG[slug]) openResourcePopup(slug, {skipHistory:true});
+      else show404(path, {skipHistory:true});
     }, 150);
     return;
   }
-  goPage(hash);
+  goPage(parts[0], {skipHistory:true, skipScroll:opts.skipScroll});
 }
 
-function show404(attemptedHash){
-  window.__last404Hash = attemptedHash;
-  goPage('404');
+function show404(attemptedName, opts){
+  opts = opts || {};
+  if(!opts.skipHistory && attemptedName){
+    const path = attemptedName.startsWith('/') ? attemptedName : '/' + attemptedName;
+    if(location.pathname !== path) history.pushState({page:'404'}, '', path);
+  }
+  window.__last404Path = location.pathname;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-404').classList.add('active');
+  highlightActiveNav('404');
+  if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
   document.getElementById('reportBrokenLinkStatus').style.display = 'none';
   const btn = document.getElementById('reportBrokenLinkBtn');
   if(btn) btn.style.display = '';
 }
-window.addEventListener('hashchange', checkAdminHash);
+window.addEventListener('popstate', ()=>checkCurrentPath({skipHistory:true}));
 
 (async function initBackend(){
   await initFirebase();
@@ -4768,7 +4359,7 @@ window.addEventListener('hashchange', checkAdminHash);
   await applyResourceOverrides();
   await applyPartnerOverrides();
   await enhancePagesFromBackend();
-  checkAdminHash();
+  checkCurrentPath();
 })();
 </script>
 
