@@ -13,14 +13,13 @@
     single-page apps hosted on GitHub Pages:
     https://github.com/rafgraph/spa-github-pages
 
-    pathSegmentsToKeep = 0 assumes this site is served from the root of
-    a domain (e.g. cjhq.org/contact). If you are instead using the raw
-    GitHub Pages address without a custom domain (e.g.
-    yourusername.github.io/cjhq-website/contact), change this to 1 so
-    the "/cjhq-website" part of the path isn't dropped.
+    This automatically detects whether the site is on a custom domain
+    (e.g. cjhq.org/contact — no prefix to preserve) or the raw GitHub
+    Pages project address (e.g. cjhqinfo.github.io/CJHQ/contact — the
+    "/CJHQ" prefix must be preserved). No manual editing needed.
   -->
   <script>
-    var pathSegmentsToKeep = 0;
+    var pathSegmentsToKeep = window.location.hostname.endsWith('.github.io') ? 1 : 0;
     var l = window.location;
     l.replace(
       l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
