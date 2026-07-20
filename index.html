@@ -342,7 +342,7 @@
   /* quick links */
   .pill-row{display:flex; flex-wrap:nowrap; gap:10px; justify-content:center;}
   @media (max-width:860px){ .pill-row{flex-wrap:wrap;} }
-  .follow-btn-row{display:flex; flex-wrap:nowrap; gap:12px;}
+  .follow-btn-row{display:flex; flex-wrap:nowrap; gap:12px; justify-content:center;}
   @media (max-width:860px){ .follow-btn-row{flex-wrap:wrap;} }
 
   /* ===== ADMIN PANEL ===== */
@@ -920,14 +920,14 @@
         <a class="btn dark" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Facebook →</span><span data-fr>Suivre le CJHQ sur Facebook →</span></a>
         <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on X →</span><span data-fr>Suivre le CJHQ sur X →</span></a>
       </div>
-      <div id="socialEmbedGrid" style="max-width:500px; margin:0 auto;">
-        <div>
+      <div id="socialEmbedGrid" style="display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; max-width:500px; margin:0 auto;">
+        <div style="width:100%;">
           <h3 data-cid="stay-informed-14" style="font-size:.95rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
         <span data-en>Facebook Feed</span>
         <span data-fr>Fil Facebook</span>
       </h3>
           <div id="fb-root"></div>
-          <div class="fb-page" style="width:100%;"
+          <div class="fb-page" style="width:100%; margin:0 auto;"
                data-href="https://www.facebook.com/CJHQinfo"
                data-tabs="timeline"
                data-width="500"
