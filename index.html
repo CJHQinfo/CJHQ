@@ -237,8 +237,9 @@
   .icon-badge svg{width:20px; height:20px; stroke:var(--bronze);}
 
   .core-values-grid{
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:20px;
   }
+  @media (max-width:1000px){ .core-values-grid{grid-template-columns:repeat(3, 1fr);} }
   @media (max-width:700px){ .core-values-grid{grid-template-columns:1fr;} }
 
   /* resource categories — expandable cells */
@@ -339,7 +340,7 @@
   .res-fee-note{font-size:.75rem; font-style:italic; margin-top:8px;}
 
   /* quick links */
-  .pill-row{display:flex; flex-wrap:nowrap; gap:10px;}
+  .pill-row{display:flex; flex-wrap:nowrap; gap:10px; justify-content:center;}
   @media (max-width:860px){ .pill-row{flex-wrap:wrap;} }
   .follow-btn-row{display:flex; flex-wrap:nowrap; gap:12px;}
   @media (max-width:860px){ .follow-btn-row{flex-wrap:wrap;} }
@@ -741,7 +742,7 @@
   </section>
 
   <section>
-    <div class="section-inner" style="max-width:720px;">
+    <div class="section-inner">
       <div class="section-head" style="margin:0 auto 32px; text-align:center;">
         <span class="eyebrow" data-en>Our Values</span><span class="eyebrow" data-fr>Nos valeurs</span>
         <h2 data-cid="about-13" style="margin-top:10px;">
@@ -919,7 +920,7 @@
         <a class="btn dark" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Facebook →</span><span data-fr>Suivre le CJHQ sur Facebook →</span></a>
         <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on X →</span><span data-fr>Suivre le CJHQ sur X →</span></a>
       </div>
-      <div id="socialEmbedGrid" style="max-width:500px;">
+      <div id="socialEmbedGrid" style="max-width:500px; margin:0 auto;">
         <div>
           <h3 data-cid="stay-informed-14" style="font-size:.95rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
         <span data-en>Facebook Feed</span>
@@ -3072,6 +3073,13 @@ function translateCtctForm(){
       if(btn.value === 'Sign Up!') btn.value = "S'inscrire";
       if(btn.innerHTML === 'Sign Up!') btn.innerHTML = "S'inscrire";
     });
+    // Legal consent notice shown under the signup form
+    var frenchNotice = 'En soumettant ce formulaire, vous consentez à recevoir des courriels promotionnels de la part de : CJHQ, 1040, avenue Van Horne, 2e étage, Outremont, QC, H2V 1J5, CA. Vous pouvez révoquer votre consentement à recevoir des courriels en tout temps en utilisant le lien de désabonnement SafeUnsubscribe®, situé au bas de chaque courriel. Les courriels sont gérés par Constant Contact.';
+    document.querySelectorAll('p, div, span, small').forEach(function(el){
+      if(el.children.length === 0 && el.textContent.indexOf('By submitting this form') !== -1){
+        el.textContent = frenchNotice;
+      }
+    });
   }
   setTimeout(translateOnce, 1000);
 }
@@ -4311,7 +4319,10 @@ async function publishChangeNotice(slug){
 
 function checkCurrentPath(opts){
   opts = opts || {};
-  const path = location.pathname.replace(/\/+$/, '') || '/';
+  let path = location.pathname.replace(/\/+$/, '') || '/';
+  // A visit to /index.html (or /index.htm) is the same as the bare root —
+  // without this, it would be parsed as an unrecognized page name and 404.
+  if(/^\/index\.html?$/i.test(path)) path = '/';
   if(path === '/'){
     goPage('home', {skipHistory:true, skipScroll:opts.skipScroll});
     return;
@@ -4348,18 +4359,26 @@ function show404(attemptedName, opts){
 window.addEventListener('popstate', ()=>checkCurrentPath({skipHistory:true}));
 
 (async function initBackend(){
-  await initFirebase();
-  await renderPublicNotices();
-  const settings = await fetchSettingsDoc();
-  if(settings) applySettingsToSite(settings);
-  await enhancePartnersFromBackend();
-  await enhanceResourcesFromBackend();
-  await enhanceResourceMetaFromBackend();
-  await applyContentOverrides();
-  await applyResourceOverrides();
-  await applyPartnerOverrides();
-  await enhancePagesFromBackend();
-  checkCurrentPath();
+  try{
+    await initFirebase();
+    await renderPublicNotices();
+    const settings = await fetchSettingsDoc();
+    if(settings) applySettingsToSite(settings);
+    await enhancePartnersFromBackend();
+    await enhanceResourcesFromBackend();
+    await enhanceResourceMetaFromBackend();
+    await applyContentOverrides();
+    await applyResourceOverrides();
+    await applyPartnerOverrides();
+    await enhancePagesFromBackend();
+  }catch(e){
+    console.warn('Backend init step failed, continuing with routing regardless:', e);
+  }finally{
+    // Routing must never be blocked by a backend hiccup — the visitor
+    // should always land on the right page even if Firestore is slow,
+    // unreachable, or a single step above throws.
+    checkCurrentPath();
+  }
 })();
 </script>
 
