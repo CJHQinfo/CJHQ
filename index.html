@@ -3,7 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CJHQ — Le Conseil des Juifs Hassidiques du Québec</title>
+<title id="pageTitle">CJHQ — Jewish Hasidic Council of Quebec</title>
+<meta name="description" content="The Jewish Hasidic Council of Quebec (CJHQ) serves, supports, and represents Quebec's Hasidic Jewish communities — providing practical assistance, advocacy, and resources for individuals, families, and institutions.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" id="canonicalTag" href="https://cjhq.org/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CJHQ — Jewish Hasidic Council of Quebec">
+<meta property="og:title" id="ogTitle" content="CJHQ — Jewish Hasidic Council of Quebec">
+<meta property="og:description" id="ogDescription" content="The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec's Hasidic Jewish communities — providing practical assistance, advocacy, and community resources.">
+<meta property="og:url" id="ogUrl" content="https://cjhq.org/">
+<meta property="og:image" content="https://cjhq.org/og-image.png">
+<meta property="og:locale" content="en_CA">
+<meta property="og:locale:alternate" content="fr_CA">
+
+<!-- Twitter/X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@CJHQinfo">
+<meta name="twitter:title" id="twitterTitle" content="CJHQ — Jewish Hasidic Council of Quebec">
+<meta name="twitter:description" id="twitterDescription" content="The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec's Hasidic Jewish communities.">
+<meta name="twitter:image" content="https://cjhq.org/og-image.png">
+
+<!-- Schema.org Organization structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Jewish Hasidic Council of Quebec",
+  "alternateName": ["CJHQ", "Conseil des Juifs Hassidiques du Québec"],
+  "url": "https://cjhq.org",
+  "logo": "https://cjhq.org/cjhq-logo.png",
+  "description": "The Jewish Hasidic Council of Quebec (CJHQ) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1040 Van Horne Ave, 2nd floor",
+    "addressLocality": "Outremont",
+    "addressRegion": "QC",
+    "postalCode": "H2V 1J5",
+    "addressCountry": "CA"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+1-514-819-9440",
+    "email": "info@cjhq.org",
+    "contactType": "customer service",
+    "areaServed": "Quebec",
+    "availableLanguage": ["English", "French"]
+  },
+  "sameAs": [
+    "https://www.facebook.com/CJHQinfo",
+    "https://x.com/CJHQinfo"
+  ],
+  "areaServed": {
+    "@type": "State",
+    "name": "Quebec",
+    "addressCountry": "CA"
+  }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -230,6 +289,11 @@
     background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
     padding:26px; height:100%;
   }
+  .skip-to-main{
+    position:absolute; left:-9999px; top:8px; padding:10px 18px; background:var(--ink);
+    color:var(--paper); border-radius:var(--radius); font-size:.9rem; z-index:9999; text-decoration:none;
+  }
+  .skip-to-main:focus{ left:8px; }
   .icon-badge{
     width:42px; height:42px; border-radius:50%;
     background:rgba(161,113,47,.12);
@@ -528,8 +592,12 @@
   }
   @media (prefers-reduced-motion: reduce){ .partners-track{animation:none;} }
 </style>
+<!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
+<a href="#mainContent" class="skip-to-main" data-en>Skip to main content</a>
+<a href="#mainContent" class="skip-to-main" data-fr>Passer au contenu principal</a>
 <script>
   // Restores the real path after a bounce through 404.html.
   // Must run before any other routing logic. See 404.html for context.
@@ -544,6 +612,7 @@
     }
   }(window.location));
 </script>
+<div id="mainContent" tabindex="-1"></div>
 <div id="siteNoticeBanner" style="display:none;"></div>
 <!-- ============ HEADER ============ -->
 <header>
@@ -840,8 +909,8 @@
     </div>
   </div>
 
-  <div class="site-modal-overlay no-print" id="resourceShareModal">
-    <div class="site-modal" id="resourceShareModalBody" style="max-width:min(1040px, 92vw);"></div>
+  <div class="site-modal-overlay no-print" id="resourceShareModal" role="dialog" aria-modal="true" aria-labelledby="resourceModalTitle" onclick="if(event.target===this)closeResourceShareModal()">
+    <div class="site-modal" id="resourceShareModalBody" style="max-width:min(1040px, 92vw);" tabindex="-1"></div>
   </div>
 
   <section class="alt">
@@ -1846,8 +1915,8 @@
   </div>
 </footer>
 
-<div class="site-modal-overlay no-print" id="sitePopupOverlay">
-  <div class="site-modal" id="sitePopupBody" style="max-width:480px;"></div>
+<div class="site-modal-overlay no-print" id="sitePopupOverlay" role="dialog" aria-modal="true">
+  <div class="site-modal" id="sitePopupBody" style="max-width:480px;" tabindex="-1"></div>
 </div>
 
 
@@ -2129,7 +2198,7 @@ const categories = [
     groups:[
       { heading_en:'', heading_fr:'', items:[
         {en:'Outremont Visitor Parking', fr:'Stationnement visiteurs Outremont', desc_en:'Register free visitor parking permits for eligible Outremont residents.', desc_fr:'Inscrivez des vignettes de stationnement gratuites pour visiteurs pour les résidents admissibles d\'Outremont.', url:"https://arr-outremont.ca/", url2:"mailto:mobilite.durable@montreal.ca?subject=Request%20for%20Outremont%20Parking%20Access%20Code&body=Please%20find%20attached%20my%20proof%20of%20residence%20to%20obtain%20visitor%20parking%20access%20codes.", label_en1:'Register Online →', label_fr1:'S\'inscrire en ligne →', label_en2:'Request Access Code', label_fr2:'Demander un code', what_en:'Use this service if you live in Outremont and need a visitor parking permit.', what_fr:'Utilisez ce service si vous habitez à Outremont et avez besoin d\'une vignette de stationnement pour visiteurs.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'You\'ll need your resident access code. If you don\'t have one, request it by providing proof of residence.', need_fr:'Vous aurez besoin de votre code d\'accès résident. Si vous n\'en avez pas, demandez-en un en fournissant une preuve de résidence.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Create a visitor permit online. Eligible residents receive up to 50 free visitor permits each calendar year.', steps_fr:'Créez une vignette pour visiteurs en ligne. Les résidents admissibles reçoivent jusqu\'à 50 vignettes gratuites par année civile.', official_links:[{label_en:'Outremont Visitor Parking', label_fr:'Stationnement visiteurs Outremont', url:"https://arr-outremont.ca/"}], related:['le-plateau-mont-royal-visitor-parking'], reviewed:'July 2026', slug:'outremont-visitor-parking'},
-        {en:'Le Plateau-Mont-Royal Visitor Parking', fr:'Stationnement visiteurs — Le Plateau-Mont-Royal', desc_en:'Purchase a daily visitor parking sticker — Le Plateau does not offer free visitor permits (that program is specific to Outremont).', desc_fr:'Achetez une vignette de stationnement quotidienne pour visiteurs — Le Plateau n\'offre pas de vignettes gratuites (ce programme est propre à Outremont).', url:"https://montreal.ca/en/how-to/get-daily-or-monthly-parking-sticker?arrondissement=PMR", what_en:'Use this service when visitors need to park in resident-only areas of Le Plateau-Mont-Royal.', what_fr:'Utilisez ce service lorsque des visiteurs doivent stationner dans les zones réservées aux résidents du Plateau-Mont-Royal.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Know which parking zone you need and have a payment method available.', need_fr:'Sachez quelle zone de stationnement vous concerne et ayez un moyen de paiement disponible.', steps_heading_en:'How to Get a Daily Permit', steps_heading_fr:'Comment obtenir une vignette quotidienne', steps_list_en:['Buy a daily parking sticker at any Montréal parking pay station — the same machines used for parking meters.','Zone PMR01 (all sticker zones in the borough): \$16.','Zone PMR02 (only zones east of Rue Saint-Denis, excluding Saint-Denis itself): \$10.','The sticker is valid for 24 hours from purchase — leave the printed coupon in plain view on the dashboard, street side.'], steps_list_fr:['Achetez une vignette de stationnement quotidienne à n\'importe quelle borne de paiement de Montréal — les mêmes bornes que pour les parcomètres.','Zone PMR01 (toutes les zones à vignette de l\'arrondissement) : 16 \$.','Zone PMR02 (seulement les zones à l\'est de la rue Saint-Denis, celle-ci exclue) : 10 \$.','La vignette est valide 24 heures à partir de l\'achat — laissez le coupon imprimé bien visible sur le tableau de bord, côté rue.'], official_links:[{label_en:'Daily or Monthly Parking Sticker', label_fr:'Vignette de stationnement quotidienne ou mensuelle', url:"https://montreal.ca/en/how-to/get-daily-or-monthly-parking-sticker?arrondissement=PMR"},{label_en:'On-Street Parking', label_fr:'Stationnement sur rue', url:"https://montreal.ca/en/topics/street-parking"}], related:['outremont-visitor-parking'], reviewed:'August 2026', slug:'le-plateau-mont-royal-visitor-parking', label_en1:'Get a Permit →', label_fr1:'Obtenir un permis →'},
+        {en:'Le Plateau-Mont-Royal Visitor Parking', fr:'Stationnement visiteurs — Le Plateau-Mont-Royal', desc_en:'Free visitor permits for residents, or a paid daily sticker for everyone else.', desc_fr:'Permis visiteurs gratuits pour les résidents, ou une vignette quotidienne payante pour tous les autres.', url:"https://montreal.ca/en/how-to/get-temporary-visitor-parking-sticker?arrondissement=Le%20Plateau-Mont-Royal", what_en:'Use this service when visitors need to park in resident-only areas of Le Plateau-Mont-Royal.', what_fr:'Utilisez ce service lorsque des visiteurs doivent stationner dans les zones réservées aux résidents du Plateau-Mont-Royal.', need_heading_en:'Check the Free Option First', need_heading_fr:'Vérifiez d\'abord l\'option gratuite', need_en:'Plateau residents can obtain up to 50 free daily virtual visitor permits per year through the borough\'s online portal. Nothing to print, nothing to display.', need_fr:'Les résidents du Plateau peuvent obtenir jusqu\'à 50 permis virtuels gratuits pour visiteurs par année, par jour, via le portail en ligne de l\'arrondissement. Rien à imprimer, rien à afficher.', steps_heading_en:'If You Are Not a Resident (or Have Used Your 50)', steps_heading_fr:'Si vous n\'êtes pas résident (ou avez utilisé vos 50 permis)', steps_list_en:['Buy a daily parking sticker at any Montréal parking pay station — the same machines used for parking meters.','Zone PMR01 (all sticker zones in the borough): \$16.','Zone PMR02 (only zones east of Rue Saint-Denis, excluding Saint-Denis itself): \$10.','The sticker is valid for 24 hours from purchase — leave the printed coupon in plain view on the dashboard, street side.'], steps_list_fr:['Achetez une vignette de stationnement quotidienne à n\'importe quelle borne de paiement de Montréal — les mêmes bornes que pour les parcomètres.','Zone PMR01 (toutes les zones à vignette de l\'arrondissement) : 16 \$.','Zone PMR02 (seulement les zones à l\'est de la rue Saint-Denis, celle-ci exclue) : 10 \$.','La vignette est valide 24 heures à partir de l\'achat — laissez le coupon imprimé bien visible sur le tableau de bord, côté rue.'], official_links:[{label_en:'Free Visitor Permit for Residents', label_fr:'Permis visiteur gratuit pour résidents', url:"https://montreal.ca/en/how-to/get-temporary-visitor-parking-sticker?arrondissement=Le%20Plateau-Mont-Royal"},{label_en:'Daily or Monthly Parking Sticker', label_fr:'Vignette de stationnement quotidienne ou mensuelle', url:"https://montreal.ca/en/how-to/get-daily-or-monthly-parking-sticker?arrondissement=PMR"},{label_en:'On-Street Parking', label_fr:'Stationnement sur rue', url:"https://montreal.ca/en/topics/street-parking"}], related:['outremont-visitor-parking'], reviewed:'August 2026', slug:'le-plateau-mont-royal-visitor-parking', label_en1:'Get a Permit →', label_fr1:'Obtenir un permis →'},
         {en:'Waste Collection', fr:'Collecte des matières résiduelles', desc_en:'Garbage, recycling, compost, and bulky item collection schedules.', desc_fr:'Horaires de collecte des ordures, du recyclage, du compost et des objets volumineux.', url:"https://montreal.ca/en/services/collection-schedules", what_en:'Use this page to find your collection schedule and disposal rules.', what_fr:'Utilisez cette page pour trouver votre horaire de collecte et les règles d\'élimination.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Your municipal address.', need_fr:'Votre adresse municipale.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Enter your address to view collection days and instructions for your neighbourhood.', steps_fr:'Entrez votre adresse pour voir les jours de collecte et les instructions pour votre quartier.', official_links:[{label_en:'Waste Collection', label_fr:'Collecte des matières résiduelles', url:"https://montreal.ca/en/services/collection-schedules"}], related:['snow-removal','property-taxes'], reviewed:'July 2026', slug:'waste-collection', label_en1:'View Schedule →', label_fr1:'Voir l\'horaire →'},
         {en:'Snow Removal', fr:'Déneigement', desc_en:'Snow removal operations and temporary parking restrictions.', desc_fr:'Opérations de déneigement et restrictions de stationnement temporaires.', url:"https://montreal.ca/en/snow-removal", what_en:'Check before parking on the street during the winter.', what_fr:'Vérifiez avant de stationner dans la rue pendant l\'hiver.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Your street name or address.', need_fr:'Le nom de votre rue ou votre adresse.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'View current snow removal operations and move your vehicle before posted restrictions begin.', steps_fr:'Consultez les opérations de déneigement actuelles et déplacez votre véhicule avant le début des restrictions affichées.', official_links:[{label_en:'Snow Removal', label_fr:'Déneigement', url:"https://montreal.ca/en/snow-removal"}], related:['waste-collection'], reviewed:'July 2026', slug:'snow-removal', label_en1:'Learn More →', label_fr1:'En savoir plus →'},
         {en:'Property Taxes', fr:'Taxes municipales', desc_en:'View and pay your municipal property taxes.', desc_fr:'Consultez et payez vos taxes municipales.', url:"https://montreal.ca/en/municipal-taxes", what_en:'Use this service if you own property in Montreal.', what_fr:'Utilisez ce service si vous possédez une propriété à Montréal.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Your municipal tax account number or property information.', need_fr:'Votre numéro de compte de taxes municipales ou renseignements de propriété.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'View your account and pay online or through your financial institution.', steps_fr:'Consultez votre compte et payez en ligne ou par votre institution financière.', official_links:[{label_en:'Property Taxes', label_fr:'Taxes municipales', url:"https://montreal.ca/en/municipal-taxes"}], related:['waste-collection','building-permits'], reviewed:'July 2026', slug:'property-taxes', label_en1:'View or Pay Online →', label_fr1:'Consulter ou payer en ligne →'},
@@ -2539,8 +2608,8 @@ function openResourcePopup(slug, opts){
   const body = document.getElementById('resourceShareModalBody');
   body.innerHTML = `
     <div class="site-modal-head">
-      <h2 style="margin:2px 0; font-size:1.1rem;">${title}</h2>
-      <button class="site-modal-close" onclick="closeResourceShareModal()">&times;</button>
+      <h2 id="resourceModalTitle" style="margin:2px 0; font-size:1.1rem;">${title}</h2>
+      <button class="site-modal-close" onclick="closeResourceShareModal()" aria-label="Close">&times;</button>
     </div>
     <div class="site-modal-body">
       ${pendingNotice ? `
@@ -2611,13 +2680,24 @@ function openResourcePopup(slug, opts){
   });
 
   document.getElementById('resourceShareModal').classList.add('open');
+  // Accessibility: move focus into modal so keyboard users & screen readers know it opened
+  const modalBody = document.getElementById('resourceShareModalBody');
+  modalBody.setAttribute('aria-labelledby', 'resourceModalTitle');
+  setTimeout(()=>{ modalBody.focus(); }, 50);
+  // Store trigger element so focus returns correctly on close
+  document.getElementById('resourceShareModal')._triggerEl = document.activeElement;
   if(!opts.skipHistory){
     const newPath = SITE_BASE_PATH + `/resources/${slug}`;
     if(location.pathname !== newPath) history.pushState({page:'resources', slug}, '', newPath);
   }
 }
 function closeResourceShareModal(){
-  document.getElementById('resourceShareModal').classList.remove('open');
+  const modal = document.getElementById('resourceShareModal');
+  modal.classList.remove('open');
+  // Return focus to the element that opened the modal
+  const trigger = modal._triggerEl;
+  if(trigger && typeof trigger.focus === 'function') setTimeout(()=> trigger.focus(), 50);
+  modal._triggerEl = null;
   const resourcesPrefix = SITE_BASE_PATH + '/resources/';
   if(location.pathname.startsWith(resourcesPrefix)) history.pushState({page:'resources'}, '', SITE_BASE_PATH + '/resources');
 }
@@ -2838,6 +2918,13 @@ document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape'){
     document.getElementById('searchResults').style.display = 'none';
     document.getElementById('siteSearch').blur();
+    // Close resource modal if open
+    if(document.getElementById('resourceShareModal').classList.contains('open')){
+      closeResourceShareModal();
+    }
+    // Close site notice popup if open
+    const popup = document.getElementById('sitePopupOverlay');
+    if(popup && popup.classList.contains('open')) popup.classList.remove('open');
   }
 });
 
@@ -2990,8 +3077,9 @@ function goPage(name, opts){
   if(custom){
     document.getElementById('customPageTitle').innerHTML =
       `<span data-en>${custom.title_en}</span><span data-fr>${custom.title_fr}</span>`;
+    const sanitize = (s) => (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(s||'') : (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,'');
     document.getElementById('customPageBody').innerHTML =
-      `<div data-en>${custom.body_en||''}</div><div data-fr>${custom.body_fr||''}</div>`;
+      `<div data-en>${sanitize(custom.body_en)}</div><div data-fr>${sanitize(custom.body_fr)}</div>`;
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-custom').classList.add('active');
     highlightActiveNav(name);
@@ -3007,7 +3095,54 @@ function updateUrlForPage(name){
   if(location.pathname !== path){
     history.pushState({page:name}, '', path);
   }
+  updatePageMeta(name);
 }
+const PAGE_META = {
+  home:         { en:'CJHQ — Jewish Hasidic Council of Quebec',       fr:'CJHQ — Conseil des Juifs Hassidiques du Québec',
+                  desc_en:'The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec\'s Hasidic Jewish communities — practical assistance, advocacy, and resources.',
+                  desc_fr:'Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.' },
+  resources:    { en:'Community Resource Centre — CJHQ',               fr:'Centre de ressources communautaires — CJHQ',
+                  desc_en:'Government services, travel documents, NEXUS, border crossing, immigration, family benefits, healthcare, and municipal resources for Quebec\'s Hasidic Jewish communities.',
+                  desc_fr:'Services gouvernementaux, documents de voyage, NEXUS, passage frontalier, immigration, prestations familiales, soins de santé et ressources municipales.' },
+  'stay-informed':{ en:'News & Updates — CJHQ',                        fr:'Actualités — CJHQ',
+                  desc_en:'Official statements, public announcements, and community information updates from CJHQ — Quebec\'s Hasidic Jewish communities.',
+                  desc_fr:'Déclarations officielles, annonces publiques et mises à jour communautaires du CJHQ.' },
+  contact:      { en:'Contact CJHQ',                                   fr:'Contacter le CJHQ',
+                  desc_en:'Contact the Jewish Hasidic Council of Quebec for assistance, inquiries, media requests, or community matters.',
+                  desc_fr:'Communiquer avec le Conseil des Juifs Hassidiques du Québec pour de l\'aide, des demandes ou des enjeux communautaires.' },
+  about:        { en:'About CJHQ — Jewish Hasidic Council of Quebec',  fr:'À propos du CJHQ — Conseil des Juifs Hassidiques du Québec',
+                  desc_en:'About the Jewish Hasidic Council of Quebec — our mission, values, and how we serve Quebec\'s Hasidic Jewish communities.',
+                  desc_fr:'À propos du Conseil des Juifs Hassidiques du Québec — notre mission, nos valeurs et notre façon de servir les communautés juives hassidiques.' },
+  privacy:      { en:'Privacy Policy — CJHQ',                          fr:'Politique de confidentialité — CJHQ',
+                  desc_en:'Privacy Policy of the Jewish Hasidic Council of Quebec.',
+                  desc_fr:'Politique de confidentialité du Conseil des Juifs Hassidiques du Québec.' },
+  terms:        { en:'Terms of Use — CJHQ',                            fr:'Conditions d\'utilisation — CJHQ',
+                  desc_en:'Terms of Use for the CJHQ website.',
+                  desc_fr:'Conditions d\'utilisation du site Web du CJHQ.' },
+  accessibility:{ en:'Accessibility Statement — CJHQ',                 fr:'Déclaration d\'accessibilité — CJHQ',
+                  desc_en:'Accessibility Statement for the CJHQ website.',
+                  desc_fr:'Déclaration d\'accessibilité du site Web du CJHQ.' },
+};
+function updatePageMeta(name){
+  const isFr = document.documentElement.classList.contains('lang-fr');
+  const meta = PAGE_META[name] || PAGE_META['home'];
+  const title = isFr ? meta.fr : meta.en;
+  const desc  = isFr ? meta.desc_fr : meta.desc_en;
+  const url   = location.origin + pathForPage(name);
+  document.getElementById('pageTitle').textContent = title;
+  document.title = title;
+  const setMeta = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
+  setMeta('ogTitle', title);
+  setMeta('ogDescription', desc);
+  setMeta('ogUrl', url);
+  setMeta('twitterTitle', title);
+  setMeta('twitterDescription', desc);
+  const canon = document.getElementById('canonicalTag');
+  if(canon) canon.setAttribute('href', url);
+  // Also update on lang switch
+  document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', desc));
+}
+
 function highlightActiveNav(name){
   document.querySelectorAll('#mainNav button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
   document.querySelectorAll('#mobileDrawerNav a').forEach(a=>a.classList.toggle('active', a.dataset.page===name));
@@ -3058,6 +3193,12 @@ function setLang(lang){
   const drawerSearch = document.getElementById('drawerSearch');
   if(drawerSearch) drawerSearch.placeholder = lang==='fr' ? drawerSearch.dataset.frPh : drawerSearch.dataset.enPh;
   translateCtctForm(lang);
+  // Refresh per-page meta tags for the new language
+  const activePage = document.querySelector('.page.active');
+  if(activePage){
+    const pageName = activePage.id.replace('page-','');
+    if(typeof updatePageMeta === 'function') updatePageMeta(pageName);
+  }
 }
 // Translates the Constant Contact signup form's labels/notice/button between
 // English and French. Stores each element's original English text in a
@@ -3347,7 +3488,8 @@ async function renderPublicNotices(){
       bannerEl.style.display = 'block';
       const title = isFr ? banner.title_fr : banner.title_en;
       const body = isFr ? banner.body_fr : banner.body_en;
-      bannerEl.innerHTML = `${title?`<b>${title}</b>`:''}${body||''}<button class="notice-close" onclick="dismissBanner('${banner.id}')">&times;</button>`;
+      const sp = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize : (s => (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,''));
+      bannerEl.innerHTML = `${title?`<b>${sp(title)}</b>`:''}${sp(body)}<button class="notice-close" onclick="dismissBanner('${banner.id}')">&times;</button>`;
     } else {
       bannerEl.style.display = 'none';
     }
@@ -3360,10 +3502,11 @@ async function renderPublicNotices(){
     if(overlay && body){
       const title = isFr ? popup.title_fr : popup.title_en;
       const msg = isFr ? popup.body_fr : popup.body_en;
+      const sp2 = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize : (s => (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,''));
       body.innerHTML = `
-        <div class="site-modal-head"><h2 style="margin:2px 0;">${title||''}</h2>
+        <div class="site-modal-head"><h2 style="margin:2px 0;">${sp2(title)||''}</h2>
           <button class="site-modal-close" onclick="closeSitePopup('${popup.id}')">&times;</button></div>
-        <div class="site-modal-body"><div class="site-modal-section"><p>${msg||''}</p></div></div>`;
+        <div class="site-modal-body"><div class="site-modal-section"><p>${sp2(msg)||''}</p></div></div>`;
       overlay.classList.add('open');
     }
   }
@@ -4198,14 +4341,33 @@ async function publishChangeNotice(slug){
     renderCustomPagesList();
   });
 
+  // PIN rate-limiting: max 5 attempts within 15 minutes, then 15-minute lockout
+  let __pinAttempts = 0, __pinLockedUntil = 0;
   loginBtn.addEventListener('click', ()=>{
+    const now = Date.now();
+    if(now < __pinLockedUntil){
+      const mins = Math.ceil((__pinLockedUntil - now) / 60000);
+      document.getElementById('adminLoginError').textContent = `Too many incorrect attempts. Please wait ${mins} minute${mins > 1 ? 's' : ''} before trying again.`;
+      document.getElementById('adminLoginError').style.display = 'block';
+      return;
+    }
     const val = document.getElementById('adminPinInput').value;
     if(val === ADMIN_PIN){
+      __pinAttempts = 0;
       sessionStorage.setItem('cjhq-admin-unlocked', '1');
       document.getElementById('adminLoginError').style.display = 'none';
       showAdminPanel();
     } else {
+      __pinAttempts++;
+      if(__pinAttempts >= 5){
+        __pinLockedUntil = now + 15 * 60 * 1000;
+        __pinAttempts = 0;
+        document.getElementById('adminLoginError').textContent = 'Too many incorrect attempts. Access locked for 15 minutes.';
+      } else {
+        document.getElementById('adminLoginError').textContent = `Incorrect PIN. ${5 - __pinAttempts} attempt${5 - __pinAttempts !== 1 ? 's' : ''} remaining.`;
+      }
       document.getElementById('adminLoginError').style.display = 'block';
+      document.getElementById('adminPinInput').value = '';
     }
   });
 
