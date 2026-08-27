@@ -1700,6 +1700,23 @@
         <label for="adminPasswordInput" style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Password</label>
         <input type="password" id="adminPasswordInput" autocomplete="current-password" style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:1rem; margin-bottom:10px;">
         <button class="btn dark" id="adminLoginBtn" style="width:100%;">Sign In</button>
+
+        <div style="display:flex; align-items:center; gap:10px; margin:14px 0 12px;">
+          <span style="flex:1; height:1px; background:var(--line);"></span>
+          <span style="font-size:.78rem; color:var(--muted);">or</span>
+          <span style="flex:1; height:1px; background:var(--line);"></span>
+        </div>
+
+        <button class="btn outline" id="adminGoogleBtn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; color:var(--ink); border-color:var(--line);">
+          <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true" style="flex-shrink:0;">
+            <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.3 6.6v5.5h7C42.6 36.7 45.1 31.1 45.1 24.5z"/>
+            <path fill="#34A853" d="M24 46c5.8 0 10.7-1.9 14.3-5.2l-7-5.5c-1.9 1.3-4.4 2.1-7.3 2.1-5.6 0-10.4-3.8-12.1-8.9H4.7v5.6C8.3 41.3 15.6 46 24 46z"/>
+            <path fill="#FBBC05" d="M11.9 28.5c-.4-1.3-.7-2.7-.7-4.5s.3-3.2.7-4.5v-5.6H4.7C3.1 17.1 2.2 20.4 2.2 24s.9 6.9 2.5 10.1l7.2-5.6z"/>
+            <path fill="#EA4335" d="M24 9.5c3.2 0 6 1.1 8.2 3.2l6.2-6.2C34.7 3 29.8 1 24 1 15.6 1 8.3 5.7 4.7 13.9l7.2 5.6C13.6 14.4 18.4 9.5 24 9.5z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </button>
+
         <p id="adminLoginError" style="color:#A23B3B; font-size:.85rem; margin-top:8px; display:none;"></p>
       </div>
 
@@ -4860,7 +4877,40 @@ async function publishChangeNotice(slug){
     }
   }
 
+  async function attemptGoogleSignIn(){
+    if(!firebaseReady || !fbAuth){
+      showLoginError('Cannot reach the sign-in service. Check your connection and try again.');
+      return;
+    }
+    const btn = document.getElementById('adminGoogleBtn');
+    btn.disabled = true;
+    try{
+      const provider = new window.__fbAuth.GoogleAuthProvider();
+      // Always ask which account to use. Without this, a browser signed into a
+      // personal Google account signs in with it silently.
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await window.__fbAuth.signInWithPopup(fbAuth, provider);
+      document.getElementById('adminLoginError').style.display = 'none';
+      // onAuthStateChanged opens the panel.
+    }catch(err){
+      const code = (err && err.code) || '';
+      let msg;
+      if(code === 'auth/popup-blocked')                    msg = 'Your browser blocked the sign-in window. Allow pop-ups for this site and try again.';
+      else if(code === 'auth/popup-closed-by-user' ||
+              code === 'auth/cancelled-popup-request')     msg = '';   // user backed out; not an error
+      else if(code === 'auth/operation-not-allowed')       msg = 'Google sign-in is not enabled for this project yet.';
+      else if(code === 'auth/unauthorized-domain')         msg = 'This domain is not authorised for Google sign-in. Add it in Firebase Authentication settings.';
+      else if(code === 'auth/network-request-failed')      msg = 'Network error. Check your connection and try again.';
+      else msg = 'Google sign-in did not complete. Please try again.';
+      if(msg) showLoginError(msg);
+      if(code) console.warn('[CJHQ] Google sign-in:', code);
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
   loginBtn.addEventListener('click', attemptAdminSignIn);
+  document.getElementById('adminGoogleBtn').addEventListener('click', attemptGoogleSignIn);
   ['adminEmailInput','adminPasswordInput'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); attemptAdminSignIn(); } });
