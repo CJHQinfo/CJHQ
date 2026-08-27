@@ -3076,11 +3076,18 @@ function renderDynamicFields(index){
   const group = contactFieldGroups[index];
   wrap.innerHTML = group.fields.map(f=>{
     const req = f.required ? 'required' : '';
+    // The visible <label> elements were not programmatically associated with
+    // their inputs (no for/id pair), so a screen reader announced six
+    // unlabelled fields on the contact form. Pairing them changes nothing
+    // visible: same labels, same text, same markup shape, same styling.
+    // Both the EN and FR label point at the same input; only one is displayed
+    // at a time, and a display:none label is excluded from the accessible name.
+    const fid = 'cf-' + String(f.name).replace(/[^a-zA-Z0-9_-]/g, '');
     const input = f.type === 'textarea'
-      ? `<textarea name="${f.name}" ${req}></textarea>`
-      : `<input type="${f.type}" name="${f.name}" ${req}>`;
+      ? `<textarea id="${fid}" name="${f.name}" ${req}></textarea>`
+      : `<input id="${fid}" type="${f.type}" name="${f.name}" ${req}>`;
     return `<div class="form-group">
-      <label data-en>${f.en}</label><label data-fr>${f.fr}</label>
+      <label for="${fid}" data-en>${f.en}</label><label for="${fid}" data-fr>${f.fr}</label>
       ${input}
     </div>`;
   }).join('');
