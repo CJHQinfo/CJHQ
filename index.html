@@ -2607,6 +2607,31 @@ const CONTENT_MANIFEST = [
 const RESOURCE_BY_SLUG = {};
 let REVIEWED_OVERRIDES = {};
 let RESOURCE_OVERRIDES_CACHE = {};
+
+/* ---------- Untrusted-value helpers ----------
+   Resource overrides, pending notices, custom pages and partner records all
+   come from Firestore. Anything Firestore supplies is treated as untrusted:
+   escaped before it reaches innerHTML, and scheme-checked before it is used
+   as a navigation target.
+
+   Allowed: http, https, mailto, tel. Rejected: javascript: and data: execute
+   in the page or the opened tab, file: can probe the local disk. mailto: and
+   tel: cannot execute anything and are genuinely in use — the Outremont
+   visitor-parking resource links to a City of Montreal mailto: address with a
+   prefilled subject and body. All 143 real URLs pass unchanged. */
+function cjhqEscapeHtml(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function cjhqSafeUrl(u){
+  if(!u) return null;
+  try{
+    const parsed = new URL(String(u), location.href);
+    const ok = ['http:', 'https:', 'mailto:', 'tel:'];
+    return ok.includes(parsed.protocol) ? parsed.href : null;
+  }catch(err){ return null; }
+}
 let HIDDEN_PAGES_CACHE = {};
 let CUSTOM_PAGES_CACHE = {};
 let PENDING_NOTICES = {};
@@ -2722,7 +2747,7 @@ function openResourcePopup(slug, opts){
     <div class="site-modal-body">
       ${pendingNotice ? `
       <div class="site-modal-section res-pending-notice">
-        <span data-en>⚠️ Heads up: ${pendingNotice.notice_en}</span><span data-fr>⚠️ À noter : ${pendingNotice.notice_fr}</span>
+        <span data-en>⚠️ Heads up: ${cjhqEscapeHtml(pendingNotice.notice_en)}</span><span data-fr>⚠️ À noter : ${cjhqEscapeHtml(pendingNotice.notice_fr)}</span>
       </div>` : ''}
       <div class="site-modal-section">
         <p class="res-popup-what">${what}</p>
@@ -2757,7 +2782,8 @@ function openResourcePopup(slug, opts){
       <div class="site-modal-section res-popup-block">
         <h3><span data-en>Official Links</span><span data-fr>Liens officiels</span></h3>
         <ul class="res-popup-list res-official-links">
-          ${officialLinks.map(l => `<li><a href="${l.url}" target="_blank" rel="noopener">${isFr ? l.label_fr : l.label_en}</a></li>`).join('')}
+          ${officialLinks.map(l => { const u = cjhqSafeUrl(l.url); const t = cjhqEscapeHtml(isFr ? l.label_fr : l.label_en);
+             return u ? `<li><a href="${cjhqEscapeHtml(u)}" target="_blank" rel="noopener noreferrer">${t}</a></li>` : `<li>${t}</li>`; }).join('')}
         </ul>
       </div>` : ''}
       ${related.length ? `
@@ -2779,10 +2805,16 @@ function openResourcePopup(slug, opts){
     </div>`;
   body.querySelector('[data-popup-open1]').addEventListener('click', ()=>{
     if(isInsurance){ closeResourceShareModal(); showInsuranceDisclaimer(it.url); return; }
-    window.open(it.url, '_blank', 'noopener');
+    const dest1 = cjhqSafeUrl(it.url);
+    if(dest1) window.open(dest1, '_blank', 'noopener');
+    else console.warn('Blocked unsafe resource URL for', slug);
   });
   const btn2 = body.querySelector('[data-popup-open2]');
-  if(btn2) btn2.addEventListener('click', ()=>{ window.open(it.url2, '_blank', 'noopener'); });
+  if(btn2) btn2.addEventListener('click', ()=>{
+    const dest2 = cjhqSafeUrl(it.url2);
+    if(dest2) window.open(dest2, '_blank', 'noopener');
+    else console.warn('Blocked unsafe secondary URL for', slug);
+  });
   body.querySelectorAll('[data-related-slug]').forEach(btn=>{
     btn.addEventListener('click', ()=>{ openResourcePopup(btn.dataset.relatedSlug); });
   });
@@ -2902,7 +2934,9 @@ function closeInsuranceModal(){
 }
 function continueToInsuranceProvider(){
   const url = document.getElementById('insuranceModalOverlay').dataset.targetUrl;
-  window.open(url, '_blank', 'noopener');
+  const safeDest = cjhqSafeUrl(url);
+  if(safeDest) window.open(safeDest, '_blank', 'noopener');
+  else console.warn('Blocked unsafe insurance destination');
   closeInsuranceModal();
 }
 
@@ -3218,7 +3252,7 @@ function goPage(name, opts){
   const custom = CUSTOM_PAGES_CACHE[name];
   if(custom){
     document.getElementById('customPageTitle').innerHTML =
-      `<span data-en>${custom.title_en}</span><span data-fr>${custom.title_fr}</span>`;
+      `<span data-en>${cjhqEscapeHtml(custom.title_en)}</span><span data-fr>${cjhqEscapeHtml(custom.title_fr)}</span>`;
     const sanitize = (s) => (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(s||'') : (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,'');
     document.getElementById('customPageBody').innerHTML =
       `<div data-en>${sanitize(custom.body_en)}</div><div data-fr>${sanitize(custom.body_fr)}</div>`;
