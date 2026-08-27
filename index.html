@@ -8,6 +8,11 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" id="canonicalTag" href="https://cjhq.org/">
 
+<!-- Favicon. favicon.ico carries 16/32/48px; browsers also request /favicon.ico
+     from the site root automatically, so this works even without these tags. -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.ico">
+
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CJHQ — Jewish Hasidic Council of Quebec">
@@ -596,6 +601,102 @@
 </style>
 <!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!--
+  FIRST-VISIT LANGUAGE DEFAULT
+  Runs before <body> parses, so the page paints in the right language with no
+  flash. It only sets the class the stylesheet already uses (html.lang-fr) plus
+  the lang attribute; setLang() below re-applies everything else once the
+  header controls exist.
+
+  Priority, exactly as specified:
+    1. Explicit saved choice (localStorage "cjhq_language")
+    2. Edge geography, if a Cloudflare Worker has set a cjhq_geo cookie
+    3. Browser timezone (country) + browser language (community signal)
+    4. English
+
+  No IP address is read, stored, or sent anywhere. Steps 3 and 4 make no
+  network request at all. Every step is wrapped so that a failure anywhere
+  falls through to English rather than blocking the page.
+-->
+<script>
+(function(){
+  var KEY = 'cjhq_language';
+
+  // Canadian IANA timezones, including deprecated aliases still emitted by
+  // some browsers. Country-level only - a timezone cannot identify a borough.
+  var CA_TZ = ['America/Toronto','America/Montreal','America/Vancouver',
+    'America/Edmonton','America/Winnipeg','America/Halifax','America/St_Johns',
+    'America/Regina','America/Moncton','America/Glace_Bay','America/Goose_Bay',
+    'America/Iqaluit','America/Whitehorse','America/Yellowknife','America/Inuvik',
+    'America/Dawson_Creek','America/Fort_Nelson','America/Rankin_Inlet',
+    'America/Resolute','America/Cambridge_Bay','America/Creston','America/Dawson',
+    'America/Atikokan','America/Blanc-Sablon','America/Nipigon','America/Coral_Harbour',
+    'America/Rainy_River','America/Thunder_Bay','America/Swift_Current','America/Pangnirtung'];
+
+  function saved(){
+    try{
+      var v = localStorage.getItem(KEY);
+      return (v === 'en' || v === 'fr') ? v : null;
+    }catch(e){ return null; }
+  }
+
+  // Only present if the optional Cloudflare Worker is deployed. Absent by
+  // default - the site does not depend on it.
+  function edgeGeo(){
+    try{
+      var m = document.cookie.match(/(?:^|;\s*)cjhq_geo=([^;]*)/);
+      if(!m) return null;
+      var g = JSON.parse(decodeURIComponent(m[1]));
+      return (g && typeof g.country === 'string') ? g : null;
+    }catch(e){ return null; }
+  }
+
+  function fromEdge(g){
+    if(g.country !== 'CA') return 'en';              // outside Canada
+    var city = String(g.city || '').toLowerCase();
+    if(city.indexOf('outremont') > -1) return 'en';  // Outremont
+    if(city.indexOf('plateau')   > -1) return 'en';  // Le Plateau-Mont-Royal
+    return 'fr';                                     // rest of Canada
+  }
+
+  function fromBrowser(){
+    var tz = '';
+    try{ tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; }catch(e){}
+    if(!tz || CA_TZ.indexOf(tz) === -1) return 'en'; // unknown or non-Canadian
+
+    // In Canada. A borough cannot be resolved client-side, so the browser's
+    // own language order stands in for the Outremont / Plateau exception -
+    // see the notes in the delivery report.
+    var langs = [];
+    try{
+      langs = (navigator.languages && navigator.languages.length)
+        ? navigator.languages : [navigator.language || ''];
+    }catch(e){}
+    for(var i = 0; i < langs.length; i++){
+      var l = String(langs[i] || '').toLowerCase();
+      if(l.indexOf('fr') === 0) return 'fr';
+      if(l.indexOf('en') === 0) return 'en';
+    }
+    return 'fr';                                     // Canada, no clear signal
+  }
+
+  var lang = 'en';
+  try{
+    var s = saved();
+    if(s){ lang = s; }
+    else {
+      var g = edgeGeo();
+      lang = g ? fromEdge(g) : fromBrowser();
+    }
+  }catch(e){ lang = 'en'; }
+
+  window.__CJHQ_LANG = (lang === 'fr') ? 'fr' : 'en';
+  if(window.__CJHQ_LANG === 'fr'){
+    document.documentElement.classList.add('lang-fr');
+    document.documentElement.lang = 'fr';
+  }
+})();
+</script>
 </head>
 <body>
 <a href="#mainContent" class="skip-to-main" data-en>Skip to main content</a>
@@ -1871,6 +1972,7 @@
         <div class="social-row" style="margin-top:16px;">
           <a class="social-icon" id="footerFacebookLink" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener" title="Facebook — @CJHQinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2C11.54 2 9.68 3.66 9.68 6.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.03.29-1.73 1.76-1.73Z"/></svg></a>
           <a class="social-icon" id="footerXLink" href="https://x.com/CJHQinfo" target="_blank" rel="noopener" title="X (Twitter) — @CJHQinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg></a>
+          <a class="social-icon" id="footerInstagramLink" href="https://www.instagram.com/cjhqinfo/" target="_blank" rel="noopener" title="Instagram — @cjhqinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
         </div>
       </div>
 
@@ -3349,10 +3451,22 @@ function translateCtctForm(lang){
   }
   window.__ctctTranslateTimers = [800, 1800, 3000, 5000].map(delay => setTimeout(apply, delay));
 }
-document.getElementById('btnEN').addEventListener('click', ()=>setLang('en'));
-document.getElementById('btnFR').addEventListener('click', ()=>setLang('fr'));
-document.getElementById('drawerBtnEN').addEventListener('click', ()=>setLang('en'));
-document.getElementById('drawerBtnFR').addEventListener('click', ()=>setLang('fr'));
+// Persist ONLY on an explicit click. A geographic first-visit default is
+// deliberately not written to storage, so "saved" always means "the visitor
+// chose this" and never "we guessed this once".
+function chooseLang(lang){
+  setLang(lang);
+  try{ localStorage.setItem('cjhq_language', lang); }catch(e){}
+}
+document.getElementById('btnEN').addEventListener('click', ()=>chooseLang('en'));
+document.getElementById('btnFR').addEventListener('click', ()=>chooseLang('fr'));
+document.getElementById('drawerBtnEN').addEventListener('click', ()=>chooseLang('en'));
+document.getElementById('drawerBtnFR').addEventListener('click', ()=>chooseLang('fr'));
+
+// Sync the toggle buttons, search placeholders and meta tags with whatever the
+// head script already applied. The class and lang attribute are set before
+// first paint; this only catches up the controls, so there is no flash.
+setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
 
 // ---------- MOBILE DRAWER ----------
 (function initMobileDrawer(){
@@ -3620,6 +3734,7 @@ function applySettingsToSite(s){
   if(s.addr_fr){ const e1=document.getElementById('footerAddrFr'), e2=document.getElementById('contactAddrFr'); if(e1) e1.innerHTML=s.addr_fr; if(e2) e2.innerHTML=s.addr_fr; }
   if(s.facebook){ const el=document.getElementById('footerFacebookLink'); if(el) el.href=s.facebook; }
   if(s.x_url){ const el=document.getElementById('footerXLink'); if(el) el.href=s.x_url; }
+  if(s.instagram){ const el=document.getElementById('footerInstagramLink'); if(el) el.href=s.instagram; }
   if(s.logo_url){ const el=document.getElementById('brandLogoImg'); if(el) el.src=s.logo_url; }
   if(s.color_primary){ document.documentElement.style.setProperty('--ink', s.color_primary); document.documentElement.style.setProperty('--burgundy', s.color_primary); }
   if(s.color_accent){ document.documentElement.style.setProperty('--bronze', s.color_accent); }
