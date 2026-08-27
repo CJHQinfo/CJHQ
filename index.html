@@ -11,6 +11,31 @@
 <!-- Favicon. favicon.ico carries 16/32/48px; browsers also request /favicon.ico
      from the site root automatically, so this works even without these tags. -->
 <link rel="icon" href="/favicon.ico" sizes="any">
+
+<!-- Google Analytics 4. The measurement ID is public by design (it appears in
+     page source on every GA site) and is not a credential.
+
+     send_page_view is false because this is a single-page app: the initial
+     automatic page_view would fire before the router has resolved the path and
+     before updatePageMeta() has set the title, recording the wrong page. Views
+     are sent explicitly from trackPageView() instead, after the title is set.
+     Turn OFF Enhanced Measurement > "Page changes based on browser history
+     events" in the GA console, or every navigation is counted twice. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-902DMP2V4W', {
+    send_page_view: false,
+    // Stated in the Privacy Policy: advertising features and cross-site
+    // profiling are off. These flags enforce that from the page itself, so the
+    // policy stays true even if a console setting is changed later.
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+    anonymize_ip: true
+  });
+</script>
 <link rel="apple-touch-icon" href="/favicon.ico">
 
 <!-- Open Graph -->
@@ -1383,12 +1408,29 @@
         <span data-fr>Témoins (cookies)</span>
       </h2>
       <p data-cid="privacy-14">
-        <span data-en>This website may use cookies or similar technologies to improve functionality and better understand how visitors use the site.</span>
-        <span data-fr>Ce site Web peut utiliser des témoins ou des technologies similaires afin d'améliorer ses fonctionnalités et de mieux comprendre la façon dont les visiteurs l'utilisent.</span>
+        <span data-en>This website uses cookies and similar technologies for two purposes: to remember your language choice, and for the website analytics described below. It does not use advertising cookies.</span>
+        <span data-fr>Ce site Web utilise des témoins et des technologies similaires à deux fins : retenir votre choix de langue et produire les statistiques de fréquentation décrites ci-dessous. Il n'utilise aucun témoin publicitaire.</span>
       </p>
       <p data-cid="privacy-15">
         <span data-en>Visitors may adjust their browser settings to manage or disable cookies.</span>
         <span data-fr>Les visiteurs peuvent ajuster les paramètres de leur navigateur afin de gérer ou de désactiver les témoins.</span>
+      </p>
+
+      <h2 data-cid="privacy-analytics-1" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Website Analytics</span>
+        <span data-fr>Statistiques de fréquentation du site Web</span>
+      </h2>
+      <p data-cid="privacy-analytics-2">
+        <span data-en>This website uses Google Analytics, a web analytics service provided by Google, to understand how visitors use the site. It records information such as the pages viewed, the approximate region a visit comes from, the type of device and browser used, and how visitors arrived at the site.</span>
+        <span data-fr>Ce site Web utilise Google Analytics, un service d'analyse Web fourni par Google, afin de comprendre comment les visiteurs utilisent le site. Ce service enregistre des renseignements tels que les pages consultées, la région approximative d'où provient la visite, le type d'appareil et de navigateur utilisé, ainsi que la façon dont les visiteurs sont arrivés sur le site.</span>
+      </p>
+      <p data-cid="privacy-analytics-3">
+        <span data-en>CJHQ uses this information only to improve the website and to understand which community resources are most needed. We do not use it to identify individual visitors, and we do not combine it with any information you send us through the contact form or the newsletter.</span>
+        <span data-fr>Le CJHQ utilise ces renseignements uniquement pour améliorer le site Web et pour comprendre quelles ressources communautaires sont les plus utiles. Nous ne les utilisons pas pour identifier des visiteurs en particulier, et nous ne les combinons pas avec les renseignements que vous nous transmettez par le formulaire de contact ou l'infolettre.</span>
+      </p>
+      <p data-cid="privacy-analytics-4">
+        <span data-en>Google Analytics is configured so that advertising features and cross-site profiling are turned off. Information is processed by Google and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block analytics through their browser settings or by installing Google's opt-out browser add-on.</span>
+        <span data-fr>Google Analytics est configuré de façon à désactiver les fonctions publicitaires et le profilage entre sites. Les renseignements sont traités par Google et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent bloquer les statistiques au moyen des paramètres de leur navigateur ou en installant le module complémentaire de désactivation offert par Google.</span>
       </p>
 
       <h2 data-cid="privacy-16" style="font-size:1.2rem; margin-top:36px;">
@@ -2564,8 +2606,12 @@ const CONTENT_MANIFEST = [
   {cid:'privacy-11', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Individuals who subscribe to Community Information Updates may receive', default_en:'Individuals who subscribe to Community Information Updates may receive important community information, announcements, travel updates, government information, and other relevant communications.', default_fr:'Les personnes abonnées à l\'infolettre communautaire peuvent recevoir de l\'information communautaire importante, des annonces, des mises à jour sur les voyages, de l\'information gouvernementale et d\'autres communications pertinentes.'},
   {cid:'privacy-12', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Subscribers may unsubscribe at any time using the unsubscribe link inc', default_en:'Subscribers may unsubscribe at any time using the unsubscribe link included in each email.', default_fr:'Les abonnés peuvent se désabonner en tout temps à l\'aide du lien de désabonnement inclus dans chaque courriel.'},
   {cid:'privacy-13', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Cookies', default_en:'Cookies', default_fr:'Témoins (cookies)'},
-  {cid:'privacy-14', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website may use cookies or similar technologies to improve functi', default_en:'This website may use cookies or similar technologies to improve functionality and better understand how visitors use the site.', default_fr:'Ce site Web peut utiliser des témoins ou des technologies similaires afin d\'améliorer ses fonctionnalités et de mieux comprendre la façon dont les visiteurs l\'utilisent.'},
+  {cid:'privacy-14', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website uses cookies and similar technologies for two purposes', default_en:'This website uses cookies and similar technologies for two purposes: to remember your language choice, and for the website analytics described below. It does not use advertising cookies.', default_fr:"Ce site Web utilise des témoins et des technologies similaires à deux fins : retenir votre choix de langue et produire les statistiques de fréquentation décrites ci-dessous. Il n'utilise aucun témoin publicitaire."},
   {cid:'privacy-15', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Visitors may adjust their browser settings to manage or disable cookie', default_en:'Visitors may adjust their browser settings to manage or disable cookies.', default_fr:'Les visiteurs peuvent ajuster les paramètres de leur navigateur afin de gérer ou de désactiver les témoins.'},
+  {cid:'privacy-analytics-1', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Website Analytics', default_en:'Website Analytics', default_fr:'Statistiques de fréquentation du site Web'},
+  {cid:'privacy-analytics-2', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website uses Google Analytics, a web analytics service provided b', default_en:'This website uses Google Analytics, a web analytics service provided by Google, to understand how visitors use the site. It records information such as the pages viewed, the approximate region a visit comes from, the type of device and browser used, and how visitors arrived at the site.', default_fr:"Ce site Web utilise Google Analytics, un service d'analyse Web fourni par Google, afin de comprendre comment les visiteurs utilisent le site. Ce service enregistre des renseignements tels que les pages consultées, la région approximative d'où provient la visite, le type d'appareil et de navigateur utilisé, ainsi que la façon dont les visiteurs sont arrivés sur le site."},
+  {cid:'privacy-analytics-3', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ uses this information only to improve the website and to understan', default_en:'CJHQ uses this information only to improve the website and to understand which community resources are most needed. We do not use it to identify individual visitors, and we do not combine it with any information you send us through the contact form or the newsletter.', default_fr:"Le CJHQ utilise ces renseignements uniquement pour améliorer le site Web et pour comprendre quelles ressources communautaires sont les plus utiles. Nous ne les utilisons pas pour identifier des visiteurs en particulier, et nous ne les combinons pas avec les renseignements que vous nous transmettez par le formulaire de contact ou l'infolettre."},
+  {cid:'privacy-analytics-4', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Google Analytics is configured so that advertising features and cross-s', default_en:"Google Analytics is configured so that advertising features and cross-site profiling are turned off. Information is processed by Google and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block analytics through their browser settings or by installing Google's opt-out browser add-on.", default_fr:"Google Analytics est configuré de façon à désactiver les fonctions publicitaires et le profilage entre sites. Les renseignements sont traités par Google et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent bloquer les statistiques au moyen des paramètres de leur navigateur ou en installant le module complémentaire de désactivation offert par Google."},
   {cid:'privacy-16', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Third-Party Links', default_en:'Third-Party Links', default_fr:'Liens vers des sites tiers'},
   {cid:'privacy-17', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Our website contains links to official government websites and other t', default_en:'Our website contains links to official government websites and other trusted resources.', default_fr:'Notre site Web contient des liens vers des sites gouvernementaux officiels et d\'autres ressources fiables.'},
   {cid:'privacy-18', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ is not responsible for the privacy practices or content of extern', default_en:'CJHQ is not responsible for the privacy practices or content of external websites.', default_fr:'Le CJHQ n\'est pas responsable des pratiques de confidentialité ou du contenu des sites externes.'},
@@ -3315,7 +3361,7 @@ function goPage(name, opts){
     highlightActiveNav(name);
     if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
     if(!opts.skipHistory) updateUrlForPage(name);
-    else updatePageMeta(name);
+    else { updatePageMeta(name); trackPageView(); }
     return;
   }
   // Not a built-in page -> check custom pages
@@ -3331,19 +3377,34 @@ function goPage(name, opts){
     highlightActiveNav(name);
     if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
     if(!opts.skipHistory) updateUrlForPage(name);
-    else updatePageMeta(name);
+    else { updatePageMeta(name); trackPageView(); }
     return;
   }
   // Nothing matches -> 404
   if(opts.deferUnknown){ window.__routeDeferred = true; return; }
   if(typeof show404 === 'function') show404(name, opts);
 }
+// Report a view to GA4 after the URL and the title are both settled. Wrapped
+// so an ad blocker, an offline visitor or a failed gtag load can never break
+// navigation - analytics must not be able to take the site down.
+function trackPageView(){
+  try{
+    if(typeof gtag !== 'function') return;
+    gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: location.href,
+      page_path: location.pathname
+    });
+  }catch(e){ /* analytics is never allowed to break routing */ }
+}
+
 function updateUrlForPage(name){
   const path = pathForPage(name);
   if(location.pathname !== path){
     history.pushState({page:name}, '', path);
   }
   updatePageMeta(name);
+  trackPageView();
 }
 const PAGE_META = {
   // Assembled verbatim from the 404 page's existing approved copy: the eyebrow
@@ -4909,6 +4970,7 @@ function show404(attemptedName, opts){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-404').classList.add('active');
   highlightActiveNav('404');
+  trackPageView();
   updatePageMeta('404');
   if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
   document.getElementById('reportBrokenLinkStatus').style.display = 'none';
