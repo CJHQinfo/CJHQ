@@ -1,45 +1,105 @@
 rules_version = '2';
 
 // CJHQ website — Firestore security rules
+// Revised 26 Aug 2026. Supersedes the earlier version, which omitted the two
+// collections written by ordinary visitors and would have blocked the contact
+// form and the broken-link reporter.
 //
-// Model: the site is a public, read-only website with a small private admin
-// panel. Everything the public sees must be readable by anyone; nothing should
-// be writable by anyone who is not signed in.
+// Collection list derived by tracing every call site of fetchCollection(),
+// saveToCollection() and deleteFromCollection(), plus the direct fs.setDoc()
+// calls for 'settings/site' and 'resources_master'. 16 collections in total.
 //
-// This is the minimum secure rule set for the current architecture. It does not
-// introduce roles, per-document ownership, or custom claims, because the app
-// has a single trusted editor group and does not need them.
+// Model: a public, read-only website with a small private admin panel, plus two
+// inboxes that anyone may write to but only staff may read.
 //
-// IMPORTANT: publishing these rules will stop the admin panel from saving until
-// Firebase Authentication is wired into it. The admin panel currently gates on
-// a client-side PIN, which Firestore cannot see. See CJHQ_Firestore_Security.md.
+// IMPORTANT: the admin panel gates on a client-side PIN. Firestore cannot see
+// that PIN. Until Firebase Authentication is wired into the admin panel,
+// request.auth is null for every request from this site, and publishing these
+// rules will stop admin saves from working. See CJHQ_Firestore_Security.md.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Collections that render on the public site.
-    // Public read is required. Writes require an authenticated session.
-    match /notices/{doc}                 { allow read: if true; allow write: if request.auth != null; }
-    match /partners/{doc}                { allow read: if true; allow write: if request.auth != null; }
-    match /partner_overrides/{doc}       { allow read: if true; allow write: if request.auth != null; }
-    match /resources/{doc}               { allow read: if true; allow write: if request.auth != null; }
-    match /resource_overrides/{doc}      { allow read: if true; allow write: if request.auth != null; }
-    match /resource_meta/{doc}           { allow read: if true; allow write: if request.auth != null; }
-    match /events/{doc}                  { allow read: if true; allow write: if request.auth != null; }
-    match /settings/{doc}                { allow read: if true; allow write: if request.auth != null; }
-    match /content_overrides/{doc}       { allow read: if true; allow write: if request.auth != null; }
-    match /custom_pages/{doc}            { allow read: if true; allow write: if request.auth != null; }
-    match /page_settings/{doc}           { allow read: if true; allow write: if request.auth != null; }
+    // ---- helpers -------------------------------------------------------
+    function signedIn() {
+      return request.auth != null;
+    }
 
-    // Internal / operational collections. Not rendered publicly.
-    match /reviewed_overrides/{doc}      { allow read: if request.auth != null; allow write: if request.auth != null; }
-    match /pending_change_notices/{doc}  { allow read: if request.auth != null; allow write: if request.auth != null; }
-    match /link_audits/{doc}             { allow read: if request.auth != null; allow write: if request.auth != null; }
+    // Loose sanity cap on anonymous submissions. Generous enough that no
+    // legitimate contact form or error report can hit it, tight enough to
+    // stop a trivially malformed payload. It does NOT stop volume abuse —
+    // see the note at the bottom of this file.
+    function reasonableSize() {
+      return request.resource.data.size() < 100;
+    }
 
-    // Anything not explicitly listed above is denied outright. New collections
-    // must be added here deliberately rather than inheriting public access.
+    // ---- 1. Public site content ----------------------------------------
+    // Every visitor must be able to read these for the site to render.
+    // Only signed-in staff may change them.
+
+    match /notices/{doc}            { allow read: if true; allow write: if signedIn(); }
+    match /partners/{doc}           { allow read: if true; allow write: if signedIn(); }
+    match /partner_overrides/{doc}  { allow read: if true; allow write: if signedIn(); }
+    match /resources/{doc}          { allow read: if true; allow write: if signedIn(); }
+    match /resource_overrides/{doc} { allow read: if true; allow write: if signedIn(); }
+    match /events/{doc}             { allow read: if true; allow write: if signedIn(); }
+    match /settings/{doc}           { allow read: if true; allow write: if signedIn(); }
+    match /content_overrides/{doc}  { allow read: if true; allow write: if signedIn(); }
+    match /custom_pages/{doc}       { allow read: if true; allow write: if signedIn(); }
+    match /page_settings/{doc}      { allow read: if true; allow write: if signedIn(); }
+
+    // ---- 2. Public inboxes ---------------------------------------------
+    // Written by ordinary visitors, read only by staff.
+    //
+    // contact_submissions holds names, emails and phone numbers from the
+    // contact form — it must NOT be publicly readable.
+    // error_reports holds "Report This Broken Link" clicks from the 404 page.
+    //
+    // create only: a visitor may add a record but cannot list, read back,
+    // edit or delete anything, including their own submission.
+
+    match /contact_submissions/{doc} {
+      allow create: if reasonableSize();
+      allow read, update, delete: if signedIn();
+    }
+
+    match /error_reports/{doc} {
+      allow create: if reasonableSize();
+      allow read, update, delete: if signedIn();
+    }
+
+    // ---- 3. Staff-only collections -------------------------------------
+    // Never rendered on the public site. Not readable by visitors.
+
+    match /link_audits/{doc}            { allow read, write: if signedIn(); }
+    match /pending_change_notices/{doc} { allow read, write: if signedIn(); }
+    match /reviewed_overrides/{doc}     { allow read, write: if signedIn(); }
+    match /resources_master/{doc}       { allow read, write: if signedIn(); }
+
+    // ---- 4. Deny everything else ---------------------------------------
+    // A collection added later cannot silently inherit public access. If a new
+    // feature stops working after a deploy, check here first — the fix is to
+    // add an explicit rule above, never to loosen this.
+
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// KNOWN LIMITATION — anonymous write volume
+//
+// contact_submissions and error_reports accept writes from anyone, because the
+// contact form and the broken-link reporter are used by visitors who are not
+// signed in. Firestore rules cannot rate-limit. A determined actor could write
+// a large number of junk records and run up the Firebase bill.
+//
+// If that becomes a problem, the options are App Check (attests requests come
+// from your real site), a Cloud Function as a write proxy, or moving the
+// contact form to Formspree only — it already posts there, so the Firestore
+// copy is a convenience backup rather than the primary path.
+//
+// Not addressed here because it needs a decision, and because an open database
+// is the far larger problem to fix first.
+// ---------------------------------------------------------------------------
