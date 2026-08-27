@@ -2070,6 +2070,20 @@ function iconSVG(name){
 }
 
 // ---------- RESOURCE CATEGORY DATA ----------
+// Canadian English accepts both "licence" and "license"; the only driver
+// resource is titled with the American spelling ("New York Enhanced Driver
+// License"), so a search for "licence" returned nothing. Normalising both the
+// query and the text being searched makes either spelling match. No stored
+// content is altered - this only affects comparison.
+function cjhqNormalizeSearch(str){
+  return String(str == null ? '' : str)
+    .toLowerCase()
+    .replace(/\u2019/g, "'")      // curly apostrophe (phone keyboards) -> straight
+    .replace(/'s\b/g, '')         // possessive: "driver's license" -> "driver license",
+                                  // so it matches the stored "Driver License"
+    .replace(/licence/g, 'license'); // Canadian/British spelling -> the stored spelling
+}
+
 const searchIndex = [
   { page:'home', en:'Home', fr:'Accueil',
     body_en:'CJHQ is a central point of contact for Quebec\'s Hasidic Jewish communities, providing services, assistance, information, representation, and advocacy.',
@@ -2947,8 +2961,8 @@ function initResourceSearch(){
         const liEls = groupEl.querySelectorAll('.res-item');
         liEls.forEach((li, iIdx) => {
           const it = group.items[iIdx];
-          const haystack = [it.en, it.fr, it.desc_en, it.desc_fr, it.what_en, it.what_fr].join(' ').toLowerCase();
-          const match = haystack.includes(q);
+          const haystack = cjhqNormalizeSearch([it.en, it.fr, it.desc_en, it.desc_fr, it.what_en, it.what_fr].join(' '));
+          const match = haystack.includes(cjhqNormalizeSearch(q));
           li.style.display = match ? '' : 'none';
           if(match){ groupHasMatch = true; totalMatches++; }
         });
@@ -3050,15 +3064,16 @@ function handleSearch(q, targetId){
 
   if(!q){ box.style.display = 'none'; box.innerHTML = ''; return; }
 
+  const qn = cjhqNormalizeSearch(q);
   let matches = searchIndex
-    .filter(item => (isFr ? item.fr : item.en).toLowerCase().includes(q) || (isFr ? item.body_fr : item.body_en).toLowerCase().includes(q))
+    .filter(item => cjhqNormalizeSearch(isFr ? item.fr : item.en).includes(qn) || cjhqNormalizeSearch(isFr ? item.body_fr : item.body_en).includes(qn))
     .map(item => ({ page:item.page, title: isFr ? item.fr : item.en, body: isFr ? item.body_fr : item.body_en }));
 
   categories.forEach(c => {
     const title = isFr ? c.fr : c.en;
     const allItems = c.groups.flatMap(g => g.items.map(it => isFr ? it.fr : it.en));
     const items = allItems.join(', ');
-    if(title.toLowerCase().includes(q) || items.toLowerCase().includes(q)){
+    if(cjhqNormalizeSearch(title).includes(qn) || cjhqNormalizeSearch(items).includes(qn)){
       matches.push({ page:'resources', title, body:items });
     }
   });
@@ -3324,6 +3339,14 @@ function updateUrlForPage(name){
   updatePageMeta(name);
 }
 const PAGE_META = {
+  // Assembled verbatim from the 404 page's existing approved copy: the eyebrow
+  // ("Page Not Found" / "Page introuvable") plus the first sentence of the body
+  // paragraph. No new wording was written. The "— CJHQ" suffix matches every
+  // other entry. Without this, a 404 inherited the previous page's title and
+  // canonical - telling search engines an error page was a real one.
+  '404':        { en:'Page Not Found — CJHQ',                          fr:'Page introuvable — CJHQ',
+                  desc_en:'The link you followed may be outdated, or the page may have moved.',
+                  desc_fr:'Le lien que vous avez suivi est peut-être désuet, ou la page a été déplacée.' },
   home:         { en:'CJHQ — Jewish Hasidic Council of Quebec',       fr:'CJHQ — Conseil des Juifs Hassidiques du Québec',
                   desc_en:'The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec\'s Hasidic Jewish communities — practical assistance, advocacy, and resources.',
                   desc_fr:'Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.' },
@@ -3354,7 +3377,11 @@ function updatePageMeta(name){
   const meta = PAGE_META[name] || PAGE_META['home'];
   const title = isFr ? meta.fr : meta.en;
   const desc  = isFr ? meta.desc_fr : meta.desc_en;
-  const url   = location.origin + pathForPage(name);
+  // For 404 the canonical must self-reference the URL the visitor actually
+  // requested, not a fabricated "/404" path that serves nothing.
+  const url   = (name === '404')
+    ? (location.origin + location.pathname)
+    : (location.origin + pathForPage(name));
   document.getElementById('pageTitle').textContent = title;
   document.title = title;
   const setMeta = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
@@ -3365,6 +3392,10 @@ function updatePageMeta(name){
   setMeta('twitterDescription', desc);
   const canon = document.getElementById('canonicalTag');
   if(canon) canon.setAttribute('href', url);
+  // An error page must not claim to be a real URL, and must not be indexed.
+  // Every other route stays "index, follow" exactly as before.
+  const robots = document.querySelector('meta[name="robots"]');
+  if(robots) robots.setAttribute('content', name === '404' ? 'noindex, follow' : 'index, follow');
   // Also update on lang switch
   document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', desc));
 }
@@ -4844,6 +4875,7 @@ function show404(attemptedName, opts){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-404').classList.add('active');
   highlightActiveNav('404');
+  updatePageMeta('404');
   if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
   document.getElementById('reportBrokenLinkStatus').style.display = 'none';
   const btn = document.getElementById('reportBrokenLinkBtn');
