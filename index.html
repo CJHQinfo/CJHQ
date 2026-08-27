@@ -261,6 +261,7 @@
     text-decoration:none; letter-spacing:.01em;
   }
   .btn:hover{background:var(--bronze-soft);}
+  a.btn{text-decoration:none;}
   .btn.outline{
     background:transparent; border:1px solid rgba(246,242,232,.5); color:var(--paper);
   }
@@ -348,14 +349,17 @@
   .res-group-heading{font-family:'Lora',serif; font-size:1.05rem; color:var(--ink); margin:0 0 4px; font-weight:600;}
   .res-group-intro{font-size:.85rem; color:var(--muted); margin:0 0 12px; max-width:640px;}
   .res-list{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
-  .res-item{
+  .res-item{display:flex;}
+  .res-item-btn{
     background:var(--bg-alt); border:1px solid var(--line); border-radius:8px; padding:14px 16px;
     cursor:pointer; transition:box-shadow .15s, transform .15s, border-color .15s;
     display:flex; flex-direction:column; gap:8px; justify-content:space-between;
+    width:100%; font:inherit; color:inherit; text-align:left;
   }
-  .res-item:hover{box-shadow:0 5px 16px rgba(14,33,73,.1); transform:translateY(-1px); border-color:var(--bronze-soft);}
+  .res-item-btn:hover{box-shadow:0 5px 16px rgba(14,33,73,.1); transform:translateY(-1px); border-color:var(--bronze-soft);}
+  .res-item-text{display:block;}
   .res-link-title{font-weight:600; color:var(--ink); font-size:.9rem; display:block;}
-  .res-desc{margin:3px 0 0; font-size:.8rem; color:var(--muted); line-height:1.4;}
+  .res-desc{display:block; margin:3px 0 0; font-size:.8rem; color:var(--muted); line-height:1.4;}
   .res-learn-more{align-self:flex-start; font-size:.76rem; font-weight:600; color:var(--bronze);}
   @media (max-width:700px){ .res-list{grid-template-columns:1fr;} }
 
@@ -2405,9 +2409,24 @@ const newsTopics = [
 // ---------- RENDER ----------
 const INSURANCE_URLS = ['https://manulife-travel.ca/dist/home.html?as=wllebovits','https://shop.tugo.com/store/IAB48720'];
 
+// Accordion state must be exposed to assistive technology, not just visually.
+// Called from the head button's onclick; also used when search auto-opens or
+// closes a category so aria-expanded never drifts from the .open class.
+function toggleAccordion(headBtn){
+  const item = headBtn.closest('.accordion-item');
+  const open = item.classList.toggle('open');
+  headBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function syncAccordionAria(){
+  document.querySelectorAll('#accordionWrap .accordion-item').forEach(item=>{
+    const head = item.querySelector('.accordion-head');
+    if(head) head.setAttribute('aria-expanded', item.classList.contains('open') ? 'true' : 'false');
+  });
+}
+
 function renderAccordion(){
   const wrap = document.getElementById('accordionWrap');
-  categories.forEach((c)=>{
+  categories.forEach((c, idx)=>{
     const item = document.createElement('div');
     item.className = 'accordion-item';
     const buildItem = (it) => {
@@ -2442,19 +2461,25 @@ function renderAccordion(){
         };
       }
       RESOURCE_BY_SLUG[it.slug] = effective;
+      // The card is a real <button> so it is reachable by Tab and activated by
+      // Enter/Space. The <li> stays the grid cell (the search filter hides it by
+      // id), and all card styling moved to .res-item-btn, so the rendered result
+      // is unchanged.
       return `<li class="res-item" data-slug="${escAttr(effective.slug)}">
-          <div class="res-item-text">
-            <span class="res-link-title" data-en>${effective.en}</span>
-            <span class="res-link-title" data-fr>${effective.fr}</span>
-            ${effective.desc_en ? `<p class="res-desc" data-en>${effective.desc_en}</p>` : ''}
-            ${effective.desc_fr ? `<p class="res-desc" data-fr>${effective.desc_fr}</p>` : ''}
-          </div>
-          <span class="res-learn-more"><span data-en>Learn more →</span><span data-fr>En savoir plus →</span></span>
+          <button class="res-item-btn" type="button">
+            <span class="res-item-text">
+              <span class="res-link-title" data-en>${effective.en}</span>
+              <span class="res-link-title" data-fr>${effective.fr}</span>
+              ${effective.desc_en ? `<span class="res-desc" data-en>${effective.desc_en}</span>` : ''}
+              ${effective.desc_fr ? `<span class="res-desc" data-fr>${effective.desc_fr}</span>` : ''}
+            </span>
+            <span class="res-learn-more"><span data-en>Learn more →</span><span data-fr>En savoir plus →</span></span>
+          </button>
         </li>`;
     };
     const groupsHtml = c.groups.map(g => `
       <div class="res-group">
-        ${g.heading_en ? `<h4 class="res-group-heading"><span data-en>${g.heading_en}</span><span data-fr>${g.heading_fr}</span></h4>` : ''}
+        ${g.heading_en ? `<h3 class="res-group-heading"><span data-en>${g.heading_en}</span><span data-fr>${g.heading_fr}</span></h3>` : ''}
         ${g.intro_en ? `<p class="res-group-intro" data-en>${g.intro_en}</p>` : ''}
         ${g.intro_fr ? `<p class="res-group-intro" data-fr>${g.intro_fr}</p>` : ''}
         <ul class="res-list">${g.items.map(buildItem).join('')}</ul>
@@ -2462,7 +2487,7 @@ function renderAccordion(){
         ${g.extra_fr ? `<div data-fr>${g.extra_fr}</div>` : ''}
       </div>`).join('');
     item.innerHTML = `
-      <button class="accordion-head" onclick="this.closest('.accordion-item').classList.toggle('open')">
+      <button class="accordion-head" type="button" id="acc-head-${idx}" aria-expanded="false" aria-controls="acc-panel-${idx}" onclick="toggleAccordion(this)">
         <div class="icon-badge">${iconSVG(c.icon)}</div>
         <div class="accordion-head-text">
           <span class="accordion-head-title"><span data-en>${c.en}</span><span data-fr>${c.fr}</span></span>
@@ -2471,7 +2496,7 @@ function renderAccordion(){
         </div>
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="accordion-body">
+      <div class="accordion-body" id="acc-panel-${idx}" role="region" aria-labelledby="acc-head-${idx}">
         <div class="accordion-body-inner">
           ${groupsHtml}
           ${c.extra_en ? `<div data-en>${c.extra_en}</div>` : ''}
@@ -2733,10 +2758,14 @@ function openResourcePopup(slug, opts){
   const related = (it.related || []).map(s => RESOURCE_BY_SLUG[s]).filter(Boolean);
   const reviewedDate = REVIEWED_OVERRIDES[slug] || it.reviewed;
   const pendingNotice = PENDING_NOTICES[slug];
-  const secondaryBtn = it.url2 ? `
-        <button class="btn res-popup-secondary-btn" type="button" data-popup-open2>
+  const href2 = cjhqSafeUrl(it.url2);
+  const secondaryBtn = it.url2 ? (href2
+        ? `<a class="btn res-popup-secondary-btn" href="${cjhqEscapeHtml(href2)}" target="_blank" rel="noopener noreferrer" data-popup-open2>
           <span data-en>${it.label_en2}</span><span data-fr>${it.label_fr2}</span>
-        </button>` : '';
+        </a>`
+        : `<button class="btn res-popup-secondary-btn" type="button" data-popup-open2>
+          <span data-en>${it.label_en2}</span><span data-fr>${it.label_fr2}</span>
+        </button>`) : '';
   const bulletList = (arr) => arr && arr.length ? `<ul class="res-popup-list">${arr.map(x=>`<li>${x}</li>`).join('')}</ul>` : '';
   const body = document.getElementById('resourceShareModalBody');
   body.innerHTML = `
@@ -2774,9 +2803,18 @@ function openResourcePopup(slug, opts){
         ${bulletList(tipsList)}
       </div>` : ''}
       <div class="site-modal-section" style="display:flex; flex-wrap:wrap; gap:10px;">
-        <button class="btn dark" type="button" data-popup-open1>
-          <span data-en>${it.label_en1 || 'Go to Application →'}</span><span data-fr>${it.label_fr1 || "Aller à la demande →"}</span>
-        </button>${secondaryBtn}
+        ${(() => {
+          const href1 = cjhqSafeUrl(it.url);
+          const label1 = `<span data-en>${it.label_en1 || 'Go to Application →'}</span><span data-fr>${it.label_fr1 || "Aller à la demande →"}</span>`;
+          // A real link, so it announces as a link, shows its destination on
+          // hover, and supports middle-click / "copy link address". The
+          // insurance disclaimer still intercepts the click below. If the URL
+          // fails validation we fall back to a button rather than emit a
+          // link with no destination.
+          return href1
+            ? `<a class="btn dark" href="${cjhqEscapeHtml(href1)}" target="_blank" rel="noopener noreferrer" data-popup-open1>${label1}</a>`
+            : `<button class="btn dark" type="button" data-popup-open1>${label1}</button>`;
+        })()}${secondaryBtn}
       </div>
       ${officialLinks.length ? `
       <div class="site-modal-section res-popup-block">
@@ -2797,23 +2835,31 @@ function openResourcePopup(slug, opts){
       <div class="site-modal-section res-share-row">
         <span class="res-share-label"><span data-en>Share this resource:</span><span data-fr>Partager cette ressource :</span></span>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('email')" title="Email">📧</button>
-          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('whatsapp')" title="WhatsApp">💬</button>
-          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('copy')" title="Copy Link">🔗</button>
+          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('email')" title="Email" aria-label="Share by Email"><span aria-hidden="true">📧</span></button>
+          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('whatsapp')" title="WhatsApp" aria-label="Share via WhatsApp"><span aria-hidden="true">💬</span></button>
+          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('copy')" title="Copy Link" aria-label="Copy Link"><span aria-hidden="true">🔗</span></button>
         </div>
       </div>
     </div>`;
-  body.querySelector('[data-popup-open1]').addEventListener('click', ()=>{
-    if(isInsurance){ closeResourceShareModal(); showInsuranceDisclaimer(it.url); return; }
-    const dest1 = cjhqSafeUrl(it.url);
-    if(dest1) window.open(dest1, '_blank', 'noopener');
-    else console.warn('Blocked unsafe resource URL for', slug);
+  body.querySelector('[data-popup-open1]').addEventListener('click', (e)=>{
+    if(isInsurance){
+      e.preventDefault();
+      closeResourceShareModal(); showInsuranceDisclaimer(it.url); return;
+    }
+    // Rendered as <a> with a validated href: let the browser handle it, so
+    // modifier-clicks and middle-clicks work. The <button> fallback (unsafe
+    // URL) has no href, so nothing happens - which is the intent.
+    if(e.currentTarget.tagName !== 'A'){
+      e.preventDefault();
+      console.warn('Blocked unsafe resource URL for', slug);
+    }
   });
   const btn2 = body.querySelector('[data-popup-open2]');
-  if(btn2) btn2.addEventListener('click', ()=>{
-    const dest2 = cjhqSafeUrl(it.url2);
-    if(dest2) window.open(dest2, '_blank', 'noopener');
-    else console.warn('Blocked unsafe secondary URL for', slug);
+  if(btn2) btn2.addEventListener('click', (e)=>{
+    if(e.currentTarget.tagName !== 'A'){
+      e.preventDefault();
+      console.warn('Blocked unsafe secondary URL for', slug);
+    }
   });
   body.querySelectorAll('[data-related-slug]').forEach(btn=>{
     btn.addEventListener('click', ()=>{ openResourcePopup(btn.dataset.relatedSlug); });
@@ -2885,6 +2931,7 @@ function initResourceSearch(){
         el.querySelectorAll('.res-item').forEach(li => li.style.display = '');
         el.querySelectorAll('.res-group').forEach(g => g.style.display = '');
       });
+      syncAccordionAria();
       return;
     }
 
@@ -2911,6 +2958,7 @@ function initResourceSearch(){
       el.style.display = catHasMatch ? '' : 'none';
       el.classList.toggle('open', catHasMatch);
     });
+    syncAccordionAria();
 
     countEl.style.display = 'block';
     countEl.textContent = isFr
