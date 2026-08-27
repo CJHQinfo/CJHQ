@@ -1694,15 +1694,18 @@
       <h1 style="font-size:1.8rem; margin-top:10px;">Site Admin</h1>
 
       <div id="adminLoginBox" class="card" style="max-width:360px; margin-top:20px;">
-        <p style="font-size:.9rem; color:var(--muted);">Enter the staff PIN to manage the site.</p>
-        <input type="password" id="adminPinInput" placeholder="PIN" style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:1rem; margin-bottom:10px;">
-        <button class="btn dark" id="adminLoginBtn" style="width:100%;">Unlock</button>
-        <p id="adminLoginError" style="color:#A23B3B; font-size:.85rem; margin-top:8px; display:none;">Incorrect PIN.</p>
+        <p style="font-size:.9rem; color:var(--muted);">Sign in with your CJHQ staff account to manage the site.</p>
+        <label for="adminEmailInput" style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Email</label>
+        <input type="email" id="adminEmailInput" autocomplete="username" style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:1rem; margin-bottom:10px;">
+        <label for="adminPasswordInput" style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Password</label>
+        <input type="password" id="adminPasswordInput" autocomplete="current-password" style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:1rem; margin-bottom:10px;">
+        <button class="btn dark" id="adminLoginBtn" style="width:100%;">Sign In</button>
+        <p id="adminLoginError" style="color:#A23B3B; font-size:.85rem; margin-top:8px; display:none;"></p>
       </div>
 
       <div id="adminPanelBox" style="display:none; margin-top:20px;">
         <div id="adminFirebaseWarning" class="notice" style="display:none; margin-bottom:20px; background:#FBF3DD; border-color:#B4881A;">
-          <strong>Backend not connected yet.</strong> Firebase isn't configured, so anything you add here will only be visible in this browser and won't appear for site visitors. Search the page source for "FIREBASE CONFIG" for setup steps.
+          <strong>Not signed in.</strong> Saving is unavailable until you sign in with a CJHQ staff account. Anything you change here will not be saved.
         </div>
 
         <div id="adminTabs" style="display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:24px; padding-bottom:0;">
@@ -1999,7 +2002,8 @@
           <div id="messagesList"></div>
         </div>
 
-        <button class="btn admin-btn-outline" style="margin-top:28px; font-size:.82rem; color:var(--muted); border-color:var(--line);" id="adminLogoutBtn">Lock admin panel</button>
+        <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
+        <button class="btn admin-btn-outline" style="margin-top:8px; font-size:.82rem; color:var(--muted); border-color:var(--line);" id="adminLogoutBtn">Sign out</button>
       </div>
     </div>
   </section>
@@ -3750,8 +3754,11 @@ if(contactForm){
    admin panel; until that is done, writes will be rejected. See
    CJHQ_Firestore_Security.md for the sequence.
 
-   The ADMIN_PIN below is a convenience gate for the admin UI only. It is
-   visible in page source and is NOT an authentication system.
+   ADMIN ACCESS: the admin panel signs in with Firebase Authentication
+   (email + password). Firestore rules require request.auth != null for every
+   write, so the panel and the database enforce the same condition. The old
+   client-side PIN has been removed - it was visible in page source and was
+   never an authentication boundary.
    Collections used: notices, partners, resources, events, settings (single doc "site").
    That's it — no other code changes needed, everything below already
    expects this shape.
@@ -3764,10 +3771,11 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "158970385688",
   appId: "1:158970385688:web:c9bdc737f4e123b69aba6d"
 };
-const ADMIN_PIN = '5786'; // Change this. Simple client-side gate only — not real security.
 
 let fbDb = null;
 let firebaseReady = false;
+let fbAuth = null;
+let adminUser = null;
 
 async function initFirebase(){
   if(FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY'){
@@ -3777,11 +3785,22 @@ async function initFirebase(){
   try{
     const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const fsMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const authMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
     const app = appMod.initializeApp(FIREBASE_CONFIG);
     fbDb = fsMod.getFirestore(app);
     window.__fbFirestore = fsMod;
+    window.__fbAuth = authMod;
     window.__fbApp = app;
+    fbAuth = authMod.getAuth(app);
     firebaseReady = true;
+
+    // Firestore rules require request.auth != null for every write. Drive the
+    // admin panel from the real auth state rather than a client-side flag, so
+    // the UI can never show an editable panel that Firestore will reject.
+    authMod.onAuthStateChanged(fbAuth, (user) => {
+      adminUser = user || null;
+      syncAdminAuthUI();
+    });
   }catch(e){
     console.warn('Firebase init failed, running in local-only mode:', e);
     firebaseReady = false;
@@ -3817,8 +3836,9 @@ function reportSaveFailure(name, err){
   const denied = err && (err.code === 'permission-denied' || /permission/i.test(err.message || ''));
   const msg = denied
     ? 'Could not save: the database rejected the change.\n\n' +
-      'Saving requires being signed in, and sign-in is not set up yet. ' +
-      'Your change has NOT been saved. Please copy anything you typed before leaving this page.'
+      'Your session may have expired. Sign out and sign back in with your CJHQ ' +
+      'staff account, then try again. Your change has NOT been saved - please ' +
+      'copy anything you typed before leaving this page.'
     : 'Could not save: ' + ((err && err.message) || 'unknown error') +
       '\n\nYour change has NOT been saved.';
   console.error('[CJHQ] save failed for "' + name + '":', err);
@@ -3990,12 +4010,40 @@ async function enhanceResourcesFromBackend(){
 }
 
 /* ---------- Admin panel: shared ---------- */
-function adminUnlocked(){ return sessionStorage.getItem('cjhq-admin-unlocked') === '1'; }
+// Signed in with Firebase Auth. Firestore enforces the same condition on every
+// write, so the panel and the database agree instead of relying on a flag the
+// browser could set for itself.
+function adminUnlocked(){ return !!adminUser; }
+
+// Single place that reconciles the admin UI with the real auth state. Called by
+// onAuthStateChanged, so a page reload while signed in restores the panel and a
+// sign-out anywhere closes it.
+function syncAdminAuthUI(){
+  const loginBox = document.getElementById('adminLoginBox');
+  const panelBox = document.getElementById('adminPanelBox');
+  const whoami   = document.getElementById('adminSignedInAs');
+  if(!loginBox || !panelBox) return;
+  const onAdminRoute = document.getElementById('page-admin').classList.contains('active');
+  if(adminUser){
+    loginBox.style.display = 'none';
+    if(whoami) whoami.textContent = adminUser.email || '';
+    if(onAdminRoute) showAdminPanel();
+  }else{
+    panelBox.style.display = 'none';
+    loginBox.style.display = 'block';
+  }
+}
 
 function showAdminPanel(){
   document.getElementById('adminLoginBox').style.display = 'none';
   document.getElementById('adminPanelBox').style.display = 'block';
-  document.getElementById('adminFirebaseWarning').style.display = firebaseReady ? 'none' : 'block';
+  // The banner now means "not signed in", which is the condition that actually
+  // stops saves from working.
+  // Superseded: the banner used to key off firebaseReady, which is true even
+  // when nobody is signed in - so it stayed hidden in exactly the case that
+  // blocks saving. It now keys off the auth state, which is the real condition.
+  const warn = document.getElementById('adminFirebaseWarning');
+  if(warn) warn.style.display = adminUser ? 'none' : 'block';
   renderPagesList();
   renderCustomPagesList();
   renderContentBlocksList();
@@ -4717,7 +4765,9 @@ async function publishChangeNotice(slug){
   const loginBtn = document.getElementById('adminLoginBtn');
   if(!loginBtn) return;
 
-  if(adminUnlocked()) showAdminPanel();
+  // Firebase restores the session asynchronously, so reconcile now with
+  // whatever is known and let onAuthStateChanged correct it a moment later.
+  syncAdminAuthUI();
 
   document.getElementById('syncResourcesBtn').addEventListener('click', syncResourcesToBackend);
   document.getElementById('refreshAuditBtn').addEventListener('click', renderLinkAuditList);
@@ -4762,39 +4812,70 @@ async function publishChangeNotice(slug){
   });
 
   // PIN rate-limiting: max 5 attempts within 15 minutes, then 15-minute lockout
-  let __pinAttempts = 0, __pinLockedUntil = 0;
-  loginBtn.addEventListener('click', ()=>{
-    const now = Date.now();
-    if(now < __pinLockedUntil){
-      const mins = Math.ceil((__pinLockedUntil - now) / 60000);
-      document.getElementById('adminLoginError').textContent = `Too many incorrect attempts. Please wait ${mins} minute${mins > 1 ? 's' : ''} before trying again.`;
-      document.getElementById('adminLoginError').style.display = 'block';
+  // Firebase Auth sign-in. Firebase applies its own throttling after repeated
+  // failures, so the old client-side attempt counter is gone - it could be
+  // bypassed by reloading the page and never protected the database anyway.
+  const showLoginError = (msg) => {
+    const el = document.getElementById('adminLoginError');
+    el.textContent = msg;
+    el.style.display = 'block';
+  };
+
+  async function attemptAdminSignIn(){
+    const emailEl = document.getElementById('adminEmailInput');
+    const passEl  = document.getElementById('adminPasswordInput');
+    const email = (emailEl.value || '').trim();
+    const password = passEl.value || '';
+    if(!email || !password){
+      showLoginError('Enter your email address and password.');
       return;
     }
-    const val = document.getElementById('adminPinInput').value;
-    if(val === ADMIN_PIN){
-      __pinAttempts = 0;
-      sessionStorage.setItem('cjhq-admin-unlocked', '1');
-      document.getElementById('adminLoginError').style.display = 'none';
-      showAdminPanel();
-    } else {
-      __pinAttempts++;
-      if(__pinAttempts >= 5){
-        __pinLockedUntil = now + 15 * 60 * 1000;
-        __pinAttempts = 0;
-        document.getElementById('adminLoginError').textContent = 'Too many incorrect attempts. Access locked for 15 minutes.';
-      } else {
-        document.getElementById('adminLoginError').textContent = `Incorrect PIN. ${5 - __pinAttempts} attempt${5 - __pinAttempts !== 1 ? 's' : ''} remaining.`;
-      }
-      document.getElementById('adminLoginError').style.display = 'block';
-      document.getElementById('adminPinInput').value = '';
+    if(!firebaseReady || !fbAuth){
+      showLoginError('Cannot reach the sign-in service. Check your connection and try again.');
+      return;
     }
+    loginBtn.disabled = true;
+    const originalLabel = loginBtn.textContent;
+    loginBtn.textContent = 'Signing in…';
+    try{
+      await window.__fbAuth.signInWithEmailAndPassword(fbAuth, email, password);
+      document.getElementById('adminLoginError').style.display = 'none';
+      passEl.value = '';
+      // onAuthStateChanged opens the panel.
+    }catch(err){
+      const code = (err && err.code) || '';
+      let msg;
+      if(code === 'auth/invalid-email')            msg = 'That does not look like a valid email address.';
+      else if(code === 'auth/too-many-requests')   msg = 'Too many attempts. Please wait a few minutes and try again.';
+      else if(code === 'auth/network-request-failed') msg = 'Network error. Check your connection and try again.';
+      else if(code === 'auth/user-disabled')       msg = 'This account has been disabled. Contact the site administrator.';
+      else if(code === 'auth/operation-not-allowed') msg = 'Email sign-in is not enabled for this project yet.';
+      else msg = 'Email or password is incorrect.';
+      showLoginError(msg);
+      console.warn('[CJHQ] admin sign-in failed:', code || err);
+      passEl.value = '';
+    }finally{
+      loginBtn.disabled = false;
+      loginBtn.textContent = originalLabel;
+    }
+  }
+
+  loginBtn.addEventListener('click', attemptAdminSignIn);
+  ['adminEmailInput','adminPasswordInput'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); attemptAdminSignIn(); } });
   });
 
-  document.getElementById('adminLogoutBtn').addEventListener('click', ()=>{
-    sessionStorage.removeItem('cjhq-admin-unlocked');
-    document.getElementById('adminPanelBox').style.display = 'none';
-    document.getElementById('adminLoginBox').style.display = 'block';
+  document.getElementById('adminLogoutBtn').addEventListener('click', async ()=>{
+    try{
+      if(fbAuth && window.__fbAuth) await window.__fbAuth.signOut(fbAuth);
+    }catch(err){
+      console.warn('[CJHQ] sign-out failed:', err);
+    }
+    // onAuthStateChanged closes the panel; do it here too so the UI responds
+    // immediately even if the network call is slow.
+    adminUser = null;
+    syncAdminAuthUI();
   });
 
   document.querySelectorAll('.admin-tab-btn').forEach(b=>{
