@@ -1,53 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<!--
+  CJHQ sitemap
+
+  lastmod: keep these honest. Google uses lastmod when it is accurate and
+  starts ignoring it site-wide when it is not, so do not bulk-update every
+  date on each deploy. Change a page's date only when that page's content
+  actually changes.
+
+  changefreq / priority: Google ignores both. Retained because Bing still
+  reads them and they cost nothing.
+
+  hreflang: deliberately not present. hreflang maps one URL per language,
+  and this site serves both languages from the same URL via a JavaScript
+  toggle, so there is no distinct French URL to point at. See the note in
+  the delivery message about French indexability.
+
+  Not listed here, on purpose:
+  - /admin (also disallowed in robots.txt)
+  - /resources/<slug> deep links. These open a modal and canonicalise to
+    /resources, so listing them would submit URLs that point elsewhere.
+    They belong here only if each is given its own title and canonical.
+
+  Admin-created custom pages are not added automatically. Add them below
+  by hand if they should be indexed.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
     <loc>https://cjhq.org/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://cjhq.org/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://cjhq.org/"/>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/resources</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/stay-informed</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/contact</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/about</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/privacy</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/terms</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
     <loc>https://cjhq.org/accessibility</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
