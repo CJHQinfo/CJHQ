@@ -15,20 +15,11 @@
   changefreq / priority: Google ignores both. Retained because Bing still
   reads them and they cost nothing.
 
-  hreflang: deliberately not present. hreflang maps one URL per language,
-  and this site serves both languages from the same URL via a JavaScript
-  toggle, so there is no distinct French URL to point at. See the note in
-  the delivery message about French indexability.
-
-  Not listed here, on purpose:
-  - /admin (also disallowed in robots.txt)
-  - /resources/<slug> deep links. These open a modal and canonicalise to
-    /resources, so listing them would submit URLs that point elsewhere.
-    They belong here only if each is given its own title and canonical.
-
-  Admin-created custom pages are not added automatically. Add them below
-  by hand if they should be indexed.
--->
+  hreflang: /fr/ is the one distinct French URL, added 2026-08-28. It is the
+  French homepage, and it is reciprocal with / via hreflang tags in both files.
+  The other seven routes have no French equivalent and deliberately carry no
+  hreflang - pointing fr at an English URL would be wrong, and inventing
+  /fr/about would mean shipping pages that do not exist. See the note in-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
@@ -36,6 +27,12 @@
     <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://cjhq.org/fr/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <url>
