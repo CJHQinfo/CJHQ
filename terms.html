@@ -4032,39 +4032,47 @@ async function enhanceResourcesFromBackend(){
 // browser could set for itself.
 function adminUnlocked(){ return !!adminUser && adminIsStaff === true; }
 
-// Signing in proves who you are, not that you are staff. The staff list lives
-// in the Firestore rules, and deliberately NOT in this file - putting six real
-// email addresses in public page source would hand them to every scraper that
-// crawls the site.
+// Signing in proves who you are, not that you are staff. This decides whether
+// to OPEN the panel; Firestore rules remain the actual security boundary and
+// reject every write from a non-staff account regardless of what the UI does.
 //
-// Instead we ask the database. A staff-only collection is read once after
-// sign-in: if Firestore allows it the account is staff, if it returns
-// permission-denied it is not. That is the same check the rules apply to every
-// save, so the panel can never disagree with the database.
+// An earlier version probed a staff-only collection to find out. That was wrong:
+// the Firestore read can hang instead of returning permission-denied, which left
+// the answer undetermined and could stall a real staff member out of the panel.
+//
+// This compares a SHA-256 of the signed-in address against a fixed list. No
+// network call, so it cannot hang. Hashes rather than plain addresses because
+// this file is public - six real staff email addresses in page source would be
+// harvested by scrapers.
+const STAFF_EMAIL_HASHES = [
+  '802f29f18f2c21c1e75ed93c8370a46e42e1f6d1351dd65da0ee6defc356ec0a',
+  'c56b62a4276676b8988ba6e92f4569c6e9c9a09fefddf7fc4d5ab0b1c4727955',
+  'bfb5888a455e596f356dfad1cebf7b7be594b69e795b60c5cd68bb6657c27e21',
+  'da8379e0210c9cf3fd4fee3d0c53b167f459201045c39eef986ddbf65e7c6d82',
+  '40470a896474b00dfc2b9e05996a2f4bdb340d456301d65bdcaac5b132c3adaa',
+  '71b41552fc55fe00e35e511f40cd4e84975dbb16e39ea726ded0d7c680d2671b'
+];
+
 let adminIsStaff = null;   // null = not yet determined
 
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function verifyAdminIsStaff(){
-  if(!adminUser || !firebaseReady){ adminIsStaff = false; return false; }
+  if(!adminUser || !adminUser.email){ adminIsStaff = false; return false; }
   try{
-    const fs = window.__fbFirestore;
-    await fs.getDocs(fs.collection(fbDb, 'link_audits'));
-    adminIsStaff = true;
+    const hash = await sha256Hex(String(adminUser.email).trim().toLowerCase());
+    adminIsStaff = STAFF_EMAIL_HASHES.includes(hash);
   }catch(err){
-    const code = (err && err.code) || '';
-    if(code === 'permission-denied'){
-      adminIsStaff = false;
-    }else{
-      // A network blip is not a rejection - do not lock a real staff member out.
-      console.warn('[CJHQ] could not verify staff access:', code || err);
-      adminIsStaff = null;
-    }
+    // crypto.subtle needs a secure context. Fail closed rather than open.
+    console.warn('[CJHQ] could not verify staff access:', err);
+    adminIsStaff = false;
   }
   return adminIsStaff === true;
 }
 
-// Single place that reconciles the admin UI with the real auth state. Called by
-// onAuthStateChanged, so a page reload while signed in restores the panel and a
-// sign-out anywhere closes it.
 async function syncAdminAuthUI(){
   const loginBox = document.getElementById('adminLoginBox');
   const panelBox = document.getElementById('adminPanelBox');
