@@ -4030,25 +4030,87 @@ async function enhanceResourcesFromBackend(){
 // Signed in with Firebase Auth. Firestore enforces the same condition on every
 // write, so the panel and the database agree instead of relying on a flag the
 // browser could set for itself.
-function adminUnlocked(){ return !!adminUser; }
+function adminUnlocked(){ return !!adminUser && adminIsStaff === true; }
+
+// Signing in proves who you are, not that you are staff. The staff list lives
+// in the Firestore rules, and deliberately NOT in this file - putting six real
+// email addresses in public page source would hand them to every scraper that
+// crawls the site.
+//
+// Instead we ask the database. A staff-only collection is read once after
+// sign-in: if Firestore allows it the account is staff, if it returns
+// permission-denied it is not. That is the same check the rules apply to every
+// save, so the panel can never disagree with the database.
+let adminIsStaff = null;   // null = not yet determined
+
+async function verifyAdminIsStaff(){
+  if(!adminUser || !firebaseReady){ adminIsStaff = false; return false; }
+  try{
+    const fs = window.__fbFirestore;
+    await fs.getDocs(fs.collection(fbDb, 'link_audits'));
+    adminIsStaff = true;
+  }catch(err){
+    const code = (err && err.code) || '';
+    if(code === 'permission-denied'){
+      adminIsStaff = false;
+    }else{
+      // A network blip is not a rejection - do not lock a real staff member out.
+      console.warn('[CJHQ] could not verify staff access:', code || err);
+      adminIsStaff = null;
+    }
+  }
+  return adminIsStaff === true;
+}
 
 // Single place that reconciles the admin UI with the real auth state. Called by
 // onAuthStateChanged, so a page reload while signed in restores the panel and a
 // sign-out anywhere closes it.
-function syncAdminAuthUI(){
+async function syncAdminAuthUI(){
   const loginBox = document.getElementById('adminLoginBox');
   const panelBox = document.getElementById('adminPanelBox');
   const whoami   = document.getElementById('adminSignedInAs');
   if(!loginBox || !panelBox) return;
   const onAdminRoute = document.getElementById('page-admin').classList.contains('active');
-  if(adminUser){
+
+  if(!adminUser){
+    adminIsStaff = null;
+    panelBox.style.display = 'none';
+    loginBox.style.display = 'block';
+    return;
+  }
+
+  // Signed in - but is this account on the staff list?
+  if(adminIsStaff === null) await verifyAdminIsStaff();
+
+  if(adminIsStaff === true){
     loginBox.style.display = 'none';
     if(whoami) whoami.textContent = adminUser.email || '';
     if(onAdminRoute) showAdminPanel();
-  }else{
-    panelBox.style.display = 'none';
-    loginBox.style.display = 'block';
+    return;
   }
+
+  // Authenticated, not authorised. Close the panel, say so plainly, and sign
+  // the account out so it is not left in a half-open state.
+  panelBox.style.display = 'none';
+  loginBox.style.display = 'block';
+  const email = adminUser.email || 'That account';
+  showLoginErrorGlobal(adminIsStaff === false
+    ? `${email} does not have access to the CJHQ admin panel. Contact the site administrator if you believe this is a mistake.`
+    : 'Could not confirm your access. Check your connection and try signing in again.');
+  try{
+    if(fbAuth && window.__fbAuth) await window.__fbAuth.signOut(fbAuth);
+  }catch(e){ /* already signed out, or offline */ }
+  adminUser = null;
+  adminIsStaff = null;
+}
+
+// showLoginError lives inside the admin IIFE; this reaches the same element
+// from syncAdminAuthUI, which is called from onAuthStateChanged.
+function showLoginErrorGlobal(msg){
+  const el = document.getElementById('adminLoginError');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
 }
 
 function showAdminPanel(){
