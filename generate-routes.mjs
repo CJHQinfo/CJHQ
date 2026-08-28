@@ -109,9 +109,36 @@ function buildRoute(route) {
   out = replaceOnce(out, /<meta name="twitter:description" id="twitterDescription" content="[^"]*">/,
     `<meta name="twitter:description" id="twitterDescription" content="${desc}">`, `${route}: twitter:description`);
 
-  // Nothing outside <head> may differ from index.html.
-  const bodyOf = (s) => s.slice(s.indexOf('</head>'));
-  if (bodyOf(out) !== bodyOf(html)) {
+  // Mark this route's own page as the active one.
+  //
+  // Every route file previously shipped with <div class="page active"
+  // id="page-home">, so a crawler that does not execute CSS/JS read the
+  // HOMEPAGE content on /about, /resources and the rest - eight URLs whose
+  // pre-render content was identical. Google renders and was unaffected, but
+  // non-rendering crawlers (some AI crawlers, social scrapers) were not.
+  //
+  // The router still calls goPage() on load and re-derives this from the URL,
+  // so this only changes what is true before JavaScript runs.
+  const pageId = `page-${route}`;
+  if (!out.includes(`id="${pageId}"`)) {
+    throw new Error(`${route}: no <div class="page" id="${pageId}"> found`);
+  }
+  out = replaceOnce(out, /<div class="page active" id="page-home"/,
+    '<div class="page" id="page-home"', `${route}: deactivate home`);
+  out = replaceOnce(out, new RegExp(`<div class="page" id="${pageId}"`),
+    `<div class="page active" id="${pageId}"`, `${route}: activate ${pageId}`);
+
+  // Exactly one page may be active, or the pre-JS render shows two at once.
+  const activeCount = (out.match(/class="page active"/g) || []).length;
+  if (activeCount !== 1) {
+    throw new Error(`${route}: expected 1 active page, found ${activeCount}`);
+  }
+
+  // Nothing outside <head> may differ from index.html except that one class.
+  const normalise = (s) => s.slice(s.indexOf('</head>'))
+    .replace(/<div class="page active" id="page-[a-z0-9-]+"/g, '<div class="page" id="PAGE"')
+    .replace(/<div class="page" id="page-[a-z0-9-]+"/g, '<div class="page" id="PAGE"');
+  if (normalise(out) !== normalise(html)) {
     throw new Error(`${route}: content outside <head> changed - aborting`);
   }
   return out;
