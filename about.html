@@ -668,7 +668,7 @@
   @media (prefers-reduced-motion: reduce){ .partners-track{animation:none;} }
 </style>
 <!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!--
   FIRST-VISIT LANGUAGE DEFAULT
   Runs before <body> parses, so the page paints in the right language with no
@@ -2762,6 +2762,25 @@ let RESOURCE_OVERRIDES_CACHE = {};
    tel: cannot execute anything and are genuinely in use — the Outremont
    visitor-parking resource links to a City of Montreal mailto: address with a
    prefilled subject and body. All 143 real URLs pass unchanged. */
+// Admin-authored HTML from Firestore is rendered with innerHTML in three
+// places: custom pages, the site banner and the site popup. DOMPurify does that
+// safely. If DOMPurify is not available - blocked CDN, ad blocker, offline, an
+// outage - the previous fallback stripped <script> tags with a regex and
+// nothing else, so <img src=x onerror=...> went straight through. A sanitiser
+// that only appears to work is worse than none.
+//
+// This fails closed instead: with no DOMPurify the content is escaped and
+// renders as visible text. Formatting is lost for that visitor, nothing
+// executes, and no content silently disappears.
+function cjhqSanitizeHtml(v){
+  const raw = (v == null) ? '' : String(v);
+  if(typeof DOMPurify !== 'undefined' && DOMPurify && typeof DOMPurify.sanitize === 'function'){
+    return DOMPurify.sanitize(raw);
+  }
+  console.warn('[CJHQ] DOMPurify unavailable - rendering admin HTML as escaped text.');
+  return cjhqEscapeHtml(raw);
+}
+
 function cjhqEscapeHtml(v){
   return String(v == null ? '' : v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -3440,7 +3459,7 @@ function goPage(name, opts){
   if(custom){
     document.getElementById('customPageTitle').innerHTML =
       `<span data-en>${cjhqEscapeHtml(custom.title_en)}</span><span data-fr>${cjhqEscapeHtml(custom.title_fr)}</span>`;
-    const sanitize = (s) => (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(s||'') : (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,'');
+    const sanitize = cjhqSanitizeHtml;
     document.getElementById('customPageBody').innerHTML =
       `<div data-en>${sanitize(custom.body_en)}</div><div data-fr>${sanitize(custom.body_fr)}</div>`;
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -3863,19 +3882,21 @@ if(contactForm){
 /* ================================================================
    CJHQ BACKEND — Firebase-backed site admin system
    ================================================================
-   DEV NOTE — FIREBASE CONFIG:
-   Firebase IS connected. Content saved in the admin panel (/admin) is
-   stored in Firestore and is visible to all site visitors.
+   SECURITY MODEL (current):
+   Admin access uses Firebase Authentication - email/password or Google -
+   gated by a staff allowlist. The client checks a SHA-256 of the signed-in
+   address; Firestore rules enforce the same list server-side, which is the
+   real boundary. Any other account is refused and signed out.
 
-   SECURITY — READ BEFORE CHANGING FIRESTORE RULES:
-   Do NOT use `allow read, write: if true`. That makes every collection
-   world-writable by anyone on the internet, with no sign-in, and the
-   admin PIN below does not protect it — a rule like that can be written
-   to directly, bypassing this page entirely. The intended rule set ships
-   alongside this file as `firestore.rules` (public read, authenticated
-   write). Publishing it requires wiring Firebase Authentication into the
-   admin panel; until that is done, writes will be rejected. See
-   CJHQ_Firestore_Security.md for the sequence.
+   Firestore rules: public read on the collections the site renders, create
+   only on the two public inboxes, writes restricted to the staff allowlist,
+   deny-all catch-all. Never use `allow read, write: if true` - that makes
+   every collection world-writable by anyone, bypassing this page entirely.
+
+   Rules live in `firestore.rules`, which is deliberately NOT committed to
+   this repository. Publish from the Firebase Console. To add or remove a
+   staff member you must update BOTH the allowlist in the rules and the
+   hash list in this file, or the panel and the database will disagree.
 
    ADMIN ACCESS: the admin panel signs in with Firebase Authentication
    (email + password). Firestore rules require request.auth != null for every
@@ -4050,7 +4071,7 @@ async function renderPublicNotices(){
       bannerEl.style.display = 'block';
       const title = isFr ? banner.title_fr : banner.title_en;
       const body = isFr ? banner.body_fr : banner.body_en;
-      const sp = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize : (s => (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,''));
+      const sp = cjhqSanitizeHtml;
       bannerEl.innerHTML = `${title?`<b>${sp(title)}</b>`:''}${sp(body)}<button class="notice-close" onclick="dismissBanner('${banner.id}')">&times;</button>`;
     } else {
       bannerEl.style.display = 'none';
@@ -4064,7 +4085,7 @@ async function renderPublicNotices(){
     if(overlay && body){
       const title = isFr ? popup.title_fr : popup.title_en;
       const msg = isFr ? popup.body_fr : popup.body_en;
-      const sp2 = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize : (s => (s||'').replace(/<script[^>]*>.*?<\/script>/gsi,''));
+      const sp2 = cjhqSanitizeHtml;
       body.innerHTML = `
         <div class="site-modal-head"><h2 style="margin:2px 0;">${sp2(title)||''}</h2>
           <button class="site-modal-close" onclick="closeSitePopup('${popup.id}')">&times;</button></div>
