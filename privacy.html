@@ -230,38 +230,68 @@
   }
 
   /* ===== MOBILE SLIDE-OUT DRAWER ===== */
+  /* Starts below the header so the header is never dimmed, and sits under the
+     panel. Lighter than the old full-screen scrim - the panel is now a header
+     extension rather than a modal takeover. */
   .mobile-drawer-overlay{
-    display:none; position:fixed; inset:0; background:rgba(14,33,73,.5); z-index:190;
+    display:none; position:fixed; top:var(--header-h, 96px); left:0; right:0; bottom:0;
+    background:rgba(14,33,73,.35); z-index:30;
   }
   .mobile-drawer-overlay.open{display:block;}
+  /* Anchored to the bottom edge of the header, spanning its full width, so it
+     reads as HEADER -> NAVIGATION -> PAGE. --header-h is measured from the real
+     rendered header (see setHeaderHeightVar) rather than hard-coded, because the
+     brand mark is 112px on desktop and 64px on mobile. z-index sits BELOW the
+     header (50) so the header stays visible and the panel tucks under it. */
   .mobile-drawer{
-    position:fixed; top:0; right:0; height:100%; width:min(320px, 82vw); background:var(--paper);
-    z-index:200; transform:translateX(100%); transition:transform .25s ease;
-    display:flex; flex-direction:column; box-shadow:-8px 0 30px rgba(14,33,73,.18);
+    position:fixed; top:var(--header-h, 96px); left:0; right:0;
+    max-height:calc(100vh - var(--header-h, 96px)); background:var(--paper);
+    z-index:40; display:flex; flex-direction:column;
+    border-bottom:1px solid var(--line);
+    box-shadow:0 10px 24px rgba(14,33,73,.10);
+    transform:translateY(-8px); opacity:0; visibility:hidden; pointer-events:none;
+    transition:transform .18s ease, opacity .18s ease, visibility .18s;
   }
-  .mobile-drawer.open{transform:translateX(0);}
-  .mobile-drawer-head{
-    display:flex; align-items:center; justify-content:space-between; padding:18px 20px;
-    border-bottom:1px solid var(--line); flex-shrink:0;
+  .mobile-drawer.open{
+    transform:translateY(0); opacity:1; visibility:visible; pointer-events:auto;
   }
-  .mobile-drawer-close{background:none; border:none; font-size:1.6rem; line-height:1; color:var(--muted); cursor:pointer; padding:4px 8px;}
+  @media (prefers-reduced-motion: reduce){
+    .mobile-drawer{transition:none;}
+  }
   .mobile-drawer-search{
-    display:flex; align-items:center; gap:8px; margin:16px 20px; padding:9px 14px;
+    display:flex; align-items:center; gap:8px; margin:14px 0 6px; padding:9px 14px;
     border:1px solid var(--line); border-radius:20px; flex-shrink:0;
   }
   .mobile-drawer-search svg{width:16px; height:16px; stroke:var(--muted); flex-shrink:0;}
   .mobile-drawer-search input{border:none; outline:none; font-size:.9rem; width:100%; font-family:inherit; background:none;}
-  .mobile-drawer-nav{display:flex; flex-direction:column; padding:8px 12px; overflow-y:auto; flex:1;}
-  .mobile-drawer-nav a{
-    padding:14px 12px; font-size:1rem; font-weight:500; color:var(--ink); text-decoration:none;
-    border-radius:8px; display:block;
+  /* Same max-width and horizontal padding as .header-inner so the items line up
+     with the logo above them instead of floating in their own box. */
+  .mobile-drawer-inner{
+    max-width:var(--maxw); margin:0 auto; width:100%;
+    padding:8px 24px 20px; display:flex; flex-direction:column;
+    overflow-y:auto; max-height:calc(100vh - var(--header-h, 96px));
   }
-  .mobile-drawer-nav a:active, .mobile-drawer-nav a.active{background:var(--bg-alt);}
+  .mobile-drawer-nav{display:flex; flex-direction:column; padding:4px 0;}
+  /* 48px minimum touch target; a hairline divider between items rather than
+     boxed buttons, which keeps it institutional rather than app-like. */
+  .mobile-drawer-nav a{
+    padding:13px 4px; min-height:48px; display:flex; align-items:center;
+    font-size:1rem; font-weight:500; color:var(--ink); text-decoration:none;
+    border-bottom:1px solid var(--line);
+  }
+  .mobile-drawer-nav a:last-child{border-bottom:none;}
+  .mobile-drawer-nav a:hover{color:var(--bronze);}
+  .mobile-drawer-nav a.active{color:var(--bronze); font-weight:600;}
+  .mobile-drawer-nav a.active::before{
+    content:""; width:3px; align-self:stretch; background:var(--bronze);
+    margin-right:12px; margin-left:-4px; border-radius:2px;
+  }
+  .mobile-drawer-nav a:active{background:var(--bg-alt);}
   .mobile-drawer-nav a.mobile-drawer-sublink{
     margin-left:14px; font-size:.92rem; font-weight:400; color:var(--ink-soft);
     padding-top:10px; padding-bottom:10px;
   }
-  .mobile-drawer-foot{padding:16px 20px 24px; border-top:1px solid var(--line); flex-shrink:0;}
+  .mobile-drawer-foot{padding:16px 0 4px; border-top:1px solid var(--line); flex-shrink:0;}
   @media (min-width:861px){ .mobile-drawer, .mobile-drawer-overlay{display:none !important;} }
 
   /* ===== HERO ===== */
@@ -756,6 +786,7 @@
     </a>
 
     <nav class="main-nav" id="mainNav" aria-label="Main">
+      <a href="/" data-page="home"><span data-en>Home</span><span data-fr>Accueil</span></a>
       <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
       <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
       <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
@@ -774,7 +805,7 @@
         <button id="btnEN" class="active">EN</button>
         <button id="btnFR">FR</button>
       </div>
-      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open menu">
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileDrawer">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
     </div>
@@ -782,27 +813,27 @@
 </header>
 
 <div class="mobile-drawer-overlay" id="mobileDrawerOverlay"></div>
-<div class="mobile-drawer" id="mobileDrawer">
-  <div class="mobile-drawer-head">
-    <span class="brand-name">CJHQ</span>
-    <button class="mobile-drawer-close" id="mobileDrawerClose" aria-label="Close menu">&times;</button>
-  </div>
+<div class="mobile-drawer" id="mobileDrawer" role="navigation" aria-label="Mobile menu">
+  <div class="mobile-drawer-inner">
   <div class="mobile-drawer-search">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
     <input type="text" id="drawerSearch" data-en-ph="Search the site…" data-fr-ph="Rechercher sur le site…" placeholder="Search the site…" autocomplete="off" oninput="handleSearch(this.value, 'drawerSearchResults')" onfocus="handleSearch(this.value, 'drawerSearchResults')">
   </div>
-  <div class="search-results" id="drawerSearchResults" style="position:static; width:auto; margin:0 20px 8px; box-shadow:none; max-height:none;"></div>
-  <nav class="mobile-drawer-nav" id="mobileDrawerNav" aria-label="Mobile">
+  <div class="search-results" id="drawerSearchResults" style="position:static; width:auto; margin:0 0 8px; box-shadow:none; max-height:none;"></div>
+  <div class="mobile-drawer-nav" id="mobileDrawerNav">
+    <a href="/" data-page="home"><span data-en>Home</span><span data-fr>Accueil</span></a>
     <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
     <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
     <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
     <a href="/about" data-page="about"><span data-en>About CJHQ</span><span data-fr>À propos du CJHQ</span></a>
-  </nav>
+    <a href="/stay-informed" data-href-page="stay-informed" id="drawerSubscribeLink" onclick="if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return true; goToSubscribeForm(); return false;"><span data-en>Subscribe</span><span data-fr>S'abonner</span></a>
+  </div>
   <div class="mobile-drawer-foot">
     <div class="lang-toggle">
       <button id="drawerBtnEN" class="active">EN</button>
       <button id="drawerBtnFR">FR</button>
     </div>
+  </div>
   </div>
 </div>
 
@@ -3709,20 +3740,65 @@ setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
   const toggle = document.getElementById('mobileNavToggle');
   const drawer = document.getElementById('mobileDrawer');
   const overlay = document.getElementById('mobileDrawerOverlay');
-  const closeBtn = document.getElementById('mobileDrawerClose');
+  const header = document.querySelector('header');
   if(!toggle || !drawer) return;
 
-  function openDrawer(){ drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  // The panel hangs off the bottom of the header, and the header is not a fixed
+  // height: the brand mark is 112px on desktop and 64px below 860px, and French
+  // labels can wrap. Measuring the rendered header keeps the panel attached
+  // instead of relying on a magic number that breaks at some width.
+  function setHeaderHeightVar(){
+    if(!header) return;
+    const h = Math.round(header.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  setHeaderHeightVar();
+  window.addEventListener('resize', setHeaderHeightVar);
+  window.addEventListener('orientationchange', setHeaderHeightVar);
+  // Late webfont loads change the header height after first paint.
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderHeightVar);
 
-  toggle.addEventListener('click', openDrawer);
-  closeBtn.addEventListener('click', closeDrawer);
+  function openDrawer(){
+    setHeaderHeightVar();
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    toggle.setAttribute('aria-expanded','true');
+    // The page behind is scroll-locked, but the panel itself still scrolls
+    // because .mobile-drawer-inner has its own overflow.
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');
+    document.body.style.overflow = '';
+  }
+  function toggleDrawer(){
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+  }
+
+  // One control opens and closes it, so there is no separate close button to
+  // duplicate the hamburger.
+  toggle.addEventListener('click', toggleDrawer);
   overlay.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && drawer.classList.contains('open')){
+      closeDrawer();
+      toggle.focus();
+    }
+  });
+  // Above the breakpoint the panel is irrelevant; make sure it cannot be left open.
+  window.addEventListener('resize', ()=>{
+    if(window.innerWidth > 860 && drawer.classList.contains('open')) closeDrawer();
+  });
 
   document.querySelectorAll('#mobileDrawerNav a').forEach(a=>{
     a.addEventListener('click', (e)=>{
       if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      // Subscribe has no data-page: it runs its own handler (route + scroll to
+      // the form), so routing it here as well would fire goPage(undefined) and
+      // cancel the scroll. It still closes the panel.
+      if(!a.dataset.page){ closeDrawer(); return; }
       e.preventDefault();
       goPage(a.dataset.page);
       closeDrawer();
