@@ -292,6 +292,11 @@
     padding-top:10px; padding-bottom:10px;
   }
   .mobile-drawer-foot{padding:16px 0 4px; border-top:1px solid var(--line); flex-shrink:0;}
+  /* .lang-toggle is display:flex, so as a block-level child of the footer it
+     stretched to the full panel width. In the header it sits inside a flex row
+     and shrinks naturally. inline-flex makes it size to its two buttons here
+     without touching the header instance. */
+  .mobile-drawer-foot .lang-toggle{display:inline-flex; width:fit-content;}
   @media (min-width:861px){ .mobile-drawer, .mobile-drawer-overlay{display:none !important;} }
 
   /* ===== HERO ===== */
