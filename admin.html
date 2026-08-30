@@ -695,7 +695,22 @@
     font-weight:600; color:var(--ink); min-height:88px; transition:border-color .15s, background .15s;}
   .ctc-dir-btn:hover{border-color:var(--bronze-soft);}
   .ctc-dir-btn[aria-checked="true"]{border-color:var(--bronze); background:var(--bg-alt);}
-  .ctc-dir-flag{font-size:1.5rem; line-height:1;}
+  /* Emoji flags render as bare letters ("CA", "US") on Windows, so the flags are
+     inline SVG. No external image request, and they look identical everywhere. */
+  .ctc-dir-flag{display:flex; align-items:center; justify-content:center; gap:10px; line-height:1;}
+  .ctc-flag{width:32px; height:20px; border:1px solid var(--line); border-radius:2px; display:block; flex-shrink:0;}
+  .ctc-dir-arrow{font-size:1.05rem; color:var(--muted);}
+  .ctc-hint{font-size:.86rem; color:var(--muted); margin-top:10px;}
+  .ctc-back{margin-bottom:22px; padding:9px 16px; font-size:.9rem;}
+  /* .btn.outline is designed for the dark hero: white text on transparent.
+     On this white page that renders as an invisible button, so give the
+     outline variant readable colours inside the tool only. */
+  #page-child-travel-consent .btn.outline{
+    color:var(--ink); border-color:var(--line); background:var(--paper);
+  }
+  #page-child-travel-consent .btn.outline:hover{
+    border-color:var(--bronze-soft); background:var(--bg-alt);
+  }
   .ctc-generate{width:100%; justify-content:center; font-size:1.05rem; padding:15px 24px;}
   .ctc-actions{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 22px;}
   .ctc-actions .btn{flex:1 1 auto; justify-content:center;}
@@ -734,7 +749,7 @@
     #ctcLetter{position:absolute; left:0; top:0; width:100%; max-width:none;
       margin:0; padding:0; box-shadow:none; min-height:0;}
     .ctc-letter-wrap{background:none; padding:0; overflow:visible;}
-    header, footer, .ctc-actions, #ctcFormScreen, .mobile-drawer, .mobile-drawer-overlay{display:none !important;}
+    header, footer, .ctc-actions, .ctc-back, #ctcFormScreen, .mobile-drawer, .mobile-drawer-overlay{display:none !important;}
   }
 </style>
 <!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
@@ -1766,6 +1781,10 @@
   <section style="padding-top:56px; padding-bottom:48px;">
     <div class="section-inner" style="max-width:820px;">
 
+      <a href="/resources" data-page="resources" class="btn outline ctc-back">
+        <span data-en>← Back to Resources</span><span data-fr>← Retour aux ressources</span>
+      </a>
+
       <div class="ctc-screen" id="ctcFormScreen">
         <span class="eyebrow" data-en>Travel &amp; Border Crossing</span><span class="eyebrow" data-fr>Voyage et passage frontalier</span>
         <h1 style="font-size:clamp(1.8rem,3.6vw,2.4rem); margin-top:10px;">
@@ -1785,11 +1804,11 @@
             <legend class="ctc-legend"><span data-en>Travel Direction</span><span data-fr>Sens du voyage</span></legend>
             <div class="ctc-dir" role="radiogroup" aria-labelledby="ctcDirLabel">
               <button type="button" class="ctc-dir-btn" data-dir="ca-us" role="radio" aria-checked="false">
-                <span class="ctc-dir-flag" aria-hidden="true">🇨🇦&nbsp;→&nbsp;🇺🇸</span>
+                <span class="ctc-dir-flag" aria-hidden="true"><svg class="ctc-flag" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><rect width="32" height="20" fill="#fff"/><rect width="8" height="20" fill="#D52B1E"/><rect x="24" width="8" height="20" fill="#D52B1E"/><path fill="#D52B1E" d="M16 4.2l.86 1.94a.28.28 0 00.32.16l1.4-.32-.5 1.66a.28.28 0 00.1.31l1.5 1.05-1.28.66a.28.28 0 00-.12.32l.36 1.2-2.3-.3a.28.28 0 00-.3.3l.14 2.1h-.72l.14-2.1a.28.28 0 00-.3-.3l-2.3.3.36-1.2a.28.28 0 00-.12-.32l-1.28-.66 1.5-1.05a.28.28 0 00.1-.31l-.5-1.66 1.4.32a.28.28 0 00.32-.16z"/></svg><span class="ctc-dir-arrow" aria-hidden="true">→</span><svg class="ctc-flag" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><rect width="32" height="20" fill="#fff"/><g fill="#B22234"><rect width="32" height="1.54"/><rect y="3.08" width="32" height="1.54"/><rect y="6.16" width="32" height="1.54"/><rect y="9.24" width="32" height="1.54"/><rect y="12.32" width="32" height="1.54"/><rect y="15.4" width="32" height="1.54"/><rect y="18.46" width="32" height="1.54"/></g><rect width="13.2" height="10.78" fill="#3C3B6E"/><g fill="#fff"><circle cx="2.2" cy="2" r=".7"/><circle cx="5.5" cy="2" r=".7"/><circle cx="8.8" cy="2" r=".7"/><circle cx="11.5" cy="2" r=".7"/><circle cx="3.8" cy="4" r=".7"/><circle cx="7.1" cy="4" r=".7"/><circle cx="10.2" cy="4" r=".7"/><circle cx="2.2" cy="6" r=".7"/><circle cx="5.5" cy="6" r=".7"/><circle cx="8.8" cy="6" r=".7"/><circle cx="11.5" cy="6" r=".7"/><circle cx="3.8" cy="8.2" r=".7"/><circle cx="7.1" cy="8.2" r=".7"/><circle cx="10.2" cy="8.2" r=".7"/></g></svg></span>
                 <span class="ctc-dir-txt" data-en>Canada → United States</span><span class="ctc-dir-txt" data-fr>Canada → États-Unis</span>
               </button>
               <button type="button" class="ctc-dir-btn" data-dir="us-ca" role="radio" aria-checked="false">
-                <span class="ctc-dir-flag" aria-hidden="true">🇺🇸&nbsp;→&nbsp;🇨🇦</span>
+                <span class="ctc-dir-flag" aria-hidden="true"><svg class="ctc-flag" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><rect width="32" height="20" fill="#fff"/><g fill="#B22234"><rect width="32" height="1.54"/><rect y="3.08" width="32" height="1.54"/><rect y="6.16" width="32" height="1.54"/><rect y="9.24" width="32" height="1.54"/><rect y="12.32" width="32" height="1.54"/><rect y="15.4" width="32" height="1.54"/><rect y="18.46" width="32" height="1.54"/></g><rect width="13.2" height="10.78" fill="#3C3B6E"/><g fill="#fff"><circle cx="2.2" cy="2" r=".7"/><circle cx="5.5" cy="2" r=".7"/><circle cx="8.8" cy="2" r=".7"/><circle cx="11.5" cy="2" r=".7"/><circle cx="3.8" cy="4" r=".7"/><circle cx="7.1" cy="4" r=".7"/><circle cx="10.2" cy="4" r=".7"/><circle cx="2.2" cy="6" r=".7"/><circle cx="5.5" cy="6" r=".7"/><circle cx="8.8" cy="6" r=".7"/><circle cx="11.5" cy="6" r=".7"/><circle cx="3.8" cy="8.2" r=".7"/><circle cx="7.1" cy="8.2" r=".7"/><circle cx="10.2" cy="8.2" r=".7"/></g></svg><span class="ctc-dir-arrow" aria-hidden="true">→</span><svg class="ctc-flag" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><rect width="32" height="20" fill="#fff"/><rect width="8" height="20" fill="#D52B1E"/><rect x="24" width="8" height="20" fill="#D52B1E"/><path fill="#D52B1E" d="M16 4.2l.86 1.94a.28.28 0 00.32.16l1.4-.32-.5 1.66a.28.28 0 00.1.31l1.5 1.05-1.28.66a.28.28 0 00-.12.32l.36 1.2-2.3-.3a.28.28 0 00-.3.3l.14 2.1h-.72l.14-2.1a.28.28 0 00-.3-.3l-2.3.3.36-1.2a.28.28 0 00-.12-.32l-1.28-.66 1.5-1.05a.28.28 0 00.1-.31l-.5-1.66 1.4.32a.28.28 0 00.32-.16z"/></svg></span>
                 <span class="ctc-dir-txt" data-en>United States → Canada</span><span class="ctc-dir-txt" data-fr>États-Unis → Canada</span>
               </button>
             </div>
@@ -1809,19 +1828,21 @@
               <p class="ctc-err" id="err-ctcChildDob" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcChildPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcChildPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span></label>
               <input type="text" id="ctcChildPassport" autocomplete="off" spellcheck="false">
               <p class="ctc-err" id="err-ctcChildPassport" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcChildCountry"><span data-en>Passport Issuing Country</span><span data-fr>Pays émetteur du passeport</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcChildCountry"><span data-en>Passport Issuing Country</span><span data-fr>Pays émetteur du passeport</span></label>
               <select id="ctcChildCountry">
                 <option value=""></option>
                 <option value="Canada">Canada</option>
-                <option value="United States">United States</option>
-                <option value="Other">Other</option>
+                <option value="United States" data-en-txt="United States" data-fr-txt="États-Unis">United States</option>
+                <option value="Other" data-en-txt="Other (enter below)" data-fr-txt="Autre (précisez ci-dessous)">Other (enter below)</option>
               </select>
-              <input type="text" id="ctcChildCountryOther" hidden placeholder="Country">
+              <label for="ctcChildCountryOther" id="ctcChildCountryOtherLabel" hidden><span data-en>Country name</span><span data-fr>Nom du pays</span></label>
+              <input type="text" id="ctcChildCountryOther" hidden autocomplete="off"
+                     data-ph-en="Enter the issuing country" data-ph-fr="Indiquez le pays émetteur">
               <p class="ctc-err" id="err-ctcChildCountry" hidden></p>
             </div>
           </fieldset>
@@ -1834,22 +1855,22 @@
               <p class="ctc-err" id="err-ctcAdultName" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcAdultRel"><span data-en>Relationship to Child</span><span data-fr>Lien avec l'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcAdultRel"><span data-en>Relationship to Child</span><span data-fr>Lien avec l'enfant</span></label>
               <input type="text" id="ctcAdultRel" autocomplete="off" placeholder="Parent, Grandparent, Relative, etc.">
               <p class="ctc-err" id="err-ctcAdultRel" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcAdultPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcAdultPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span></label>
               <input type="text" id="ctcAdultPassport" autocomplete="off" spellcheck="false">
               <p class="ctc-err" id="err-ctcAdultPassport" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcAdultPhone"><span data-en>Phone Number</span><span data-fr>Numéro de téléphone</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcAdultPhone"><span data-en>Phone Number</span><span data-fr>Numéro de téléphone</span></label>
               <input type="tel" id="ctcAdultPhone" autocomplete="off">
               <p class="ctc-err" id="err-ctcAdultPhone" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcAdultEmail"><span data-en>Email</span><span data-fr>Courriel</span> <span class="ctc-opt" data-en>(optional)</span><span class="ctc-opt" data-fr>(facultatif)</span></label>
+              <label for="ctcAdultEmail"><span data-en>Email</span><span data-fr>Courriel</span></label>
               <input type="email" id="ctcAdultEmail" autocomplete="off">
             </div>
           </fieldset>
@@ -1862,7 +1883,7 @@
               <p class="ctc-err" id="err-ctcParentName" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcParentAddress"><span data-en>Address</span><span data-fr>Adresse</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcParentAddress"><span data-en>Address</span><span data-fr>Adresse</span></label>
               <textarea id="ctcParentAddress" rows="3"></textarea>
               <p class="ctc-err" id="err-ctcParentAddress" hidden></p>
             </div>
@@ -1872,7 +1893,7 @@
               <p class="ctc-err" id="err-ctcParentPhone" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcParentEmail"><span data-en>Email</span><span data-fr>Courriel</span> <span class="ctc-opt" data-en>(optional)</span><span class="ctc-opt" data-fr>(facultatif)</span></label>
+              <label for="ctcParentEmail"><span data-en>Email</span><span data-fr>Courriel</span></label>
               <input type="email" id="ctcParentEmail" autocomplete="off">
             </div>
           </fieldset>
@@ -1885,7 +1906,7 @@
               <p class="ctc-err" id="err-ctcDeparture" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcReturn"><span data-en>Return Date</span><span data-fr>Date de retour</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcReturn"><span data-en>Return Date</span><span data-fr>Date de retour</span></label>
               <input type="date" id="ctcReturn">
               <p class="ctc-err" id="err-ctcReturn" hidden></p>
             </div>
@@ -1900,6 +1921,13 @@
           <button type="submit" class="btn dark ctc-generate" id="ctcGenerate">
             <span data-en>Generate Travel Consent Letter</span><span data-fr>Générer la lettre de consentement</span>
           </button>
+          <button type="button" class="btn outline ctc-generate" id="ctcBlankBtn">
+            <span data-en>Download Blank Form</span><span data-fr>Télécharger le formulaire vierge</span>
+          </button>
+          <p class="ctc-hint">
+            <span data-en>Prefer to fill it in by hand? Download the blank form and complete it in pen.</span>
+            <span data-fr>Vous préférez le remplir à la main? Téléchargez le formulaire vierge et complétez-le au stylo.</span>
+          </p>
         </form>
       </div>
 
@@ -4223,8 +4251,17 @@ if(contactForm){
   /* ---------- "Other" issuing country ---------- */
   $('ctcChildCountry').addEventListener('change', function(){
     const other = $('ctcChildCountryOther');
-    other.hidden = this.value !== 'Other';
-    if(other.hidden) other.value = '';
+    const lab   = $('ctcChildCountryOtherLabel');
+    const show  = this.value === 'Other';
+    other.hidden = !show;
+    if(lab) lab.hidden = !show;
+    if(show){
+      // Placeholder follows the current language, like every other field.
+      other.placeholder = isFr() ? other.dataset.phFr : other.dataset.phEn;
+      other.focus();
+    }else{
+      other.value = '';
+    }
   });
 
   /* ---------- validation ---------- */
@@ -4260,10 +4297,12 @@ if(contactForm){
     const field = $(key);
     if(field){ field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby'); }
   }
-  const REQUIRED = ['ctcChildName','ctcChildDob','ctcChildPassport','ctcChildCountry',
-    'ctcAdultName','ctcAdultRel','ctcAdultPassport','ctcAdultPhone',
-    'ctcParentName','ctcParentAddress','ctcParentPhone',
-    'ctcDeparture','ctcReturn','ctcDestination'];
+  // Only these seven are mandatory. Everything else is genuinely optional and
+  // is simply left unmarked - the form never uses the word "optional".
+  const REQUIRED = ['ctcChildName','ctcChildDob',
+    'ctcAdultName',
+    'ctcParentName','ctcParentPhone',
+    'ctcDeparture','ctcDestination'];
 
   function validate(){
     let firstBad = null;
@@ -4297,6 +4336,18 @@ if(contactForm){
     const sel = $('ctcChildCountry').value;
     return sel === 'Other' ? ($('ctcChildCountryOther').value.trim() || 'Other') : sel;
   }
+  // A blank form is the same document with every value replaced by a rule to
+  // write on. Reusing the real builder means the printed layout, wording and
+  // page size can never drift from the filled-in version.
+  const FILL = '\u00a0'.repeat(2) + '_'.repeat(26);
+  function blankData(){
+    return { blank:true, dir:direction || '',
+      childName:'', childDob:'', childPassport:'', childCountry:'',
+      adultName:'', adultRel:'', adultPassport:'', adultPhone:'', adultEmail:'',
+      parentName:'', parentAddress:'', parentPhone:'', parentEmail:'',
+      departure:'', ret:'', destination:'' };
+  }
+
   function collect(){
     const v = (id) => $(id).value.trim();
     return {
@@ -4314,20 +4365,35 @@ if(contactForm){
   /* ---------- letter copy ---------- */
   function L(d){
     const fr = isFr();
-    const fromTo = fr
-      ? (d.dir==='ca-us' ? ['du Canada','aux \u00c9tats-Unis'] : ['des \u00c9tats-Unis','au Canada'])
-      : (d.dir==='ca-us' ? ['Canada','the United States'] : ['the United States','Canada']);
-    const dirLine = fr
+    // In blank mode every interpolated value becomes a rule to write on.
+    const B = (v) => d.blank ? FILL : v;
+    // A blank form with no direction chosen must not assert one: the ternary
+    // would otherwise fall through to United States -> Canada and print it as
+    // fact. Leave both countries as rules to complete by hand.
+    const fromTo = (d.blank && !d.dir)
+      ? [FILL, FILL]
+      : fr
+        ? (d.dir==='ca-us' ? ['du Canada','aux \u00c9tats-Unis'] : ['des \u00c9tats-Unis','au Canada'])
+        : (d.dir==='ca-us' ? ['Canada','the United States'] : ['the United States','Canada']);
+    let dirLine = fr
       ? (d.dir==='ca-us' ? 'Sens du voyage : Canada \u2192 \u00c9tats-Unis' : 'Sens du voyage : \u00c9tats-Unis \u2192 Canada')
       : (d.dir==='ca-us' ? 'Travel Direction: Canada \u2192 United States' : 'Travel Direction: United States \u2192 Canada');
+    // Blank form with no direction chosen: print both so it can be ticked by hand.
+    if(d.blank && !d.dir){
+      // Square-box characters are not in WinAnsi and printed as "?" in the PDF.
+      // Plain brackets render everywhere and are just as clear to tick.
+      dirLine = fr
+        ? 'Sens du voyage :   [  ] Canada \u2192 \u00c9tats-Unis      [  ] \u00c9tats-Unis \u2192 Canada'
+        : 'Travel Direction:   [  ] Canada \u2192 United States      [  ] United States \u2192 Canada';
+    }
     const body = fr
-      ? [`Je soussign\u00e9(e), ${d.parentName}, parent ou tuteur l\u00e9gal de ${d.childName}, n\u00e9(e) le ${prettyDate(d.childDob)}, consens \u00e0 ce que mon enfant voyage ${fromTo[0]} ${fromTo[1]} avec ${d.adultName}, ${d.adultRel}, du ${prettyDate(d.departure)} au ${prettyDate(d.ret)}.`,
-         `Le num\u00e9ro de passeport de l\u2019enfant est ${d.childPassport}, d\u00e9livr\u00e9 par : ${d.childCountry}.`,
-         `La destination du voyage est ${d.destination}.`,
+      ? [`Je soussign\u00e9(e), ${B(d.parentName)}, parent ou tuteur l\u00e9gal de ${B(d.childName)}, n\u00e9(e) le ${d.blank ? FILL : prettyDate(d.childDob)}, consens \u00e0 ce que mon enfant voyage ${fromTo[0]} ${fromTo[1]} avec ${B(d.adultName)}, ${B(d.adultRel)}, du ${d.blank ? FILL : prettyDate(d.departure)} au ${d.blank ? FILL : prettyDate(d.ret)}.`,
+         `Le num\u00e9ro de passeport de l\u2019enfant est ${B(d.childPassport)}, d\u00e9livr\u00e9 par : ${B(d.childCountry)}.`,
+         `La destination du voyage est ${B(d.destination)}.`,
          `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour le voyage mentionn\u00e9 ci-dessus.`]
-      : [`I, ${d.parentName}, am the parent/legal guardian of ${d.childName}, born ${prettyDate(d.childDob)}, and give my consent for my child to travel from ${fromTo[0]} to ${fromTo[1]} with ${d.adultName}, ${d.adultRel}, from ${prettyDate(d.departure)} through ${prettyDate(d.ret)}.`,
-         `The child\u2019s passport number is ${d.childPassport}, issued by ${d.childCountry}.`,
-         `The destination of travel is ${d.destination}.`,
+      : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${d.blank ? FILL : prettyDate(d.childDob)}, and give my consent for my child to travel from ${fromTo[0]} to ${fromTo[1]} with ${B(d.adultName)}, ${B(d.adultRel)}, from ${d.blank ? FILL : prettyDate(d.departure)} through ${d.blank ? FILL : prettyDate(d.ret)}.`,
+         `The child\u2019s passport number is ${B(d.childPassport)}, issued by ${B(d.childCountry)}.`,
+         `The destination of travel is ${B(d.destination)}.`,
          `I authorize the accompanying adult to travel with the child for the above-mentioned trip.`];
     return {
       title: fr ? 'LETTRE DE CONSENTEMENT AU VOYAGE D\u2019UN ENFANT' : 'CHILD TRAVEL CONSENT LETTER',
@@ -4441,7 +4507,17 @@ if(contactForm){
     }
     function rule(){ need(8); ops.push(`0.72 w 0.75 G ${M} ${(y-3).toFixed(2)} m ${PW-M} ${(y-3).toFixed(2)} l S`); y -= 9; }
     function kv(k, v){
-      if(!v) return;
+      // Filled form: omit empty rows entirely. Blank form: keep every row and
+      // draw a rule to write on.
+      if(!v && !d.blank) return;
+      if(!v && d.blank){
+        const size = 10, kw = 132;
+        need(size * 1.35);
+        ops.push(`BT /F2 ${size} Tf 1 0 0 1 ${M} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(k))}) Tj ET`);
+        ops.push(`0.6 w 0.55 G ${(M+kw).toFixed(2)} ${(y-size-1.5).toFixed(2)} m ${PW-M} ${(y-size-1.5).toFixed(2)} l S`);
+        y -= size * 1.35 + 1.5;
+        return;
+      }
       const kw = 132, size = 10;
       const lines = wrapText(v, size, false, CW - kw);
       need(size * 1.35 * lines.length);
@@ -4553,6 +4629,26 @@ if(contactForm){
     renderPreview(collect());
     showPreview();
   });
+  // Blank form: no validation, nothing entered is used, so it works from an
+  // untouched form. Shares the same PDF builder as the filled version.
+  $('ctcBlankBtn').addEventListener('click', ()=>{
+    let url;
+    try{
+      const blob = buildPdf(blankData());
+      url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'CJHQ-Child-Travel-Consent-Blank.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(err){
+      console.warn('[CJHQ] blank consent form PDF generation failed');
+      alert(isFr() ? 'Le formulaire vierge n\u2019a pas pu \u00eatre g\u00e9n\u00e9r\u00e9. Veuillez r\u00e9essayer.'
+                   : 'The blank form could not be generated. Please try again.');
+    }finally{
+      if(url) setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    }
+  });
+
   $('ctcEditBtn').addEventListener('click', showForm);
   $('ctcPrintBtn').addEventListener('click', ()=> window.print());
   $('ctcDownloadBtn').addEventListener('click', ()=>{
