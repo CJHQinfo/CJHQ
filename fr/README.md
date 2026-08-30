@@ -1,0 +1,5076 @@
+[index.html](https://github.com/user-attachments/files/31609926/index.html)
+<!DOCTYPE html>
+<html lang="fr" class="lang-fr" data-force-lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">CJHQ — Conseil des Juifs Hassidiques du Québec</title>
+<meta name="description" content="Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" id="canonicalTag" href="https://cjhq.org/fr/">
+<!-- Reciprocal with /fr/, the one crawlable French URL. The other routes have
+     no French equivalent, so the route generator strips these from them. -->
+<link rel="alternate" hreflang="en" href="https://cjhq.org/">
+<link rel="alternate" hreflang="fr" href="https://cjhq.org/fr/">
+<link rel="alternate" hreflang="x-default" href="https://cjhq.org/">
+
+<!-- Favicon. favicon.ico carries 16/32/48px; browsers also request /favicon.ico
+     from the site root automatically, so this works even without these tags. -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+
+<!-- Google Analytics 4. The measurement ID is public by design (it appears in
+     page source on every GA site) and is not a credential.
+
+     send_page_view is false because this is a single-page app: the initial
+     automatic page_view would fire before the router has resolved the path and
+     before updatePageMeta() has set the title, recording the wrong page. Views
+     are sent explicitly from trackPageView() instead, after the title is set.
+     Turn OFF Enhanced Measurement > "Page changes based on browser history
+     events" in the GA console, or every navigation is counted twice. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-902DMP2V4W', {
+    send_page_view: false,
+    // Stated in the Privacy Policy: advertising features and cross-site
+    // profiling are off. These flags enforce that from the page itself, so the
+    // policy stays true even if a console setting is changed later.
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+    anonymize_ip: true
+  });
+</script>
+<link rel="apple-touch-icon" href="/favicon.ico">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CJHQ — Jewish Hasidic Council of Quebec">
+<meta property="og:title" id="ogTitle" content="CJHQ — Conseil des Juifs Hassidiques du Québec">
+<meta property="og:description" id="ogDescription" content="Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.">
+<meta property="og:url" id="ogUrl" content="https://cjhq.org/fr/">
+<meta property="og:image" content="https://cjhq.org/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_CA">
+<meta property="og:locale:alternate" content="en_CA">
+
+<!-- Twitter/X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@CJHQinfo">
+<meta name="twitter:title" id="twitterTitle" content="CJHQ — Conseil des Juifs Hassidiques du Québec">
+<meta name="twitter:description" id="twitterDescription" content="Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.">
+<meta name="twitter:image" content="https://cjhq.org/og-image.png">
+
+<!-- Schema.org Organization structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Jewish Hasidic Council of Quebec",
+  "alternateName": ["CJHQ", "Conseil des Juifs Hassidiques du Québec"],
+  "url": "https://cjhq.org/",
+  "logo": "https://cjhq.org/cjhq-logo.png",
+  "description": "The Jewish Hasidic Council of Quebec (CJHQ) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1040 Van Horne Ave",
+    "addressLocality": "Outremont",
+    "addressRegion": "QC",
+    "postalCode": "H2V 1J5",
+    "addressCountry": "CA"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+1-514-819-9440",
+    "email": "info@cjhq.org",
+    "contactType": "customer service",
+    "areaServed": "Quebec",
+    "availableLanguage": ["English", "French"]
+  },
+  "sameAs": [
+    "https://www.facebook.com/CJHQinfo",
+    "https://x.com/CJHQinfo",
+    "https://www.instagram.com/cjhqinfo/"
+  ],
+  "areaServed": {
+    "@type": "State",
+    "name": "Quebec",
+    "addressCountry": "CA"
+  }
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E2149;
+    --ink-soft:#1E3A6B;
+    --bronze:#2F4C7A;
+    --bronze-soft:#5A7CA8;
+    --burgundy:#0E2149;
+    --parchment:#FFFFFF;
+    --paper:#FFFFFF;
+    --bg-alt:#F2F5F9;
+    --charcoal:#20242A;
+    --line:#D8DFE8;
+    --muted:#68707C;
+    --radius:4px;
+    --maxw:1120px;
+    --c-blue:#3D6FB4; --c-blue-bg:#E8F0FB;
+    --c-yellow:#B4881A; --c-yellow-bg:#FBF3DD;
+    --c-red:#A23B3B; --c-red-bg:#F8E9E9;
+    --c-green:#3A7D52; --c-green-bg:#E9F5EC;
+    --c-purple:#6B4A8A; --c-purple-bg:#EFE7F5;
+    --c-minor:#8A6D3B; --c-minor-bg:#F5EFE1;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--parchment);
+    color:var(--charcoal);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Lora',serif;
+    color:var(--ink);
+    font-weight:600;
+    line-height:1.15;
+    margin:0 0 .5em 0;
+  }
+  h1{font-size:clamp(2.2rem,5vw,3.4rem); font-weight:500;}
+  h2{font-size:clamp(1.5rem,3vw,2rem);}
+  h3{font-size:1.15rem; font-weight:600;}
+  p{margin:0 0 1em 0;}
+  a{color:inherit;}
+  ul{margin:0 0 1em 0; padding-left:1.2em;}
+  li{margin-bottom:.35em;}
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.72rem;
+    font-weight:600;
+    color:var(--bronze);
+  }
+  button{font-family:inherit; cursor:pointer;}
+
+  /* visibility toggle for language */
+  html:not(.lang-fr) [data-fr]{display:none !important;}
+  html.lang-fr [data-en]{display:none !important;}
+
+  /* page routing */
+  main#mainContent{display:block; margin:0; padding:0;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:var(--parchment);
+    border-bottom:1px solid var(--line);
+  }
+  .header-inner{
+    max-width:var(--maxw); margin:0 auto; padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none;}
+  .brand-mark{height:112px; width:auto; flex-shrink:0; object-fit:contain;}
+  @media (max-width:860px){ .brand-mark{height:64px;} }
+  .brand-name{font-family:'Lora',serif; font-weight:600; font-size:1.15rem; color:var(--ink); letter-spacing:.01em;}
+  .brand-sub{display:block; font-family:'Inter',sans-serif; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; margin-top:1px;}
+
+  nav.main-nav{display:flex; gap:2px; flex-wrap:wrap; align-items:center;}
+  nav.main-nav a{
+    background:none; border:none; padding:8px 14px;
+    font-size:.88rem; font-weight:500; color:var(--ink-soft);
+    border-radius:var(--radius);
+    display:inline-block; line-height:normal; text-align:center;
+    text-decoration:none; cursor:pointer;
+  }
+  nav.main-nav a:hover{background:rgba(161,113,47,.1);}
+  nav.main-nav a.active{color:var(--paper); background:var(--ink);}
+
+  .nav-dropdown{position:relative;}
+  .nav-dropdown-trigger{display:flex; align-items:center; gap:4px; cursor:pointer;}
+  .nav-dropdown-caret{width:12px; height:12px; stroke:currentColor; transition:transform .15s;}
+  .nav-dropdown.open .nav-dropdown-caret{transform:rotate(180deg);}
+  .nav-dropdown-menu{
+    display:none; position:absolute; top:100%; left:0; margin-top:4px; min-width:180px;
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:0 10px 28px rgba(14,33,73,.14); padding:6px; z-index:60;
+  }
+  .nav-dropdown.open .nav-dropdown-menu{display:block;}
+  .nav-dropdown-menu a{
+    display:block; padding:9px 12px; font-size:.86rem; color:var(--ink-soft); border-radius:6px; text-decoration:none;
+  }
+  .nav-dropdown-menu a:hover{background:rgba(161,113,47,.1); color:var(--ink);}
+  @media (max-width:860px){
+    .nav-dropdown-menu{position:static; box-shadow:none; border:none; margin-top:0; padding:0 0 0 14px; display:none;}
+    .nav-dropdown.open .nav-dropdown-menu{display:block;}
+  }
+
+  .lang-toggle{
+    display:flex; border:1px solid var(--ink); border-radius:20px; overflow:hidden; flex-shrink:0;
+  }
+  .lang-toggle button{
+    background:var(--parchment); border:none; padding:6px 14px; font-size:.78rem; font-weight:600; color:var(--ink);
+  }
+  .lang-toggle button.active{background:var(--ink); color:var(--paper);}
+
+  .mobile-nav-toggle{
+    display:none; background:none; border:1px solid var(--line); border-radius:8px;
+    width:40px; height:40px; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .mobile-nav-toggle svg{width:20px; height:20px; stroke:var(--ink);}
+
+  @media (max-width:860px){
+    nav.main-nav{display:none;}
+    .search-box-wrap{display:none;}
+    .mobile-nav-toggle{display:flex;}
+  }
+
+  /* ===== MOBILE SLIDE-OUT DRAWER ===== */
+  /* Starts below the header so the header is never dimmed, and sits under the
+     panel. Lighter than the old full-screen scrim - the panel is now a header
+     extension rather than a modal takeover. */
+  .mobile-drawer-overlay{
+    display:none; position:fixed; top:var(--header-h, 96px); left:0; right:0; bottom:0;
+    background:rgba(14,33,73,.35); z-index:30;
+  }
+  .mobile-drawer-overlay.open{display:block;}
+  /* Anchored to the bottom edge of the header, spanning its full width, so it
+     reads as HEADER -> NAVIGATION -> PAGE. --header-h is measured from the real
+     rendered header (see setHeaderHeightVar) rather than hard-coded, because the
+     brand mark is 112px on desktop and 64px on mobile. z-index sits BELOW the
+     header (50) so the header stays visible and the panel tucks under it. */
+  .mobile-drawer{
+    position:fixed; top:var(--header-h, 96px); left:0; right:0;
+    max-height:calc(100vh - var(--header-h, 96px)); background:var(--paper);
+    z-index:40; display:flex; flex-direction:column;
+    border-bottom:1px solid var(--line);
+    box-shadow:0 10px 24px rgba(14,33,73,.10);
+    transform:translateY(-8px); opacity:0; visibility:hidden; pointer-events:none;
+    transition:transform .18s ease, opacity .18s ease, visibility .18s;
+  }
+  .mobile-drawer.open{
+    transform:translateY(0); opacity:1; visibility:visible; pointer-events:auto;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .mobile-drawer{transition:none;}
+  }
+  .mobile-drawer-search{
+    display:flex; align-items:center; gap:8px; margin:14px 0 6px; padding:9px 14px;
+    border:1px solid var(--line); border-radius:20px; flex-shrink:0;
+  }
+  .mobile-drawer-search svg{width:16px; height:16px; stroke:var(--muted); flex-shrink:0;}
+  .mobile-drawer-search input{border:none; outline:none; font-size:.9rem; width:100%; font-family:inherit; background:none;}
+  /* Same max-width and horizontal padding as .header-inner so the items line up
+     with the logo above them instead of floating in their own box. */
+  .mobile-drawer-inner{
+    max-width:var(--maxw); margin:0 auto; width:100%;
+    padding:8px 24px 20px; display:flex; flex-direction:column;
+    overflow-y:auto; max-height:calc(100vh - var(--header-h, 96px));
+  }
+  .mobile-drawer-nav{display:flex; flex-direction:column; padding:4px 0;}
+  /* 48px minimum touch target; a hairline divider between items rather than
+     boxed buttons, which keeps it institutional rather than app-like. */
+  .mobile-drawer-nav a{
+    padding:13px 4px; min-height:48px; display:flex; align-items:center;
+    font-size:1rem; font-weight:500; color:var(--ink); text-decoration:none;
+    border-bottom:1px solid var(--line);
+  }
+  .mobile-drawer-nav a:last-child{border-bottom:none;}
+  .mobile-drawer-nav a:hover{color:var(--bronze);}
+  .mobile-drawer-nav a.active{color:var(--bronze); font-weight:600;}
+  .mobile-drawer-nav a.active::before{
+    content:""; width:3px; align-self:stretch; background:var(--bronze);
+    margin-right:12px; margin-left:-4px; border-radius:2px;
+  }
+  .mobile-drawer-nav a:active{background:var(--bg-alt);}
+  .mobile-drawer-nav a.mobile-drawer-sublink{
+    margin-left:14px; font-size:.92rem; font-weight:400; color:var(--ink-soft);
+    padding-top:10px; padding-bottom:10px;
+  }
+  .mobile-drawer-foot{padding:16px 0 4px; border-top:1px solid var(--line); flex-shrink:0;}
+  /* .lang-toggle is display:flex, so as a block-level child of the footer it
+     stretched to the full panel width. In the header it sits inside a flex row
+     and shrinks naturally. inline-flex makes it size to its two buttons here
+     without touching the header instance. */
+  .mobile-drawer-foot .lang-toggle{display:inline-flex; width:fit-content;}
+  @media (min-width:861px){ .mobile-drawer, .mobile-drawer-overlay{display:none !important;} }
+
+  /* ===== HERO ===== */
+  .hero{
+    background:var(--ink);
+    color:var(--parchment);
+    position:relative;
+    overflow:hidden;
+    padding:88px 24px 96px;
+  }
+  .hero-inner{max-width:720px; margin:0 auto; position:relative; z-index:2;}
+  .hero h1{color:var(--paper); margin-bottom:.4em;}
+  .hero .eyebrow{color:#8FA3C7; margin-bottom:14px; display:block;}
+  .hero p.lede{font-size:1.15rem; color:#C7D3E8; max-width:600px; margin-bottom:2em;}
+  .hero-rings{position:absolute; right:-60px; top:50%; transform:translateY(-50%); opacity:.5; width:420px; height:420px;}
+  @media (max-width:760px){ .hero-rings{display:none;} }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--bronze); color:var(--paper); border:none;
+    padding:13px 24px; border-radius:2px; font-weight:600; font-size:.92rem;
+    text-decoration:none; letter-spacing:.01em;
+  }
+  .btn:hover{background:var(--bronze-soft);}
+  a.btn{text-decoration:none;}
+  .btn.outline{
+    background:transparent; border:1px solid rgba(246,242,232,.5); color:var(--paper);
+  }
+  .btn.outline:hover{border-color:var(--paper); background:rgba(246,242,232,.08);}
+  .btn.dark{background:var(--ink); color:var(--paper);}
+  .btn.dark:hover{background:var(--ink-soft);}
+
+  /* ===== SECTIONS ===== */
+  section{padding:72px 24px;}
+  .section-inner{max-width:var(--maxw); margin:0 auto;}
+  section.alt{background:var(--bg-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .section-head{max-width:640px; margin-bottom:40px;}
+  .section-head .eyebrow{display:block; margin-bottom:10px;}
+
+  .divider{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    margin:0 auto 40px; width:120px;
+  }
+  .divider .line{flex:1; height:1px; background:var(--line);}
+  .divider svg{width:18px; height:18px; opacity:.6;}
+
+  /* grid layouts */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:48px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+  @media (max-width:760px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+  .contact-grid{grid-template-columns:1.6fr 1fr;}
+  @media (max-width:760px){ .contact-grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px; height:100%;
+  }
+  .skip-to-main{
+    position:absolute; left:-9999px; top:8px; padding:10px 18px; background:var(--ink);
+    color:var(--paper); border-radius:var(--radius); font-size:.9rem; z-index:9999; text-decoration:none;
+  }
+  .skip-to-main:focus{ left:8px; }
+  .icon-badge{
+    width:42px; height:42px; border-radius:50%;
+    background:rgba(161,113,47,.12);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:14px;
+  }
+  .icon-badge svg{width:20px; height:20px; stroke:var(--bronze);}
+
+  .core-values-grid{
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:20px;
+  }
+  @media (max-width:1000px){ .core-values-grid{grid-template-columns:repeat(3, 1fr);} }
+  @media (max-width:700px){ .core-values-grid{grid-template-columns:1fr;} }
+
+  /* resource categories — expandable cells */
+  .accordion-item{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    margin-bottom:14px; overflow:hidden; transition:box-shadow .15s;
+  }
+  .accordion-item:hover{box-shadow:0 6px 18px rgba(14,33,73,.08);}
+  .accordion-head{
+    width:100%; background:none; border:none; text-align:left; cursor:pointer;
+    padding:20px 22px; display:flex; align-items:center; gap:16px;
+  }
+  .accordion-head .icon-badge{margin:0; flex-shrink:0;}
+  .accordion-head-text{flex:1; min-width:0;}
+  .accordion-head-title{display:block; font-family:'Lora',serif; font-size:1.1rem; font-weight:600; color:var(--ink);}
+  .accordion-head-sub{display:block; font-size:.85rem; color:var(--muted); margin-top:3px;}
+  .accordion-head .chev{flex-shrink:0; width:16px; height:16px; stroke:var(--muted); transition:transform .2s;}
+  .accordion-item.open .chev{transform:rotate(180deg);}
+  .accordion-item.open{box-shadow:0 6px 18px rgba(14,33,73,.08);}
+  .accordion-body{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+  .accordion-item.open .accordion-body{max-height:6000px;}
+  .accordion-body-inner{padding:4px 22px 26px 22px;}
+  @media (max-width:600px){
+    .accordion-head{padding:16px; gap:12px;}
+    .accordion-body-inner{padding:4px 16px 22px 16px;}
+  }
+
+  .res-search-wrap{position:relative; max-width:560px; margin-top:28px;}
+  .res-search-wrap svg{position:absolute; left:16px; top:50%; transform:translateY(-50%); width:19px; height:19px; stroke:var(--muted); pointer-events:none;}
+  .res-search-wrap input{width:100%; padding:15px 44px; border:1.5px solid var(--line); border-radius:8px; font-size:1rem; font-family:inherit; background:var(--paper);}
+  .res-search-wrap input:focus{outline:none; border-color:var(--bronze);}
+  .res-search-wrap #resourceSearchClear{position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.3rem; color:var(--muted); cursor:pointer; padding:4px 8px; line-height:1;}
+
+  .res-group{margin-bottom:24px;}
+  .res-group:last-child{margin-bottom:0;}
+  .res-group-heading{font-family:'Lora',serif; font-size:1.05rem; color:var(--ink); margin:0 0 4px; font-weight:600;}
+  .res-group-intro{font-size:.85rem; color:var(--muted); margin:0 0 12px; max-width:640px;}
+  .res-list{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
+  .res-item{display:flex;}
+  .res-item-btn{
+    background:var(--bg-alt); border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+    cursor:pointer; transition:box-shadow .15s, transform .15s, border-color .15s;
+    display:flex; flex-direction:column; gap:8px; justify-content:space-between;
+    width:100%; font:inherit; color:inherit; text-align:left;
+  }
+  .res-item-btn:hover{box-shadow:0 5px 16px rgba(14,33,73,.1); transform:translateY(-1px); border-color:var(--bronze-soft);}
+  .res-item-text{display:block;}
+  .res-link-title{font-weight:600; color:var(--ink); font-size:.9rem; display:block;}
+  .res-desc{display:block; margin:3px 0 0; font-size:.8rem; color:var(--muted); line-height:1.4;}
+  .res-learn-more{align-self:flex-start; font-size:.76rem; font-weight:600; color:var(--bronze);}
+  @media (max-width:700px){ .res-list{grid-template-columns:1fr;} }
+
+  .res-popup-secondary-btn{background:transparent; border:1.5px solid var(--ink); color:var(--ink);}
+  .res-popup-what{font-size:.95rem; line-height:1.6; color:var(--ink);}
+  .res-popup-block{background:var(--bg-alt); border-radius:8px; padding:14px 16px;}
+  .res-popup-block h3{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--bronze); margin:0 0 6px; font-weight:700;}
+  .res-popup-block p{font-size:.88rem; line-height:1.55; color:var(--ink-soft); margin:0;}
+  .res-popup-intro-line{font-size:.88rem; line-height:1.55; color:var(--ink-soft); margin:0 0 6px;}
+  .res-popup-list{margin:0; padding-left:20px; font-size:.88rem; line-height:1.6; color:var(--ink-soft);}
+  .res-popup-list li{margin-bottom:3px;}
+  .res-popup-list-numbered{padding-left:22px;}
+  .res-official-links{list-style:none; padding:0;}
+  .res-official-links li{margin-bottom:6px;}
+  .res-official-links a{color:var(--ink); font-weight:600; text-decoration:underline; font-size:.88rem;}
+  .res-related-pills{display:flex; flex-wrap:wrap; gap:8px;}
+  .res-related-pill{
+    background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:6px 14px;
+    font-size:.8rem; font-family:inherit; cursor:pointer; color:var(--ink-soft);
+  }
+  .res-related-pill:hover{border-color:var(--bronze-soft); color:var(--ink);}
+  .res-reviewed{font-size:.72rem; color:var(--muted); font-style:italic; margin:0;}
+  .res-pending-notice{background:#FBF3DD; border:1px solid #B4881A; border-radius:8px; padding:10px 14px; font-size:.85rem; color:#7A5B0E;}
+
+  /* ===== 404 PAGE ===== */
+  .notfound-mark{
+    width:76px; height:76px; border-radius:50%; background:var(--bg-alt); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 20px;
+  }
+  .notfound-mark svg{width:34px; height:34px; stroke:var(--bronze);}
+  .notfound-report{margin-top:36px; padding-top:24px; border-top:1px solid var(--line);}
+  .res-share-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:14px; border-top:1px solid var(--line);}
+  .res-share-label{font-size:.8rem; color:var(--muted); font-weight:600;}
+  .res-share-icon-btn{
+    background:var(--bg-alt); border:1px solid var(--line); border-radius:8px; width:38px; height:38px;
+    font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .res-share-icon-btn:hover{background:var(--paper); border-color:var(--bronze-soft);}
+  /* The button is already a centred flex container, so the icon only needs a
+     size. pointer-events:none guarantees clicks land on the button itself and
+     never on the SVG, so the existing share handler is untouched. */
+  .res-share-icon-btn svg{width:19px; height:19px; display:block; flex-shrink:0; pointer-events:none;}
+
+  .res-details{margin-top:22px; border:1px solid var(--line); border-radius:var(--radius); padding:14px 18px; background:var(--bg-alt);}
+  .res-details summary{cursor:pointer; font-weight:600; color:var(--ink); font-size:.92rem; list-style:none;}
+  .res-details summary::-webkit-details-marker{display:none;}
+  .res-details[open] summary{margin-bottom:12px;}
+  .res-details-body p{font-size:.85rem; color:var(--muted); margin:0 0 10px;}
+  .res-details-body h5{font-family:'Inter',sans-serif; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--bronze); margin:14px 0 6px;}
+  .res-fee-grid{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px;}
+  .res-fee-box{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:10px 14px; font-size:.82rem; flex:1; min-width:160px;}
+  .res-fee-box b{display:block; font-size:.68rem; text-transform:uppercase; color:var(--muted); margin-bottom:3px; letter-spacing:.04em;}
+  .res-cc-table{width:100%; border-collapse:collapse; font-size:.8rem; margin-bottom:10px;}
+  .res-cc-table th{text-align:left; padding:6px 8px; background:var(--paper); border-bottom:2px solid var(--line); font-size:.7rem; text-transform:uppercase; color:var(--muted); letter-spacing:.03em;}
+  .res-cc-table td{padding:6px 8px; border-bottom:1px solid var(--line); font-size:.8rem;}
+  .res-fee-note{font-size:.75rem; font-style:italic; margin-top:8px;}
+
+  /* quick links */
+  .pill-row{display:flex; flex-wrap:nowrap; gap:10px; justify-content:center;}
+  @media (max-width:860px){ .pill-row{flex-wrap:wrap;} }
+  .follow-btn-row{display:flex; flex-wrap:nowrap; gap:12px; justify-content:center;}
+  @media (max-width:860px){ .follow-btn-row{flex-wrap:wrap;} }
+
+  /* ===== ADMIN PANEL ===== */
+  .admin-tab-btn{background:none; border:none; padding:10px 4px; margin-right:20px; font-size:.88rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
+  .admin-tab-btn.active{color:var(--ink); border-bottom-color:var(--ink);}
+  .admin-label{display:block; font-size:.78rem; font-weight:600; color:var(--muted); margin:10px 0 4px;}
+  .admin-input{width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font-size:.9rem; font-family:inherit;}
+  .admin-btn-outline{background:transparent; border:1.5px solid var(--ink); color:var(--ink);}
+  .admin-row{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;}
+  .admin-small-btn{border:1px solid var(--line); background:var(--paper); border-radius:5px; padding:5px 10px; font-size:.78rem; cursor:pointer;}
+
+  /* ===== SITE-WIDE NOTICE BANNER ===== */
+  #siteNoticeBanner{width:100%; padding:12px 24px; text-align:center; font-size:.88rem; position:relative;}
+  #siteNoticeBanner.notice-info{background:var(--bg-alt); color:var(--ink);}
+  #siteNoticeBanner.notice-warning{background:#FBF3DD; color:#7A5B0E;}
+  #siteNoticeBanner.notice-urgent{background:#F8E9E9; color:#7A2A2A;}
+  #siteNoticeBanner b{margin-right:6px;}
+  #siteNoticeBanner .notice-close{position:absolute; right:16px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:1.2rem; cursor:pointer; color:inherit; opacity:.6;}
+  #siteNoticeBanner .notice-close:hover{opacity:1;}
+
+  /* ===== GENERIC SITE MODAL (used for insurance disclaimer, future notices/popups) ===== */
+  .site-modal-overlay{position:fixed; inset:0; background:rgba(14,33,73,.55); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
+  .site-modal-overlay.open{display:flex;}
+  .site-modal{background:var(--paper); border-radius:10px; max-width:620px; width:100%; max-height:88vh; overflow-y:auto; padding:0;}
+  .site-modal-head{padding:22px 26px 14px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .site-modal-close{background:none; border:none; font-size:1.4rem; color:var(--muted); line-height:1; padding:4px; cursor:pointer;}
+  .site-modal-body{padding:18px 26px 8px;}
+  .site-modal-section{margin-bottom:16px;}
+  .site-modal-foot{padding:16px 26px 24px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{
+    border:1px solid var(--line); background:var(--paper); padding:8px 16px;
+    border-radius:20px; font-size:.85rem; font-weight:500; color:var(--ink-soft);
+    text-decoration:none; display:inline-block; transition:border-color .15s, color .15s;
+  }
+  a.pill:hover{border-color:var(--bronze); color:var(--bronze);}
+
+  .notice{
+    background:rgba(161,113,47,.08); border-left:3px solid var(--bronze);
+    padding:18px 22px; font-size:.92rem; color:var(--ink-soft);
+  }
+
+  /* social + email */
+  .channel-card{
+    background:var(--ink); color:var(--parchment); border-radius:var(--radius);
+    padding:36px; text-align:left;
+  }
+  .channel-card h3{color:var(--paper);}
+  .channel-card.bronze{background:var(--bronze);}
+  .social-row{display:flex; gap:10px; margin-top:18px;}
+  .social-icon{
+    width:38px; height:38px; border-radius:50%; border:1px solid rgba(246,242,232,.4);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .social-icon svg{width:16px; height:16px; fill:var(--parchment); stroke:none;}
+
+  /* contact form */
+  .form-group{margin-bottom:18px;}
+  label{display:block; font-size:.82rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px;}
+  input,select,textarea{
+    width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:var(--radius);
+    font-family:inherit; font-size:.92rem; background:var(--paper); color:var(--charcoal);
+  }
+  textarea{min-height:120px; resize:vertical;}
+
+  .cat-toggle{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;}
+  .cat-toggle button{
+    border:1px solid var(--line); background:var(--paper); padding:9px 16px;
+    border-radius:20px; font-size:.85rem; font-weight:500; color:var(--ink-soft);
+  }
+  .cat-toggle button.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  .contact-info{display:flex; gap:18px; margin-top:24px;}
+  .contact-info .icon-badge{margin:0;}
+  .contact-info-item{display:flex; gap:12px; align-items:flex-start; margin-bottom:16px;}
+  .contact-info-item svg{width:18px; height:18px; stroke:var(--bronze); flex-shrink:0; margin-top:3px;}
+
+  footer{background:var(--ink); color:#B9B2A0; padding:48px 24px 32px;}
+  .footer-inner{max-width:var(--maxw); margin:0 auto;}
+  .footer-top{display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; margin-bottom:32px;}
+  footer .brand-name, footer .brand-sub{color:var(--parchment);}
+  footer a{text-decoration:none; color:#B9B2A0; font-size:.88rem;}
+  footer a.footer-subscribe-btn{
+    color:var(--paper); font-size:.82rem; font-weight:600;
+    padding:11px 18px; text-align:left; line-height:1.35;
+    display:inline-flex; align-items:center;
+  }
+  footer nav{display:flex; flex-direction:column; gap:8px;}
+  .footer-bottom{
+    border-top:1px solid rgba(246,242,232,.15); padding-top:20px;
+    font-size:.78rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+
+  /* constant contact embed */
+  .ctct-inline-form{width:100%;}
+  .ctct-inline-form iframe{width:100% !important; max-width:100%;}
+
+  /* social embeds */
+  .social-embed-grid{display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; max-width:500px; margin:0 auto;}
+  .fb-page{width:100% !important; max-width:100%; display:block;}
+  .fb-page span{width:100% !important; max-width:100%; display:block !important;}
+  .fb-page iframe{width:100% !important; max-width:100%;}
+  @media (max-width:860px){
+    #socialEmbedGrid{display:none;}
+  }
+
+  /* search box */
+  .search-box-wrap{position:relative;}
+  .search-box{
+    display:flex; align-items:center; gap:6px; border:1px solid var(--line);
+    border-radius:20px; padding:6px 12px; background:var(--paper);
+  }
+  .search-box svg{width:15px; height:15px; stroke:var(--muted); flex-shrink:0;}
+  .search-box input{border:none; padding:2px 0; width:150px; font-size:.85rem;}
+  .search-box input:focus{outline:none;}
+  @media (max-width:860px){ .search-box-wrap{display:none;} }
+
+  .search-results{
+    display:none; position:absolute; top:calc(100% + 8px); right:0; width:340px; max-height:420px;
+    overflow-y:auto; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:0 12px 32px rgba(14,33,73,.16); z-index:60;
+  }
+  .search-result-item{
+    display:block; width:100%; text-align:left; background:none; border:none;
+    padding:12px 16px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .search-result-item:last-child{border-bottom:none;}
+  .search-result-item:hover{background:var(--bg-alt);}
+  .search-result-item strong{display:block; font-size:.88rem; color:var(--ink); margin-bottom:2px;}
+  .search-result-item span{display:block; font-size:.78rem; color:var(--muted);}
+  .search-result-item .search-cat{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--bronze); font-weight:600; margin-bottom:3px;}
+  .search-result-empty{padding:16px; font-size:.85rem; color:var(--muted); text-align:center;}
+
+  /* initiative cards */
+  .init-card{
+    border:1px solid var(--line); border-radius:var(--radius); padding:22px; background:var(--paper);
+    transition:box-shadow .18s, transform .18s;
+  }
+  .init-card:hover{box-shadow:0 8px 24px rgba(14,33,73,.1); transform:translateY(-2px);}
+
+  /* topic list (stay informed) */
+  .topic-list{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media (max-width:760px){ .topic-list{grid-template-columns:1fr 1fr;} }
+  @media (max-width:480px){ .topic-list{grid-template-columns:1fr;} }
+  .topic-item{
+    display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px; background:var(--paper); font-size:.88rem; font-weight:500; color:var(--ink-soft);
+  }
+  .topic-item svg{width:17px; height:17px; stroke:var(--bronze); flex-shrink:0;}
+
+
+  /* ===== PARTNERS MARQUEE ===== */
+  .partners-marquee-wrap{display:flex; align-items:center; gap:10px; max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+  .partners-arrow{
+    flex-shrink:0; width:44px; height:44px; border-radius:50%; background:var(--paper); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s, box-shadow .15s;
+  }
+  .partners-arrow:hover{background:var(--bg-alt); box-shadow:0 4px 12px rgba(14,33,73,.1);}
+  .partners-arrow svg{width:18px; height:18px; stroke:var(--ink);}
+  @media (max-width:640px){
+    .partners-arrow{display:none;}
+    .partners-marquee-wrap{padding:0;}
+  }
+  .partners-marquee{
+    overflow-x:auto; overflow-y:hidden; position:relative; flex:1; min-width:0;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none; -ms-overflow-style:none; cursor:grab;
+    -webkit-mask-image:linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+    mask-image:linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  }
+  .partners-marquee.dragging{cursor:grabbing; scroll-behavior:auto;}
+  .partners-marquee::-webkit-scrollbar{display:none;}
+  .partners-track{display:flex; align-items:center; gap:20px; width:max-content;}
+  .partners-dup{display:contents;}
+  
+  .partner-badge{
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    padding:22px 36px; min-height:116px; background:var(--paper); border:1px solid var(--line);
+    border-radius:var(--radius); font-family:'Lora',serif; font-weight:600; font-size:1.15rem;
+    color:var(--ink-soft); white-space:nowrap; transition:box-shadow .15s, transform .15s;
+  }
+  a.partner-badge{ text-decoration:none; cursor:pointer; }
+  a.partner-badge:hover{ box-shadow:0 6px 18px rgba(14,33,73,.12); transform:translateY(-2px); }
+  .partner-badge-logo{ padding:12px 22px; }
+  .partner-badge-logo img{ height:100px; width:auto; max-width:290px; object-fit:contain; display:block; }
+  @media (max-width:600px){
+    .partner-badge{padding:16px 22px; font-size:.95rem; min-height:88px;}
+    .partner-badge-logo img{ height:56px; max-width:170px; }
+  }
+  @media (prefers-reduced-motion: reduce){ .partners-track{animation:none;} }
+</style>
+<!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!--
+  FIRST-VISIT LANGUAGE DEFAULT
+  Runs before <body> parses, so the page paints in the right language with no
+  flash. It only sets the class the stylesheet already uses (html.lang-fr) plus
+  the lang attribute; setLang() below re-applies everything else once the
+  header controls exist.
+
+  Priority, exactly as specified:
+    1. Explicit saved choice (localStorage "cjhq_language")
+    2. Edge geography, if a Cloudflare Worker has set a cjhq_geo cookie
+    3. Browser timezone (country) + browser language (community signal)
+    4. English
+
+  No IP address is read, stored, or sent anywhere. Steps 3 and 4 make no
+  network request at all. Every step is wrapped so that a failure anywhere
+  falls through to English rather than blocking the page.
+-->
+<script>
+(function(){
+  var KEY = 'cjhq_language';
+
+  // Canadian IANA timezones, including deprecated aliases still emitted by
+  // some browsers. Country-level only - a timezone cannot identify a borough.
+  var CA_TZ = ['America/Toronto','America/Montreal','America/Vancouver',
+    'America/Edmonton','America/Winnipeg','America/Halifax','America/St_Johns',
+    'America/Regina','America/Moncton','America/Glace_Bay','America/Goose_Bay',
+    'America/Iqaluit','America/Whitehorse','America/Yellowknife','America/Inuvik',
+    'America/Dawson_Creek','America/Fort_Nelson','America/Rankin_Inlet',
+    'America/Resolute','America/Cambridge_Bay','America/Creston','America/Dawson',
+    'America/Atikokan','America/Blanc-Sablon','America/Nipigon','America/Coral_Harbour',
+    'America/Rainy_River','America/Thunder_Bay','America/Swift_Current','America/Pangnirtung'];
+
+  function saved(){
+    try{
+      var v = localStorage.getItem(KEY);
+      return (v === 'en' || v === 'fr') ? v : null;
+    }catch(e){ return null; }
+  }
+
+  // Only present if the optional Cloudflare Worker is deployed. Absent by
+  // default - the site does not depend on it.
+  function edgeGeo(){
+    try{
+      var m = document.cookie.match(/(?:^|;\s*)cjhq_geo=([^;]*)/);
+      if(!m) return null;
+      var g = JSON.parse(decodeURIComponent(m[1]));
+      return (g && typeof g.country === 'string') ? g : null;
+    }catch(e){ return null; }
+  }
+
+  function fromEdge(g){
+    if(g.country !== 'CA') return 'en';              // outside Canada
+    var city = String(g.city || '').toLowerCase();
+    if(city.indexOf('outremont') > -1) return 'en';  // Outremont
+    if(city.indexOf('plateau')   > -1) return 'en';  // Le Plateau-Mont-Royal
+    return 'fr';                                     // rest of Canada
+  }
+
+  function fromBrowser(){
+    var tz = '';
+    try{ tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; }catch(e){}
+    if(!tz || CA_TZ.indexOf(tz) === -1) return 'en'; // unknown or non-Canadian
+
+    // In Canada. A borough cannot be resolved client-side, so the browser's
+    // own language order stands in for the Outremont / Plateau exception -
+    // see the notes in the delivery report.
+    var langs = [];
+    try{
+      langs = (navigator.languages && navigator.languages.length)
+        ? navigator.languages : [navigator.language || ''];
+    }catch(e){}
+    for(var i = 0; i < langs.length; i++){
+      var l = String(langs[i] || '').toLowerCase();
+      if(l.indexOf('fr') === 0) return 'fr';
+      if(l.indexOf('en') === 0) return 'en';
+    }
+    return 'fr';                                     // Canada, no clear signal
+  }
+
+  // 0. Route-level override. /fr/ carries data-force-lang="fr" on <html> so it
+  //    renders French for a first-time visitor regardless of browser, timezone
+  //    or geo - otherwise a French URL with a French canonical could serve
+  //    English content, which is worse than having no French page.
+  //    An explicit saved choice still wins: if someone has chosen a language,
+  //    that is a decision, not a guess. The marker exists ONLY in fr/index.html;
+  //    the generator asserts it never appears anywhere else.
+  var forced = null;
+  try{
+    var f = document.documentElement.getAttribute('data-force-lang');
+    if(f === 'fr' || f === 'en') forced = f;
+  }catch(e){}
+
+  var lang = 'en';
+  try{
+    // On /fr/ the URL itself is the language declaration - it has a French
+    // canonical and French hreflang - so it must win over a stored preference.
+    // Otherwise a returning visitor gets a French URL serving English content,
+    // which is exactly the mismatch this route exists to avoid. Their choice is
+    // still respected: the toggle works, and it applies everywhere else.
+    var s = saved();
+    if(forced){ lang = forced; }
+    else if(s){ lang = s; }
+    else {
+      var g = edgeGeo();
+      lang = g ? fromEdge(g) : fromBrowser();
+    }
+  }catch(e){ lang = forced || 'en'; }
+
+  window.__CJHQ_LANG = (lang === 'fr') ? 'fr' : 'en';
+  if(window.__CJHQ_LANG === 'fr'){
+    document.documentElement.classList.add('lang-fr');
+    document.documentElement.lang = 'fr';
+  }
+})();
+</script>
+</head>
+<body>
+<a href="#mainContent" class="skip-to-main" data-en>Skip to main content</a>
+<a href="#mainContent" class="skip-to-main" data-fr>Passer au contenu principal</a>
+<script>
+  // Restores the real path after a bounce through 404.html.
+  // Must run before any other routing logic. See 404.html for context.
+  (function(l){
+    if(l.search[1] === '/'){
+      var decoded = l.search.slice(1).split('&').map(function(s){
+        return s.replace(/~and~/g, '&');
+      }).join('?');
+      window.history.replaceState(null, null,
+        l.pathname.slice(0, -1) + decoded + l.hash
+      );
+    }
+  }(window.location));
+</script>
+<div id="siteNoticeBanner" style="display:none;"></div>
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="header-inner">
+    <a class="brand" href="/" data-page="home">
+      <img class="brand-mark" id="brandLogoImg" src="/assets/cjhq-brand-mark.webp" width="1000" height="563" decoding="async" alt="CJHQ \u2014 Le Conseil des Juifs Hassidiques du Qu\u00e9bec \u2014 The Jewish Hasidic Council of Quebec">
+    </a>
+
+    <nav class="main-nav" id="mainNav" aria-label="Main">
+      <a href="/" data-page="home"><span data-en>Home</span><span data-fr>Accueil</span></a>
+      <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
+      <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
+      <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
+      <a href="/about" data-page="about"><span data-en>About</span><span data-fr>À propos</span></a>
+    </nav>
+
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="search-box-wrap">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input type="text" id="siteSearch" data-en-ph="Search the site…" data-fr-ph="Rechercher sur le site…" placeholder="Search the site…" autocomplete="off" oninput="handleSearch(this.value)" onfocus="handleSearch(this.value)">
+        </div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <div class="lang-toggle">
+        <button id="btnEN" class="active">EN</button>
+        <button id="btnFR">FR</button>
+      </div>
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-drawer-overlay" id="mobileDrawerOverlay"></div>
+<div class="mobile-drawer" id="mobileDrawer" role="navigation" aria-label="Mobile menu">
+  <div class="mobile-drawer-inner">
+  <div class="mobile-drawer-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input type="text" id="drawerSearch" data-en-ph="Search the site…" data-fr-ph="Rechercher sur le site…" placeholder="Search the site…" autocomplete="off" oninput="handleSearch(this.value, 'drawerSearchResults')" onfocus="handleSearch(this.value, 'drawerSearchResults')">
+  </div>
+  <div class="search-results" id="drawerSearchResults" style="position:static; width:auto; margin:0 0 8px; box-shadow:none; max-height:none;"></div>
+  <div class="mobile-drawer-nav" id="mobileDrawerNav">
+    <a href="/" data-page="home"><span data-en>Home</span><span data-fr>Accueil</span></a>
+    <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
+    <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
+    <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
+    <a href="/about" data-page="about"><span data-en>About CJHQ</span><span data-fr>À propos du CJHQ</span></a>
+    <a href="/stay-informed" data-href-page="stay-informed" id="drawerSubscribeLink" onclick="if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return true; goToSubscribeForm(); return false;"><span data-en>Subscribe</span><span data-fr>S'abonner</span></a>
+  </div>
+  <div class="mobile-drawer-foot">
+    <div class="lang-toggle">
+      <button id="drawerBtnEN" class="active">EN</button>
+      <button id="drawerBtnFR">FR</button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<main id="mainContent" tabindex="-1">
+<!-- ============ HOME ============ -->
+<div class="page active" id="page-home">
+
+  <section class="hero">
+    <svg class="hero-rings" viewBox="0 0 420 420" fill="none">
+      <circle cx="160" cy="210" r="130" stroke="#5A7CA8" stroke-width="1"/>
+      <circle cx="260" cy="210" r="130" stroke="#FFFFFF" stroke-width="1"/>
+    </svg>
+    <div class="hero-inner">
+      <span class="eyebrow" data-en>The Jewish Hasidic Council of Quebec</span>
+      <span class="eyebrow" data-fr>Le Conseil des Juifs Hassidiques du Québec</span>
+      <h1 data-cid="home-1">
+        <span data-en>Serving Quebec's Hasidic Jewish Communities</span>
+        <span data-fr>Servir les communautés juives hassidiques du Québec</span>
+      </h1>
+      <p data-cid="home-2" class="lede">
+        <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) is a central point of contact for Quebec's Hasidic Jewish communities, providing community services, practical assistance, trusted information, representation, and advocacy.</span>
+        <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) est un point de contact central pour les communautés juives hassidiques du Québec, offrant des services communautaires, une assistance pratique, une information fiable, la représentation et la défense de leurs intérêts.</span>
+      </p>
+      <p data-cid="home-3" class="lede">
+        <span data-en>CJHQ works with government, public institutions, law enforcement, service providers, and community organizations to address community needs, improve access to services, strengthen public safety, and ensure that the concerns of Hasidic residents are understood and effectively represented.</span>
+        <span data-fr>Le CJHQ travaille avec les gouvernements, les institutions publiques, les services policiers, les fournisseurs de services et les organismes communautaires afin de répondre aux besoins de la communauté, d'améliorer l'accès aux services, de renforcer la sécurité publique et de veiller à ce que les préoccupations des résidents hassidiques soient comprises et efficacement représentées.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="alt" style="padding-top:64px; padding-bottom:80px;">
+    <div class="section-inner" style="text-align:center;">
+      <h2 data-cid="home-5" style="margin-top:10px; font-size:clamp(1.7rem,3.4vw,2.3rem);">
+        <span data-en>Working Alongside Community Organizations</span>
+        <span data-fr>En collaboration avec les organismes communautaires</span>
+      </h2>
+      <p data-cid="home-6" style="max-width:680px; margin:0 auto 36px; font-size:1.05rem;">
+        <span data-en>CJHQ works alongside a wide network of community organizations dedicated to serving Quebec's Hasidic Jewish communities.</span>
+        <span data-fr>Le CJHQ travaille aux côtés d'un vaste réseau d'organismes communautaires voués au service des communautés juives hassidiques du Québec.</span>
+      </p>
+    </div>
+    <div class="partners-marquee-wrap">
+      <button class="partners-arrow partners-arrow-left" id="partnersArrowLeft" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="partners-marquee" id="partnersMarquee">
+        <div class="partners-track" id="partnersTrack"></div>
+      </div>
+      <button class="partners-arrow partners-arrow-right" id="partnersArrowRight" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div class="page" id="page-about">
+  <section style="padding-top:56px;">
+    <div class="section-inner">
+      <span class="eyebrow" data-en>About CJHQ</span>
+      <span class="eyebrow" data-fr>À propos du CJHQ</span>
+      <h1 data-cid="about-1" style="font-size:clamp(2rem,4vw,2.8rem); margin-top:10px;">
+        <span data-en>About the Jewish Hasidic Council of Quebec</span>
+        <span data-fr>À propos du Conseil des Juifs Hassidiques du Québec</span>
+      </h1>
+      <p data-cid="about-2" style="font-size:1.05rem;">
+        <span data-en>The Jewish Hasidic Council of Quebec (CJHQ), known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.</span>
+        <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.</span>
+      </p>
+      <p data-cid="about-3">
+        <span data-en>CJHQ acts as a central point of contact for individuals, families, institutions, and community organizations seeking practical assistance, services, representation, advocacy, guidance, or reliable information. At the heart of our work is a commitment to helping community members address the issues affecting their daily lives and ensuring that the community's needs and concerns are properly represented.</span>
+        <span data-fr>Le CJHQ agit comme point de contact central pour les personnes, les familles, les institutions et les organismes communautaires à la recherche d'assistance pratique, de services, de représentation, de défense des intérêts, de conseils ou d'information fiable. Au cœur de notre travail se trouve un engagement à aider les membres de la communauté à résoudre les enjeux touchant leur vie quotidienne et à veiller à ce que les besoins et les préoccupations de la communauté soient adéquatement représentés.</span>
+      </p>
+      <p data-cid="about-4">
+        <span data-en>We work closely with governments, municipal authorities, law enforcement agencies, public institutions, service providers, and community organizations. Through these relationships, CJHQ helps address concerns, improve access to services, strengthen public safety, and develop practical solutions that respect the community's religious practices and way of life.</span>
+        <span data-fr>Nous travaillons en étroite collaboration avec les gouvernements, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et les organismes communautaires. Grâce à ces relations, le CJHQ contribue à résoudre des préoccupations, à améliorer l'accès aux services, à renforcer la sécurité publique et à élaborer des solutions pratiques qui respectent les pratiques religieuses et le mode de vie de la communauté.</span>
+      </p>
+      <p data-cid="about-5">
+        <span data-en>CJHQ also works to promote greater understanding of Hasidic Jewish life and to strengthen communication between the Hasidic community, public authorities, institutions, and the broader public.</span>
+        <span data-fr>Le CJHQ travaille également à favoriser une meilleure compréhension de la vie juive hassidique et à renforcer la communication entre la communauté hassidique, les autorités publiques, les institutions et le grand public.</span>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-inner" style="max-width:720px;">
+      <h2 data-cid="about-7" style="margin-top:10px;">
+        <span data-en>Our Mission</span>
+        <span data-fr>Notre mission</span>
+      </h2>
+      <p data-cid="about-8" style="font-size:1.05rem;">
+        <span data-en>Our mission is to serve and strengthen Quebec's Hasidic Jewish communities through practical assistance, effective advocacy, trusted representation, and strong relationships with governments, public institutions, service providers, and community partners.</span>
+        <span data-fr>Notre mission est de servir et de renforcer les communautés juives hassidiques du Québec par une assistance pratique, une défense efficace des intérêts, une représentation fiable et des relations solides avec les gouvernements, les institutions publiques, les fournisseurs de services et les partenaires communautaires.</span>
+      </p>
+      <p data-cid="about-8b">
+        <span data-en>We are committed to promoting the safety, dignity, well-being, and full participation of Hasidic Jewish residents throughout Quebec.</span>
+        <span data-fr>Nous nous engageons à promouvoir la sécurité, la dignité, le bien-être et la pleine participation des résidents juifs hassidiques partout au Québec.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="section-inner" style="max-width:720px;">
+      <h2 data-cid="about-8c" style="margin-top:10px;">
+        <span data-en>How We Serve the Community</span>
+        <span data-fr>Comment nous servons la communauté</span>
+      </h2>
+      <p data-cid="about-8d" style="font-size:1.05rem;">
+        <span data-en>CJHQ assists individuals, families, institutions, and community organizations with matters involving government and municipal services, public safety, religious accommodations, travel and border issues, community events, and other concerns affecting daily life.</span>
+        <span data-fr>Le CJHQ aide les personnes, les familles, les institutions et les organismes communautaires pour des enjeux touchant les services gouvernementaux et municipaux, la sécurité publique, les accommodements religieux, les questions de voyage et de frontière, les événements communautaires et d'autres préoccupations touchant la vie quotidienne.</span>
+      </p>
+      <p data-cid="about-8e">
+        <span data-en>We represent the needs of Quebec's Hasidic Jewish communities before governments, law enforcement agencies, public institutions, service providers, and other decision-makers. We also provide timely guidance and reliable information when changes, emergencies, or public developments affect the community.</span>
+        <span data-fr>Nous représentons les besoins des communautés juives hassidiques du Québec auprès des gouvernements, des services policiers, des institutions publiques, des fournisseurs de services et d'autres décideurs. Nous fournissons également des conseils rapides et une information fiable lorsque des changements, des urgences ou des événements publics touchent la communauté.</span>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-inner" style="max-width:720px;">
+      <span class="eyebrow" data-en>Our Approach</span><span class="eyebrow" data-fr>Notre approche</span>
+      <h2 data-cid="about-9" style="margin-top:10px;">
+        <span data-en>Constructive Engagement. Practical Solutions.</span>
+        <span data-fr>Engagement constructif. Solutions pratiques.</span>
+      </h2>
+      <p data-cid="about-10">
+        <span data-en>CJHQ believes that effective advocacy combines strong relationships with a clear and responsible community voice.</span>
+        <span data-fr>Le CJHQ croit qu'une représentation efficace combine des relations solides avec une voix communautaire claire et responsable.</span>
+      </p>
+      <p data-cid="about-11">
+        <span data-en>Whenever possible, we seek practical solutions through respectful dialogue, direct engagement, and professional collaboration. When circumstances require public advocacy, CJHQ speaks clearly and firmly on behalf of the community.</span>
+        <span data-fr>Dans la mesure du possible, nous recherchons des solutions pratiques par le dialogue respectueux, l'engagement direct et la collaboration professionnelle. Lorsque les circonstances exigent une représentation publique, le CJHQ s'exprime clairement et fermement au nom de la communauté.</span>
+      </p>
+      <p data-cid="about-12">
+        <span data-en>As a non-partisan organization, CJHQ works constructively with elected officials and governments of every political affiliation. Our commitment is to the community and to achieving meaningful, lasting results.</span>
+        <span data-fr>En tant qu'organisme non partisan, le CJHQ travaille de façon constructive avec les élus et les gouvernements de toutes allégeances politiques. Notre engagement est envers la communauté et l'atteinte de résultats significatifs et durables.</span>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-inner">
+      <div class="section-head" style="margin:0 auto 32px; text-align:center;">
+        <span class="eyebrow" data-en>Our Values</span><span class="eyebrow" data-fr>Nos valeurs</span>
+        <h2 data-cid="about-13" style="margin-top:10px;">
+        <span data-en>The Principles That Guide Our Work</span>
+        <span data-fr>Les principes qui guident notre travail</span>
+      </h2>
+      </div>
+      <div id="coreValuesGrid" class="core-values-grid"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-inner" style="max-width:680px; text-align:center; margin:0 auto;">
+      <h2 data-cid="about-17">
+        <span data-en>Connect With CJHQ</span>
+        <span data-fr>Communiquer avec le CJHQ</span>
+      </h2>
+      <p data-cid="about-18">
+        <span data-en>Whether you are a community member, government representative, public institution, journalist, community organization, or member of the public, we welcome the opportunity to connect with you.</span>
+        <span data-fr>Que vous soyez un membre de la communauté, un représentant gouvernemental, une institution publique, un journaliste, un organisme communautaire ou un membre du public, nous serions heureux d'entrer en contact avec vous.</span>
+      </p>
+      <p data-cid="about-19">
+        <span data-en>If you have a question, require assistance, or would like to learn more about our work, our team is here to help.</span>
+        <span data-fr>Si vous avez une question, avez besoin d'aide ou souhaitez en apprendre davantage sur notre travail, notre équipe est là pour vous aider.</span>
+      </p>
+      <button class="btn dark" onclick="goPage('contact')" style="margin-top:10px;"><span data-en>Contact CJHQ →</span><span data-fr>Contacter le CJHQ →</span></button>
+    </div>
+  </section>
+</div>
+
+<!-- ============ RESOURCES ============ -->
+<div class="page" id="page-resources">
+  <section style="padding-top:56px;">
+    <div class="section-inner">
+      <span class="eyebrow" data-en>Community Resource Centre</span>
+      <span class="eyebrow" data-fr>Centre de ressources communautaires</span>
+      <h1 data-cid="resources-1" style="font-size:clamp(2rem,4vw,2.8rem); margin-top:10px;">
+        <span data-en>Trusted Government Resources — All in One Place</span>
+        <span data-fr>Des ressources gouvernementales fiables — regroupées en un seul endroit</span>
+      </h1>
+      <p data-cid="resources-2" style="max-width:680px; font-size:1.05rem;">
+        <span data-en>The CJHQ Community Resource Centre brings together the government services, applications, and official resources most frequently used by Quebec's Hasidic Jewish communities.</span>
+        <span data-fr>Le Centre de ressources communautaires du CJHQ réunit les services gouvernementaux, les demandes et les ressources officielles les plus utilisés par les communautés juives hassidiques du Québec.</span>
+      </p>
+      <p data-cid="resources-3" style="max-width:680px;">
+        <span data-en>Our goal is simple: save you time by directing you straight to the information or application you need. Whenever possible, every link on this page leads directly to the official government application, online service, or form—not simply a government homepage.</span>
+        <span data-fr>Notre objectif est simple : vous faire gagner du temps en vous dirigeant directement vers l'information ou la demande dont vous avez besoin. Dans la mesure du possible, chaque lien de cette page mène directement à la demande, au service en ligne ou au formulaire gouvernemental officiel — et non simplement à une page d'accueil gouvernementale.</span>
+      </p>
+
+      <div class="res-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="resourceSearch" data-en-ph="Search resources (passport, RAMQ, NEXUS, parking...)" data-fr-ph="Rechercher une ressource (passeport, RAMQ, NEXUS, stationnement...)" placeholder="Search resources (passport, RAMQ, NEXUS, parking...)">
+        <button id="resourceSearchClear" style="display:none;">&times;</button>
+      </div>
+      <p id="resourceSearchCount" style="font-size:.85rem; color:var(--muted); margin-top:8px; display:none;"></p>
+    </div>
+  </section>
+
+  <section class="alt" style="padding-top:24px;" id="resourceAccordionSection">
+    <div class="section-inner">
+      <h2 data-cid="resources-4" style="font-size:1.3rem;">
+        <span data-en>Browse by Category</span>
+        <span data-fr>Parcourir par catégorie</span>
+      </h2>
+      <div id="accordionWrap"></div>
+      <p id="resourceNoResults" style="display:none; text-align:center; color:var(--muted); padding:40px 0;">
+        <span data-en>No resources match your search. Try a different term, or <a href="/contact" data-page="contact">contact CJHQ</a> for help.</span>
+        <span data-fr>Aucune ressource ne correspond à votre recherche. Essayez un autre terme, ou <a href="/contact" data-page="contact">contactez le CJHQ</a> pour obtenir de l'aide.</span>
+      </p>
+    </div>
+  </section>
+
+  <div class="site-modal-overlay no-print" id="insuranceModalOverlay">
+    <div class="site-modal" style="max-width:480px;">
+      <div class="site-modal-head">
+        <div>
+          <h2 data-cid="resources-6" style="margin:2px 0 2px;">
+        <span data-en>Before You Continue</span>
+        <span data-fr>Avant de continuer</span>
+      </h2>
+        </div>
+        <button class="site-modal-close" onclick="closeInsuranceModal()">&times;</button>
+      </div>
+      <div class="site-modal-body">
+        <div class="site-modal-section">
+          <p data-cid="resources-7">
+        <span data-en>CJHQ is not an insurance broker or provider. This link points to a third-party provider the community has found useful. Coverage, pricing, and terms are set entirely by that provider — please review the policy carefully and confirm it meets your needs before purchasing.</span>
+        <span data-fr>Le CJHQ n'est pas un courtier ni un fournisseur d'assurance. Ce lien dirige vers un fournisseur tiers que la communauté a trouvé utile. La couverture, les prix et les conditions sont établis entièrement par ce fournisseur — veuillez examiner attentivement la police et confirmer qu'elle répond à vos besoins avant l'achat.</span>
+      </p>
+        </div>
+      </div>
+      <div class="site-modal-foot">
+        <button class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" onclick="closeInsuranceModal()"><span data-en>Cancel</span><span data-fr>Annuler</span></button>
+        <button class="btn dark" onclick="continueToInsuranceProvider()"><span data-en>Continue</span><span data-fr>Continuer</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="site-modal-overlay no-print" id="resourceShareModal" role="dialog" aria-modal="true" aria-labelledby="resourceModalTitle" onclick="if(event.target===this)closeResourceShareModal()">
+    <div class="site-modal" id="resourceShareModalBody" style="max-width:min(1040px, 92vw);" tabindex="-1"></div>
+  </div>
+
+  <section class="alt">
+    <div class="section-inner" style="max-width:680px; text-align:center; margin:0 auto;">
+      <h2 data-cid="resources-8">
+        <span data-en>Can't Find What You're Looking For?</span>
+        <span data-fr>Vous ne trouvez pas ce que vous cherchez?</span>
+      </h2>
+      <p data-cid="resources-9">
+        <span data-en>If you cannot find the service or information you're looking for, CJHQ is here to help.</span>
+        <span data-fr>Si vous ne trouvez pas le service ou l'information que vous cherchez, le CJHQ est là pour vous aider.</span>
+      </p>
+      <p data-cid="resources-10">
+        <span data-en>Use our contact form and we'll do our best to direct you to the appropriate government department, application, or official resource.</span>
+        <span data-fr>Utilisez notre formulaire de contact et nous ferons de notre mieux pour vous diriger vers le bon ministère, la bonne demande ou la bonne ressource officielle.</span>
+      </p>
+      <button class="btn dark" onclick="goPage('contact')" style="margin-top:10px;"><span data-en>Contact CJHQ →</span><span data-fr>Contacter le CJHQ →</span></button>
+    </div>
+  </section>
+</div>
+
+<!-- ============ STAY INFORMED ============ -->
+<div class="page" id="page-stay-informed">
+  <section style="padding-top:56px;">
+    <div class="section-inner" style="text-align:center;">
+      <span class="eyebrow" data-en>Stay Informed</span>
+      <span class="eyebrow" data-fr>Restez informés</span>
+      <h1 data-cid="stay-informed-1" style="font-size:clamp(2rem,4vw,2.8rem); margin-top:10px;">
+        <span data-en>Stay Connected with CJHQ</span>
+        <span data-fr>Restez branchés avec le CJHQ</span>
+      </h1>
+      <p data-cid="stay-informed-2" style="max-width:680px; margin:0 auto; font-size:1.05rem;">
+        <span data-en>Timely, accurate communication is an important part of serving Quebec's Hasidic Jewish communities.</span>
+        <span data-fr>Une communication rapide et exacte est un élément important du service aux communautés juives hassidiques du Québec.</span>
+      </p>
+      <p data-cid="stay-informed-3" style="max-width:680px; margin:16px auto 0;">
+        <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) shares important information through two official communication channels, each serving a different purpose.</span>
+        <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) diffuse de l'information importante par deux canaux de communication officiels, chacun ayant un objectif distinct.</span>
+      </p>
+      <p data-cid="stay-informed-4" style="max-width:680px; margin:16px auto 0;">
+        <span data-en>Community members receive direct Community Information Updates by email, while official statements and public announcements are shared through CJHQ's social media channels.</span>
+        <span data-fr>Les membres de la communauté reçoivent directement les mises à jour d'information communautaire par courriel, tandis que les déclarations et annonces publiques officielles sont diffusées par les réseaux sociaux du CJHQ.</span>
+      </p>
+      <p data-cid="stay-informed-5" style="max-width:680px; margin:16px auto 0;">
+        <span data-en>Whether the information relates to government services, travel, public safety, holidays, or community matters, CJHQ is committed to providing reliable and timely communication.</span>
+        <span data-fr>Qu'il s'agisse de services gouvernementaux, de voyages, de sécurité publique, de fêtes ou d'enjeux communautaires, le CJHQ s'engage à offrir une communication fiable et rapide.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="section-inner">
+      <div style="text-align:center; max-width:680px; margin:0 auto;">
+        <span class="eyebrow" data-en>Public Statements &amp; Announcements</span>
+        <span class="eyebrow" data-fr>Déclarations et annonces publiques</span>
+        <h2 data-cid="stay-informed-11" style="margin-top:10px;">
+          <span data-en>Follow CJHQ</span>
+          <span data-fr>Suivre le CJHQ</span>
+        </h2>
+        <p data-cid="stay-informed-12">
+          <span data-en>Official statements, public announcements, organizational updates, and other information intended for the broader public are shared through CJHQ's official social media channels.</span>
+          <span data-fr>Les déclarations officielles, les annonces publiques, les mises à jour organisationnelles et d'autres renseignements destinés au grand public sont diffusés par les réseaux sociaux officiels du CJHQ.</span>
+        </p>
+        <p data-cid="stay-informed-13" style="margin-bottom:14px;">
+          <span data-en>Follow CJHQ for:</span>
+          <span data-fr>Suivez le CJHQ pour :</span>
+        </p>
+      </div>
+      <div class="pill-row" style="margin-bottom:24px;">
+        <span class="pill"><span data-en>Official statements</span><span data-fr>Déclarations officielles</span></span>
+        <span class="pill"><span data-en>Public announcements</span><span data-fr>Annonces publiques</span></span>
+        <span class="pill"><span data-en>Community updates</span><span data-fr>Mises à jour communautaires</span></span>
+      </div>
+      <div class="follow-btn-row" style="margin-bottom:32px;">
+        <a class="btn dark" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Facebook →</span><span data-fr>Suivre le CJHQ sur Facebook →</span></a>
+        <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on X →</span><span data-fr>Suivre le CJHQ sur X →</span></a>
+      </div>
+      <div id="socialEmbedGrid" class="social-embed-grid">
+        <div style="width:100%;">
+          <h3 data-cid="stay-informed-14" style="font-size:.95rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
+        <span data-en>Facebook Feed</span>
+        <span data-fr>Fil Facebook</span>
+      </h3>
+          <div id="fb-root"></div>
+          <div class="fb-page" style="width:100%; margin:0 auto;"
+               data-href="https://www.facebook.com/CJHQinfo"
+               data-tabs="timeline"
+               data-width="500"
+               data-height="500"
+               data-small-header="true"
+               data-adapt-container-width="true"
+               data-hide-cover="false"
+               data-show-facepile="false">
+            <blockquote cite="https://www.facebook.com/CJHQinfo" class="fb-xfbml-parse-ignore">
+              <a href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener">CJHQ on Facebook</a>
+            </blockquote>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-inner">
+      <span class="eyebrow" data-en>Community Information Updates</span>
+      <span class="eyebrow" data-fr>Mises à jour d'information communautaire</span>
+      <h2 data-cid="stay-informed-6" style="margin-top:10px;">
+        <span data-en>Important Information for the Community</span>
+        <span data-fr>Information importante pour la communauté</span>
+      </h2>
+      <p data-cid="stay-informed-7" style="max-width:680px;">
+        <span data-en>Throughout the year, CJHQ distributes Community Information Updates by email to subscribers within Quebec's Hasidic Jewish communities.</span>
+        <span data-fr>Tout au long de l'année, le CJHQ diffuse des mises à jour d'information communautaire par courriel aux abonnés des communautés juives hassidiques du Québec.</span>
+      </p>
+      <p data-cid="stay-informed-8" style="max-width:680px; margin-bottom:20px;">
+        <span data-en>These updates provide practical information that helps community members stay informed about matters affecting everyday life. Topics may include:</span>
+        <span data-fr>Ces mises à jour offrent de l'information pratique qui aide les membres de la communauté à rester informés des enjeux touchant la vie quotidienne. Les sujets peuvent inclure :</span>
+      </p>
+      <div class="topic-list" id="topicList"></div>
+      <p data-cid="stay-informed-9" style="max-width:680px; margin-top:24px; font-size:.9rem; color:var(--muted);">
+        <span data-en>Many of these communications are intended specifically for community members and are therefore distributed by email rather than published publicly.</span>
+        <span data-fr>Plusieurs de ces communications sont destinées spécifiquement aux membres de la communauté et sont donc diffusées par courriel plutôt que publiées publiquement.</span>
+      </p>
+      <div class="card" style="max-width:640px; margin:28px auto 0; text-align:center;">
+        <p data-cid="stay-informed-10" style="margin:0 0 4px;">
+        <span data-en>If you are part of Quebec's Hasidic Jewish community, we encourage you to subscribe to ensure you receive important updates as they are issued.</span>
+        <span data-fr>Si vous faites partie de la communauté juive hassidique du Québec, nous vous encourageons à vous abonner afin de recevoir les mises à jour importantes dès leur diffusion.</span>
+      </p>
+        <!-- Begin Constant Contact Inline Form Code -->
+        <div class="ctct-inline-form" data-form-id="f52c7ae1-68b7-490b-8505-b139b4d247f6" style="width:100%;"></div>
+        <!-- End Constant Contact Inline Form Code -->
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="section-inner">
+      <h2 data-cid="stay-informed-16">
+        <span data-en>Why Two Communication Channels?</span>
+        <span data-fr>Pourquoi deux canaux de communication?</span>
+      </h2>
+      <p data-cid="stay-informed-17">
+        <span data-en>CJHQ communicates through two complementary channels because different information serves different audiences.</span>
+        <span data-fr>Le CJHQ communique par deux canaux complémentaires, car différents types d'information s'adressent à différents publics.</span>
+      </p>
+      <div class="grid-2" style="margin-top:20px;">
+        <div class="card">
+          <h3 data-en>Community Information Updates</h3><h3 data-fr>Mises à jour d'information communautaire</h3>
+          <p data-cid="stay-informed-18" style="font-size:.9rem;">
+        <span data-en>Delivered directly by email to subscribers within the community.</span>
+        <span data-fr>Livrées directement par courriel aux abonnés de la communauté.</span>
+      </p>
+          <p data-cid="stay-informed-19" style="font-size:.88rem; margin:0;">
+        <span data-en>These updates often contain practical information relating to holidays, travel, public services, government programs, municipal notices, and other matters affecting daily community life. Many of these communications are not intended for a general public audience and are therefore distributed exclusively by email.</span>
+        <span data-fr>Ces mises à jour contiennent souvent de l'information pratique relative aux fêtes, aux voyages, aux services publics, aux programmes gouvernementaux, aux avis municipaux et à d'autres enjeux touchant la vie communautaire quotidienne. Plusieurs de ces communications ne sont pas destinées au grand public et sont donc diffusées exclusivement par courriel.</span>
+      </p>
+        </div>
+        <div class="card">
+          <h3 data-en>Public Statements &amp; Announcements</h3><h3 data-fr>Déclarations et annonces publiques</h3>
+          <p data-cid="stay-informed-20" style="font-size:.9rem;">
+        <span data-en>Shared publicly through CJHQ's official social media channels.</span>
+        <span data-fr>Diffusées publiquement par les réseaux sociaux officiels du CJHQ.</span>
+      </p>
+          <p data-cid="stay-informed-21" style="font-size:.88rem; margin:0;">
+        <span data-en>These communications include official statements, public announcements, organizational updates, and information intended for governments, public institutions, media organizations, community partners, and the general public.</span>
+        <span data-fr>Ces communications comprennent des déclarations officielles, des annonces publiques, des mises à jour organisationnelles et de l'information destinée aux gouvernements, aux institutions publiques, aux médias, aux partenaires communautaires et au grand public.</span>
+      </p>
+        </div>
+      </div>
+      <p data-cid="stay-informed-22" style="margin-top:20px;">
+        <span data-en>Together, these two communication channels ensure that important information reaches the appropriate audience in the most effective manner.</span>
+        <span data-fr>Ensemble, ces deux canaux de communication garantissent que l'information importante rejoint le bon public de la façon la plus efficace.</span>
+      </p>
+    </div>
+  </section>
+
+
+  <section class="alt">
+    <div class="section-inner" style="max-width:680px; text-align:center; margin:0 auto;">
+      <p data-cid="stay-informed-27" style="font-weight:500; color:var(--ink-soft); font-family:'Lora',serif; font-size:1.1rem;">
+        <span data-en>Reliable information. Trusted communication. Stronger communities.</span>
+        <span data-fr>Une information fiable. Une communication de confiance. Des communautés plus fortes.</span>
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ CONTACT ============ -->
+<div class="page" id="page-contact">
+  <section style="padding-top:56px;">
+    <div class="section-inner">
+      <span class="eyebrow" data-en>Contact CJHQ</span>
+      <span class="eyebrow" data-fr>Contacter le CJHQ</span>
+      <h1 data-cid="contact-1" style="font-size:clamp(2rem,4vw,2.8rem); margin-top:10px;">
+        <span data-en>We're Here to Help</span>
+        <span data-fr>Nous sommes là pour vous aider</span>
+      </h1>
+      <p data-cid="contact-2" style="max-width:680px;">
+        <span data-en>Whether you are a community member, government official, public institution, journalist, community organization, or have a general question, the Jewish Hasidic Council of Quebec (CJHQ) welcomes your inquiry.</span>
+        <span data-fr>Que vous soyez un membre de la communauté, un représentant gouvernemental, une institution publique, un journaliste, un organisme communautaire ou que vous ayez une question générale, le Conseil des Juifs Hassidiques du Québec (CJHQ) accueille votre demande.</span>
+      </p>
+      <p data-cid="contact-3" style="max-width:680px;">
+        <span data-en>Our goal is to ensure that every request reaches the appropriate member of our team so that it can be handled efficiently and professionally.</span>
+        <span data-fr>Notre objectif est de veiller à ce que chaque demande soit acheminée au bon membre de notre équipe afin qu'elle soit traitée de façon efficace et professionnelle.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="alt" style="padding-top:0;">
+    <div class="section-inner grid-2 contact-grid">
+      <div>
+        <h3 data-cid="contact-4" style="margin-top:24px; margin-bottom:2px;">
+        <span data-en>How can we assist you?</span>
+        <span data-fr>Comment pouvons-nous vous aider?</span>
+      </h3>
+        <p data-cid="contact-5" style="font-size:.86rem; color:var(--muted); margin-bottom:14px;">
+        <span data-en>Please begin by selecting the option that best describes you. The form will automatically display the questions most relevant to your inquiry.</span>
+        <span data-fr>Veuillez d'abord sélectionner l'option qui vous décrit le mieux. Le formulaire affichera automatiquement les questions les plus pertinentes pour votre demande.</span>
+      </p>
+        <p data-cid="contact-6" style="font-weight:600; margin-bottom:6px;">
+        <span data-en>I am a:</span>
+        <span data-fr>Je suis :</span>
+      </p>
+        <div class="cat-toggle" id="catToggle"></div>
+        <form id="contactForm" action="https://formspree.io/f/xbdndzzd" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="inquiry_type" id="inquiryTypeField" value="Community Member">
+          <input type="hidden" name="_subject" value="New message from the CJHQ website">
+          <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+          <div id="dynamicFields"></div>
+          <button class="btn dark" type="submit" id="contactSubmitBtn"><span data-en>Send Message</span><span data-fr>Envoyer le message</span></button>
+          <p id="contactFormStatus" style="margin-top:12px; font-size:.88rem; display:none;"></p>
+        </form>
+      </div>
+
+      <div style="margin-top:24px;">
+        <h3 data-en>Contact Information</h3>
+        <h3 data-fr>Coordonnées</h3>
+        <p style="font-weight:600; margin-bottom:8px;"><span data-en id="contactOrgEn">The Jewish Hasidic Council of Quebec</span><span data-fr id="contactOrgFr">Le Conseil des Juifs Hassidiques du Québec</span></p>
+        <div class="contact-info-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11a7 7 0 1114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+          <div><span data-en id="contactAddrEn">1040 Van Horne Ave<br>Outremont, QC, H2V 1J5, CANADA</span><span data-fr id="contactAddrFr">1040, avenue Van Horne, 2e étage<br>Outremont (Québec) H2V 1J5, CANADA</span></div>
+        </div>
+        <div class="contact-info-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 5c0 8.3 6.7 15 15 15l3-3-5-4-2 2c-2-1-4.5-3.5-5.5-5.5l2-2-4-5-3 3z"/></svg>
+          <div id="contactPhone">(514) 819-9440</div>
+        </div>
+        <div class="contact-info-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
+          <div id="contactEmail">info@cjhq.org</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-inner" style="max-width:640px; text-align:center; margin:0 auto;">
+      <h2 data-cid="contact-22">
+        <span data-en>Thank You</span>
+        <span data-fr>Merci</span>
+      </h2>
+      <p data-cid="contact-23" style="font-size:.92rem; color:var(--muted);">
+        <span data-en>Thank you for contacting the Jewish Hasidic Council of Quebec.</span>
+        <span data-fr>Merci d'avoir communiqué avec le Conseil des Juifs Hassidiques du Québec.</span>
+      </p>
+      <p data-cid="contact-24" style="font-size:.92rem; color:var(--muted);">
+        <span data-en>We appreciate the opportunity to assist you and look forward to working with you.</span>
+        <span data-fr>Nous apprécions l'occasion de vous venir en aide et avons hâte de travailler avec vous.</span>
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ PRIVACY POLICY ============ -->
+<div class="page" id="page-privacy">
+  <section style="padding-top:56px; padding-bottom:24px;">
+    <div class="section-inner" style="max-width:760px;">
+      <span class="eyebrow" data-en>Legal</span><span class="eyebrow" data-fr>Mentions légales</span>
+      <h1 data-cid="privacy-1" style="font-size:clamp(1.8rem,3.6vw,2.4rem); margin-top:10px;">
+        <span data-en>Privacy Policy</span>
+        <span data-fr>Politique de confidentialité</span>
+      </h1>
+      <p data-cid="privacy-2" style="font-size:.85rem; color:var(--muted);">
+        <span data-en><strong>Effective Date:</strong> July 19, 2026</span>
+        <span data-fr><strong>Date d'entrée en vigueur :</strong> 19 juillet 2026</span>
+      </p>
+      <p data-cid="privacy-3">
+        <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting the privacy of all individuals who visit our website or communicate with us.</span>
+        <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) s'engage à protéger la vie privée de toutes les personnes qui visitent notre site Web ou communiquent avec nous.</span>
+      </p>
+      <p data-cid="privacy-4">
+        <span data-en>This Privacy Policy explains what information may be collected through this website, how it is used, and how it is protected.</span>
+        <span data-fr>La présente politique de confidentialité explique quels renseignements peuvent être recueillis par ce site Web, comment ils sont utilisés et comment ils sont protégés.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="alt" style="padding-top:32px;">
+    <div class="section-inner" style="max-width:760px;">
+
+      <h2 data-cid="privacy-5" style="font-size:1.2rem;">
+        <span data-en>Information We Collect</span>
+        <span data-fr>Renseignements que nous recueillons</span>
+      </h2>
+      <p data-cid="privacy-6">
+        <span data-en>Depending on how you interact with our website, CJHQ may collect information that you voluntarily provide, including:</span>
+        <span data-fr>Selon la façon dont vous interagissez avec notre site Web, le CJHQ peut recueillir des renseignements que vous fournissez volontairement, notamment :</span>
+      </p>
+      <ul data-en>
+        <li>Name</li><li>Email address</li><li>Telephone number</li>
+        <li>Organization or government department</li>
+        <li>Information submitted through our contact form</li>
+        <li>Information provided when subscribing to Community Information Updates</li>
+      </ul>
+      <ul data-fr>
+        <li>Nom</li><li>Adresse courriel</li><li>Numéro de téléphone</li>
+        <li>Organisation ou ministère gouvernemental</li>
+        <li>Renseignements soumis par notre formulaire de contact</li>
+        <li>Renseignements fournis lors de l'abonnement à l'infolettre communautaire</li>
+      </ul>
+
+      <h2 data-cid="privacy-7" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>How We Use Your Information</span>
+        <span data-fr>Utilisation de vos renseignements</span>
+      </h2>
+      <p data-cid="privacy-8">
+        <span data-en>Information submitted through this website may be used to:</span>
+        <span data-fr>Les renseignements soumis par ce site Web peuvent être utilisés pour :</span>
+      </p>
+      <ul data-en>
+        <li>Respond to inquiries</li><li>Provide assistance or information</li><li>Process requests</li>
+        <li>Send Community Information Updates to subscribers</li><li>Improve our website and services</li>
+        <li>Maintain website security</li>
+      </ul>
+      <ul data-fr>
+        <li>Répondre aux demandes</li><li>Fournir de l'aide ou de l'information</li><li>Traiter les demandes</li>
+        <li>Envoyer l'infolettre communautaire aux abonnés</li><li>Améliorer notre site Web et nos services</li>
+        <li>Assurer la sécurité du site Web</li>
+      </ul>
+      <p data-cid="privacy-9">
+        <span data-en>CJHQ does not sell or rent personal information.</span>
+        <span data-fr>Le CJHQ ne vend ni ne loue les renseignements personnels.</span>
+      </p>
+
+      <h2 data-cid="privacy-10" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Email Communications</span>
+        <span data-fr>Communications par courriel</span>
+      </h2>
+      <p data-cid="privacy-11">
+        <span data-en>Individuals who subscribe to Community Information Updates may receive important community information, announcements, travel updates, government information, and other relevant communications.</span>
+        <span data-fr>Les personnes abonnées à l'infolettre communautaire peuvent recevoir de l'information communautaire importante, des annonces, des mises à jour sur les voyages, de l'information gouvernementale et d'autres communications pertinentes.</span>
+      </p>
+      <p data-cid="privacy-12">
+        <span data-en>Subscribers may unsubscribe at any time using the unsubscribe link included in each email.</span>
+        <span data-fr>Les abonnés peuvent se désabonner en tout temps à l'aide du lien de désabonnement inclus dans chaque courriel.</span>
+      </p>
+
+      <h2 data-cid="privacy-13" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Cookies</span>
+        <span data-fr>Témoins (cookies)</span>
+      </h2>
+      <p data-cid="privacy-14">
+        <span data-en>This website uses cookies and similar technologies for two purposes: to remember your language choice, and for the website analytics described below. It does not use advertising cookies.</span>
+        <span data-fr>Ce site Web utilise des témoins et des technologies similaires à deux fins : retenir votre choix de langue et produire les statistiques de fréquentation décrites ci-dessous. Il n'utilise aucun témoin publicitaire.</span>
+      </p>
+      <p data-cid="privacy-15">
+        <span data-en>Visitors may adjust their browser settings to manage or disable cookies.</span>
+        <span data-fr>Les visiteurs peuvent ajuster les paramètres de leur navigateur afin de gérer ou de désactiver les témoins.</span>
+      </p>
+
+      <h2 data-cid="privacy-analytics-1" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Website Analytics</span>
+        <span data-fr>Statistiques de fréquentation du site Web</span>
+      </h2>
+      <p data-cid="privacy-analytics-2">
+        <span data-en>This website uses Google Analytics, a web analytics service provided by Google, to understand how visitors use the site. It records information such as the pages viewed, the approximate region a visit comes from, the type of device and browser used, and how visitors arrived at the site.</span>
+        <span data-fr>Ce site Web utilise Google Analytics, un service d'analyse Web fourni par Google, afin de comprendre comment les visiteurs utilisent le site. Ce service enregistre des renseignements tels que les pages consultées, la région approximative d'où provient la visite, le type d'appareil et de navigateur utilisé, ainsi que la façon dont les visiteurs sont arrivés sur le site.</span>
+      </p>
+      <p data-cid="privacy-analytics-3">
+        <span data-en>CJHQ uses this information only to improve the website and to understand which community resources are most needed. We do not use it to identify individual visitors, and we do not combine it with any information you send us through the contact form or the newsletter.</span>
+        <span data-fr>Le CJHQ utilise ces renseignements uniquement pour améliorer le site Web et pour comprendre quelles ressources communautaires sont les plus utiles. Nous ne les utilisons pas pour identifier des visiteurs en particulier, et nous ne les combinons pas avec les renseignements que vous nous transmettez par le formulaire de contact ou l'infolettre.</span>
+      </p>
+      <p data-cid="privacy-analytics-4">
+        <span data-en>Google Analytics is configured so that advertising features and cross-site profiling are turned off. Information is processed by Google and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block analytics through their browser settings or by installing Google's opt-out browser add-on.</span>
+        <span data-fr>Google Analytics est configuré de façon à désactiver les fonctions publicitaires et le profilage entre sites. Les renseignements sont traités par Google et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent bloquer les statistiques au moyen des paramètres de leur navigateur ou en installant le module complémentaire de désactivation offert par Google.</span>
+      </p>
+
+      <h2 data-cid="privacy-16" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Third-Party Links</span>
+        <span data-fr>Liens vers des sites tiers</span>
+      </h2>
+      <p data-cid="privacy-17">
+        <span data-en>Our website contains links to official government websites and other trusted resources.</span>
+        <span data-fr>Notre site Web contient des liens vers des sites gouvernementaux officiels et d'autres ressources fiables.</span>
+      </p>
+      <p data-cid="privacy-18">
+        <span data-en>CJHQ is not responsible for the privacy practices or content of external websites.</span>
+        <span data-fr>Le CJHQ n'est pas responsable des pratiques de confidentialité ou du contenu des sites externes.</span>
+      </p>
+      <p data-cid="privacy-19">
+        <span data-en>Visitors should review the privacy policies of those websites separately.</span>
+        <span data-fr>Les visiteurs sont invités à consulter séparément les politiques de confidentialité de ces sites.</span>
+      </p>
+
+      <h2 data-cid="privacy-20" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Data Security</span>
+        <span data-fr>Sécurité des données</span>
+      </h2>
+      <p data-cid="privacy-21">
+        <span data-en>CJHQ takes reasonable measures to protect personal information submitted through this website.</span>
+        <span data-fr>Le CJHQ prend des mesures raisonnables pour protéger les renseignements personnels soumis par ce site Web.</span>
+      </p>
+      <p data-cid="privacy-22">
+        <span data-en>While no method of electronic transmission is completely secure, appropriate safeguards are used to help protect information from unauthorized access.</span>
+        <span data-fr>Bien qu'aucune méthode de transmission électronique ne soit entièrement sécurisée, des mesures de protection appropriées sont utilisées pour aider à protéger l'information contre tout accès non autorisé.</span>
+      </p>
+
+      <h2 data-cid="privacy-23" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Changes to this Policy</span>
+        <span data-fr>Modifications de la présente politique</span>
+      </h2>
+      <p data-cid="privacy-24">
+        <span data-en>This Privacy Policy may be updated from time to time to reflect changes in legal requirements or website functionality.</span>
+        <span data-fr>La présente politique de confidentialité peut être mise à jour périodiquement afin de refléter les changements aux exigences légales ou aux fonctionnalités du site Web.</span>
+      </p>
+      <p data-cid="privacy-25">
+        <span data-en>The most current version will always be published on this website.</span>
+        <span data-fr>La version la plus récente sera toujours publiée sur ce site Web.</span>
+      </p>
+
+      <h2 data-cid="privacy-26" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Contact</span>
+        <span data-fr>Contact</span>
+      </h2>
+      <p data-cid="privacy-27">
+        <span data-en>Questions regarding this Privacy Policy may be submitted through the Contact page.</span>
+        <span data-fr>Les questions relatives à la présente politique de confidentialité peuvent être soumises par la page Contact.</span>
+      </p>
+      <button class="btn dark" onclick="goPage('contact')" style="margin-top:10px;"><span data-en>Go to Contact</span><span data-fr>Aller à la page Contact</span></button>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TERMS OF USE ============ -->
+<div class="page" id="page-terms">
+  <section style="padding-top:56px; padding-bottom:24px;">
+    <div class="section-inner" style="max-width:760px;">
+      <span class="eyebrow" data-en>Legal</span><span class="eyebrow" data-fr>Mentions légales</span>
+      <h1 data-cid="terms-1" style="font-size:clamp(1.8rem,3.6vw,2.4rem); margin-top:10px;">
+        <span data-en>Terms of Use</span>
+        <span data-fr>Conditions d'utilisation</span>
+      </h1>
+      <p data-cid="terms-2">
+        <span data-en>By accessing and using this website, you agree to these Terms of Use.</span>
+        <span data-fr>En accédant à ce site Web et en l'utilisant, vous acceptez les présentes conditions d'utilisation.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="alt" style="padding-top:32px;">
+    <div class="section-inner" style="max-width:760px;">
+
+      <h2 data-cid="terms-3" style="font-size:1.2rem;">
+        <span data-en>Website Purpose</span>
+        <span data-fr>Objet du site Web</span>
+      </h2>
+      <p data-cid="terms-4">
+        <span data-en>The CJHQ website provides community information, official resource links, and general information about the work of the Jewish Hasidic Council of Quebec.</span>
+        <span data-fr>Le site Web du CJHQ offre de l'information communautaire, des liens vers des ressources officielles et de l'information générale sur le travail du Conseil des Juifs Hassidiques du Québec.</span>
+      </p>
+
+      <h2 data-cid="terms-5" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Information Accuracy</span>
+        <span data-fr>Exactitude de l'information</span>
+      </h2>
+      <p data-cid="terms-6">
+        <span data-en>CJHQ makes every reasonable effort to provide accurate and reliable information.</span>
+        <span data-fr>Le CJHQ déploie tous les efforts raisonnables pour fournir une information exacte et fiable.</span>
+      </p>
+      <p data-cid="terms-7">
+        <span data-en>However, government programs, regulations, policies, procedures, and requirements may change without notice.</span>
+        <span data-fr>Toutefois, les programmes, règlements, politiques, procédures et exigences gouvernementaux peuvent changer sans préavis.</span>
+      </p>
+      <p data-cid="terms-8">
+        <span data-en>Visitors should always verify important information directly with the appropriate government department or official source.</span>
+        <span data-fr>Les visiteurs devraient toujours vérifier les renseignements importants directement auprès du ministère gouvernemental concerné ou de la source officielle appropriée.</span>
+      </p>
+
+      <h2 data-cid="terms-9" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>External Links</span>
+        <span data-fr>Liens externes</span>
+      </h2>
+      <p data-cid="terms-10">
+        <span data-en>Many pages contain links to third-party websites, including government departments and public institutions.</span>
+        <span data-fr>Plusieurs pages contiennent des liens vers des sites tiers, y compris des ministères et des institutions publiques.</span>
+      </p>
+      <p data-cid="terms-11">
+        <span data-en>CJHQ is not responsible for the content, availability, or accuracy of external websites.</span>
+        <span data-fr>Le CJHQ n'est pas responsable du contenu, de la disponibilité ou de l'exactitude des sites externes.</span>
+      </p>
+
+      <h2 data-cid="terms-12" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>No Professional Advice</span>
+        <span data-fr>Absence de conseils professionnels</span>
+      </h2>
+      <p data-cid="terms-13">
+        <span data-en>Information provided through this website is intended for general informational purposes only.</span>
+        <span data-fr>L'information fournie par ce site Web est destinée à des fins d'information générale seulement.</span>
+      </p>
+      <p data-cid="terms-14">
+        <span data-en>Nothing contained on this website should be considered legal, financial, immigration, medical, or professional advice.</span>
+        <span data-fr>Rien sur ce site Web ne doit être considéré comme un conseil juridique, financier, en matière d'immigration, médical ou professionnel.</span>
+      </p>
+      <p data-cid="terms-15">
+        <span data-en>Visitors should consult the appropriate qualified professional where necessary.</span>
+        <span data-fr>Les visiteurs devraient consulter le professionnel qualifié approprié au besoin.</span>
+      </p>
+
+      <h2 data-cid="terms-16" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Intellectual Property</span>
+        <span data-fr>Propriété intellectuelle</span>
+      </h2>
+      <p data-cid="terms-17">
+        <span data-en>Unless otherwise indicated, the content of this website is the property of the Jewish Hasidic Council of Quebec.</span>
+        <span data-fr>Sauf indication contraire, le contenu de ce site Web est la propriété du Conseil des Juifs Hassidiques du Québec.</span>
+      </p>
+      <p data-cid="terms-18">
+        <span data-en>Content may not be reproduced without prior written permission, except where permitted by law.</span>
+        <span data-fr>Le contenu ne peut être reproduit sans autorisation écrite préalable, sauf dans les cas permis par la loi.</span>
+      </p>
+
+      <h2 data-cid="terms-19" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Changes</span>
+        <span data-fr>Modifications</span>
+      </h2>
+      <p data-cid="terms-20">
+        <span data-en>CJHQ may update these Terms of Use from time to time.</span>
+        <span data-fr>Le CJHQ peut mettre à jour les présentes conditions d'utilisation périodiquement.</span>
+      </p>
+      <p data-cid="terms-21">
+        <span data-en>Continued use of this website constitutes acceptance of the updated Terms.</span>
+        <span data-fr>L'utilisation continue de ce site Web constitue une acceptation des conditions mises à jour.</span>
+      </p>
+      <button class="btn dark" onclick="goPage('contact')" style="margin-top:10px;"><span data-en>Go to Contact</span><span data-fr>Aller à la page Contact</span></button>
+    </div>
+  </section>
+</div>
+
+<!-- ============ ACCESSIBILITY ============ -->
+<div class="page" id="page-accessibility">
+  <section style="padding-top:56px; padding-bottom:24px;">
+    <div class="section-inner" style="max-width:760px;">
+      <span class="eyebrow" data-en>Legal</span><span class="eyebrow" data-fr>Mentions légales</span>
+      <h1 data-cid="accessibility-1" style="font-size:clamp(1.8rem,3.6vw,2.4rem); margin-top:10px;">
+        <span data-en>Accessibility Statement</span>
+        <span data-fr>Déclaration d'accessibilité</span>
+      </h1>
+    </div>
+  </section>
+
+  <section class="alt" style="padding-top:32px;">
+    <div class="section-inner" style="max-width:760px;">
+      <p data-cid="accessibility-2">
+        <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) is committed to providing a website that is accessible to all visitors.</span>
+        <span data-fr>Le Conseil des Juifs Hassidiques du Québec (CJHQ) s'engage à offrir un site Web accessible à tous les visiteurs.</span>
+      </p>
+      <p data-cid="accessibility-3">
+        <span data-en>We strive to make our website easy to navigate and compatible with commonly used browsers, mobile devices, and assistive technologies.</span>
+        <span data-fr>Nous nous efforçons de rendre notre site Web facile à naviguer et compatible avec les navigateurs, les appareils mobiles et les technologies d'assistance couramment utilisés.</span>
+      </p>
+      <p data-cid="accessibility-4">
+        <span data-en>As our website continues to evolve, we will make reasonable efforts to improve accessibility and enhance the user experience for everyone.</span>
+        <span data-fr>Alors que notre site Web continue d'évoluer, nous déploierons des efforts raisonnables pour améliorer l'accessibilité et bonifier l'expérience utilisateur pour tous.</span>
+      </p>
+      <p data-cid="accessibility-5">
+        <span data-en>If you experience difficulty accessing any part of this website or require information in an alternative format, we encourage you to contact CJHQ through our Contact page.</span>
+        <span data-fr>Si vous éprouvez de la difficulté à accéder à une partie de ce site Web ou si vous avez besoin d'information dans un autre format, nous vous encourageons à communiquer avec le CJHQ par notre page Contact.</span>
+      </p>
+      <p data-cid="accessibility-6">
+        <span data-en>We value your feedback and will make every reasonable effort to improve accessibility wherever possible.</span>
+        <span data-fr>Nous accordons de la valeur à vos commentaires et déploierons tous les efforts raisonnables pour améliorer l'accessibilité dans la mesure du possible.</span>
+      </p>
+      <button class="btn dark" onclick="goPage('contact')" style="margin-top:10px;"><span data-en>Go to Contact</span><span data-fr>Aller à la page Contact</span></button>
+    </div>
+  </section>
+</div>
+
+
+<!-- ============ 404 / PAGE NOT FOUND ============ -->
+<div class="page" id="page-404">
+  <section style="padding-top:80px; min-height:60vh; display:flex; align-items:center;">
+    <div class="section-inner" style="max-width:560px; text-align:center; margin:0 auto;">
+      <div class="notfound-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11a7 7 0 1114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+      </div>
+      <span class="eyebrow" data-en>Page Not Found</span>
+      <span class="eyebrow" data-fr>Page introuvable</span>
+      <h1 style="font-size:clamp(1.8rem,4vw,2.4rem); margin-top:10px;">
+        <span data-en>We couldn't find that page</span>
+        <span data-fr>Nous n'avons pas trouvé cette page</span>
+      </h1>
+      <p style="max-width:460px; margin:0 auto;">
+        <span data-en>The link you followed may be outdated, or the page may have moved. Nothing to worry about — let's get you back on track.</span>
+        <span data-fr>Le lien que vous avez suivi est peut-être désuet, ou la page a été déplacée. Rien d'inquiétant — revenons sur la bonne voie.</span>
+      </p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:22px;">
+        <button class="btn dark" onclick="goPage('home')"><span data-en>Go to Homepage →</span><span data-fr>Aller à l'accueil →</span></button>
+        <button class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" onclick="goPage('contact')"><span data-en>Contact CJHQ</span><span data-fr>Contacter le CJHQ</span></button>
+      </div>
+      <div class="notfound-report">
+        <p style="font-size:.82rem; color:var(--muted); margin-bottom:10px;">
+          <span data-en>If you clicked a link from our site or a shared message to get here, letting us know helps us fix it.</span>
+          <span data-fr>Si vous avez cliqué sur un lien de notre site ou d'un message partagé pour arriver ici, nous en informer nous aide à le corriger.</span>
+        </p>
+        <button class="btn" id="reportBrokenLinkBtn" style="background:transparent; border:1.5px solid var(--line); color:var(--ink-soft); font-size:.82rem; padding:9px 16px;">
+          <span data-en>Report This Broken Link</span><span data-fr>Signaler ce lien brisé</span>
+        </button>
+        <p id="reportBrokenLinkStatus" style="font-size:.8rem; color:#3A7D52; margin-top:8px; display:none;">
+          <span data-en>Thank you — this has been reported.</span><span data-fr>Merci — ceci a été signalé.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+<!-- ============ CUSTOM PAGE (admin-created, generic container) ============ -->
+<div class="page" id="page-custom">
+  <section style="padding-top:56px; min-height:60vh;">
+    <div class="section-inner" style="max-width:760px;">
+      <h1 id="customPageTitle" style="font-size:clamp(1.8rem,4vw,2.4rem);"></h1>
+      <div id="customPageBody" style="font-size:1.02rem; line-height:1.7; color:var(--ink-soft);"></div>
+    </div>
+  </section>
+</div>
+</div>
+
+
+<!-- ============ ADMIN (hidden — access via /admin) ============ -->
+
+
+<!-- ============ ADMIN (hidden — access via /admin) ============ -->
+<!-- Admin panel: source lives in tools/admin-panel.html and is injected into admin.html only. -->
+
+<!-- ============ FOOTER ============ -->
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top" style="align-items:flex-start;">
+      <div style="max-width:220px;">
+        <span class="brand-name">CJHQ</span>
+        <div class="brand-sub" style="margin-top:4px;" data-en id="footerOrgEn">The Jewish Hasidic Council of Quebec</div>
+        <div class="brand-sub" data-fr id="footerOrgFr">Le Conseil des Juifs Hassidiques du Québec</div>
+        <div style="font-size:.8rem; color:#C7D3E8; margin-top:6px;">
+          <span data-en id="footerTaglineEn">Supporting, Serving, and Representing Quebec's Hasidic Jewish Communities</span>
+          <span data-fr id="footerTaglineFr">Soutenir, servir et représenter les communautés juives hassidiques du Québec</span>
+        </div>
+        <div class="social-row" style="margin-top:16px;">
+          <a class="social-icon" id="footerFacebookLink" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener" title="Facebook — @CJHQinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2C11.54 2 9.68 3.66 9.68 6.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.03.29-1.73 1.76-1.73Z"/></svg></a>
+          <a class="social-icon" id="footerXLink" href="https://x.com/CJHQinfo" target="_blank" rel="noopener" title="X (Twitter) — @CJHQinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg></a>
+          <a class="social-icon" id="footerInstagramLink" href="https://www.instagram.com/cjhqinfo/" target="_blank" rel="noopener" title="Instagram — @cjhqinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+        </div>
+      </div>
+
+      <nav aria-label="Footer">
+        <span class="eyebrow" style="color:#8FA3C7;" data-en>Quick Links</span>
+        <span class="eyebrow" style="color:#8FA3C7;" data-fr>Liens rapides</span>
+        <a href="/" data-page="home" style="margin-top:8px;"><span data-en>Home</span><span data-fr>Accueil</span></a>
+        <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
+        <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
+        <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
+        <a href="/about" data-page="about"><span data-en>About</span><span data-fr>À propos</span></a>
+      </nav>
+
+      <div>
+        <span class="eyebrow" style="color:#8FA3C7;" data-en>Contact</span>
+        <span class="eyebrow" style="color:#8FA3C7;" data-fr>Contact</span>
+        <div style="font-size:.85rem; margin-top:8px; line-height:1.8;">
+          <span data-en id="footerAddrEn">1040 Van Horne Ave<br>Outremont, QC, H2V 1J5, CANADA</span><span data-fr id="footerAddrFr">1040, avenue Van Horne, 2e étage<br>Outremont (Québec) H2V 1J5, CANADA</span><br><span id="footerPhone">(514) 819-9440</span> · <span id="footerEmail">info@cjhq.org</span>
+        </div>
+      </div>
+
+      <div style="max-width:260px;">
+        <span class="eyebrow" style="color:#8FA3C7;" data-en>Community Information Updates</span>
+        <span class="eyebrow" style="color:#8FA3C7;" data-fr>Mises à jour d'information communautaire</span>
+        <p style="font-size:.82rem; color:#C7D3E8; margin-top:8px; line-height:1.6;">
+          <span data-en>Subscribe to receive important community announcements, holiday information, travel and border updates, government notices, public safety information, and other developments affecting Quebec's Hasidic Jewish communities.</span>
+          <span data-fr>Abonnez-vous pour recevoir des annonces communautaires importantes, des renseignements sur les fêtes, des mises à jour de voyage et de frontière, des avis gouvernementaux, de l'information sur la sécurité publique et d'autres développements touchant les communautés juives hassidiques du Québec.</span>
+        </p>
+        <div style="margin-top:8px;">
+          <a href="/stay-informed" data-href-page="stay-informed" class="btn outline footer-subscribe-btn" onclick="if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return true; goToSubscribeForm(); return false;">
+            <span data-en>Subscribe to Community Information Updates →</span>
+            <span data-fr>S'abonner aux mises à jour d'information communautaire →</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span><span data-en>© 2026 The Jewish Hasidic Council of Quebec (CJHQ)</span><span data-fr>© 2026 Le Conseil des Juifs Hassidiques du Québec (CJHQ)</span></span>
+      <span style="display:flex; gap:16px; flex-wrap:wrap;">
+        <a href="/privacy" data-page="privacy"><span data-en>Privacy Policy</span><span data-fr>Politique de confidentialité</span></a>
+        <a href="/terms" data-page="terms"><span data-en>Terms of Use</span><span data-fr>Conditions d'utilisation</span></a>
+        <a href="/accessibility" data-page="accessibility"><span data-en>Accessibility Statement</span><span data-fr>Déclaration d'accessibilité</span></a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<div class="site-modal-overlay no-print" id="sitePopupOverlay" role="dialog" aria-modal="true">
+  <div class="site-modal" id="sitePopupBody" style="max-width:480px;" tabindex="-1"></div>
+</div>
+
+
+<script>
+// ---------- ROUTING BASE PATH ----------
+// Auto-detects whether this site is served from a domain root (e.g.
+// cjhq.org/contact) or a GitHub Pages project subpath (e.g.
+// cjhqinfo.github.io/CJHQ/contact). No manual configuration needed —
+// this makes every link below correct on either setup automatically.
+const SITE_BASE_PATH = (function(){
+  if(location.hostname.endsWith('.github.io')){
+    const seg = location.pathname.split('/').filter(Boolean)[0];
+    return seg ? '/' + seg : '';
+  }
+  return '';
+})();
+// ---------- ICON LIBRARY (simple line icons, 24x24) ----------
+const icons = {
+  baby: '<path d="M9 12a3 3 0 106 0M12 4v3M8 7c-2 0-3 2-3 4M16 7c2 0 3 2 3 4M6 12c0 5 3 8 6 8s6-3 6-8"/>',
+  leaf: '<path d="M20 4C10 4 4 10 4 20c10 0 16-6 16-16z"/><path d="M8 16l8-8"/>',
+  plane: '<path d="M3 12l18-7-7 18-3-8-8-3z"/>',
+  passport: '<rect x="6" y="3" width="12" height="18" rx="1.5"/><circle cx="12" cy="10" r="2.4"/><path d="M9 16h6"/>',
+  heart: '<path d="M12 20s-7-4.6-9.5-9C.7 7.4 3 4 6.5 4 9 4 11 6 12 7.5 13 6 15 4 17.5 4 21 4 23.3 7.4 21.5 11 19 15.4 12 20 12 20z"/>',
+  briefcase: '<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M8 8V6a2 2 0 012-2h4a2 2 0 012 2v2"/>',
+  doc: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/>',
+  building: '<rect x="4" y="3" width="16" height="18"/><path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1"/>',
+  truck: '<rect x="2" y="8" width="12" height="9"/><path d="M14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',
+  gov: '<path d="M4 21h16M5 21V10M19 21V10M3 10l9-6 9 6M8 10v7M12 10v7M16 10v7"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
+  people: '<circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M10 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>',
+  handshake: '<path d="M2 12l5-4 4 3 3-3 5 4-3 3-2-2-3 3-4-3-2 2z"/><path d="M7 8l4 8M17 8l-4 8"/>',
+  scale: '<path d="M12 3v18M5 8l-3 6a3 3 0 006 0L5 8zM19 8l-3 6a3 3 0 006 0l-3-6zM5 8h14M8 21h8"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5-5"/>'
+};
+function iconSVG(name){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${icons[name]}</svg>`;
+}
+
+// ---------- RESOURCE CATEGORY DATA ----------
+// Canadian English accepts both "licence" and "license"; the only driver
+// resource is titled with the American spelling ("New York Enhanced Driver
+// License"), so a search for "licence" returned nothing. Normalising both the
+// query and the text being searched makes either spelling match. No stored
+// content is altered - this only affects comparison.
+function cjhqNormalizeSearch(str){
+  return String(str == null ? '' : str)
+    .toLowerCase()
+    .replace(/\u2019/g, "'")      // curly apostrophe (phone keyboards) -> straight
+    .replace(/'s\b/g, '')         // possessive: "driver's license" -> "driver license",
+                                  // so it matches the stored "Driver License"
+    .replace(/licence/g, 'license'); // Canadian/British spelling -> the stored spelling
+}
+
+const searchIndex = [
+  { page:'home', en:'Home', fr:'Accueil',
+    body_en:'CJHQ is a central point of contact for Quebec\'s Hasidic Jewish communities, providing services, assistance, information, representation, and advocacy.',
+    body_fr:'Le CJHQ est un point de contact central pour les communautés juives hassidiques du Québec, offrant services, assistance, information, représentation et défense de leurs intérêts.' },
+  { page:'home', en:'Our Partners', fr:'Nos partenaires',
+    body_en:'CJHQ works alongside community organizations including Refuah V\'Chesed, Hatzolah Montreal, Chaverim Montreal, and others.',
+    body_fr:'Le CJHQ collabore avec des organismes communautaires, dont Refuah V\'Chesed, Hatzolah Montreal, Chaverim Montreal et d\'autres.' },
+  { page:'about', en:'About CJHQ', fr:'À propos du CJHQ',
+    body_en:'A community organization dedicated to serving, supporting, and representing Quebec\'s Hasidic Jewish communities.',
+    body_fr:'Un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.' },
+  { page:'about', en:'Our Mission', fr:'Notre mission',
+    body_en:'To serve and strengthen Quebec\'s Hasidic Jewish communities through practical services, trusted information, and advocacy.',
+    body_fr:'Servir et renforcer les communautés juives hassidiques du Québec par des services pratiques, une information fiable et la défense de leurs intérêts.' },
+  { page:'about', en:'Our Approach', fr:'Notre approche',
+    body_en:'Effective advocacy combines strong relationships with a clear and responsible community voice.',
+    body_fr:'Une représentation efficace combine des relations solides avec une voix communautaire claire et responsable.' },
+  { page:'about', en:'Our Values', fr:'Nos valeurs',
+    body_en:'Service, professionalism, integrity, collaboration, respect, and non-partisanship.',
+    body_fr:'Service, professionnalisme, intégrité, collaboration, respect et non-partisanerie.' },
+  { page:'resources', en:'Community Resource Centre', fr:'Centre de ressources communautaires',
+    body_en:'Trusted government resources, applications, and services for Quebec\'s Hasidic Jewish communities.',
+    body_fr:'Ressources gouvernementales fiables, demandes et services pour les communautés juives hassidiques du Québec.' },
+  { page:'resources', en:'Visitor Parking — Outremont & Le Plateau-Mont-Royal', fr:'Stationnement pour visiteurs — Outremont et Le Plateau-Mont-Royal',
+    body_en:'How to get a visitor parking pass in Outremont and Le Plateau-Mont-Royal, including access codes and pay station instructions.',
+    body_fr:'Comment obtenir une vignette de stationnement pour visiteurs à Outremont et au Plateau-Mont-Royal, incluant les codes d\'accès et les instructions pour les bornes de paiement.' },
+  { page:'stay-informed', en:'Stay Informed', fr:'Restez informés',
+    body_en:'How to stay connected with CJHQ through Community Information Updates and public communications.',
+    body_fr:'Comment rester branché avec le CJHQ par les mises à jour d\'information communautaire et les communications publiques.' },
+  { page:'stay-informed', en:'Community Information Updates', fr:'Mises à jour d\'information communautaire',
+    body_en:'Subscribe for announcements, holiday information, travel and border updates, and public safety information.',
+    body_fr:'Abonnez-vous pour les annonces, l\'information sur les fêtes, les mises à jour de voyage et la sécurité publique.' },
+  { page:'stay-informed', en:'Public Statements & Announcements', fr:'Déclarations et annonces publiques',
+    body_en:'Official statements and announcements shared on Facebook and X.',
+    body_fr:'Déclarations et annonces officielles diffusées sur Facebook et X.' },
+  { page:'stay-informed', en:'Why Two Communication Channels?', fr:'Pourquoi deux canaux de communication?',
+    body_en:'Why CJHQ uses both Community Information Updates and public social media communications.',
+    body_fr:'Pourquoi le CJHQ utilise à la fois les mises à jour d\'information communautaire et les communications publiques.' },
+  { page:'contact', en:'Contact CJHQ', fr:'Contacter le CJHQ',
+    body_en:'Get in touch — community members, government officials, media, and organizations.',
+    body_fr:'Communiquez avec nous — membres de la communauté, représentants gouvernementaux, médias et organismes.' },
+  { page:'contact', en:'Community Organizations', fr:'Organismes communautaires',
+    body_en:'How community organizations and partners can connect with CJHQ.',
+    body_fr:'Comment les organismes communautaires et partenaires peuvent communiquer avec le CJHQ.' },
+  { page:'contact', en:'Response Times', fr:'Délais de réponse',
+    body_en:'What to expect when contacting CJHQ, and how to flag an urgent matter.',
+    body_fr:'À quoi s\'attendre en communiquant avec le CJHQ, et comment signaler une situation urgente.' },
+  { page:'contact', en:'Office Address & Phone', fr:'Adresse et téléphone du bureau',
+    body_en:'1040 Van Horne Ave, Outremont, QC, H2V 1J5, CANADA · (514) 819-9440 · info@cjhq.org',
+    body_fr:'1040, avenue Van Horne, 2e étage, Outremont (Québec) H2V 1J5, CANADA · (514) 819-9440 · info@cjhq.org' },
+  { page:'privacy', en:'Privacy Policy', fr:'Politique de confidentialité',
+    body_en:'What information CJHQ collects, how it is used, and how it is protected.',
+    body_fr:'Quels renseignements le CJHQ recueille, comment ils sont utilisés et protégés.' },
+  { page:'terms', en:'Terms of Use', fr:'Conditions d\'utilisation',
+    body_en:'The terms governing use of the CJHQ website.',
+    body_fr:'Les conditions régissant l\'utilisation du site Web du CJHQ.' },
+  { page:'accessibility', en:'Accessibility Statement', fr:'Déclaration d\'accessibilité',
+    body_en:'CJHQ\'s commitment to an accessible website for all visitors.',
+    body_fr:'L\'engagement du CJHQ envers un site Web accessible à tous les visiteurs.' },
+];
+
+const categories = [
+  { icon:'passport', en:'Canadian Passports', fr:'Passeports canadiens',
+    intro_en:'Everything you need to apply for, renew, or replace a Canadian passport.',
+    intro_fr:'Tout ce qu\'il faut pour faire une demande, renouveler ou remplacer un passeport canadien.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Adult Passport Application', fr:'Demande de passeport pour adulte', desc_en:'Apply for your first Canadian adult passport.', desc_fr:'Faites une demande pour votre premier passeport canadien pour adulte.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/new-adult-passport.html", what_en:'This is for anyone applying for their very first Canadian adult passport.', what_fr:'Ceci s\'adresse à toute personne qui fait une demande pour son tout premier passeport canadien pour adulte.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this application if you have never had a Canadian adult passport. If you already have, or previously had, a Canadian passport, use Passport Renewal instead.', answer_fr:'Utilisez cette demande si vous n\'avez jamais eu de passeport canadien pour adulte. Si vous avez déjà eu un passeport canadien, utilisez plutôt le Renouvellement de passeport.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You will need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['Proof of Canadian citizenship (birth certificate or citizenship certificate)','One valid government-issued photo ID','Two identical passport photos','One guarantor who has known you personally for at least two years','Two references','Payment'], need_list_fr:['Preuve de citoyenneté canadienne (certificat de naissance ou de citoyenneté)','Une pièce d\'identité valide avec photo émise par le gouvernement','Deux photos de passeport identiques','Un répondant qui vous connaît personnellement depuis au moins deux ans','Deux références','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Complete the passport application.','Have your passport photos taken.','Gather your required documents.','Have your guarantor complete the required sections.','Submit your application by mail or at a Passport Office.'], steps_list_fr:['Complétez la demande de passeport.','Faites prendre vos photos de passeport.','Rassemblez vos documents requis.','Faites remplir les sections requises par votre répondant.','Soumettez votre demande par la poste ou à un bureau des passeports.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Passport photos must meet Government of Canada specifications.','Make sure your name matches your citizenship document exactly.','If you are travelling soon, review the current processing times before submitting your application.'], tips_list_fr:['Les photos de passeport doivent respecter les normes du gouvernement du Canada.','Assurez-vous que votre nom correspond exactement à votre document de citoyenneté.','Si vous voyagez bientôt, consultez les délais de traitement actuels avant de soumettre votre demande.'], official_links:[{label_en:'Adult Passport Application', label_fr:'Demande de passeport pour adulte', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/new-adult-passport.html"},{label_en:'Passport Processing Times', label_fr:'Délais de traitement des passeports', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/processing-times.html"},{label_en:'Find a Passport Office', label_fr:'Trouver un bureau des passeports', url:"https://offices.service.canada.ca/en/SearchPassport"}], related:['passport-renewal','urgent-express-passport-services','child-passport','lost-stolen-or-damaged-passport'], reviewed:'August 2026', slug:'adult-passport-application'},
+        {en:'Passport Renewal', fr:'Renouvellement de passeport', desc_en:'Renew your existing Canadian passport.', desc_fr:'Renouvelez votre passeport canadien existant.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/renew-adult-passport.html", what_en:'This is the process for renewing a passport that\'s expiring or has recently expired.', what_fr:'Voici la démarche pour renouveler un passeport qui arrive à échéance ou qui a récemment expiré.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this application if your passport is expiring or has expired. If you\'ve never had a Canadian passport before, use Adult Passport Application.', answer_fr:'Utilisez cette demande si votre passeport arrive à échéance ou a expiré. Si vous n\'avez jamais eu de passeport canadien, utilisez plutôt la Demande de passeport pour adulte.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You will need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['Your current or most recent passport','Two new passport photos','Payment'], need_list_fr:['Votre passeport actuel ou le plus récent','Deux nouvelles photos de passeport','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Complete the renewal application.','Have new passport photos taken, or a digital photo if applying online.','Include your current passport (not required if applying online).','Submit your application online, by mail, or at a Passport Office.'], steps_list_fr:['Complétez la demande de renouvellement.','Faites prendre de nouvelles photos de passeport, ou une photo numérique si vous faites la demande en ligne.','Incluez votre passeport actuel (non requis si vous faites la demande en ligne).','Soumettez votre demande en ligne, par la poste ou à un bureau des passeports.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['As of July 2026, most adults can renew entirely online if they are 16 or older, applying from within Canada, and their current passport is valid or expired less than 15 years.','Processing times do not include mailing time.','If you are travelling soon, check whether you qualify for urgent or express service.'], tips_list_fr:['Depuis juillet 2026, la plupart des adultes peuvent renouveler entièrement en ligne s\'ils ont 16 ans ou plus, font la demande depuis le Canada, et que leur passeport actuel est valide ou a expiré depuis moins de 15 ans.','Les délais de traitement n\'incluent pas le temps d\'acheminement postal.','Si vous voyagez bientôt, vérifiez si vous êtes admissible au service urgent ou express.'], official_links:[{label_en:'Passport Renewal', label_fr:'Renouvellement de passeport', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/renew-adult-passport.html"},{label_en:'Passport Processing Times', label_fr:'Délais de traitement des passeports', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/processing-times.html"},{label_en:'Find a Passport Office', label_fr:'Trouver un bureau des passeports', url:"https://offices.service.canada.ca/en/SearchPassport"}], related:['adult-passport-application','urgent-express-passport-services','lost-stolen-or-damaged-passport'], reviewed:'August 2026', slug:'passport-renewal'},
+        {en:'Child Passport', fr:'Passeport pour enfant', desc_en:'Apply for a Canadian passport for a child under 16 years of age.', desc_fr:'Faites une demande de passeport canadien pour un enfant de moins de 16 ans.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/child-passport.html", what_en:'This is for a child\'s Canadian passport application — every child needs their own passport to travel, even a newborn.', what_fr:'Ceci concerne la demande de passeport canadien d\'un enfant — chaque enfant a besoin de son propre passeport pour voyager, même un nouveau-né.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Every child must have their own passport to travel internationally, including newborn babies. Children under 16 do not renew a passport — a new child passport application is required each time.', answer_fr:'Chaque enfant doit avoir son propre passeport pour voyager à l\'international, incluant les nouveau-nés. Les enfants de moins de 16 ans ne renouvellent pas un passeport — une nouvelle demande est requise à chaque fois.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You will need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['Proof of the child\'s Canadian citizenship','Two passport photos','Identification for the parent(s) or legal guardian(s)','Signatures from all required parents or guardians','Payment'], need_list_fr:['Preuve de citoyenneté canadienne de l\'enfant','Deux photos de passeport','Pièces d\'identité des parents ou tuteurs légaux','Signatures de tous les parents ou tuteurs requis','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Complete the child passport application.','Have passport photos taken.','Gather the required documents.','Ensure all required parents or guardians sign the application.','Submit the application by mail or in person.'], steps_list_fr:['Complétez la demande de passeport pour enfant.','Faites prendre les photos de passeport.','Rassemblez les documents requis.','Assurez-vous que tous les parents ou tuteurs requis signent la demande.','Soumettez la demande par la poste ou en personne.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Every child needs their own passport, regardless of age.','Babies also require passport photos.','If only one parent has legal decision-making authority, supporting documents may be required.'], tips_list_fr:['Chaque enfant a besoin de son propre passeport, peu importe l\'âge.','Les bébés ont aussi besoin de photos de passeport.','Si un seul parent a l\'autorité légale de décision, des documents à l\'appui peuvent être requis.'], official_links:[{label_en:'Child Passport Application', label_fr:'Demande de passeport pour enfant', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/child-passport.html"},{label_en:'Passport Processing Times', label_fr:'Délais de traitement des passeports', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/processing-times.html"},{label_en:'Find a Passport Office', label_fr:'Trouver un bureau des passeports', url:"https://offices.service.canada.ca/en/SearchPassport"}], related:['adult-passport-application','passport-renewal','children-travelling','urgent-express-passport-services'], reviewed:'August 2026', slug:'child-passport'},
+        {en:'Urgent & Express Passport Service', fr:'Services de passeport urgents et express', desc_en:'Apply for faster passport processing if you need your passport urgently.', desc_fr:'Faites une demande de traitement accéléré si vous avez besoin de votre passeport de toute urgence.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/urgent-emergency-passport.html", what_en:'This is for travellers who need a passport faster than the standard timeline, because of an urgent or unexpected trip.', what_fr:'Ceci s\'adresse aux voyageurs qui ont besoin d\'un passeport plus rapidement que le délai standard, en raison d\'un voyage urgent ou imprévu.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Choose this option if you need your passport before the regular processing time because of upcoming travel.', answer_fr:'Choisissez cette option si vous avez besoin de votre passeport avant le délai de traitement régulier en raison d\'un voyage à venir.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'Bring:', need_intro_fr:'Apportez :', need_list_en:['All documents required for your passport application','Proof of travel, such as an airline ticket, travel itinerary, or written proof from your employer','Proof of a family emergency, if applicable'], need_list_fr:['Tous les documents requis pour votre demande de passeport','Une preuve de voyage, comme un billet d\'avion, un itinéraire de voyage ou une preuve écrite de votre employeur','Une preuve d\'urgence familiale, le cas échéant'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Urgent and express service generally requires you to apply in person at a Passport Office. Bring all required documents and your proof of travel.', steps_fr:'Le service urgent et express exige généralement de faire la demande en personne à un bureau des passeports. Apportez tous les documents requis et votre preuve de voyage.', tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Faster processing is not available for every situation.','Additional government fees apply for urgent and express service.','The closer your travel date, the more important it is to bring proof of travel.'], tips_list_fr:['Le traitement accéléré n\'est pas offert pour toutes les situations.','Des frais gouvernementaux supplémentaires s\'appliquent pour le service urgent et express.','Plus votre date de voyage approche, plus il est important d\'apporter une preuve de voyage.'], official_links:[{label_en:'Urgent & Express Passport Service', label_fr:'Service de passeport urgent et express', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/urgent-emergency-passport.html"},{label_en:'Find a Passport Office', label_fr:'Trouver un bureau des passeports', url:"https://offices.service.canada.ca/en/SearchPassport"},{label_en:'Passport Processing Times', label_fr:'Délais de traitement des passeports', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/processing-times.html"}], related:['adult-passport-application','passport-renewal','child-passport'], reviewed:'August 2026', slug:'urgent-express-passport-services'},
+        {en:'Find a Passport Office', fr:'Trouver un bureau des passeports', desc_en:'Find the nearest Passport Office or Service Canada location.', desc_fr:'Trouvez le bureau des passeports ou le bureau de Service Canada le plus près.', url:"https://offices.service.canada.ca/en/SearchPassport", what_en:'Use this tool to find the closest office where you can submit a passport application or obtain passport services.', what_fr:'Utilisez cet outil pour trouver le bureau le plus près où soumettre une demande de passeport ou obtenir des services de passeport.', need_heading_en:'Before You Go', need_heading_fr:'Avant de vous déplacer', need_intro_en:'Have your postal code or city ready. Always check:', need_intro_fr:'Ayez votre code postal ou votre ville en main. Vérifiez toujours :', need_list_en:['Office hours','Appointment requirements','Services available at that location'], need_list_fr:['Les heures d\'ouverture','Les exigences de rendez-vous','Les services offerts à cet endroit'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Enter your postal code or city to see nearby locations, then check their hours before you go — some locations get busy, especially early in the week.', steps_fr:'Entrez votre code postal ou votre ville pour voir les emplacements à proximité, puis vérifiez leurs heures avant de vous déplacer — certains bureaux sont achalandés, surtout en début de semaine.', official_links:[{label_en:'Passport Office Locator', label_fr:'Localisateur de bureaux des passeports', url:"https://offices.service.canada.ca/en/SearchPassport"}], related:['adult-passport-application','passport-renewal','urgent-express-passport-services'], reviewed:'August 2026', slug:'find-a-passport-office', label_en1:'Find an Office →', label_fr1:'Trouver un bureau →'},
+        {en:'Passport Processing Times', fr:'Délais de traitement des passeports', desc_en:'View current passport processing times.', desc_fr:'Consultez les délais de traitement actuels des passeports.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/processing-times.html", what_en:'Review processing times before booking travel or submitting your application.', what_fr:'Consultez les délais de traitement avant de réserver un voyage ou de soumettre votre demande.', need_heading_en:'Good to Know', need_heading_fr:'Bon à savoir', need_list_en:['Processing times begin after your complete application has been received.','Mail delivery time is not included in the estimated processing time.'], need_list_fr:['Les délais de traitement commencent une fois votre demande complète reçue.','Le temps d\'acheminement postal n\'est pas inclus dans le délai de traitement estimé.'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Check this before applying so you know how much time to leave before your trip — processing time doesn\'t include time in the mail.', steps_fr:'Vérifiez cette page avant de faire votre demande afin de savoir combien de temps prévoir avant votre voyage — le délai de traitement n\'inclut pas le temps d\'acheminement postal.', official_links:[{label_en:'Passport Processing Times', label_fr:'Délais de traitement des passeports', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/processing-times.html"}], related:['adult-passport-application','passport-renewal','urgent-express-passport-services'], reviewed:'August 2026', slug:'passport-processing-times', label_en1:'View Processing Times →', label_fr1:'Voir les délais de traitement →'},
+        {en:'Lost, Stolen or Damaged Passport', fr:'Passeport perdu, volé ou endommagé', desc_en:'Report and replace a lost, stolen or damaged Canadian passport.', desc_fr:'Signalez et remplacez un passeport canadien perdu, volé ou endommagé.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/lost-stolen-inaccessible-damaged-found.html", what_en:'If your passport was lost, stolen, or damaged, don\'t worry — this happens, and there\'s a clear process to fix it.', what_fr:'Si votre passeport a été perdu, volé ou endommagé, ne vous inquiétez pas — cela arrive, et il existe une démarche claire pour y remédier.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this guide if your passport has been lost, stolen, or damaged.', answer_fr:'Utilisez ce guide si votre passeport a été perdu, volé ou endommagé.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You will need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['Details about what happened to your passport','A new passport application','Proof of Canadian citizenship','Government-issued identification','Passport photos','Payment'], need_list_fr:['Détails sur ce qui est arrivé à votre passeport','Une nouvelle demande de passeport','Preuve de citoyenneté canadienne','Pièce d\'identité émise par le gouvernement','Photos de passeport','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Report the lost, stolen or damaged passport.','Complete a new passport application.','Submit all required supporting documents.'], steps_list_fr:['Signalez le passeport perdu, volé ou endommagé.','Complétez une nouvelle demande de passeport.','Soumettez tous les documents à l\'appui requis.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['A replacement passport is processed similarly to a new passport application.','If your passport is lost while travelling outside Canada, contact the nearest Canadian embassy, high commission or consulate immediately.'], tips_list_fr:['Un passeport de remplacement est traité de façon similaire à une nouvelle demande de passeport.','Si votre passeport est perdu à l\'extérieur du Canada, contactez immédiatement l\'ambassade, le haut-commissariat ou le consulat canadien le plus près.'], official_links:[{label_en:'Lost, Stolen or Damaged Passport', label_fr:'Passeport perdu, volé ou endommagé', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports/lost-stolen-inaccessible-damaged-found.html"},{label_en:'Find a Passport Office', label_fr:'Trouver un bureau des passeports', url:"https://offices.service.canada.ca/en/SearchPassport"}], related:['adult-passport-application','passport-renewal','urgent-express-passport-services'], reviewed:'August 2026', slug:'lost-stolen-or-damaged-passport'}
+      ] }
+    ] },
+  { icon:'passport', en:'United States Citizens', fr:'Citoyens américains',
+    intro_en:'Passport, citizenship, and identity services for U.S. citizens living in or visiting Quebec.',
+    intro_fr:'Services de passeport, de citoyenneté et d\'identité pour les citoyens américains vivant au Québec ou en visite.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'U.S. Passport', fr:'Demande de passeport américain', desc_en:'Apply for, renew, replace, or update a U.S. passport.', desc_fr:'Faites une demande, renouvelez, remplacez ou mettez à jour un passeport américain.', url:"https://travel.state.gov/content/travel/en/passports.html", what_en:'This is the official starting point for U.S. citizens applying for or renewing an American passport from Canada.', what_fr:'Voici le point de départ officiel pour les citoyens américains qui font une demande ou un renouvellement de passeport américain depuis le Canada.', question_en:'Is this the right service?', question_fr:'Est-ce le bon service?', answer_en:'Use this page if you are a U.S. citizen and need to apply for your first U.S. passport, renew an existing passport, replace a lost or stolen passport, or update your passport after a name change.', answer_fr:'Utilisez cette page si vous êtes citoyen américain et devez faire une demande pour votre premier passeport américain, renouveler un passeport existant, remplacer un passeport perdu ou volé, ou mettre à jour votre passeport après un changement de nom.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'The documents required depend on your situation, but generally include:', need_intro_fr:'Les documents requis dépendent de votre situation, mais incluent généralement :', need_list_en:['Proof of U.S. citizenship','Government-issued identification','One passport photo','The appropriate passport application form','Payment'], need_list_fr:['Preuve de citoyenneté américaine','Pièce d\'identité émise par le gouvernement','Une photo de passeport','Le formulaire de demande de passeport approprié','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'The U.S. Department of State will guide you to the correct application based on your situation. Follow the instructions provided for mailing your application or booking an appointment if required.', steps_fr:'Le Département d\'État américain vous guidera vers la bonne demande selon votre situation. Suivez les instructions fournies pour envoyer votre demande par la poste ou prendre rendez-vous si nécessaire.', tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['First-time applications and renewals use different forms.','Eligible adults renewing a passport may be able to renew online, but this generally requires being physically located within the United States at the time of application — most U.S. citizens applying from Quebec will need to renew by mail instead.','If you\'re travelling soon, check current processing times before applying.'], tips_list_fr:['Les premières demandes et les renouvellements utilisent des formulaires différents.','Les adultes admissibles au renouvellement pourraient pouvoir renouveler en ligne, mais cela exige généralement de se trouver physiquement aux États-Unis au moment de la demande — la plupart des citoyens américains faisant une demande depuis le Québec devront renouveler par la poste.','Si vous voyagez bientôt, vérifiez les délais de traitement actuels avant de faire la demande.'], official_links:[{label_en:'U.S. Passport Services', label_fr:'Services de passeport américain', url:"https://travel.state.gov/content/travel/en/passports.html"},{label_en:'U.S. Embassy & Consulate Services', label_fr:'Services de l\'ambassade et des consulats américains', url:"https://ca.usembassy.gov/u-s-citizen-services/"}], related:['first-us-passport-for-a-child','consular-report-of-birth-abroad-crba','embassy-consulate-appointments'], reviewed:'August 2026', slug:'us-passport-application'},
+        {en:'Consular Report of Birth Abroad (CRBA)', fr:'Rapport consulaire de naissance à l\'étranger (CRBA)', desc_en:'Register a child born outside the United States to a U.S. citizen parent.', desc_fr:'Enregistrez un enfant né à l\'extérieur des États-Unis d\'un parent citoyen américain.', url:"https://travel.state.gov/en/international-travel/living-abroad/birth.html", what_en:'This document (called a CRBA) registers a child\'s U.S. citizenship when they were born outside the United States to a U.S. citizen parent.', what_fr:'Ce document (appelé CRBA) enregistre la citoyenneté américaine d\'un enfant né à l\'extérieur des États-Unis d\'un parent citoyen américain.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Apply for a Consular Report of Birth Abroad (CRBA) if your child was born outside the United States and may qualify for U.S. citizenship through one or both parents. A CRBA is proof of U.S. citizenship and is often applied for together with the child\'s first U.S. passport.', answer_fr:'Faites une demande de rapport consulaire de naissance à l\'étranger (CRBA) si votre enfant est né à l\'extérieur des États-Unis et pourrait être admissible à la citoyenneté américaine par un ou les deux parents. Le CRBA est une preuve de citoyenneté américaine et est souvent demandé en même temps que le premier passeport américain de l\'enfant.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll generally need:', need_intro_fr:'Vous aurez généralement besoin de :', need_list_en:['The child\'s birth certificate','Proof of the parent\'s U.S. citizenship','Parents\' identification','Evidence of the parent\'s physical presence in the United States (if required)','Supporting family documents, such as a marriage certificate if applicable'], need_list_fr:['Le certificat de naissance de l\'enfant','Preuve de citoyenneté américaine du parent','Pièces d\'identité des parents','Preuve de présence physique du parent aux États-Unis (si requis)','Documents familiaux à l\'appui, comme un certificat de mariage le cas échéant'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Schedule an appointment with a U.S. Embassy or Consulate.','Bring all required documents and complete the application during your appointment.'], steps_list_fr:['Prenez rendez-vous avec une ambassade ou un consulat américain.','Apportez tous les documents requis et complétez la demande lors de votre rendez-vous.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Apply as soon as practical after the child\'s birth.','A CRBA can only be issued while the child is under 18 years of age.','Many families apply for the child\'s first U.S. passport during the same appointment.'], tips_list_fr:['Faites la demande le plus tôt possible après la naissance de l\'enfant.','Un CRBA ne peut être délivré que si l\'enfant a moins de 18 ans.','Plusieurs familles font la demande du premier passeport américain de l\'enfant lors du même rendez-vous.'], official_links:[{label_en:'Consular Report of Birth Abroad', label_fr:'Rapport consulaire de naissance à l\'étranger', url:"https://travel.state.gov/en/international-travel/living-abroad/birth.html"},{label_en:'U.S. Embassy & Consulate Services', label_fr:'Services de l\'ambassade et des consulats américains', url:"https://ca.usembassy.gov/u-s-citizen-services/"}], related:['first-us-passport-for-a-child','social-security-number','us-passport-application'], reviewed:'August 2026', slug:'consular-report-of-birth-abroad-crba'},
+        {en:'First U.S. Passport for a Child', fr:'Premier passeport américain pour un enfant', desc_en:'Apply for a child\'s first U.S. passport.', desc_fr:'Faites une demande pour le premier passeport américain d\'un enfant.', url:"https://travel.state.gov/en/passports/apply/child/under-16.html", what_en:'This is for a child who has never had a U.S. passport before.', what_fr:'Ceci concerne un enfant qui n\'a jamais eu de passeport américain.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this application if your child has never had a U.S. passport.', answer_fr:'Utilisez cette demande si votre enfant n\'a jamais eu de passeport américain.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll generally need:', need_intro_fr:'Vous aurez généralement besoin de :', need_list_en:['Proof of the child\'s U.S. citizenship','Proof of the parents\' relationship to the child','Parents\' identification','One passport photo','Payment'], need_list_fr:['Preuve de citoyenneté américaine de l\'enfant','Preuve de la relation des parents avec l\'enfant','Pièces d\'identité des parents','Une photo de passeport','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Book an appointment at a U.S. Embassy, Consulate, or Passport Acceptance Facility, depending on where you are applying.','Attend the appointment with your child and all required documents.'], steps_list_fr:['Prenez rendez-vous à une ambassade, un consulat ou un centre d\'acceptation de passeports américain, selon l\'endroit où vous faites la demande.','Assistez au rendez-vous avec votre enfant et tous les documents requis.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['First-time child passport applications must normally be submitted in person.','If one parent cannot attend, additional consent forms or documentation may be required.'], tips_list_fr:['Les premières demandes de passeport pour enfant doivent normalement être soumises en personne.','Si un parent ne peut être présent, des formulaires de consentement ou documents supplémentaires peuvent être requis.'], official_links:[{label_en:'First Child Passport', label_fr:'Premier passeport pour enfant', url:"https://travel.state.gov/en/passports/apply/child/under-16.html"},{label_en:'U.S. Embassy & Consulate Services', label_fr:'Services de l\'ambassade et des consulats américains', url:"https://ca.usembassy.gov/u-s-citizen-services/"}], related:['consular-report-of-birth-abroad-crba','us-passport-application','social-security-number'], reviewed:'August 2026', slug:'first-us-passport-for-a-child'},
+        {en:'Social Security Number (SSN)', fr:'Numéro de sécurité sociale', desc_en:'Apply for a Social Security Number or replace a Social Security card.', desc_fr:'Faites une demande de numéro de sécurité sociale ou remplacez une carte de sécurité sociale.', url:"https://www.ssa.gov/number-card", what_en:'A Social Security Number is required for employment, taxes, and many U.S. government services.', what_fr:'Un numéro de sécurité sociale est requis pour le travail, les impôts et plusieurs services gouvernementaux américains.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this service if you need to apply for your first Social Security Number, apply for your child\'s first Social Security Number, replace a lost Social Security card, or update your Social Security record.', answer_fr:'Utilisez ce service si vous devez faire une demande pour votre premier numéro de sécurité sociale, celui de votre enfant, remplacer une carte perdue, ou mettre à jour votre dossier.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'The required documents depend on your situation but generally include:', need_intro_fr:'Les documents requis dépendent de votre situation, mais incluent généralement :', need_list_en:['Proof of identity','Proof of U.S. citizenship or immigration status','Supporting documents if changing information on your record'], need_list_fr:['Preuve d\'identité','Preuve de citoyenneté américaine ou de statut d\'immigration','Documents à l\'appui si vous modifiez des renseignements à votre dossier'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Follow the instructions provided by the Social Security Administration for your specific situation. Some applications can be completed online, while others require an appointment or supporting documents.', steps_fr:'Suivez les instructions fournies par la Social Security Administration selon votre situation. Certaines demandes peuvent être complétées en ligne, tandis que d\'autres nécessitent un rendez-vous ou des documents à l\'appui.', official_links:[{label_en:'Social Security Number Services', label_fr:'Services de numéro de sécurité sociale', url:"https://www.ssa.gov/number-card"}], related:['consular-report-of-birth-abroad-crba','first-us-passport-for-a-child','us-passport-application'], reviewed:'August 2026', slug:'social-security-number'},
+        {en:'U.S. Embassy & Consulate Appointments', fr:'Rendez-vous à l\'ambassade et au consulat', desc_en:'Book appointments for U.S. citizen services in Canada.', desc_fr:'Prenez rendez-vous pour les services aux citoyens américains au Canada.', url:"https://ca.usembassy.gov/u-s-citizen-services/", what_en:'Many U.S. citizen services require an appointment, including passport services, Consular Report of Birth Abroad, notarial services, and emergency passport assistance.', what_fr:'Plusieurs services aux citoyens américains nécessitent un rendez-vous, incluant les services de passeport, le rapport consulaire de naissance à l\'étranger, les services notariaux et l\'assistance passeport d\'urgence.', need_heading_en:'Before You Book', need_heading_fr:'Avant de réserver', need_intro_en:'Check which Embassy or Consulate provides the service you need. Some services are only available at certain locations.', need_intro_fr:'Vérifiez quelle ambassade ou quel consulat offre le service dont vous avez besoin. Certains services ne sont offerts qu\'à certains endroits.', steps_heading_en:'How to Book', steps_heading_fr:'Comment réserver', steps_en:'Select your required service and follow the online appointment instructions. Bring all required documents to your appointment.', steps_fr:'Sélectionnez le service requis et suivez les instructions de rendez-vous en ligne. Apportez tous les documents requis à votre rendez-vous.', official_links:[{label_en:'U.S. Embassy & Consulate Services', label_fr:'Services de l\'ambassade et des consulats américains', url:"https://ca.usembassy.gov/u-s-citizen-services/"}], related:['us-passport-application','consular-report-of-birth-abroad-crba','first-us-passport-for-a-child'], reviewed:'August 2026', slug:'embassy-consulate-appointments', label_en1:'Book Appointment →', label_fr1:'Prendre rendez-vous →'}
+      ] }
+    ] },
+  { icon:'check', en:'NEXUS', fr:'NEXUS',
+    intro_en:'NEXUS is a trusted traveller program jointly administered by the Canada Border Services Agency (CBSA) and U.S. Customs and Border Protection (CBP). Members enjoy expedited processing at participating land border crossings, airports, and marine reporting locations.',
+    intro_fr:'NEXUS est un programme de voyageur digne de confiance administré conjointement par l\'Agence des services frontaliers du Canada (ASFC) et le U.S. Customs and Border Protection (CBP). Les membres bénéficient d\'un traitement accéléré aux points d\'entrée terrestres, aéroports et postes maritimes participants.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Apply for NEXUS', fr:'Faire une demande NEXUS', desc_en:'Apply for a new NEXUS membership.', desc_fr:'Faites une demande de nouvelle adhésion NEXUS.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-4-eng.html", what_en:'NEXUS allows pre-approved, low-risk travellers to cross the Canada–U.S. border more quickly at participating airports, land crossings, and marine locations.', what_fr:'NEXUS permet aux voyageurs pré-approuvés à faible risque de traverser la frontière Canada–États-Unis plus rapidement aux aéroports, postes frontaliers terrestres et emplacements maritimes participants.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Apply if you have never been a NEXUS member and would like faster border crossings between Canada and the United States.', answer_fr:'Faites une demande si vous n\'avez jamais été membre NEXUS et souhaitez traverser la frontière Canada–États-Unis plus rapidement.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['A Trusted Traveler Programs (TTP) account','Valid passport(s)','Driver\'s licence or other government-issued identification','Your address and travel history','Payment of the application fee'], need_list_fr:['Un compte Trusted Traveler Programs (TTP)','Passeport(s) valide(s)','Permis de conduire ou autre pièce d\'identité émise par le gouvernement','Votre adresse et historique de voyage','Le paiement des frais de demande'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Create a Trusted Traveler Programs account.','Complete the online application.','Pay the application fee.','Wait for conditional approval.','Book and attend your interview.'], steps_list_fr:['Créez un compte Trusted Traveler Programs.','Complétez la demande en ligne.','Payez les frais de demande.','Attendez l\'approbation conditionnelle.','Réservez et assistez à votre entrevue.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Every applicant, including children, must have their own application.','Children may apply free of charge when eligibility requirements are met.','Approval is not automatic.'], tips_list_fr:['Chaque demandeur, incluant les enfants, doit avoir sa propre demande.','Les enfants peuvent faire une demande gratuitement lorsque les critères d\'admissibilité sont respectés.','L\'approbation n\'est pas automatique.'], official_links:[{label_en:'Apply for NEXUS', label_fr:'Faire une demande NEXUS', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-4-eng.html"}], related:['renew-or-replace-nexus','schedule-your-interview','find-an-enrolment-centre'], reviewed:'August 2026', slug:'apply-for-nexus'},
+        {en:'Renew or Replace NEXUS', fr:'Renouveler ou remplacer NEXUS', desc_en:'Renew your NEXUS membership or replace a lost, stolen, or damaged card.', desc_fr:'Renouvelez votre adhésion NEXUS ou remplacez une carte perdue, volée ou endommagée.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-6-eng.html", what_en:'This covers renewing a NEXUS membership before it expires, or replacing a card that\'s lost or damaged.', what_fr:'Ceci concerne le renouvellement d\'une adhésion NEXUS avant son expiration, ou le remplacement d\'une carte perdue ou endommagée.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this service if your membership is expiring or your card has been lost, stolen, or damaged.', answer_fr:'Utilisez ce service si votre adhésion arrive à échéance ou si votre carte a été perdue, volée ou endommagée.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_en:'You\'ll need your Trusted Traveler Programs account and your membership information.', need_fr:'Vous aurez besoin de votre compte Trusted Traveler Programs et de vos renseignements d\'adhésion.', steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Sign in to your account and submit your renewal or replacement request online. You may be asked to attend another interview.', steps_fr:'Connectez-vous à votre compte et soumettez votre demande de renouvellement ou de remplacement en ligne. On pourrait vous demander d\'assister à une autre entrevue.', tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Renew your membership before it expires to avoid interruptions to your NEXUS benefits.'], tips_list_fr:['Renouvelez votre adhésion avant son expiration pour éviter toute interruption de vos avantages NEXUS.'], official_links:[{label_en:'Renew or Replace NEXUS', label_fr:'Renouveler ou remplacer NEXUS', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-6-eng.html"}], related:['apply-for-nexus','schedule-your-interview'], reviewed:'August 2026', slug:'renew-or-replace-nexus'},
+        {en:'Schedule Your Interview', fr:'Planifier votre entrevue', desc_en:'Book your required NEXUS enrolment interview.', desc_fr:'Réservez votre entrevue d\'inscription NEXUS requise.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-5-eng.html", what_en:'After receiving conditional approval, you\'ll need to schedule an interview before your membership can be approved.', what_fr:'Après avoir reçu une approbation conditionnelle, vous devrez planifier une entrevue avant que votre adhésion puisse être approuvée.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'Bring:', need_intro_fr:'Apportez :', need_list_en:['Your passport(s)','Additional identification if requested','Any documents listed in your appointment confirmation'], need_list_fr:['Votre ou vos passeports','Pièces d\'identité supplémentaires si demandées','Tout document indiqué dans votre confirmation de rendez-vous'], steps_heading_en:'How to Schedule', steps_heading_fr:'Comment planifier', steps_en:'Log in to your Trusted Traveler Programs account and select an available interview location and appointment time.', steps_fr:'Connectez-vous à votre compte Trusted Traveler Programs et sélectionnez un lieu d\'entrevue et une heure de rendez-vous disponibles.', tips_heading_en:'Before Your Appointment', tips_heading_fr:'Avant votre rendez-vous', tips_list_en:['Arrive on time and bring all required documents.','Missing documents may require you to reschedule.'], tips_list_fr:['Arrivez à l\'heure et apportez tous les documents requis.','Des documents manquants pourraient vous obliger à reprendre rendez-vous.'], official_links:[{label_en:'Schedule Interview', label_fr:'Planifier une entrevue', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-5-eng.html"}], related:['apply-for-nexus','find-an-enrolment-centre'], reviewed:'August 2026', slug:'schedule-your-interview', label_en1:'Schedule Interview →', label_fr1:'Planifier une entrevue →'},
+        {en:'Find an Enrolment Centre', fr:'Trouver un centre d\'inscription', desc_en:'Find a NEXUS enrolment centre in Canada or the United States.', desc_fr:'Trouvez un centre d\'inscription NEXUS au Canada ou aux États-Unis.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/centres-eng.html", what_en:'Locate the nearest enrolment centre where you can complete your NEXUS interview.', what_fr:'Trouvez le centre d\'inscription le plus près où compléter votre entrevue NEXUS.', need_heading_en:'Before You Go', need_heading_fr:'Avant de vous déplacer', need_intro_en:'Check:', need_intro_fr:'Vérifiez :', need_list_en:['Appointment availability','Office hours','Services offered'], need_list_fr:['La disponibilité des rendez-vous','Les heures d\'ouverture','Les services offerts'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Search by location to see which centres are closest and what hours they operate.', steps_fr:'Recherchez par emplacement pour voir quels centres sont les plus près et leurs heures d\'ouverture.', official_links:[{label_en:'Find an Enrolment Centre', label_fr:'Trouver un centre d\'inscription', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/centres-eng.html"}], related:['apply-for-nexus','schedule-your-interview','renew-or-replace-nexus'], reviewed:'August 2026', slug:'find-an-enrolment-centre', label_en1:'Find a Centre →', label_fr1:'Trouver un centre →'}
+      ], extra_en:`<details class="res-details">
+  <summary>💳 Credit Cards That Reimburse NEXUS Fees</summary>
+  <div class="res-details-body">
+    <p>Many premium travel credit cards reimburse the NEXUS application or renewal fee as a statement credit.</p>
+    <div class="res-fee-grid">
+      <div class="res-fee-box"><b>Current NEXUS Membership Fee</b>US$120</div>
+      <div class="res-fee-box"><b>Membership Validity</b>5 Years</div>
+    </div>
+    <h5>Canadian Credit Cards</h5>
+    <table class="res-cc-table"><thead><tr><th>Card</th><th>Statement Credit</th><th>Benefit</th></tr></thead><tbody><tr><td>American Express Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>American Express Business Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>TD Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>TD Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr></tbody></table>
+    <h5>United States Credit Cards</h5>
+    <table class="res-cc-table"><thead><tr><th>Card</th><th>Statement Credit</th><th>Benefit</th></tr></thead><tbody><tr><td>Chase Sapphire Reserve®</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Sapphire Reserve Business℠</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Aeroplan® Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Club℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Quest℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Explorer℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Business Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Southwest Rapid Rewards® Performance Business Card</td><td>Up to US$120</td><td>Every 4 years</td></tr></tbody></table>
+    <p class="res-fee-note">Credit card benefits are subject to change. Please verify eligibility directly with the card issuer before applying or renewing.</p>
+  </div>
+</details>`, extra_fr:`<details class="res-details">
+  <summary>💳 Cartes de crédit qui remboursent les frais NEXUS</summary>
+  <div class="res-details-body">
+    <p>Plusieurs cartes de crédit voyage haut de gamme remboursent les frais de demande ou de renouvellement NEXUS sous forme de crédit sur relevé.</p>
+    <div class="res-fee-grid">
+      <div class="res-fee-box"><b>Frais d'adhésion NEXUS actuels</b>120 $ US</div>
+      <div class="res-fee-box"><b>Validité de l'adhésion</b>5 ans</div>
+    </div>
+    <h5>Cartes de crédit canadiennes</h5>
+    <table class="res-cc-table"><thead><tr><th>Carte</th><th>Crédit sur relevé</th><th>Avantage</th></tr></thead><tbody><tr><td>American Express Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>American Express Business Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>TD Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>TD Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr></tbody></table>
+    <h5>Cartes de crédit américaines</h5>
+    <table class="res-cc-table"><thead><tr><th>Carte</th><th>Crédit sur relevé</th><th>Avantage</th></tr></thead><tbody><tr><td>Chase Sapphire Reserve®</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Sapphire Reserve Business℠</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Aeroplan® Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Club℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Quest℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Explorer℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Business Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Southwest Rapid Rewards® Performance Business Card</td><td>Up to US$120</td><td>Every 4 years</td></tr></tbody></table>
+    <p class="res-fee-note">Les avantages des cartes de crédit peuvent changer. Veuillez vérifier votre admissibilité directement auprès de l'émetteur de la carte avant de faire une demande ou un renouvellement.</p>
+  </div>
+</details>` }
+    ] },
+  { icon:'globe', en:'Travel & Border Crossing', fr:'Voyage et passage frontalier',
+    intro_en:'Wait times, duty-free limits, advisories, travel insurance, and documentation for crossing the Canada–U.S. border.',
+    intro_fr:'Temps d\'attente, limites hors taxes, avis, assurance voyage et documents pour traverser la frontière Canada–États-Unis.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Canada Border Services Agency (CBSA)', fr:'Agence des services frontaliers du Canada (ASFC)', desc_en:'Official information for returning to Canada.', desc_fr:'Renseignements officiels pour le retour au Canada.', url:"https://www.cbsa-asfc.gc.ca/menu-eng.html", what_en:'Use this if you\'re returning to Canada and need information about what you must declare, what you can bring back, and border rules and customs requirements.', what_fr:'Utilisez ceci si vous revenez au Canada et avez besoin d\'information sur ce que vous devez déclarer, ce que vous pouvez rapporter, et les règles frontalières et exigences douanières.', need_heading_en:'Before You Cross', need_heading_fr:'Avant de traverser', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your passport or other accepted travel document','Receipts for purchases made outside Canada','Details of any alcohol, tobacco, food, gifts, or high-value items you\'re bringing back'], need_list_fr:['Votre passeport ou autre document de voyage accepté','Les reçus de vos achats effectués à l\'extérieur du Canada','Les détails de tout alcool, tabac, nourriture, cadeaux ou articles de grande valeur que vous rapportez'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'A good page to check before any trip, especially if you\'re unsure what needs to be declared.', steps_fr:'Une bonne page à consulter avant tout voyage, surtout si vous n\'êtes pas certain de ce qui doit être déclaré.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['You must declare everything you purchased or are bringing back into Canada, even if it qualifies for a duty-free exemption.','Failure to declare goods may result in fines, seizure of goods, or additional penalties.'], tips_list_fr:['Vous devez déclarer tout ce que vous avez acheté ou rapportez au Canada, même si cela est admissible à une exemption hors taxes.','Omettre de déclarer des biens peut entraîner des amendes, la saisie de biens ou des pénalités supplémentaires.'], official_links:[{label_en:'Canada Border Services Agency', label_fr:'Agence des services frontaliers du Canada', url:"https://www.cbsa-asfc.gc.ca/menu-eng.html"}], related:['duty-free-allowances','border-wait-times','children-travelling'], reviewed:'August 2026', slug:'canada-border-services-agency-cbsa', label_en1:'Visit CBSA →', label_fr1:'Visiter l\'ASFC →'},
+        {en:'U.S. Customs & Border Protection (CBP)', fr:'U.S. Customs & Border Protection (CBP)', desc_en:'Official information for entering the United States.', desc_fr:'Renseignements officiels pour entrer aux États-Unis.', url:"https://www.cbp.gov/travel", what_en:'Use this before travelling to the United States to confirm entry requirements, accepted travel documents, customs regulations, and items that may be restricted or prohibited.', what_fr:'Utilisez ceci avant de voyager aux États-Unis pour confirmer les exigences d\'entrée, les documents de voyage acceptés, les règlements douaniers et les articles pouvant être restreints ou interdits.', need_heading_en:'Before You Cross', need_heading_fr:'Avant de traverser', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your passport or other accepted travel document','Any visas or travel authorizations, if required','Supporting documents if requested by U.S. border officers'], need_list_fr:['Votre passeport ou autre document de voyage accepté','Tout visa ou autorisation de voyage, si requis','Documents à l\'appui si demandés par les agents frontaliers américains'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Review this before crossing into the U.S. to confirm your documents and any items you\'re bringing meet current requirements.', steps_fr:'Consultez cette page avant de traverser vers les États-Unis pour confirmer que vos documents et les articles que vous apportez respectent les exigences actuelles.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Border officers may ask questions about your trip, where you\'re staying, and how long you plan to remain in the United States.','Answer all questions truthfully and completely.'], tips_list_fr:['Les agents frontaliers peuvent poser des questions sur votre voyage, votre lieu de séjour et la durée prévue de votre séjour aux États-Unis.','Répondez à toutes les questions de façon honnête et complète.'], official_links:[{label_en:'U.S. Customs & Border Protection', label_fr:'U.S. Customs & Border Protection', url:"https://www.cbp.gov/travel"}], related:['border-wait-times','apply-for-nexus','children-travelling'], reviewed:'August 2026', slug:'us-customs-border-protection-cbp', label_en1:'Visit CBP →', label_fr1:'Visiter le CBP →'},
+        {en:'Border Wait Times', fr:'Temps d\'attente à la frontière', desc_en:'View live wait times at Canada–U.S. land border crossings.', desc_fr:'Consultez les temps d\'attente en direct aux postes frontaliers terrestres Canada–États-Unis.', url:"https://www.cbsa-asfc.gc.ca/bwt-taf/menu-eng.html", what_en:'Check current border wait times before leaving home. The tool shows estimated wait times for most Canada–U.S. land border crossings.', what_fr:'Vérifiez les temps d\'attente actuels avant de quitter la maison. L\'outil affiche les temps d\'attente estimés pour la plupart des postes frontaliers terrestres Canada–États-Unis.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Check it before you leave, especially on busy travel days, to pick the crossing with the shortest wait.', steps_fr:'Vérifiez-le avant de partir, surtout les jours de grand achalandage, pour choisir le poste frontalier avec le moins d\'attente.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Wait times change throughout the day.','Friday afternoons, Sunday evenings, long weekends, and holiday periods are usually the busiest.','If you have flexibility, choosing another crossing can often save considerable time.'], tips_list_fr:['Les temps d\'attente changent tout au long de la journée.','Les vendredis après-midi, dimanches soirs, longs weekends et périodes de congé sont habituellement les plus achalandés.','Si vous avez de la flexibilité, choisir un autre poste frontalier peut souvent faire économiser beaucoup de temps.'], official_links:[{label_en:'Canada–U.S. Border Wait Times', label_fr:'Temps d\'attente à la frontière Canada–États-Unis', url:"https://www.cbsa-asfc.gc.ca/bwt-taf/menu-eng.html"}], related:['apply-for-nexus','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'August 2026', slug:'border-wait-times', label_en1:'Check Wait Times →', label_fr1:'Vérifier les temps d\'attente →'},
+        {en:'Duty-Free Allowances', fr:'Exemptions hors taxes', desc_en:'Understand what you can bring back to Canada without paying duty or taxes.', desc_fr:'Comprenez ce que vous pouvez rapporter au Canada sans payer de droits ou de taxes.', url:"https://travel.gc.ca/returning/customs/bringing-to-canada/personal-exemptions-mini-guide", what_en:'Review these exemptions before returning to Canada after travelling outside the country.', what_fr:'Consultez ces exemptions avant de revenir au Canada après un voyage à l\'extérieur du pays.', need_heading_en:'Duty-Free Exemptions', need_heading_fr:'Exemptions hors taxes', need_list_en:['Less than 24 hours: No personal exemption.','24 hours or more: Up to CAN\$200 worth of goods. Alcohol and tobacco products are not included in this exemption.','48 hours or more: Up to CAN\$800 worth of goods, plus an alcohol allowance — choose one of 1.5 litres of wine, or 1.14 litres of liquor, or 8.5 litres of beer/ale — and a tobacco allowance of all of the following: 200 cigarettes, 50 cigars, 200 g of manufactured tobacco, and 200 tobacco sticks.','7 days or more: The same CAN\$800 personal exemption. Goods other than alcohol and tobacco may follow you by mail or courier, but alcohol and tobacco must be in your possession when you enter Canada. Everything must still be declared on arrival.'], need_list_fr:['Moins de 24 heures : Aucune exemption personnelle.','24 heures ou plus : Jusqu\'à 200 \$ CA de biens. L\'alcool et le tabac ne sont pas inclus dans cette exemption.','48 heures ou plus : Jusqu\'à 800 \$ CA de biens, plus une quantité d\'alcool — au choix, 1,5 litre de vin, ou 1,14 litre de spiritueux, ou 8,5 litres de bière — et une quantité de tabac correspondant à la totalité de : 200 cigarettes, 50 cigares, 200 g de tabac manufacturé, et 200 bâtonnets de tabac.','7 jours ou plus : La même exemption personnelle de 800 \$ CA. Les biens autres que l\'alcool et le tabac peuvent vous suivre par la poste ou par messagerie, mais l\'alcool et le tabac doivent être en votre possession à votre entrée au Canada. Tout doit tout de même être déclaré à l\'arrivée.'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'We\'ve put together a quick reference table further down this page showing the exemption amounts by trip length.', steps_fr:'Nous avons préparé un tableau de référence rapide plus bas sur cette page montrant les montants d\'exemption selon la durée du voyage.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Keep receipts for everything you purchased while travelling — border officers may ask to see them.','If you exceed your exemption, you generally only pay duty and taxes on the amount over your allowance — not on everything you purchased.','The tobacco allowance applies to stamped tobacco. Product not marked \'duty paid Canada droit acquitté\' attracts a special duty even inside your exemption.','You must meet the legal drinking age of the province or territory where you enter Canada.'], tips_list_fr:['Conservez les reçus de tous vos achats en voyage — les agents frontaliers pourraient les demander.','Si vous dépassez votre exemption, vous payez généralement des droits et taxes seulement sur le montant excédentaire — pas sur la totalité de vos achats.','L\'exemption de tabac s\'applique au tabac estampillé. Un produit non marqué « droit acquitté Canada duty paid » est assujetti à un droit spécial même à l\'intérieur de votre exemption.','Vous devez respecter l\'âge légal pour consommer de l\'alcool dans la province ou le territoire où vous entrez au Canada.'], official_links:[{label_en:'Personal Exemptions Mini Guide', label_fr:'Mini-guide des exemptions personnelles', url:"https://travel.gc.ca/returning/customs/bringing-to-canada/personal-exemptions-mini-guide"},{label_en:'I Declare: A Guide for Residents Returning to Canada', label_fr:'Je déclare : Guide à l\'intention des résidents revenant au Canada', url:"https://www.cbsa-asfc.gc.ca/travel-voyage/declare-eng.html"},{label_en:'Alcohol and Tobacco Limits', label_fr:'Limites d\'alcool et de tabac', url:"https://www.cbsa-asfc.gc.ca/travel-voyage/atl-lat-eng.html"}], related:['canada-border-services-agency-cbsa'], reviewed:'August 2026', slug:'duty-free-allowances', label_en1:'View Allowances →', label_fr1:'Voir les exemptions →'},
+        {en:'Travel Advisories', fr:'Avis de voyage', desc_en:'Current travel advisories issued by the Government of Canada.', desc_fr:'Avis de voyage actuels émis par le gouvernement du Canada.', url:"https://travel.gc.ca/travelling/advisories", what_en:'This page shows the government\'s current travel advisories for destinations around the world.', what_fr:'Cette page présente les avis de voyage actuels du gouvernement pour des destinations à travers le monde.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Search for your destination before booking or travelling, since advisories can change closer to your trip date.', steps_fr:'Recherchez votre destination avant de réserver ou de voyager, puisque les avis peuvent changer à l\'approche de votre voyage.', official_links:[{label_en:'Travel Advisories', label_fr:'Avis de voyage', url:"https://travel.gc.ca/travelling/advisories"}], related:['canada-border-services-agency-cbsa','border-wait-times'], reviewed:'August 2026', label_en1:'View Advisories →', label_fr1:'Voir les avis →', slug:'travel-advisories'},
+        {en:'Children Travelling', fr:'Enfants voyageant', desc_en:'Recommended documents when travelling with children.', desc_fr:'Documents recommandés lors de voyages avec des enfants.', url:"https://travel.gc.ca/travelling/children", what_en:'Review this information if only one parent is travelling with a child, a grandparent or relative is travelling with a child, or someone other than the child\'s parent is travelling with the child.', what_fr:'Consultez cette information si un seul parent voyage avec un enfant, un grand-parent ou un proche voyage avec un enfant, ou une personne autre que le parent voyage avec l\'enfant.', need_heading_en:'Bring With You', need_heading_fr:'Apportez avec vous', need_intro_en:'It is strongly recommended to carry:', need_intro_fr:'Il est fortement recommandé d\'apporter :', need_list_en:['The child\'s passport','A consent letter signed by the parent(s) or legal guardian(s) who are not travelling','Contact information for the parent(s)'], need_list_fr:['Le passeport de l\'enfant','Une lettre de consentement signée par le ou les parents ou tuteurs légaux qui ne voyagent pas','Les coordonnées des parents'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Prepare this documentation before you travel — border officers may ask for it, and having it ready avoids delays.', steps_fr:'Préparez ces documents avant votre voyage — les agents frontaliers peuvent les demander, et les avoir en main évite des délais.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Although a consent letter is not always legally required, border officers in Canada and the United States may ask for it.','Having it ready can help prevent delays.'], tips_list_fr:['Bien qu\'une lettre de consentement ne soit pas toujours légalement requise, les agents frontaliers au Canada et aux États-Unis peuvent la demander.','L\'avoir en main peut aider à éviter des délais.'], official_links:[{label_en:'Children Travelling', label_fr:'Enfants voyageant', url:"https://travel.gc.ca/travelling/children"}], related:['child-passport','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'August 2026', slug:'children-travelling', label_en1:'Learn More →', label_fr1:'En savoir plus →'}
+      ] },
+      { heading_en:'Travel Insurance', heading_fr:'Assurance voyage', items:[
+        {en:'Manulife Travel Insurance', fr:'Assurance voyage Manulife', desc_en:'Purchase travel medical insurance before leaving Canada.', desc_fr:'Achetez une assurance médicale voyage avant de quitter le Canada.', url:"https://manulife-travel.ca/dist/home.html?as=wllebovits", what_en:'Travel medical insurance helps protect you against unexpected medical expenses while travelling outside your home province or country.', what_fr:'L\'assurance médicale voyage vous protège contre des dépenses médicales imprévues lors d\'un voyage à l\'extérieur de votre province ou pays.', need_heading_en:'Before You Buy', need_heading_fr:'Avant d\'acheter', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your travel dates','Destination','Traveller information','Basic health information'], need_list_fr:['Vos dates de voyage','La destination','Les renseignements du voyageur','Des renseignements de santé de base'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Get a quote directly on their site, compare coverage options, and purchase your policy before you leave.', steps_fr:'Obtenez une soumission directement sur leur site, comparez les options de couverture, et achetez votre police avant de partir.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Provincial health coverage generally pays only a small portion of medical costs outside Canada.','Travel medical insurance can help cover emergency medical treatment, hospital stays, and medical transportation.'], tips_list_fr:['La couverture santé provinciale ne couvre généralement qu\'une petite partie des frais médicaux à l\'extérieur du Canada.','L\'assurance médicale voyage peut couvrir les traitements médicaux d\'urgence, les séjours hospitaliers et le transport médical.'], official_links:[{label_en:'Manulife Travel Insurance', label_fr:'Assurance voyage Manulife', url:"https://manulife-travel.ca/dist/home.html?as=wllebovits"}], related:['tugo-travel-insurance'], reviewed:'August 2026', slug:'manulife-travel-insurance', label_en1:'Get a Quote →', label_fr1:'Obtenir une soumission →'},
+        {en:'TuGo Travel Insurance', fr:'Assurance voyage TuGo', desc_en:'Purchase emergency medical and trip protection insurance.', desc_fr:'Achetez une assurance médicale d\'urgence et de protection de voyage.', url:"https://shop.tugo.com/store/IAB48720", what_en:'Travel insurance helps protect against unexpected medical expenses and certain travel interruptions while away from home.', what_fr:'L\'assurance voyage protège contre des dépenses médicales imprévues et certaines interruptions de voyage loin de la maison.', need_heading_en:'Before You Buy', need_heading_fr:'Avant d\'acheter', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Travel dates','Destination','Traveller information','Basic health information'], need_list_fr:['Les dates de voyage','La destination','Les renseignements du voyageur','Des renseignements de santé de base'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Compare plans and purchase directly through their site before your trip.', steps_fr:'Comparez les régimes et achetez directement sur leur site avant votre voyage.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Compare coverage options and limits before purchasing a policy.','Coverage varies depending on age, destination, trip length, and pre-existing medical conditions.'], tips_list_fr:['Comparez les options et limites de couverture avant d\'acheter une police.','La couverture varie selon l\'âge, la destination, la durée du voyage et les conditions médicales préexistantes.'], official_links:[{label_en:'TuGo Travel Insurance', label_fr:'Assurance voyage TuGo', url:"https://shop.tugo.com/store/IAB48720"}], related:['manulife-travel-insurance'], reviewed:'August 2026', slug:'tugo-travel-insurance', label_en1:'Get a Quote →', label_fr1:'Obtenir une soumission →'},
+        {en:'New York Enhanced Driver License (EDL)', fr:'Permis de conduire amélioré de New York', desc_en:'An alternative to a passport for land and sea travel between the U.S. and Canada.', desc_fr:'Une alternative au passeport pour les déplacements terrestres et maritimes entre les États-Unis et le Canada.', url:"https://dmv.ny.gov/driver-license/get-enhanced-driver-license-edl", what_en:'A New York Enhanced Driver License can be used instead of a passport for land and sea travel between the United States and Canada.', what_fr:'Un permis de conduire amélioré de New York peut être utilisé à la place d\'un passeport pour les déplacements terrestres et maritimes entre les États-Unis et le Canada.', question_en:'When should I use this?', question_fr:'Quand dois-je utiliser ceci?', answer_en:'If you\'re a New York State resident who regularly crosses the Canada–U.S. border by land or sea, an Enhanced Driver License may be a convenient alternative to carrying a passport.', answer_fr:'Si vous résidez dans l\'État de New York et traversez régulièrement la frontière Canada–États-Unis par voie terrestre ou maritime, un permis de conduire amélioré peut être une alternative pratique au passeport.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['Proof of U.S. citizenship','Proof of identity','Proof of New York residency','Payment'], need_list_fr:['Preuve de citoyenneté américaine','Preuve d\'identité','Preuve de résidence à New York','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Apply in person at a New York DMV office. Enhanced Driver Licenses cannot be issued online.', steps_fr:'Faites la demande en personne à un bureau du DMV de New York. Les permis de conduire améliorés ne peuvent pas être émis en ligne.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['An Enhanced Driver License cannot be used for international air travel.','You will still need a passport when flying between Canada and the United States.'], tips_list_fr:['Un permis de conduire amélioré ne peut pas être utilisé pour les voyages aériens internationaux.','Vous aurez toujours besoin d\'un passeport pour les vols entre le Canada et les États-Unis.'], official_links:[{label_en:'New York Enhanced Driver License', label_fr:'Permis de conduire amélioré de New York', url:"https://dmv.ny.gov/driver-license/get-enhanced-driver-license-edl"}], related:['us-passport-application','apply-for-nexus'], reviewed:'August 2026', slug:'new-york-enhanced-drivers-license'}
+      ] }
+    ],
+    extra_en:`<details class="res-details">
+  <summary>🪪 Which Document Do I Need to Cross the Border?</summary>
+  <div class="res-details-body">
+    <p>A quick comparison of the documents accepted for crossing the Canada–U.S. border, depending on how you're travelling.</p>
+    <table class="res-cc-table"><thead><tr><th>Document</th><th>Air Travel</th><th>Land / Sea Travel</th></tr></thead><tbody>
+      <tr><td>Passport</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>U.S. Passport Card</td><td>Domestic U.S. only</td><td>Yes</td></tr>
+      <tr><td>NEXUS Card</td><td>Yes, at NEXUS lanes/kiosks</td><td>Yes, expedited lanes</td></tr>
+      <tr><td>Enhanced Driver's License (EDL)</td><td>Domestic U.S. only</td><td>Yes</td></tr>
+    </tbody></table>
+    <p class="res-fee-note">Children under 16 generally need only proof of citizenship (such as a birth certificate) for land and sea travel — check current requirements before travelling.</p>
+  </div>
+</details>`,
+    extra_fr:`<details class="res-details">
+  <summary>🪪 Quel document faut-il pour traverser la frontière?</summary>
+  <div class="res-details-body">
+    <p>Comparaison rapide des documents acceptés pour traverser la frontière Canada–États-Unis, selon votre mode de déplacement.</p>
+    <table class="res-cc-table"><thead><tr><th>Document</th><th>Voyage aérien</th><th>Voyage terrestre / maritime</th></tr></thead><tbody>
+      <tr><td>Passeport</td><td>Oui</td><td>Oui</td></tr>
+      <tr><td>Carte de passeport américaine</td><td>Vols intérieurs américains seulement</td><td>Oui</td></tr>
+      <tr><td>Carte NEXUS</td><td>Oui, aux voies/kiosques NEXUS</td><td>Oui, voies accélérées</td></tr>
+      <tr><td>Permis de conduire amélioré (EDL)</td><td>Vols intérieurs américains seulement</td><td>Oui</td></tr>
+    </tbody></table>
+    <p class="res-fee-note">Les enfants de moins de 16 ans ont généralement seulement besoin d'une preuve de citoyenneté (comme un certificat de naissance) pour les déplacements terrestres et maritimes — vérifiez les exigences actuelles avant de voyager.</p>
+  </div>
+</details>` },
+  { icon:'globe', en:'Canadian Citizens Living Abroad', fr:'Citoyens canadiens vivant à l\'étranger',
+    intro_en:'Services for Canadian citizens living outside Canada, including emergency assistance, voting, and passport services.',
+    intro_fr:'Services pour les citoyens canadiens vivant à l\'extérieur du Canada, incluant l\'aide d\'urgence, le vote et les services de passeport.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Registration of Canadians Abroad', fr:'Inscription des Canadiens à l\'étranger', desc_en:'Register your trip or stay outside Canada so the Government of Canada can contact you during an emergency.', desc_fr:'Enregistrez votre voyage ou séjour à l\'extérieur du Canada afin que le gouvernement puisse vous joindre en cas d\'urgence.', url:"https://travel.gc.ca/travelling/registration", what_en:'Register if you\'ll be travelling or living outside Canada, especially for an extended period.', what_fr:'Inscrivez-vous si vous voyagerez ou vivrez à l\'extérieur du Canada, particulièrement pour une période prolongée.', question_en:'When should I use this?', question_fr:'Quand dois-je utiliser ceci?', answer_en:'This free service allows the Government of Canada to contact you if there is a natural disaster, civil unrest, a major emergency, an evacuation, or an emergency affecting Canadians in your area.', answer_fr:'Ce service gratuit permet au gouvernement du Canada de vous joindre en cas de catastrophe naturelle, de troubles civils, d\'urgence majeure, d\'évacuation, ou d\'urgence touchant les Canadiens dans votre région.', need_heading_en:'Required Information', need_heading_fr:'Renseignements requis', need_intro_en:'You\'ll need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['Your contact information','Your destination','Your travel dates or address abroad','Emergency contact information'], need_list_fr:['Vos coordonnées','Votre destination','Vos dates de voyage ou votre adresse à l\'étranger','Les coordonnées d\'une personne à contacter en cas d\'urgence'], steps_heading_en:'How to Register', steps_heading_fr:'Comment s\'inscrire', steps_en:'Complete the online registration before you leave Canada or shortly after arriving at your destination. You can update or cancel your registration at any time.', steps_fr:'Complétez l\'inscription en ligne avant de quitter le Canada ou peu après votre arrivée à destination. Vous pouvez mettre à jour ou annuler votre inscription en tout temps.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Registration is free and does not affect your passport or immigration status.'], tips_list_fr:['L\'inscription est gratuite et n\'affecte pas votre passeport ou votre statut d\'immigration.'], official_links:[{label_en:'Registration of Canadians Abroad', label_fr:'Inscription des Canadiens à l\'étranger', url:"https://travel.gc.ca/travelling/registration"}], related:['consular-services','canadian-passport-services'], reviewed:'August 2026', slug:'registration-of-canadians-abroad', label_en1:'Register Online →', label_fr1:'S\'inscrire en ligne →'},
+        {en:'Consular Services', fr:'Services consulaires', desc_en:'Emergency assistance for Canadian citizens outside Canada.', desc_fr:'Aide d\'urgence pour les citoyens canadiens à l\'extérieur du Canada.', url:"https://travel.gc.ca/assistance/consular-services/consular", what_en:'Canadian embassies, high commissions and consulates may be able to help Canadians in emergency situations abroad.', what_fr:'Les ambassades, hauts-commissariats et consulats canadiens peuvent aider les Canadiens en situation d\'urgence à l\'étranger.', question_en:'When should I use this?', question_fr:'Quand dois-je utiliser ceci?', answer_en:'Canadian embassies, high commissions and consulates may be able to help if you lose your passport, need an emergency travel document, are arrested or detained, experience a medical emergency, or need assistance during a crisis abroad.', answer_fr:'Les ambassades, hauts-commissariats et consulats canadiens peuvent vous aider si vous perdez votre passeport, avez besoin d\'un document de voyage d\'urgence, êtes arrêté ou détenu, vivez une urgence médicale, ou avez besoin d\'aide lors d\'une crise à l\'étranger.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'This page explains what kind of help is available and how to reach the nearest Canadian office wherever you are.', steps_fr:'Cette page explique quel type d\'aide est disponible et comment joindre le bureau canadien le plus près, où que vous soyez.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Consular officials can provide assistance and information, but they cannot pay your expenses, provide legal advice, or override local laws.'], tips_list_fr:['Les agents consulaires peuvent offrir de l\'aide et de l\'information, mais ne peuvent pas payer vos dépenses, fournir des conseils juridiques ou outrepasser les lois locales.'], official_links:[{label_en:'Canadian Consular Services', label_fr:'Services consulaires canadiens', url:"https://travel.gc.ca/assistance/consular-services/consular"}], related:['canadian-passport-services','registration-of-canadians-abroad'], reviewed:'August 2026', slug:'consular-services', label_en1:'Learn More →', label_fr1:'En savoir plus →'},
+        {en:'Voting from Abroad', fr:'Voter depuis l\'étranger', desc_en:'Register to vote by mail while living or travelling outside Canada.', desc_fr:'Inscrivez-vous pour voter par la poste en vivant ou voyageant à l\'extérieur du Canada.', url:"https://www.elections.ca/content.aspx?section=vot&dir=reg/etr&document=index&lang=e", what_en:'If you\'re a Canadian citizen living outside Canada and want to vote in federal elections, you can register in the International Register of Electors and vote by mail.', what_fr:'Si vous êtes un citoyen canadien vivant à l\'extérieur du Canada et souhaitez voter aux élections fédérales, vous pouvez vous inscrire au Registre international des électeurs et voter par la poste.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll need one piece of identification, such as:', need_intro_fr:'Vous aurez besoin d\'une pièce d\'identité, par exemple :', need_list_en:['Pages 2 and 3 of your Canadian passport','A citizenship certificate','A birth certificate','Your last residential address in Canada before you left (a P.O. box or rural route is not accepted) — this determines which electoral district your vote is counted in'], need_list_fr:['Les pages 2 et 3 de votre passeport canadien','Un certificat de citoyenneté','Un certificat de naissance','Votre dernière adresse résidentielle au Canada avant votre départ (une case postale ou une route rurale n\'est pas acceptée) — cela détermine la circonscription électorale où votre vote sera compté'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Apply to Elections Canada at any time — you do not have to wait for an election to be called. Once a federal election is called, you\'ll receive a special ballot voting kit and instructions for returning it by mail.', steps_fr:'Faites votre demande auprès d\'Élections Canada en tout temps — vous n\'avez pas à attendre le déclenchement d\'une élection. Une fois une élection fédérale déclenchée, vous recevrez une trousse de vote par bulletin spécial et les instructions pour la retourner par la poste.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['You do not need to provide proof of address.','There is no time limit on how long you can have lived outside Canada — the former five-year rule was struck down by the Supreme Court of Canada in Frank v. Canada (2019) and removed from the legislation.','You must be a Canadian citizen, at least 18 years old on election day, and have lived in Canada at some point in your life.','This applies to federal elections only. Provincial and municipal elections have different rules.','Return your completed ballot early — it must arrive at Elections Canada by the deadline, not merely be postmarked by it.'], tips_list_fr:['Vous n\'avez pas besoin de fournir une preuve d\'adresse.','Il n\'y a aucune limite de temps quant à la durée pendant laquelle vous pouvez avoir vécu à l\'extérieur du Canada — l\'ancienne règle de cinq ans a été invalidée par la Cour suprême du Canada dans l\'affaire Frank c. Canada (2019) et retirée de la loi.','Vous devez être citoyen canadien, âgé d\'au moins 18 ans le jour du scrutin, et avoir vécu au Canada à un moment de votre vie.','Ceci s\'applique aux élections fédérales seulement. Les élections provinciales et municipales ont des règles différentes.','Retournez votre bulletin complété tôt — il doit arriver à Élections Canada avant la date limite, et non simplement être oblitéré avant cette date.'], official_links:[{label_en:'Registration and Voting for Canadians Who Live Abroad', label_fr:'Inscription et vote pour les Canadiens vivant à l\'étranger', url:"https://www.elections.ca/content.aspx?section=vot&dir=reg/etr&document=index&lang=e"},{label_en:'Apply to Vote by Mail', label_fr:'Faire une demande pour voter par la poste', url:"https://www.elections.ca/voting-by-mail"}], related:['registration-of-canadians-abroad'], reviewed:'August 2026', slug:'voting-from-abroad'},
+        {en:'Canadian Passport Services', fr:'Services de passeport canadien', desc_en:'Apply for, renew, or replace a Canadian passport while outside Canada.', desc_fr:'Faites une demande, renouvelez ou remplacez un passeport canadien à l\'extérieur du Canada.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports.html", what_en:'Use this service if you\'re living or travelling outside Canada and need passport services.', what_fr:'Utilisez ce service si vous vivez ou voyagez à l\'extérieur du Canada et avez besoin de services de passeport.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'The required documents depend on your application but generally include:', need_intro_fr:'Les documents requis dépendent de votre demande mais incluent généralement :', need_list_en:['Proof of Canadian citizenship','Passport photos','Supporting identification','Your current passport (for renewals)','Payment'], need_list_fr:['Preuve de citoyenneté canadienne','Photos de passeport','Pièces d\'identité à l\'appui','Votre passeport actuel (pour les renouvellements)','Le paiement'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Select the country where you\'re located and follow the passport instructions for that Canadian embassy, high commission, or consulate.', steps_fr:'Sélectionnez le pays où vous vous trouvez et suivez les instructions de passeport de cette ambassade, ce haut-commissariat ou ce consulat canadien.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Processing times outside Canada vary by country.'], tips_list_fr:['Les délais de traitement à l\'extérieur du Canada varient selon le pays.'], official_links:[{label_en:'Canadian Passport Services Abroad', label_fr:'Services de passeport canadien à l\'étranger', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-passports.html"}], related:['consular-services','registration-of-canadians-abroad'], reviewed:'August 2026', slug:'canadian-passport-services'}
+      ] }
+    ] },
+  { icon:'handshake', en:'Immigrating to Canada', fr:'Immigrer au Canada',
+    intro_en:'Resources for those looking to move to Canada or Quebec permanently, including skilled worker, family sponsorship, and citizenship programs.',
+    intro_fr:'Ressources pour les personnes souhaitant s\'établir au Canada ou au Québec de façon permanente, incluant les programmes de travailleurs qualifiés, de parrainage familial et de citoyenneté.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Explore Immigration Programs', fr:'Explorer les programmes d\'immigration', desc_en:'Find the immigration program that best fits your situation.', desc_fr:'Trouvez le programme d\'immigration qui convient le mieux à votre situation.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada.html", what_en:'Start here if you want to move to Canada permanently but aren\'t sure which immigration program applies to you.', what_fr:'Commencez ici si vous souhaitez immigrer au Canada de façon permanente mais n\'êtes pas certain du programme qui s\'applique à vous.', need_heading_en:'Immigration Options', need_heading_fr:'Options d\'immigration', need_list_en:['Skilled workers','Family sponsorship','Business immigration','Provincial immigration programs','Refugees and humanitarian programs'], need_list_fr:['Travailleurs qualifiés','Parrainage familial','Immigration d\'affaires','Programmes d\'immigration provinciaux','Réfugiés et programmes humanitaires'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Start here to understand which program fits your situation before diving into a specific application.', steps_fr:'Commencez ici pour comprendre quel programme convient à votre situation avant de vous lancer dans une demande spécifique.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Quebec has its own immigration programs and selection process for many applicants planning to settle in the province.'], tips_list_fr:['Le Québec a ses propres programmes d\'immigration et processus de sélection pour plusieurs candidats qui prévoient s\'établir dans la province.'], official_links:[{label_en:'Explore Immigration Programs', label_fr:'Explorer les programmes d\'immigration', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada.html"}], related:['express-entry-skilled-workers','family-sponsorship','quebec-selection-certificate-csq'], reviewed:'August 2026', slug:'explore-immigration-programs', label_en1:'Explore Programs →', label_fr1:'Explorer les programmes →'},
+        {en:'Express Entry', fr:'Entrée express (travailleurs qualifiés)', desc_en:'Canada\'s immigration system for many skilled workers.', desc_fr:'Le système d\'immigration du Canada pour plusieurs travailleurs qualifiés.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html", what_en:'If you\'re applying for permanent residence based on your education, work experience, and language ability, Express Entry is Canada\'s main points-based system.', what_fr:'Si vous faites une demande de résidence permanente selon votre formation, votre expérience de travail et vos compétences linguistiques, Entrée express est le principal système à points du Canada.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll generally need:', need_intro_fr:'Vous aurez généralement besoin de :', need_list_en:['Language test results','Educational Credential Assessment (if required)','Passport','Employment history'], need_list_fr:['Résultats de tests linguistiques','Évaluation des diplômes d\'études (si requise)','Passeport','Historique d\'emploi'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Create an Express Entry profile online. If you\'re invited to apply, you\'ll submit your permanent residence application.', steps_fr:'Créez un profil Entrée express en ligne. Si vous êtes invité à faire une demande, vous soumettrez votre demande de résidence permanente.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Creating a profile does not guarantee you\'ll receive an invitation.'], tips_list_fr:['Créer un profil ne garantit pas que vous recevrez une invitation.'], official_links:[{label_en:'Express Entry', label_fr:'Entrée express', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html"}], related:['explore-immigration-programs','quebec-selection-certificate-csq'], reviewed:'August 2026', slug:'express-entry-skilled-workers'},
+        {en:'Family Sponsorship', fr:'Parrainage familial', desc_en:'Sponsor eligible family members to become permanent residents of Canada.', desc_fr:'Parrainez des membres de famille admissibles pour qu\'ils deviennent résidents permanents du Canada.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship.html", what_en:'If you\'re a Canadian citizen or permanent resident, you may be able to sponsor an eligible family member to immigrate.', what_fr:'Si vous êtes citoyen canadien ou résident permanent, vous pourriez être en mesure de parrainer un membre de famille admissible pour immigrer.', need_heading_en:'Eligible Family Members', need_heading_fr:'Membres de famille admissibles', need_intro_en:'Depending on the program, you may be able to sponsor:', need_intro_fr:'Selon le programme, vous pourriez être en mesure de parrainer :', need_list_en:['Your spouse','Common-law or conjugal partner','Dependent children','Parents','Grandparents'], need_list_fr:['Votre époux ou épouse','Partenaire conjugal ou de fait','Enfants à charge','Parents','Grands-parents'], steps_en:'Your sponsor submits an application on your behalf, along with your own application forms and supporting documents.', steps_fr:'Votre répondant soumet une demande en votre nom, avec vos propres formulaires de demande et documents à l\'appui.', official_links:[{label_en:'Family Sponsorship', label_fr:'Parrainage familial', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship.html"}], related:['explore-immigration-programs','canadian-citizenship-application'], reviewed:'August 2026', slug:'family-sponsorship'},
+        {en:'Quebec Selection Certificate (CSQ)', fr:'Certificat de sélection du Québec (CSQ)', desc_en:'Immigration programs for people planning to settle in Quebec.', desc_fr:'Programmes d\'immigration pour les personnes prévoyant s\'établir au Québec.', url:"https://www.quebec.ca/en/immigration", what_en:'If you plan to immigrate to Quebec, most applicants must first receive a Quebec Selection Certificate (CSQ) before applying to the federal government for permanent residence.', what_fr:'Si vous prévoyez immigrer au Québec, la plupart des candidats doivent d\'abord obtenir un certificat de sélection du Québec (CSQ) avant de faire une demande de résidence permanente au gouvernement fédéral.', steps_en:'This page explains Quebec\'s programs and how the CSQ fits into the overall process, step by step.', steps_fr:'Cette page explique les programmes du Québec et la place du CSQ dans l\'ensemble du processus, étape par étape.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Quebec manages many of its own immigration programs separately from the rest of Canada.'], tips_list_fr:['Le Québec gère plusieurs de ses propres programmes d\'immigration séparément du reste du Canada.'], official_links:[{label_en:'Quebec Immigration', label_fr:'Immigration Québec', url:"https://www.quebec.ca/en/immigration"}], related:['express-entry-skilled-workers','explore-immigration-programs'], reviewed:'August 2026', slug:'quebec-selection-certificate-csq'},
+        {en:'Canadian Citizenship', fr:'Demande de citoyenneté canadienne', desc_en:'Apply to become a Canadian citizen.', desc_fr:'Faites une demande pour devenir citoyen canadien.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/become-canadian-citizen.html", what_en:'Apply after meeting the permanent residence and physical presence requirements.', what_fr:'Faites une demande après avoir répondu aux exigences de résidence permanente et de présence physique.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'Requirements vary but generally include:', need_intro_fr:'Les exigences varient mais incluent généralement :', need_list_en:['Permanent Resident documentation','Proof of physical presence in Canada','Supporting identification'], need_list_fr:['Documents de résident permanent','Preuve de présence physique au Canada','Pièces d\'identité à l\'appui'], steps_en:'Submit your application online, then prepare for the citizenship test and, eventually, the citizenship ceremony.', steps_fr:'Soumettez votre demande en ligne, puis préparez-vous pour le test de citoyenneté et, éventuellement, la cérémonie de citoyenneté.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Most applicants between certain ages must complete a citizenship test and attend a citizenship ceremony before becoming Canadian citizens.'], tips_list_fr:['La plupart des candidats d\'un certain âge doivent réussir un test de citoyenneté et assister à une cérémonie de citoyenneté avant de devenir citoyens canadiens.'], official_links:[{label_en:'Canadian Citizenship Application', label_fr:'Demande de citoyenneté canadienne', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/become-canadian-citizen.html"}], related:['explore-immigration-programs','family-sponsorship'], reviewed:'August 2026', slug:'canadian-citizenship-application'}
+      ] }
+    ] },
+  { icon:'baby', en:'Family & Children', fr:'Famille et enfants',
+    intro_en:'Whether welcoming a newborn, registering a child, or applying for family benefits, this section provides direct access to the services most frequently used by families.',
+    intro_fr:'Que ce soit pour accueillir un nouveau-né, enregistrer un enfant ou faire une demande de prestations familiales, cette section donne un accès direct aux services les plus utilisés par les familles.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Birth Registration', fr:'Déclaration de naissance', desc_en:'Officially register the birth of a child born in Quebec.', desc_fr:'Enregistrez officiellement la naissance d\'un enfant né au Québec.', url:"https://www.etatcivil.gouv.qc.ca/en/birth/declaration_birth.html", what_en:'Every child born in Quebec must be registered with the Directeur de l\'état civil. This is the first legal step after birth.', what_fr:'Chaque enfant né au Québec doit être enregistré auprès du Directeur de l\'état civil. C\'est la première étape légale après la naissance.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Information provided by the hospital or midwife','Parents\' personal information','Child\'s full legal name'], need_list_fr:['Renseignements fournis par l\'hôpital ou la sage-femme','Renseignements personnels des parents','Nom légal complet de l\'enfant'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Complete the Declaration of Birth within 30 days of the birth. In most cases, the hospital begins the process and the parents complete the remaining information.', steps_fr:'Complétez la déclaration de naissance dans les 30 jours suivant la naissance. Dans la plupart des cas, l\'hôpital débute le processus et les parents complètent les renseignements restants.', official_links:[{label_en:'Birth Registration', label_fr:'Déclaration de naissance', url:"https://www.etatcivil.gouv.qc.ca/en/birth/declaration_birth.html"}], related:['birth-certificate','canada-child-benefit','quebec-family-allowance'], reviewed:'August 2026', slug:'birth-registration'},
+        {en:'Birth Certificate', fr:'Certificat de naissance', desc_en:'Order an official Quebec birth certificate.', desc_fr:'Commandez un certificat de naissance officiel du Québec.', url:"https://www.etatcivil.gouv.qc.ca/en/certificate-copy.html", what_en:'A birth certificate is commonly required for passports, school registration, government services, and many legal documents.', what_fr:'Un certificat de naissance est couramment requis pour les passeports, l\'inscription scolaire, les services gouvernementaux et plusieurs documents légaux.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Child\'s full name','Date of birth','Parents\' names','Payment'], need_list_fr:['Nom complet de l\'enfant','Date de naissance','Noms des parents','Le paiement'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Order your birth certificate online. It will be mailed to you.', steps_fr:'Commandez votre certificat de naissance en ligne. Il vous sera envoyé par la poste.', official_links:[{label_en:'Order Birth Certificate', label_fr:'Commander un certificat de naissance', url:"https://www.etatcivil.gouv.qc.ca/en/certificate-copy.html"}], related:['birth-registration','child-passport'], reviewed:'August 2026', slug:'birth-certificate'},
+        {en:'Canada Child Benefit (CCB)', fr:'Allocation canadienne pour enfants', desc_en:'Monthly tax-free payment from the Government of Canada for eligible families.', desc_fr:'Paiement mensuel non imposable du gouvernement du Canada pour les familles admissibles.', url:"https://www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-child-benefit.html", what_en:'If you have a child under 18, you may qualify for the Canada Child Benefit.', what_fr:'Si vous avez un enfant de moins de 18 ans, vous pourriez être admissible à l\'Allocation canadienne pour enfants.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Most families do not need to apply separately. If you register your child\'s birth and file your income tax returns each year, your eligibility is generally assessed automatically. If you were not automatically enrolled, you can apply directly.', need_fr:'La plupart des familles n\'ont pas besoin de faire une demande séparée. Si vous enregistrez la naissance de votre enfant et produisez vos déclarations de revenus chaque année, votre admissibilité est généralement évaluée automatiquement. Si vous n\'avez pas été inscrit automatiquement, vous pouvez faire une demande directement.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Check whether you\'re already receiving the benefit before submitting a new application.', steps_fr:'Vérifiez si vous recevez déjà la prestation avant de soumettre une nouvelle demande.', official_links:[{label_en:'Canada Child Benefit', label_fr:'Allocation canadienne pour enfants', url:"https://www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-child-benefit.html"}], related:['quebec-family-allowance','birth-registration'], reviewed:'August 2026', slug:'canada-child-benefit'},
+        {en:'Quebec Family Allowance', fr:'Allocation famille du Québec', desc_en:'Monthly financial assistance for eligible families living in Quebec.', desc_fr:'Aide financière mensuelle pour les familles admissibles vivant au Québec.', url:"https://www.retraitequebec.gouv.qc.ca/en/programs/family-allowance-measure", what_en:'Families with children under 18 living in Quebec may qualify for Family Allowance.', what_fr:'Les familles ayant des enfants de moins de 18 ans vivant au Québec pourraient être admissibles à l\'Allocation famille.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Most families are enrolled automatically. If your child\'s birth has been registered and your income tax returns are up to date, you usually do not need to apply.', need_fr:'La plupart des familles sont inscrites automatiquement. Si la naissance de votre enfant a été enregistrée et vos déclarations de revenus sont à jour, vous n\'avez habituellement pas besoin de faire une demande.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Verify whether you\'re already receiving Family Allowance before submitting an application.', steps_fr:'Vérifiez si vous recevez déjà l\'Allocation famille avant de soumettre une demande.', official_links:[{label_en:'Quebec Family Allowance', label_fr:'Allocation famille du Québec', url:"https://www.retraitequebec.gouv.qc.ca/en/programs/family-allowance-measure"}], related:['canada-child-benefit','birth-registration'], reviewed:'August 2026', slug:'quebec-family-allowance'},
+        {en:'Quebec Parental Insurance Plan (QPIP)', fr:'Régime québécois d\'assurance parentale (RQAP)', desc_en:'Income replacement during maternity, paternity, parental, or adoption leave.', desc_fr:'Remplacement de revenu pendant un congé de maternité, de paternité, parental ou d\'adoption.', url:"https://www.rqap.gouv.qc.ca/en", what_en:'Apply if you\'re taking maternity, paternity, parental, or adoption leave from work.', what_fr:'Faites une demande si vous prenez un congé de maternité, de paternité, parental ou d\'adoption.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Social Insurance Number','Employment information','Expected or actual birth or adoption date','Banking information for direct deposit'], need_list_fr:['Numéro d\'assurance sociale','Renseignements d\'emploi','Date prévue ou réelle de naissance ou d\'adoption','Renseignements bancaires pour le dépôt direct'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Submit your application online after your leave begins or shortly before your benefits are expected to start.', steps_fr:'Soumettez votre demande en ligne après le début de votre congé ou peu avant le début prévu de vos prestations.', official_links:[{label_en:'QPIP', label_fr:'RQAP', url:"https://www.rqap.gouv.qc.ca/en"}], related:['canada-child-benefit'], reviewed:'August 2026', slug:'quebec-parental-insurance-plan-qpip'},
+        {en:'Children Born Abroad', fr:'Enfants nés à l\'étranger', desc_en:'Apply for proof of Canadian citizenship for a child born outside Canada.', desc_fr:'Faites une demande de preuve de citoyenneté canadienne pour un enfant né à l\'extérieur du Canada.', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/proof-citizenship.html", what_en:'If your child was born outside Canada to a Canadian citizen parent, they may already be a Canadian citizen and need a Citizenship Certificate before applying for a Canadian passport.', what_fr:'Si votre enfant est né à l\'extérieur du Canada d\'un parent citoyen canadien, il pourrait déjà être citoyen canadien et avoir besoin d\'un certificat de citoyenneté avant de faire une demande de passeport canadien.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Child\'s foreign birth certificate','Parent\'s proof of Canadian citizenship','Supporting identification'], need_list_fr:['Certificat de naissance étranger de l\'enfant','Preuve de citoyenneté canadienne du parent','Pièces d\'identité à l\'appui'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Apply for a Canadian Citizenship Certificate. Once approved, you can apply for the child\'s Canadian passport.', steps_fr:'Faites une demande de certificat de citoyenneté canadienne. Une fois approuvé, vous pourrez faire une demande de passeport canadien pour l\'enfant.', official_links:[{label_en:'Proof of Citizenship', label_fr:'Preuve de citoyenneté', url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/proof-citizenship.html"}], related:['child-passport','canadian-citizenship-application'], reviewed:'August 2026', slug:'children-born-abroad'},
+        {en:'Childcare Registration (Childcare Services Registration Portal, formerly La Place 0-5)', fr:'Inscription en service de garde (Portail d\'inscription, anciennement La Place 0-5)', desc_en:'Register for subsidized daycare and CPE waiting lists.', desc_fr:'Inscrivez-vous aux listes d\'attente de garderies subventionnées et de CPE.', url:"https://www.quebec.ca/en/family-and-support-for-individuals/childhood/childcare-centres/registration-portal", what_en:'Register if you\'re looking for a place in a CPE or subsidized daycare in Quebec. The Childcare Services Registration Portal replaced La Place 0-5, which stopped operating in October 2025; existing records were migrated automatically.', what_fr:'Inscrivez-vous si vous cherchez une place en CPE ou en garderie subventionnée au Québec. Le Portail d\'inscription en service de garde a remplacé La Place 0-5, qui a cessé ses activités en octobre 2025; les dossiers existants ont été transférés automatiquement.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Child\'s information — the child must already be born, or arrived in your family in the case of adoption','Parent or guardian information','Your desired date of entry into childcare','Preferred daycare locations','Access through the Government Authentication Service (SAG), which replaced clicSÉQUR'], need_list_fr:['Renseignements de l\'enfant — l\'enfant doit déjà être né, ou arrivé dans votre famille dans le cas d\'une adoption','Renseignements du parent ou tuteur','Votre date d\'entrée souhaitée en service de garde','Emplacements de garderie préférés','Accès via le Service d\'authentification gouvernementale (SAG), qui a remplacé clicSÉQUR'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Create your account and register each child who is already born.', steps_fr:'Créez votre compte et inscrivez chaque enfant déjà né.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['You cannot register an unborn child. Registration is only possible once your child is born, or has arrived in your family through adoption.','Spaces are allocated based on your desired date of entry into childcare, not on how early you registered — registering sooner no longer improves your position.'], tips_list_fr:['Vous ne pouvez pas inscrire un enfant à naître. L\'inscription n\'est possible qu\'une fois votre enfant né, ou arrivé dans votre famille par adoption.','Les places sont attribuées en fonction de votre date d\'entrée souhaitée en service de garde, et non selon la rapidité de votre inscription — s\'inscrire plus tôt n\'améliore plus votre position.'], official_links:[{label_en:'Childcare Services Registration Portal (information)', label_fr:'Portail d\'inscription en service de garde (information)', url:"https://www.quebec.ca/en/family-and-support-for-individuals/childhood/childcare-centres/registration-portal"},{label_en:'Parent Access to the Portal', label_fr:'Accès parent au portail', url:"https://www.quebec.ca/en/family-and-support-for-individuals/childhood/childcare-centres/registration-portal/parents/parents-access"}], related:['birth-registration','canada-child-benefit'], reviewed:'August 2026', slug:'childcare-registration-cpe-subsidized-daycare'}
+      ] }
+    ] },
+  { icon:'briefcase', en:'Government Benefits', fr:'Prestations gouvernementales',
+    intro_en:'Federal and provincial financial assistance programs.',
+    intro_fr:'Programmes d\'aide financière fédéraux et provinciaux.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Employment Insurance (EI)', fr:'Assurance-emploi (AE)', desc_en:'Temporary income support for eligible workers.', desc_fr:'Soutien temporaire du revenu pour les travailleurs admissibles.', url:"https://www.canada.ca/en/services/benefits/ei.html", what_en:'Apply if you\'ve stopped working because of job loss, illness, maternity, parental leave, caregiving responsibilities, or another qualifying reason.', what_fr:'Faites une demande si vous avez cessé de travailler en raison d\'une perte d\'emploi, d\'une maladie, d\'un congé de maternité ou parental, de responsabilités de proche aidant, ou d\'une autre raison admissible.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Social Insurance Number','Record of Employment (ROE)','Banking information','Employment history'], need_list_fr:['Numéro d\'assurance sociale','Relevé d\'emploi (RE)','Renseignements bancaires','Historique d\'emploi'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Apply online as soon as you stop working. Don\'t wait for your Record of Employment if your employer hasn\'t submitted it yet.', steps_fr:'Faites une demande en ligne dès que vous cessez de travailler. N\'attendez pas votre relevé d\'emploi si votre employeur ne l\'a pas encore soumis.', official_links:[{label_en:'Employment Insurance', label_fr:'Assurance-emploi', url:"https://www.canada.ca/en/services/benefits/ei.html"}], related:['canada-pension-plan-cpp','disability-benefits'], reviewed:'August 2026', slug:'employment-insurance-ei'},
+        {en:'Canada Pension Plan (CPP)', fr:'Régime de pensions du Canada (RPC)', desc_en:'Retirement, disability, children\'s and survivor benefits.', desc_fr:'Prestations de retraite, d\'invalidité, pour enfants et de survivant.', url:"https://www.canada.ca/en/services/benefits/publicpensions/cpp.html", what_en:'Apply when you\'re ready to start receiving CPP retirement benefits or if you\'re applying for CPP disability or survivor benefits.', what_fr:'Faites une demande lorsque vous êtes prêt à recevoir vos prestations de retraite du RPC ou pour des prestations d\'invalidité ou de survivant.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Social Insurance Number','Banking information','Employment history (if required)'], need_list_fr:['Numéro d\'assurance sociale','Renseignements bancaires','Historique d\'emploi (si requis)'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Apply online through your My Service Canada Account. Retirement benefits can be started any time between ages 60 and 70.', steps_fr:'Faites une demande en ligne via votre compte Mon dossier Service Canada. Les prestations de retraite peuvent débuter à tout moment entre 60 et 70 ans.', official_links:[{label_en:'Canada Pension Plan', label_fr:'Régime de pensions du Canada', url:"https://www.canada.ca/en/services/benefits/publicpensions/cpp.html"}], related:['old-age-security-oas','employment-insurance-ei'], reviewed:'August 2026', slug:'canada-pension-plan-cpp'},
+        {en:'Old Age Security (OAS)', fr:'Sécurité de la vieillesse (SV)', desc_en:'Monthly pension for eligible Canadians aged 65 and older.', desc_fr:'Pension mensuelle pour les Canadiens admissibles de 65 ans et plus.', url:"https://www.canada.ca/en/services/benefits/publicpensions/old-age-security.html", what_en:'Apply only if you were not automatically enrolled.', what_fr:'Faites une demande seulement si vous n\'avez pas été inscrit automatiquement.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Many Canadians are enrolled automatically and receive a notification before turning 65. If you did not receive a notification, you may need to apply.', need_fr:'Plusieurs Canadiens sont inscrits automatiquement et reçoivent un avis avant leur 65e anniversaire. Si vous n\'avez pas reçu d\'avis, vous pourriez avoir besoin de faire une demande.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Check whether you\'ve been automatically enrolled before submitting an application.', steps_fr:'Vérifiez si vous avez été inscrit automatiquement avant de soumettre une demande.', official_links:[{label_en:'Old Age Security', label_fr:'Sécurité de la vieillesse', url:"https://www.canada.ca/en/services/benefits/publicpensions/old-age-security.html"}], related:['guaranteed-income-supplement-gis','canada-pension-plan-cpp'], reviewed:'August 2026', slug:'old-age-security-oas'},
+        {en:'Guaranteed Income Supplement (GIS)', fr:'Supplément de revenu garanti (SRG)', desc_en:'Additional monthly payments for low-income seniors receiving Old Age Security.', desc_fr:'Paiements mensuels supplémentaires pour les aînés à faible revenu recevant la Sécurité de la vieillesse.', url:"https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/guaranteed-income-supplement.html", what_en:'If you\'re receiving Old Age Security and your household income is below the annual limit, you may qualify for GIS.', what_fr:'Si vous recevez la Sécurité de la vieillesse et que le revenu de votre ménage est sous la limite annuelle, vous pourriez être admissible au SRG.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Old Age Security eligibility','Most recent income tax return'], need_list_fr:['Admissibilité à la Sécurité de la vieillesse','Déclaration de revenus la plus récente'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Many recipients are enrolled automatically. Filing your income tax return every year helps keep your eligibility up to date.', steps_fr:'Plusieurs bénéficiaires sont inscrits automatiquement. Produire votre déclaration de revenus chaque année aide à maintenir votre admissibilité à jour.', official_links:[{label_en:'Guaranteed Income Supplement', label_fr:'Supplément de revenu garanti', url:"https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/guaranteed-income-supplement.html"}], related:['old-age-security-oas'], reviewed:'August 2026', slug:'guaranteed-income-supplement-gis'},
+        {en:'Disability Benefits', fr:'Prestations d\'invalidité', desc_en:'Find disability benefits and support programs.', desc_fr:'Trouvez des prestations d\'invalidité et des programmes de soutien.', url:"https://www.canada.ca/en/services/benefits/disability.html", what_en:'If you have a disability or medical condition that affects your ability to work or your daily activities, this page helps you find the programs you may qualify for.', what_fr:'Si vous avez un handicap ou une condition médicale qui affecte votre capacité à travailler ou vos activités quotidiennes, cette page vous aide à trouver les programmes auxquels vous pourriez être admissible.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Medical information','Supporting documents','Social Insurance Number (for many programs)'], need_list_fr:['Renseignements médicaux','Documents à l\'appui','Numéro d\'assurance sociale (pour plusieurs programmes)'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Review the available disability programs and apply directly for the one that matches your situation.', steps_fr:'Consultez les programmes d\'invalidité disponibles et faites une demande directement pour celui qui correspond à votre situation.', official_links:[{label_en:'Disability Benefits', label_fr:'Prestations d\'invalidité', url:"https://www.canada.ca/en/services/benefits/disability.html"}], related:['employment-insurance-ei','canada-pension-plan-cpp'], reviewed:'August 2026', slug:'disability-benefits'},
+        {en:'Family Benefits', fr:'Prestations familiales', desc_en:'Overview of federal child and family benefit programs.', desc_fr:'Aperçu des programmes fédéraux de prestations pour enfants et familles.', url:"https://www.canada.ca/en/revenue-agency/services/child-family-benefits.html", what_en:'Visit this page if you want to review all federal family benefits or check whether you qualify for additional programs.', what_fr:'Visitez cette page pour consulter toutes les prestations familiales fédérales ou vérifier si vous êtes admissible à des programmes supplémentaires.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Have your CRA account available if you need to update your information or submit an application.', need_fr:'Ayez votre compte ARC à portée de main si vous devez mettre à jour vos renseignements ou soumettre une demande.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Review the available benefits and apply only for programs that are not automatically provided based on your eligibility.', steps_fr:'Consultez les prestations disponibles et faites une demande seulement pour les programmes qui ne sont pas fournis automatiquement selon votre admissibilité.', official_links:[{label_en:'Family Benefits', label_fr:'Prestations familiales', url:"https://www.canada.ca/en/revenue-agency/services/child-family-benefits.html"}], related:['canada-child-benefit','quebec-family-allowance'], reviewed:'August 2026', slug:'family-benefits'}
+      ] }
+    ] },
+  { icon:'heart', en:'Healthcare', fr:'Soins de santé',
+    intro_en:'Quebec healthcare services.',
+    intro_fr:'Services de santé du Québec.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Apply for RAMQ', fr:'Faire une demande à la RAMQ', desc_en:'Register for Quebec\'s public health insurance plan.', desc_fr:'Inscrivez-vous à l\'assurance maladie publique du Québec.', url:"https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/register", what_en:'Apply if you\'ve recently moved to Quebec and are eligible for provincial health coverage.', what_fr:'Faites une demande si vous avez récemment déménagé au Québec et êtes admissible à la couverture santé provinciale.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Proof of identity','Proof you live in Quebec','Immigration documents (if applicable)'], need_list_fr:['Preuve d\'identité','Preuve de résidence au Québec','Documents d\'immigration (le cas échéant)'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Register as soon as possible after arriving in Quebec. Depending on your situation, a waiting period may apply before coverage begins.', steps_fr:'Inscrivez-vous le plus tôt possible après votre arrivée au Québec. Selon votre situation, une période d\'attente peut s\'appliquer avant le début de la couverture.', official_links:[{label_en:'Apply for RAMQ', label_fr:'Faire une demande à la RAMQ', url:"https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/register"}], related:['replace-or-renew-your-health-card','register-a-newborn-with-ramq'], reviewed:'August 2026', slug:'apply-for-ramq'},
+        {en:'Replace or Renew Your Health Card', fr:'Remplacer ou renouveler votre carte d\'assurance maladie', desc_en:'Renew an expiring health card or replace one that\'s lost, stolen, or damaged.', desc_fr:'Renouvelez une carte d\'assurance maladie qui expire ou remplacez-en une perdue, volée ou endommagée.', url:"https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/obtain-new-card", what_en:'Use this service if your health card is expiring or if it has been lost, stolen, or damaged.', what_fr:'Utilisez ce service si votre carte d\'assurance maladie expire ou a été perdue, volée ou endommagée.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Proof of identity','Your current health card (if available)'], need_list_fr:['Preuve d\'identité','Votre carte d\'assurance maladie actuelle (si disponible)'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Renew your card when you receive your renewal notice, or request a replacement immediately if your card is lost or damaged.', steps_fr:'Renouvelez votre carte lorsque vous recevez votre avis de renouvellement, ou demandez un remplacement immédiatement si votre carte est perdue ou endommagée.', official_links:[{label_en:'Replace or Renew Your Health Card', label_fr:'Remplacer ou renouveler votre carte d\'assurance maladie', url:"https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/obtain-new-card"}], related:['apply-for-ramq'], reviewed:'August 2026', slug:'replace-or-renew-your-health-card'},
+        {en:'Register a Newborn with RAMQ', fr:'Inscrire un nouveau-né à la RAMQ', desc_en:'Register your newborn for Quebec health coverage.', desc_fr:'Inscrivez votre nouveau-né à la couverture santé du Québec.', url:"https://www.ramq.gouv.qc.ca/en/citizens/birth-adoption", what_en:'Register your child as soon as possible after birth so they receive their own RAMQ coverage.', what_fr:'Inscrivez votre enfant le plus tôt possible après la naissance afin qu\'il reçoive sa propre couverture RAMQ.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['Birth registration information','Parent\'s RAMQ information'], need_list_fr:['Renseignements de déclaration de naissance','Renseignements RAMQ du parent'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Complete the registration after your child\'s birth has been declared.', steps_fr:'Complétez l\'inscription après que la naissance de votre enfant ait été déclarée.', official_links:[{label_en:'Register a Newborn with RAMQ', label_fr:'Inscrire un nouveau-né à la RAMQ', url:"https://www.ramq.gouv.qc.ca/en/citizens/birth-adoption"}], related:['apply-for-ramq','birth-registration'], reviewed:'August 2026', slug:'register-a-newborn-with-ramq'},
+        {en:'Find a Family Doctor', fr:'Trouver un médecin de famille', desc_en:'Join Quebec\'s waiting list for a family doctor.', desc_fr:'Rejoignez la liste d\'attente du Québec pour un médecin de famille.', url:"https://www.quebec.ca/en/health/finding-a-resource/quebec-family-doctor-finder", what_en:'Register if you don\'t currently have a family doctor.', what_fr:'Inscrivez-vous si vous n\'avez pas actuellement de médecin de famille.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_list_en:['RAMQ health card','Contact information'], need_list_fr:['Carte d\'assurance maladie RAMQ','Coordonnées'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Register online and keep your contact information up to date while waiting to be matched.', steps_fr:'Inscrivez-vous en ligne et gardez vos coordonnées à jour en attendant d\'être jumelé.', official_links:[{label_en:'Find a Family Doctor', label_fr:'Trouver un médecin de famille', url:"https://www.quebec.ca/en/health/finding-a-resource/quebec-family-doctor-finder"}], related:['apply-for-ramq','info-sante-811'], reviewed:'August 2026', slug:'find-a-family-doctor'},
+        {en:'Prescription Drug Insurance', fr:'Assurance médicaments', desc_en:'Learn about Quebec\'s prescription drug insurance.', desc_fr:'Renseignez-vous sur l\'assurance médicaments du Québec.', url:"https://www.ramq.gouv.qc.ca/en/citizens/prescription-drug-insurance", what_en:'Everyone living in Quebec must have prescription drug coverage through either a private insurance plan or the public RAMQ plan.', what_fr:'Toute personne vivant au Québec doit avoir une assurance médicaments, soit par un régime privé, soit par le régime public de la RAMQ.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Know whether you already have prescription coverage through your employer or another private insurance plan.', need_fr:'Vérifiez si vous avez déjà une couverture de médicaments par votre employeur ou un autre régime privé.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'If you don\'t have private coverage, review the RAMQ Public Prescription Drug Insurance Plan and confirm your eligibility.', steps_fr:'Si vous n\'avez pas de couverture privée, consultez le régime public d\'assurance médicaments de la RAMQ et confirmez votre admissibilité.', official_links:[{label_en:'Prescription Drug Insurance', label_fr:'Assurance médicaments', url:"https://www.ramq.gouv.qc.ca/en/citizens/prescription-drug-insurance"}], related:['apply-for-ramq'], reviewed:'August 2026', slug:'prescription-drug-insurance'},
+        {en:'Info-Santé 811', fr:'Info-Santé 811', desc_en:'Speak with a nurse for non-emergency medical advice.', desc_fr:'Parlez à une infirmière pour des conseils médicaux non urgents.', url:"https://www.quebec.ca/en/health/finding-a-resource/info-sante-811", what_en:'Call if you\'re unsure whether you should see a doctor, visit a clinic, or go to the emergency room.', what_fr:'Appelez si vous n\'êtes pas certain de devoir consulter un médecin, visiter une clinique ou vous rendre à l\'urgence.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Have your RAMQ card available if possible, along with details about your symptoms.', need_fr:'Ayez votre carte RAMQ à portée de main si possible, ainsi que les détails de vos symptômes.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Call 811 anytime to speak with a nurse. No appointment is required.', steps_fr:'Composez le 811 en tout temps pour parler à une infirmière. Aucun rendez-vous n\'est nécessaire.', official_links:[{label_en:'Info-Santé 811', label_fr:'Info-Santé 811', url:"https://www.quebec.ca/en/health/finding-a-resource/info-sante-811"}], related:['find-a-family-doctor'], reviewed:'August 2026', slug:'info-sante-811'},
+        {en:'Tzum Gezunt Health Centre', fr:'Centre de santé Tzum Gezunt', desc_en:'Community healthcare services for Quebec\'s Hasidic Jewish community.', desc_fr:'Services de santé communautaires pour la communauté juive hassidique du Québec.', url:"https://tzumgezunt.ca/", what_en:'Contact Tzum Gezunt for primary healthcare services and community health programs.', what_fr:'Contactez Tzum Gezunt pour des services de soins de santé primaires et des programmes de santé communautaires.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Have your RAMQ card and any referral or medical information available if requested.', need_fr:'Ayez votre carte RAMQ et tout renseignement de référence ou médical disponible si demandé.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Visit the website or contact the clinic directly to learn about available services and book an appointment.', steps_fr:'Visitez le site web ou contactez la clinique directement pour connaître les services disponibles et prendre rendez-vous.', label_en1:'Visit Website →', label_fr1:'Visiter le site web →', tips_heading_en:'Contact Information', tips_heading_fr:'Coordonnées', tips_list_en:['Fax: 514.277.4887','Address: 5655 av du Parc, Suite 206, Montréal QC H2V-4H2'], tips_list_fr:['Télécopieur : 514.277.4887','Adresse : 5655, av. du Parc, bureau 206, Montréal (Québec) H2V-4H2'], official_links:[{label_en:'Tzum Gezunt Health Centre', label_fr:'Centre de santé Tzum Gezunt', url:"https://tzumgezunt.ca/"},{label_en:'Phone: 514.545.4398', label_fr:'Téléphone : 514.545.4398', url:"tel:5145454398"},{label_en:'Email: info@tzumgezunt.ca', label_fr:'Courriel : info@tzumgezunt.ca', url:"mailto:info@tzumgezunt.ca"}], related:['apply-for-ramq','find-a-family-doctor'], reviewed:'August 2026', slug:'tzum-gezunt-health-centre'}
+      ] }
+    ] },
+  { icon:'gov', en:'Municipal Services', fr:'Services municipaux',
+    intro_en:'Everyday municipal services.',
+    intro_fr:'Services municipaux courants.',
+    groups:[
+      { heading_en:'', heading_fr:'', items:[
+        {en:'Outremont Visitor Parking', fr:'Stationnement visiteurs Outremont', desc_en:'Register free visitor parking permits for eligible Outremont residents.', desc_fr:'Inscrivez des vignettes de stationnement gratuites pour visiteurs pour les résidents admissibles d\'Outremont.', url:"https://arr-outremont.ca/", url2:"mailto:mobilite.durable@montreal.ca?subject=Request%20for%20Outremont%20Parking%20Access%20Code&body=Please%20find%20attached%20my%20proof%20of%20residence%20to%20obtain%20visitor%20parking%20access%20codes.", label_en1:'Register Online →', label_fr1:'S\'inscrire en ligne →', label_en2:'Request Access Code', label_fr2:'Demander un code', what_en:'Use this service if you live in Outremont and need a visitor parking permit.', what_fr:'Utilisez ce service si vous habitez à Outremont et avez besoin d\'une vignette de stationnement pour visiteurs.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'You\'ll need your resident access code. If you don\'t have one, request it by providing proof of residence.', need_fr:'Vous aurez besoin de votre code d\'accès résident. Si vous n\'en avez pas, demandez-en un en fournissant une preuve de résidence.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Create a visitor permit online. Eligible residents receive up to 50 free visitor permits each calendar year.', steps_fr:'Créez une vignette pour visiteurs en ligne. Les résidents admissibles reçoivent jusqu\'à 50 vignettes gratuites par année civile.', official_links:[{label_en:'Outremont Visitor Parking', label_fr:'Stationnement visiteurs Outremont', url:"https://arr-outremont.ca/"}], related:['le-plateau-mont-royal-visitor-parking'], reviewed:'August 2026', slug:'outremont-visitor-parking'},
+        {en:'Le Plateau-Mont-Royal Visitor Parking', fr:'Stationnement visiteurs — Le Plateau-Mont-Royal', desc_en:'Free visitor permits for residents, or a paid daily sticker for everyone else.', desc_fr:'Permis visiteurs gratuits pour les résidents, ou une vignette quotidienne payante pour tous les autres.', url:"https://montreal.ca/en/how-to/get-temporary-visitor-parking-sticker?arrondissement=Le%20Plateau-Mont-Royal", what_en:'Use this service when visitors need to park in resident-only areas of Le Plateau-Mont-Royal.', what_fr:'Utilisez ce service lorsque des visiteurs doivent stationner dans les zones réservées aux résidents du Plateau-Mont-Royal.', need_heading_en:'Check the Free Option First', need_heading_fr:'Vérifiez d\'abord l\'option gratuite', need_en:'Plateau residents can obtain up to 50 free daily virtual visitor permits per year through the borough\'s online portal. Nothing to print, nothing to display.', need_fr:'Les résidents du Plateau peuvent obtenir jusqu\'à 50 permis virtuels gratuits pour visiteurs par année, par jour, via le portail en ligne de l\'arrondissement. Rien à imprimer, rien à afficher.', steps_heading_en:'If You Are Not a Resident (or Have Used Your 50)', steps_heading_fr:'Si vous n\'êtes pas résident (ou avez utilisé vos 50 permis)', steps_list_en:['Buy a daily parking sticker at any Montréal parking pay station — the same machines used for parking meters.','Zone PMR01 (all sticker zones in the borough): \$16.','Zone PMR02 (only zones east of Rue Saint-Denis, excluding Saint-Denis itself): \$10.','The sticker is valid for 24 hours from purchase — leave the printed coupon in plain view on the dashboard, street side.'], steps_list_fr:['Achetez une vignette de stationnement quotidienne à n\'importe quelle borne de paiement de Montréal — les mêmes bornes que pour les parcomètres.','Zone PMR01 (toutes les zones à vignette de l\'arrondissement) : 16 \$.','Zone PMR02 (seulement les zones à l\'est de la rue Saint-Denis, celle-ci exclue) : 10 \$.','La vignette est valide 24 heures à partir de l\'achat — laissez le coupon imprimé bien visible sur le tableau de bord, côté rue.'], official_links:[{label_en:'Free Visitor Permit for Residents', label_fr:'Permis visiteur gratuit pour résidents', url:"https://montreal.ca/en/how-to/get-temporary-visitor-parking-sticker?arrondissement=Le%20Plateau-Mont-Royal"},{label_en:'Daily or Monthly Parking Sticker', label_fr:'Vignette de stationnement quotidienne ou mensuelle', url:"https://montreal.ca/en/how-to/get-daily-or-monthly-parking-sticker?arrondissement=PMR"},{label_en:'On-Street Parking', label_fr:'Stationnement sur rue', url:"https://montreal.ca/en/topics/street-parking"}], related:['outremont-visitor-parking'], reviewed:'August 2026', slug:'le-plateau-mont-royal-visitor-parking', label_en1:'Get a Permit →', label_fr1:'Obtenir un permis →'},
+        {en:'Waste Collection', fr:'Collecte des matières résiduelles', desc_en:'Garbage, recycling, compost, and bulky item collection schedules.', desc_fr:'Horaires de collecte des ordures, du recyclage, du compost et des objets volumineux.', url:"https://montreal.ca/en/services/collection-schedules", what_en:'Use this page to find your collection schedule and disposal rules.', what_fr:'Utilisez cette page pour trouver votre horaire de collecte et les règles d\'élimination.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Your municipal address.', need_fr:'Votre adresse municipale.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Enter your address to view collection days and instructions for your neighbourhood.', steps_fr:'Entrez votre adresse pour voir les jours de collecte et les instructions pour votre quartier.', official_links:[{label_en:'Waste Collection', label_fr:'Collecte des matières résiduelles', url:"https://montreal.ca/en/services/collection-schedules"}], related:['snow-removal','property-taxes'], reviewed:'August 2026', slug:'waste-collection', label_en1:'View Schedule →', label_fr1:'Voir l\'horaire →'},
+        {en:'Snow Removal', fr:'Déneigement', desc_en:'Snow removal operations and temporary parking restrictions.', desc_fr:'Opérations de déneigement et restrictions de stationnement temporaires.', url:"https://montreal.ca/en/snow-removal", what_en:'Check before parking on the street during the winter.', what_fr:'Vérifiez avant de stationner dans la rue pendant l\'hiver.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Your street name or address.', need_fr:'Le nom de votre rue ou votre adresse.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'View current snow removal operations and move your vehicle before posted restrictions begin.', steps_fr:'Consultez les opérations de déneigement actuelles et déplacez votre véhicule avant le début des restrictions affichées.', official_links:[{label_en:'Snow Removal', label_fr:'Déneigement', url:"https://montreal.ca/en/snow-removal"},{label_en:'311 Montréal App — Track Snow Removal & Report an Issue', label_fr:'Application 311 Montréal — Suivre le déneigement et signaler un problème', url:"https://montreal.ca/en/311-montreal-mobile-app"},{label_en:'Download 311 Montréal for iPhone', label_fr:'Télécharger 311 Montréal pour iPhone', url:"https://apps.apple.com/ca/app/montr%C3%A9al-services-aux-citoyens/id1280592582?l=fr-CA"},{label_en:'Download 311 Montréal for Android', label_fr:'Télécharger 311 Montréal pour Android', url:"https://play.google.com/store/apps/details?id=ca.montreal.montrealservicesauxcitoyens"}], related:['waste-collection'], reviewed:'August 2026', slug:'snow-removal', label_en1:'Learn More →', label_fr1:'En savoir plus →'},
+        {en:'Property Taxes', fr:'Taxes municipales', desc_en:'View and pay your municipal property taxes.', desc_fr:'Consultez et payez vos taxes municipales.', url:"https://montreal.ca/en/municipal-taxes", what_en:'Use this service if you own property in Montreal.', what_fr:'Utilisez ce service si vous possédez une propriété à Montréal.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Your municipal tax account number or property information.', need_fr:'Votre numéro de compte de taxes municipales ou renseignements de propriété.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'View your account and pay online or through your financial institution.', steps_fr:'Consultez votre compte et payez en ligne ou par votre institution financière.', official_links:[{label_en:'Property Taxes', label_fr:'Taxes municipales', url:"https://montreal.ca/en/municipal-taxes"}], related:['waste-collection','building-permits'], reviewed:'August 2026', slug:'property-taxes', label_en1:'View or Pay Online →', label_fr1:'Consulter ou payer en ligne →'},
+        {en:'Building Permits', fr:'Permis de construction', desc_en:'Apply for permits before starting construction or renovations.', desc_fr:'Faites une demande de permis avant de débuter la construction ou des rénovations.', url:"https://montreal.ca/en/permits-and-authorizations", what_en:'Many construction and renovation projects require a municipal permit before work begins.', what_fr:'Plusieurs projets de construction et de rénovation nécessitent un permis municipal avant le début des travaux.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Details of your project, including plans if required.', need_fr:'Les détails de votre projet, incluant les plans si requis.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Confirm whether a permit is required and submit your application before starting any work.', steps_fr:'Confirmez si un permis est requis et soumettez votre demande avant de débuter les travaux.', official_links:[{label_en:'Building Permits', label_fr:'Permis de construction', url:"https://montreal.ca/en/permits-and-authorizations"}], related:['local-borough-services','property-taxes'], reviewed:'August 2026', slug:'building-permits', label_en1:'Learn More →', label_fr1:'En savoir plus →'},
+        {en:'Local Borough Services', fr:'Services d\'arrondissement', desc_en:'Contact your local borough office.', desc_fr:'Contactez votre bureau d\'arrondissement local.', url:"https://montreal.ca/en/boroughs", what_en:'Use this page for services handled by your local borough, including permits, local regulations, parks, libraries, and neighbourhood services.', what_fr:'Utilisez cette page pour les services gérés par votre arrondissement local, incluant les permis, les règlements locaux, les parcs, les bibliothèques et les services de quartier.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Know which Montreal borough you live in.', need_fr:'Sachez dans quel arrondissement de Montréal vous habitez.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Select your borough to find contact information and available municipal services.', steps_fr:'Sélectionnez votre arrondissement pour trouver les coordonnées et les services municipaux disponibles.', official_links:[{label_en:'Local Borough Services', label_fr:'Services d\'arrondissement', url:"https://montreal.ca/en/boroughs"}], related:['building-permits','waste-collection'], reviewed:'August 2026', slug:'local-borough-services', label_en1:'Find Your Borough →', label_fr1:'Trouver votre arrondissement →'},
+        {en:'Public Transit (STM)', fr:'Transport en commun (STM)', desc_en:'OPUS cards, fares, and public transit information.', desc_fr:'Cartes OPUS, tarifs et renseignements sur le transport en commun.', url:"https://www.stm.info/en/info/fares/transit-fares", what_en:'Use this page if you travel on Montreal buses or the métro.', what_fr:'Utilisez cette page si vous vous déplacez en autobus ou en métro à Montréal.', need_heading_en:'Before You Start', need_heading_fr:'Avant de commencer', need_en:'Decide whether you need single fares, multiple trips, or a monthly pass.', need_fr:'Déterminez si vous avez besoin de tarifs simples, de plusieurs déplacements ou d\'une passe mensuelle.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Purchase an OPUS card at any métro station or authorized retailer and load the fare or pass that best suits your travel needs.', steps_fr:'Achetez une carte OPUS à n\'importe quelle station de métro ou détaillant autorisé et chargez le tarif ou la passe qui convient le mieux à vos besoins.', official_links:[{label_en:'Public Transit (STM)', label_fr:'Transport en commun (STM)', url:"https://www.stm.info/en/info/fares/transit-fares"}], reviewed:'August 2026', slug:'public-transit-stm', label_en1:'View Fares →', label_fr1:'Voir les tarifs →'}
+      ] }
+    ] },
+];
+const contactCats = [
+  { en:'Community Member', fr:'Membre de la communauté' },
+  { en:'Government or Public Institution', fr:'Gouvernement ou institution publique' },
+  { en:'Media Representative', fr:'Représentant des médias' },
+  { en:'Community Organization', fr:'Organisme communautaire' },
+  { en:'General Inquiry', fr:'Demande générale' },
+];
+
+const contactFieldGroups = [
+  { en:'Community Member', fr:'Membre de la communauté',
+    fields:[
+      {name:'full_name', en:'Full Name', fr:'Nom complet', type:'text', required:true},
+      {name:'email', en:'Email Address', fr:'Adresse courriel', type:'email', required:true},
+      {name:'phone', en:'Telephone Number (optional)', fr:'Numéro de téléphone (facultatif)', type:'tel', required:false},
+      {name:'community', en:'Community (optional)', fr:'Communauté (facultatif)', type:'text', required:false},
+      {name:'subject', en:'Subject', fr:'Sujet', type:'text', required:true},
+      {name:'message', en:'How can we help?', fr:'Comment pouvons-nous vous aider?', type:'textarea', required:true},
+    ] },
+  { en:'Government or Public Institution', fr:'Gouvernement ou institution publique',
+    fields:[
+      {name:'full_name', en:'Full Name', fr:'Nom complet', type:'text', required:true},
+      {name:'position', en:'Position / Title', fr:'Poste / titre', type:'text', required:true},
+      {name:'department', en:'Department or Agency', fr:'Ministère ou organisme', type:'text', required:true},
+      {name:'location', en:'Municipality / Province / Country', fr:'Municipalité / province / pays', type:'text', required:true},
+      {name:'email', en:'Email Address', fr:'Adresse courriel', type:'email', required:true},
+      {name:'phone', en:'Telephone Number', fr:'Numéro de téléphone', type:'tel', required:true},
+      {name:'nature', en:'Nature of Inquiry', fr:'Nature de la demande', type:'text', required:true},
+      {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
+    ] },
+  { en:'Media Representative', fr:'Représentant des médias',
+    fields:[
+      {name:'full_name', en:'Full Name', fr:'Nom complet', type:'text', required:true},
+      {name:'news_org', en:'News Organization', fr:'Organisation médiatique', type:'text', required:true},
+      {name:'position', en:'Position / Title', fr:'Poste / titre', type:'text', required:true},
+      {name:'deadline', en:'Deadline (optional)', fr:'Échéance (facultatif)', type:'text', required:false},
+      {name:'email', en:'Email Address', fr:'Adresse courriel', type:'email', required:true},
+      {name:'phone', en:'Telephone Number', fr:'Numéro de téléphone', type:'tel', required:true},
+      {name:'nature', en:'Nature of Media Inquiry', fr:'Nature de la demande médiatique', type:'text', required:true},
+      {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
+    ] },
+  { en:'Community Organization', fr:'Organisme communautaire',
+    fields:[
+      {name:'org_name', en:'Organization Name', fr:'Nom de l\'organisme', type:'text', required:true},
+      {name:'contact_person', en:'Contact Person', fr:'Personne-ressource', type:'text', required:true},
+      {name:'position', en:'Position', fr:'Poste', type:'text', required:true},
+      {name:'email', en:'Email Address', fr:'Adresse courriel', type:'email', required:true},
+      {name:'phone', en:'Telephone Number', fr:'Numéro de téléphone', type:'tel', required:true},
+      {name:'nature', en:'Nature of Inquiry', fr:'Nature de la demande', type:'text', required:true},
+      {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
+    ] },
+  { en:'General Inquiry', fr:'Demande générale',
+    fields:[
+      {name:'full_name', en:'Full Name', fr:'Nom complet', type:'text', required:true},
+      {name:'email', en:'Email Address', fr:'Adresse courriel', type:'email', required:true},
+      {name:'phone', en:'Telephone Number (optional)', fr:'Numéro de téléphone (facultatif)', type:'tel', required:false},
+      {name:'subject', en:'Subject', fr:'Sujet', type:'text', required:true},
+      {name:'message', en:'Message', fr:'Message', type:'textarea', required:true},
+    ] },
+];
+
+const coreValues = [
+  { icon:'scale', en:'Integrity', fr:'Intégrité' },
+  { icon:'heart', en:'Service', fr:'Service' },
+  { icon:'briefcase', en:'Professionalism', fr:'Professionnalisme' },
+  { icon:'people', en:'Respect', fr:'Respect' },
+  { icon:'handshake', en:'Collaboration', fr:'Collaboration' },
+];
+
+const initiatives = [
+  { icon:'people', en:'Community Services and Practical Assistance', fr:'Services communautaires et assistance pratique' },
+  { icon:'scale', en:'Advocacy and Representation', fr:'Défense des intérêts et représentation' },
+  { icon:'gov', en:'Government and Institutional Relations', fr:'Relations gouvernementales et institutionnelles' },
+  { icon:'shield', en:'Public Safety and Security', fr:'Sécurité publique et sécurité' },
+  { icon:'heart', en:'Religious Accommodation and Community Life', fr:'Accommodements religieux et vie communautaire' },
+  { icon:'doc', en:'Community Information and Communication', fr:'Information et communication communautaires' },
+];
+
+const newsTopics = [
+  { icon:'doc', en:'Community announcements', fr:'Annonces communautaires' },
+  { icon:'leaf', en:'Holiday information and schedules', fr:'Renseignements et horaires des fêtes' },
+  { icon:'plane', en:'Travel and border updates', fr:'Mises à jour sur les voyages et les frontières' },
+  { icon:'truck', en:'Road closures and transportation notices', fr:'Fermetures de routes et avis de transport' },
+  { icon:'shield', en:'Public safety information', fr:'Information sur la sécurité publique' },
+  { icon:'check', en:'Time-sensitive notices and reminders', fr:'Avis urgents et rappels' },
+];
+
+// ---------- RENDER ----------
+const INSURANCE_URLS = ['https://manulife-travel.ca/dist/home.html?as=wllebovits','https://shop.tugo.com/store/IAB48720'];
+
+// Accordion state must be exposed to assistive technology, not just visually.
+// Called from the head button's onclick; also used when search auto-opens or
+// closes a category so aria-expanded never drifts from the .open class.
+function toggleAccordion(headBtn){
+  const item = headBtn.closest('.accordion-item');
+  const open = item.classList.toggle('open');
+  headBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function syncAccordionAria(){
+  document.querySelectorAll('#accordionWrap .accordion-item').forEach(item=>{
+    const head = item.querySelector('.accordion-head');
+    if(head) head.setAttribute('aria-expanded', item.classList.contains('open') ? 'true' : 'false');
+  });
+}
+
+function renderAccordion(){
+  const wrap = document.getElementById('accordionWrap');
+  categories.forEach((c, idx)=>{
+    const item = document.createElement('div');
+    item.className = 'accordion-item';
+    const buildItem = (it) => {
+      const escAttr = (s) => (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+      const ov = RESOURCE_OVERRIDES_CACHE[it.slug];
+      if(ov && ov.hidden) return '';
+      let effective = it;
+      if(ov){
+        const use = (key) => (ov[key] !== undefined && ov[key] !== null && ov[key] !== '') ? ov[key] : it[key];
+        effective = {
+          ...it,
+          en: use('title_en'), fr: use('title_fr'),
+          desc_en: use('desc_en'), desc_fr: use('desc_fr'),
+          url: use('url'),
+          what_en: use('what_en'), what_fr: use('what_fr'),
+          question_en: use('question_en'), question_fr: use('question_fr'),
+          answer_en: use('answer_en'), answer_fr: use('answer_fr'),
+          need_heading_en: use('need_heading_en'), need_heading_fr: use('need_heading_fr'),
+          need_intro_en: use('need_intro_en'), need_intro_fr: use('need_intro_fr'),
+          need_list_en: (ov.need_list_en && ov.need_list_en.length) ? ov.need_list_en : it.need_list_en,
+          need_list_fr: (ov.need_list_fr && ov.need_list_fr.length) ? ov.need_list_fr : it.need_list_fr,
+          steps_heading_en: use('steps_heading_en'), steps_heading_fr: use('steps_heading_fr'),
+          steps_list_en: (ov.steps_list_en && ov.steps_list_en.length) ? ov.steps_list_en : it.steps_list_en,
+          steps_list_fr: (ov.steps_list_fr && ov.steps_list_fr.length) ? ov.steps_list_fr : it.steps_list_fr,
+          tips_heading_en: use('tips_heading_en'), tips_heading_fr: use('tips_heading_fr'),
+          tips_list_en: (ov.tips_list_en && ov.tips_list_en.length) ? ov.tips_list_en : it.tips_list_en,
+          tips_list_fr: (ov.tips_list_fr && ov.tips_list_fr.length) ? ov.tips_list_fr : it.tips_list_fr,
+          official_links: (ov.official_links && ov.official_links.length) ? ov.official_links : it.official_links,
+          related: (ov.related && ov.related.length) ? ov.related : it.related,
+          label_en1: use('label_en1'), label_fr1: use('label_fr1'),
+          url2: use('url2'), label_en2: use('label_en2'), label_fr2: use('label_fr2'),
+        };
+      }
+      RESOURCE_BY_SLUG[it.slug] = effective;
+      // The card is a real <button> so it is reachable by Tab and activated by
+      // Enter/Space. The <li> stays the grid cell (the search filter hides it by
+      // id), and all card styling moved to .res-item-btn, so the rendered result
+      // is unchanged.
+      return `<li class="res-item" data-slug="${escAttr(effective.slug)}">
+          <button class="res-item-btn" type="button">
+            <span class="res-item-text">
+              <span class="res-link-title" data-en>${cjhqEscapeHtml(effective.en)}</span>
+              <span class="res-link-title" data-fr>${cjhqEscapeHtml(effective.fr)}</span>
+              ${effective.desc_en ? `<span class="res-desc" data-en>${cjhqEscapeHtml(effective.desc_en)}</span>` : ''}
+              ${effective.desc_fr ? `<span class="res-desc" data-fr>${cjhqEscapeHtml(effective.desc_fr)}</span>` : ''}
+            </span>
+            <span class="res-learn-more"><span data-en>Learn more →</span><span data-fr>En savoir plus →</span></span>
+          </button>
+        </li>`;
+    };
+    const groupsHtml = c.groups.map(g => `
+      <div class="res-group">
+        ${g.heading_en ? `<h3 class="res-group-heading"><span data-en>${g.heading_en}</span><span data-fr>${g.heading_fr}</span></h3>` : ''}
+        ${g.intro_en ? `<p class="res-group-intro" data-en>${g.intro_en}</p>` : ''}
+        ${g.intro_fr ? `<p class="res-group-intro" data-fr>${g.intro_fr}</p>` : ''}
+        <ul class="res-list">${g.items.map(buildItem).join('')}</ul>
+        ${g.extra_en ? `<div data-en>${g.extra_en}</div>` : ''}
+        ${g.extra_fr ? `<div data-fr>${g.extra_fr}</div>` : ''}
+      </div>`).join('');
+    item.innerHTML = `
+      <button class="accordion-head" type="button" id="acc-head-${idx}" aria-expanded="false" aria-controls="acc-panel-${idx}" onclick="toggleAccordion(this)">
+        <div class="icon-badge">${iconSVG(c.icon)}</div>
+        <div class="accordion-head-text">
+          <span class="accordion-head-title"><span data-en>${c.en}</span><span data-fr>${c.fr}</span></span>
+          <span class="accordion-head-sub" data-en>${c.intro_en}</span>
+          <span class="accordion-head-sub" data-fr>${c.intro_fr}</span>
+        </div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="accordion-body" id="acc-panel-${idx}" role="region" aria-labelledby="acc-head-${idx}">
+        <div class="accordion-body-inner">
+          ${groupsHtml}
+          ${c.extra_en ? `<div data-en>${c.extra_en}</div>` : ''}
+          ${c.extra_fr ? `<div data-fr>${c.extra_fr}</div>` : ''}
+        </div>
+      </div>`;
+    wrap.appendChild(item);
+  });
+  initResourceCellHandlers();
+}
+
+/* ---------- Resource cells: click opens a CJHQ-voice "how to apply" popup ---------- */
+const CONTENT_MANIFEST = [
+  {cid:'accessibility-1', page:'page-accessibility', pageLabel:'Accessibility Statement', tag:'h1', label:'Accessibility Statement', default_en:'Accessibility Statement', default_fr:'Déclaration d\'accessibilité'},
+  {cid:'accessibility-2', page:'page-accessibility', pageLabel:'Accessibility Statement', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ) is committed to providing ', default_en:'The Jewish Hasidic Council of Quebec (CJHQ) is committed to providing a website that is accessible to all visitors.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) s\'engage à offrir un site Web accessible à tous les visiteurs.'},
+  {cid:'accessibility-3', page:'page-accessibility', pageLabel:'Accessibility Statement', tag:'p', label:'We strive to make our website easy to navigate and compatible with com', default_en:'We strive to make our website easy to navigate and compatible with commonly used browsers, mobile devices, and assistive technologies.', default_fr:'Nous nous efforçons de rendre notre site Web facile à naviguer et compatible avec les navigateurs, les appareils mobiles et les technologies d\'assistance couramment utilisés.'},
+  {cid:'accessibility-4', page:'page-accessibility', pageLabel:'Accessibility Statement', tag:'p', label:'As our website continues to evolve, we will make reasonable efforts to', default_en:'As our website continues to evolve, we will make reasonable efforts to improve accessibility and enhance the user experience for everyone.', default_fr:'Alors que notre site Web continue d\'évoluer, nous déploierons des efforts raisonnables pour améliorer l\'accessibilité et bonifier l\'expérience utilisateur pour tous.'},
+  {cid:'accessibility-5', page:'page-accessibility', pageLabel:'Accessibility Statement', tag:'p', label:'If you experience difficulty accessing any part of this website or req', default_en:'If you experience difficulty accessing any part of this website or require information in an alternative format, we encourage you to contact CJHQ through our Contact page.', default_fr:'Si vous éprouvez de la difficulté à accéder à une partie de ce site Web ou si vous avez besoin d\'information dans un autre format, nous vous encourageons à communiquer avec le CJHQ par notre page Contact.'},
+  {cid:'accessibility-6', page:'page-accessibility', pageLabel:'Accessibility Statement', tag:'p', label:'We value your feedback and will make every reasonable effort to improv', default_en:'We value your feedback and will make every reasonable effort to improve accessibility wherever possible.', default_fr:'Nous accordons de la valeur à vos commentaires et déploierons tous les efforts raisonnables pour améliorer l\'accessibilité dans la mesure du possible.'},
+  {cid:'terms-1', page:'page-terms', pageLabel:'Terms of Use', tag:'h1', label:'Terms of Use', default_en:'Terms of Use', default_fr:'Conditions d\'utilisation'},
+  {cid:'terms-2', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'By accessing and using this website, you agree to these Terms of Use.', default_en:'By accessing and using this website, you agree to these Terms of Use.', default_fr:'En accédant à ce site Web et en l\'utilisant, vous acceptez les présentes conditions d\'utilisation.'},
+  {cid:'terms-3', page:'page-terms', pageLabel:'Terms of Use', tag:'h2', label:'Website Purpose', default_en:'Website Purpose', default_fr:'Objet du site Web'},
+  {cid:'terms-4', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'The CJHQ website provides community information, official resource lin', default_en:'The CJHQ website provides community information, official resource links, and general information about the work of the Jewish Hasidic Council of Quebec.', default_fr:'Le site Web du CJHQ offre de l\'information communautaire, des liens vers des ressources officielles et de l\'information générale sur le travail du Conseil des Juifs Hassidiques du Québec.'},
+  {cid:'terms-5', page:'page-terms', pageLabel:'Terms of Use', tag:'h2', label:'Information Accuracy', default_en:'Information Accuracy', default_fr:'Exactitude de l\'information'},
+  {cid:'terms-6', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'CJHQ makes every reasonable effort to provide accurate and reliable in', default_en:'CJHQ makes every reasonable effort to provide accurate and reliable information.', default_fr:'Le CJHQ déploie tous les efforts raisonnables pour fournir une information exacte et fiable.'},
+  {cid:'terms-7', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'However, government programs, regulations, policies, procedures, and r', default_en:'However, government programs, regulations, policies, procedures, and requirements may change without notice.', default_fr:'Toutefois, les programmes, règlements, politiques, procédures et exigences gouvernementaux peuvent changer sans préavis.'},
+  {cid:'terms-8', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Visitors should always verify important information directly with the ', default_en:'Visitors should always verify important information directly with the appropriate government department or official source.', default_fr:'Les visiteurs devraient toujours vérifier les renseignements importants directement auprès du ministère gouvernemental concerné ou de la source officielle appropriée.'},
+  {cid:'terms-9', page:'page-terms', pageLabel:'Terms of Use', tag:'h2', label:'External Links', default_en:'External Links', default_fr:'Liens externes'},
+  {cid:'terms-10', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Many pages contain links to third-party websites, including government', default_en:'Many pages contain links to third-party websites, including government departments and public institutions.', default_fr:'Plusieurs pages contiennent des liens vers des sites tiers, y compris des ministères et des institutions publiques.'},
+  {cid:'terms-11', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'CJHQ is not responsible for the content, availability, or accuracy of ', default_en:'CJHQ is not responsible for the content, availability, or accuracy of external websites.', default_fr:'Le CJHQ n\'est pas responsable du contenu, de la disponibilité ou de l\'exactitude des sites externes.'},
+  {cid:'terms-12', page:'page-terms', pageLabel:'Terms of Use', tag:'h2', label:'No Professional Advice', default_en:'No Professional Advice', default_fr:'Absence de conseils professionnels'},
+  {cid:'terms-13', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Information provided through this website is intended for general info', default_en:'Information provided through this website is intended for general informational purposes only.', default_fr:'L\'information fournie par ce site Web est destinée à des fins d\'information générale seulement.'},
+  {cid:'terms-14', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Nothing contained on this website should be considered legal, financia', default_en:'Nothing contained on this website should be considered legal, financial, immigration, medical, or professional advice.', default_fr:'Rien sur ce site Web ne doit être considéré comme un conseil juridique, financier, en matière d\'immigration, médical ou professionnel.'},
+  {cid:'terms-15', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Visitors should consult the appropriate qualified professional where n', default_en:'Visitors should consult the appropriate qualified professional where necessary.', default_fr:'Les visiteurs devraient consulter le professionnel qualifié approprié au besoin.'},
+  {cid:'terms-16', page:'page-terms', pageLabel:'Terms of Use', tag:'h2', label:'Intellectual Property', default_en:'Intellectual Property', default_fr:'Propriété intellectuelle'},
+  {cid:'terms-17', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Unless otherwise indicated, the content of this website is the propert', default_en:'Unless otherwise indicated, the content of this website is the property of the Jewish Hasidic Council of Quebec.', default_fr:'Sauf indication contraire, le contenu de ce site Web est la propriété du Conseil des Juifs Hassidiques du Québec.'},
+  {cid:'terms-18', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Content may not be reproduced without prior written permission, except', default_en:'Content may not be reproduced without prior written permission, except where permitted by law.', default_fr:'Le contenu ne peut être reproduit sans autorisation écrite préalable, sauf dans les cas permis par la loi.'},
+  {cid:'terms-19', page:'page-terms', pageLabel:'Terms of Use', tag:'h2', label:'Changes', default_en:'Changes', default_fr:'Modifications'},
+  {cid:'terms-20', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'CJHQ may update these Terms of Use from time to time.', default_en:'CJHQ may update these Terms of Use from time to time.', default_fr:'Le CJHQ peut mettre à jour les présentes conditions d\'utilisation périodiquement.'},
+  {cid:'terms-21', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Continued use of this website constitutes acceptance of the updated Te', default_en:'Continued use of this website constitutes acceptance of the updated Terms.', default_fr:'L\'utilisation continue de ce site Web constitue une acceptation des conditions mises à jour.'},
+  {cid:'privacy-1', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h1', label:'Privacy Policy', default_en:'Privacy Policy', default_fr:'Politique de confidentialité'},
+  {cid:'privacy-2', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Effective Date: July 19, 2026', default_en:'<strong>Effective Date:</strong> July 19, 2026', default_fr:'<strong>Date d\'entrée en vigueur :</strong> 19 juillet 2026'},
+  {cid:'privacy-3', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting', default_en:'The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting the privacy of all individuals who visit our website or communicate with us.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) s\'engage à protéger la vie privée de toutes les personnes qui visitent notre site Web ou communiquent avec nous.'},
+  {cid:'privacy-4', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This Privacy Policy explains what information may be collected through', default_en:'This Privacy Policy explains what information may be collected through this website, how it is used, and how it is protected.', default_fr:'La présente politique de confidentialité explique quels renseignements peuvent être recueillis par ce site Web, comment ils sont utilisés et comment ils sont protégés.'},
+  {cid:'privacy-5', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Information We Collect', default_en:'Information We Collect', default_fr:'Renseignements que nous recueillons'},
+  {cid:'privacy-6', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Depending on how you interact with our website, CJHQ may collect infor', default_en:'Depending on how you interact with our website, CJHQ may collect information that you voluntarily provide, including:', default_fr:'Selon la façon dont vous interagissez avec notre site Web, le CJHQ peut recueillir des renseignements que vous fournissez volontairement, notamment :'},
+  {cid:'privacy-7', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'How We Use Your Information', default_en:'How We Use Your Information', default_fr:'Utilisation de vos renseignements'},
+  {cid:'privacy-8', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Information submitted through this website may be used to:', default_en:'Information submitted through this website may be used to:', default_fr:'Les renseignements soumis par ce site Web peuvent être utilisés pour :'},
+  {cid:'privacy-9', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ does not sell or rent personal information.', default_en:'CJHQ does not sell or rent personal information.', default_fr:'Le CJHQ ne vend ni ne loue les renseignements personnels.'},
+  {cid:'privacy-10', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Email Communications', default_en:'Email Communications', default_fr:'Communications par courriel'},
+  {cid:'privacy-11', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Individuals who subscribe to Community Information Updates may receive', default_en:'Individuals who subscribe to Community Information Updates may receive important community information, announcements, travel updates, government information, and other relevant communications.', default_fr:'Les personnes abonnées à l\'infolettre communautaire peuvent recevoir de l\'information communautaire importante, des annonces, des mises à jour sur les voyages, de l\'information gouvernementale et d\'autres communications pertinentes.'},
+  {cid:'privacy-12', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Subscribers may unsubscribe at any time using the unsubscribe link inc', default_en:'Subscribers may unsubscribe at any time using the unsubscribe link included in each email.', default_fr:'Les abonnés peuvent se désabonner en tout temps à l\'aide du lien de désabonnement inclus dans chaque courriel.'},
+  {cid:'privacy-13', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Cookies', default_en:'Cookies', default_fr:'Témoins (cookies)'},
+  {cid:'privacy-14', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website uses cookies and similar technologies for two purposes', default_en:'This website uses cookies and similar technologies for two purposes: to remember your language choice, and for the website analytics described below. It does not use advertising cookies.', default_fr:"Ce site Web utilise des témoins et des technologies similaires à deux fins : retenir votre choix de langue et produire les statistiques de fréquentation décrites ci-dessous. Il n'utilise aucun témoin publicitaire."},
+  {cid:'privacy-15', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Visitors may adjust their browser settings to manage or disable cookie', default_en:'Visitors may adjust their browser settings to manage or disable cookies.', default_fr:'Les visiteurs peuvent ajuster les paramètres de leur navigateur afin de gérer ou de désactiver les témoins.'},
+  {cid:'privacy-analytics-1', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Website Analytics', default_en:'Website Analytics', default_fr:'Statistiques de fréquentation du site Web'},
+  {cid:'privacy-analytics-2', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website uses Google Analytics, a web analytics service provided b', default_en:'This website uses Google Analytics, a web analytics service provided by Google, to understand how visitors use the site. It records information such as the pages viewed, the approximate region a visit comes from, the type of device and browser used, and how visitors arrived at the site.', default_fr:"Ce site Web utilise Google Analytics, un service d'analyse Web fourni par Google, afin de comprendre comment les visiteurs utilisent le site. Ce service enregistre des renseignements tels que les pages consultées, la région approximative d'où provient la visite, le type d'appareil et de navigateur utilisé, ainsi que la façon dont les visiteurs sont arrivés sur le site."},
+  {cid:'privacy-analytics-3', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ uses this information only to improve the website and to understan', default_en:'CJHQ uses this information only to improve the website and to understand which community resources are most needed. We do not use it to identify individual visitors, and we do not combine it with any information you send us through the contact form or the newsletter.', default_fr:"Le CJHQ utilise ces renseignements uniquement pour améliorer le site Web et pour comprendre quelles ressources communautaires sont les plus utiles. Nous ne les utilisons pas pour identifier des visiteurs en particulier, et nous ne les combinons pas avec les renseignements que vous nous transmettez par le formulaire de contact ou l'infolettre."},
+  {cid:'privacy-analytics-4', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Google Analytics is configured so that advertising features and cross-s', default_en:"Google Analytics is configured so that advertising features and cross-site profiling are turned off. Information is processed by Google and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block analytics through their browser settings or by installing Google's opt-out browser add-on.", default_fr:"Google Analytics est configuré de façon à désactiver les fonctions publicitaires et le profilage entre sites. Les renseignements sont traités par Google et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent bloquer les statistiques au moyen des paramètres de leur navigateur ou en installant le module complémentaire de désactivation offert par Google."},
+  {cid:'privacy-16', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Third-Party Links', default_en:'Third-Party Links', default_fr:'Liens vers des sites tiers'},
+  {cid:'privacy-17', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Our website contains links to official government websites and other t', default_en:'Our website contains links to official government websites and other trusted resources.', default_fr:'Notre site Web contient des liens vers des sites gouvernementaux officiels et d\'autres ressources fiables.'},
+  {cid:'privacy-18', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ is not responsible for the privacy practices or content of extern', default_en:'CJHQ is not responsible for the privacy practices or content of external websites.', default_fr:'Le CJHQ n\'est pas responsable des pratiques de confidentialité ou du contenu des sites externes.'},
+  {cid:'privacy-19', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Visitors should review the privacy policies of those websites separate', default_en:'Visitors should review the privacy policies of those websites separately.', default_fr:'Les visiteurs sont invités à consulter séparément les politiques de confidentialité de ces sites.'},
+  {cid:'privacy-20', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Data Security', default_en:'Data Security', default_fr:'Sécurité des données'},
+  {cid:'privacy-21', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ takes reasonable measures to protect personal information submitt', default_en:'CJHQ takes reasonable measures to protect personal information submitted through this website.', default_fr:'Le CJHQ prend des mesures raisonnables pour protéger les renseignements personnels soumis par ce site Web.'},
+  {cid:'privacy-22', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'While no method of electronic transmission is completely secure, appro', default_en:'While no method of electronic transmission is completely secure, appropriate safeguards are used to help protect information from unauthorized access.', default_fr:'Bien qu\'aucune méthode de transmission électronique ne soit entièrement sécurisée, des mesures de protection appropriées sont utilisées pour aider à protéger l\'information contre tout accès non autorisé.'},
+  {cid:'privacy-23', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Changes to this Policy', default_en:'Changes to this Policy', default_fr:'Modifications de la présente politique'},
+  {cid:'privacy-24', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This Privacy Policy may be updated from time to time to reflect change', default_en:'This Privacy Policy may be updated from time to time to reflect changes in legal requirements or website functionality.', default_fr:'La présente politique de confidentialité peut être mise à jour périodiquement afin de refléter les changements aux exigences légales ou aux fonctionnalités du site Web.'},
+  {cid:'privacy-25', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'The most current version will always be published on this website.', default_en:'The most current version will always be published on this website.', default_fr:'La version la plus récente sera toujours publiée sur ce site Web.'},
+  {cid:'privacy-26', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Contact', default_en:'Contact', default_fr:'Contact'},
+  {cid:'privacy-27', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Questions regarding this Privacy Policy may be submitted through the C', default_en:'Questions regarding this Privacy Policy may be submitted through the Contact page.', default_fr:'Les questions relatives à la présente politique de confidentialité peuvent être soumises par la page Contact.'},
+  {cid:'contact-1', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h1', label:'We\'re Here to Help', default_en:'We\'re Here to Help', default_fr:'Nous sommes là pour vous aider'},
+  {cid:'contact-2', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Whether you are a community member, government official, public instit', default_en:'Whether you are a community member, government official, public institution, journalist, community organization, or have a general question, the Jewish Hasidic Council of Quebec (CJHQ) welcomes your inquiry.', default_fr:'Que vous soyez un membre de la communauté, un représentant gouvernemental, une institution publique, un journaliste, un organisme communautaire ou que vous ayez une question générale, le Conseil des Juifs Hassidiques du Québec (CJHQ) accueille votre demande.'},
+  {cid:'contact-3', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Our goal is to ensure that every request reaches the appropriate membe', default_en:'Our goal is to ensure that every request reaches the appropriate member of our team so that it can be handled efficiently and professionally.', default_fr:'Notre objectif est de veiller à ce que chaque demande soit acheminée au bon membre de notre équipe afin qu\'elle soit traitée de façon efficace et professionnelle.'},
+  {cid:'contact-4', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h3', label:'How can we assist you?', default_en:'How can we assist you?', default_fr:'Comment pouvons-nous vous aider?'},
+  {cid:'contact-5', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Please begin by selecting the option that best describes you. The form', default_en:'Please begin by selecting the option that best describes you. The form will automatically display the questions most relevant to your inquiry.', default_fr:'Veuillez d\'abord sélectionner l\'option qui vous décrit le mieux. Le formulaire affichera automatiquement les questions les plus pertinentes pour votre demande.'},
+  {cid:'contact-6', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'I am a:', default_en:'I am a:', default_fr:'Je suis :'},
+  {cid:'contact-22', page:'page-contact', pageLabel:'Contact CJHQ', tag:'h2', label:'Thank You', default_en:'Thank You', default_fr:'Merci'},
+  {cid:'contact-23', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'Thank you for contacting the Jewish Hasidic Council of Quebec.', default_en:'Thank you for contacting the Jewish Hasidic Council of Quebec.', default_fr:'Merci d\'avoir communiqué avec le Conseil des Juifs Hassidiques du Québec.'},
+  {cid:'contact-24', page:'page-contact', pageLabel:'Contact CJHQ', tag:'p', label:'We appreciate the opportunity to assist you and look forward to workin', default_en:'We appreciate the opportunity to assist you and look forward to working with you.', default_fr:'Nous apprécions l\'occasion de vous venir en aide et avons hâte de travailler avec vous.'},
+  {cid:'stay-informed-1', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h1', label:'Stay Connected with CJHQ', default_en:'Stay Connected with CJHQ', default_fr:'Restez branchés avec le CJHQ'},
+  {cid:'stay-informed-2', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Timely, accurate communication is an important part of serving Quebec\'', default_en:'Timely, accurate communication is an important part of serving Quebec\'s Hasidic Jewish communities.', default_fr:'Une communication rapide et exacte est un élément important du service aux communautés juives hassidiques du Québec.'},
+  {cid:'stay-informed-3', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ) shares important informati', default_en:'The Jewish Hasidic Council of Quebec (CJHQ) shares important information through two official communication channels, each serving a different purpose.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) diffuse de l\'information importante par deux canaux de communication officiels, chacun ayant un objectif distinct.'},
+  {cid:'stay-informed-4', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Community members receive direct Community Information Updates by emai', default_en:'Community members receive direct Community Information Updates by email, while official statements and public announcements are shared through CJHQ\'s social media channels.', default_fr:'Les membres de la communauté reçoivent directement les mises à jour d\'information communautaire par courriel, tandis que les déclarations et annonces publiques officielles sont diffusées par les réseaux sociaux du CJHQ.'},
+  {cid:'stay-informed-5', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Whether the information relates to government services, travel, public', default_en:'Whether the information relates to government services, travel, public safety, holidays, or community matters, CJHQ is committed to providing reliable and timely communication.', default_fr:'Qu\'il s\'agisse de services gouvernementaux, de voyages, de sécurité publique, de fêtes ou d\'enjeux communautaires, le CJHQ s\'engage à offrir une communication fiable et rapide.'},
+  {cid:'stay-informed-6', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h2', label:'Important Information for the Community', default_en:'Important Information for the Community', default_fr:'Information importante pour la communauté'},
+  {cid:'stay-informed-7', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Throughout the year, CJHQ distributes Community Information Updates by', default_en:'Throughout the year, CJHQ distributes Community Information Updates by email to subscribers within Quebec\'s Hasidic Jewish communities.', default_fr:'Tout au long de l\'année, le CJHQ diffuse des mises à jour d\'information communautaire par courriel aux abonnés des communautés juives hassidiques du Québec.'},
+  {cid:'stay-informed-8', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'These updates provide practical information that helps community membe', default_en:'These updates provide practical information that helps community members stay informed about matters affecting everyday life. Topics may include:', default_fr:'Ces mises à jour offrent de l\'information pratique qui aide les membres de la communauté à rester informés des enjeux touchant la vie quotidienne. Les sujets peuvent inclure :'},
+  {cid:'stay-informed-9', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Many of these communications are intended specifically for community m', default_en:'Many of these communications are intended specifically for community members and are therefore distributed by email rather than published publicly.', default_fr:'Plusieurs de ces communications sont destinées spécifiquement aux membres de la communauté et sont donc diffusées par courriel plutôt que publiées publiquement.'},
+  {cid:'stay-informed-10', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'If you are part of Quebec\'s Hasidic Jewish community, we encourage you', default_en:'If you are part of Quebec\'s Hasidic Jewish community, we encourage you to subscribe to ensure you receive important updates as they are issued.', default_fr:'Si vous faites partie de la communauté juive hassidique du Québec, nous vous encourageons à vous abonner afin de recevoir les mises à jour importantes dès leur diffusion.'},
+  {cid:'stay-informed-11', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h2', label:'Follow CJHQ', default_en:'Follow CJHQ', default_fr:'Suivre le CJHQ'},
+  {cid:'stay-informed-12', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Official statements, public announcements, organizational updates, and', default_en:'Official statements, public announcements, organizational updates, and other information intended for the broader public are shared through CJHQ\'s official social media channels.', default_fr:'Les déclarations officielles, les annonces publiques, les mises à jour organisationnelles et d\'autres renseignements destinés au grand public sont diffusés par les réseaux sociaux officiels du CJHQ.'},
+  {cid:'stay-informed-13', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Follow CJHQ for:', default_en:'Follow CJHQ for:', default_fr:'Suivez le CJHQ pour :'},
+  {cid:'stay-informed-14', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h3', label:'Facebook Feed', default_en:'Facebook Feed', default_fr:'Fil Facebook'},
+  {cid:'stay-informed-16', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'h2', label:'Why Two Communication Channels?', default_en:'Why Two Communication Channels?', default_fr:'Pourquoi deux canaux de communication?'},
+  {cid:'stay-informed-17', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'CJHQ communicates through two complementary channels because different', default_en:'CJHQ communicates through two complementary channels because different information serves different audiences.', default_fr:'Le CJHQ communique par deux canaux complémentaires, car différents types d\'information s\'adressent à différents publics.'},
+  {cid:'stay-informed-18', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Delivered directly by email to subscribers within the community.', default_en:'Delivered directly by email to subscribers within the community.', default_fr:'Livrées directement par courriel aux abonnés de la communauté.'},
+  {cid:'stay-informed-19', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'These updates often contain practical information relating to holidays', default_en:'These updates often contain practical information relating to holidays, travel, public services, government programs, municipal notices, and other matters affecting daily community life. Many of these communications are not intended for a general public audience and are therefore distributed exclusively by email.', default_fr:'Ces mises à jour contiennent souvent de l\'information pratique relative aux fêtes, aux voyages, aux services publics, aux programmes gouvernementaux, aux avis municipaux et à d\'autres enjeux touchant la vie communautaire quotidienne. Plusieurs de ces communications ne sont pas destinées au grand public et sont donc diffusées exclusivement par courriel.'},
+  {cid:'stay-informed-20', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Shared publicly through CJHQ\'s official social media channels.', default_en:'Shared publicly through CJHQ\'s official social media channels.', default_fr:'Diffusées publiquement par les réseaux sociaux officiels du CJHQ.'},
+  {cid:'stay-informed-21', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'These communications include official statements, public announcements', default_en:'These communications include official statements, public announcements, organizational updates, and information intended for governments, public institutions, media organizations, community partners, and the general public.', default_fr:'Ces communications comprennent des déclarations officielles, des annonces publiques, des mises à jour organisationnelles et de l\'information destinée aux gouvernements, aux institutions publiques, aux médias, aux partenaires communautaires et au grand public.'},
+  {cid:'stay-informed-22', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Together, these two communication channels ensure that important infor', default_en:'Together, these two communication channels ensure that important information reaches the appropriate audience in the most effective manner.', default_fr:'Ensemble, ces deux canaux de communication garantissent que l\'information importante rejoint le bon public de la façon la plus efficace.'},
+  {cid:'stay-informed-27', page:'page-stay-informed', pageLabel:'Stay Informed', tag:'p', label:'Reliable information. Trusted communication. Stronger communities.', default_en:'Reliable information. Trusted communication. Stronger communities.', default_fr:'Une information fiable. Une communication de confiance. Des communautés plus fortes.'},
+  {cid:'resources-1', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'h1', label:'Trusted Government Resources — All in One Place', default_en:'Trusted Government Resources — All in One Place', default_fr:'Des ressources gouvernementales fiables — regroupées en un seul endroit'},
+  {cid:'resources-2', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'The CJHQ Community Resource Centre brings together the government serv', default_en:'The CJHQ Community Resource Centre brings together the government services, applications, and official resources most frequently used by Quebec\'s Hasidic Jewish communities.', default_fr:'Le Centre de ressources communautaires du CJHQ réunit les services gouvernementaux, les demandes et les ressources officielles les plus utilisés par les communautés juives hassidiques du Québec.'},
+  {cid:'resources-3', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'Our goal is simple: save you time by directing you straight to the inf', default_en:'Our goal is simple: save you time by directing you straight to the information or application you need. Whenever possible, every link on this page leads directly to the official government application, online service, or form—not simply a government homepage.', default_fr:'Notre objectif est simple : vous faire gagner du temps en vous dirigeant directement vers l\'information ou la demande dont vous avez besoin. Dans la mesure du possible, chaque lien de cette page mène directement à la demande, au service en ligne ou au formulaire gouvernemental officiel — et non simplement à une page d\'accueil gouvernementale.'},
+  {cid:'resources-4', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'h2', label:'Browse by Category', default_en:'Browse by Category', default_fr:'Parcourir par catégorie'},
+  {cid:'resources-6', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'h2', label:'Before You Continue', default_en:'Before You Continue', default_fr:'Avant de continuer'},
+  {cid:'resources-7', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'CJHQ is not an insurance broker or provider. This link points to a thi', default_en:'CJHQ is not an insurance broker or provider. This link points to a third-party provider the community has found useful. Coverage, pricing, and terms are set entirely by that provider — please review the policy carefully and confirm it meets your needs before purchasing.', default_fr:'Le CJHQ n\'est pas un courtier ni un fournisseur d\'assurance. Ce lien dirige vers un fournisseur tiers que la communauté a trouvé utile. La couverture, les prix et les conditions sont établis entièrement par ce fournisseur — veuillez examiner attentivement la police et confirmer qu\'elle répond à vos besoins avant l\'achat.'},
+  {cid:'resources-8', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'h2', label:'Can\'t Find What You\'re Looking For?', default_en:'Can\'t Find What You\'re Looking For?', default_fr:'Vous ne trouvez pas ce que vous cherchez?'},
+  {cid:'resources-9', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'If you cannot find the service or information you\'re looking for, CJHQ', default_en:'If you cannot find the service or information you\'re looking for, CJHQ is here to help.', default_fr:'Si vous ne trouvez pas le service ou l\'information que vous cherchez, le CJHQ est là pour vous aider.'},
+  {cid:'resources-10', page:'page-resources', pageLabel:'Community Resource Centre (intro only)', tag:'p', label:'Use our contact form and we\'ll do our best to direct you to the approp', default_en:'Use our contact form and we\'ll do our best to direct you to the appropriate government department, application, or official resource.', default_fr:'Utilisez notre formulaire de contact et nous ferons de notre mieux pour vous diriger vers le bon ministère, la bonne demande ou la bonne ressource officielle.'},
+  {cid:'about-1', page:'page-about', pageLabel:'About CJHQ', tag:'h1', label:'About the Jewish Hasidic Council of Quebec', default_en:'About the Jewish Hasidic Council of Quebec', default_fr:'À propos du Conseil des Juifs Hassidiques du Québec'},
+  {cid:'about-2', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ), known in French as Le Co', default_en:'The Jewish Hasidic Council of Quebec (CJHQ), known in French as Le Conseil des Juifs Hassidiques du Québec, is a community organization dedicated to serving, supporting, and representing Quebec\'s Hasidic Jewish communities.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) est un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.'},
+  {cid:'about-3', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ acts as a central point of contact for individuals, families, in', default_en:'CJHQ acts as a central point of contact for individuals, families, institutions, and community organizations seeking practical assistance, services, representation, advocacy, guidance, or reliable information. At the heart of our work is a commitment to helping community members address the issues affecting their daily lives and ensuring that the community\'s needs and concerns are properly represented.', default_fr:'Le CJHQ agit comme point de contact central pour les personnes, les familles, les institutions et les organismes communautaires à la recherche d\'assistance pratique, de services, de représentation, de défense des intérêts, de conseils ou d\'information fiable. Au cœur de notre travail se trouve un engagement à aider les membres de la communauté à résoudre les enjeux touchant leur vie quotidienne et à veiller à ce que les besoins et les préoccupations de la communauté soient adéquatement représentés.'},
+  {cid:'about-4', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We work closely with governments, municipal authorities, law enforce', default_en:'We work closely with governments, municipal authorities, law enforcement agencies, public institutions, service providers, and community organizations. Through these relationships, CJHQ helps address concerns, improve access to services, strengthen public safety, and develop practical solutions that respect the community\'s religious practices and way of life.', default_fr:'Nous travaillons en étroite collaboration avec les gouvernements, les autorités municipales, les services policiers, les institutions publiques, les fournisseurs de services et les organismes communautaires. Grâce à ces relations, le CJHQ contribue à résoudre des préoccupations, à améliorer l\'accès aux services, à renforcer la sécurité publique et à élaborer des solutions pratiques qui respectent les pratiques religieuses et le mode de vie de la communauté.'},
+  {cid:'about-5', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ also works to promote greater understanding of Hasidic Jewish li', default_en:'CJHQ also works to promote greater understanding of Hasidic Jewish life and to strengthen communication between the Hasidic community, public authorities, institutions, and the broader public.', default_fr:'Le CJHQ travaille également à favoriser une meilleure compréhension de la vie juive hassidique et à renforcer la communication entre la communauté hassidique, les autorités publiques, les institutions et le grand public.'},
+  {cid:'about-7', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Our Mission', default_en:'Our Mission', default_fr:'Notre mission'},
+  {cid:'about-8', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Our mission is to serve and strengthen Quebec\'s Hasidic Jewish communi', default_en:'Our mission is to serve and strengthen Quebec\'s Hasidic Jewish communities through practical assistance, effective advocacy, trusted representation, and strong relationships with governments, public institutions, service providers, and community partners.', default_fr:'Notre mission est de servir et de renforcer les communautés juives hassidiques du Québec par une assistance pratique, une défense efficace des intérêts, une représentation fiable et des relations solides avec les gouvernements, les institutions publiques, les fournisseurs de services et les partenaires communautaires.'},
+  {cid:'about-8b', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We are committed to promoting the safety, dignity, well-being, and fu', default_en:'We are committed to promoting the safety, dignity, well-being, and full participation of Hasidic Jewish residents throughout Quebec.', default_fr:'Nous nous engageons à promouvoir la sécurité, la dignité, le bien-être et la pleine participation des résidents juifs hassidiques partout au Québec.'},
+  {cid:'about-8c', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'How We Serve the Community', default_en:'How We Serve the Community', default_fr:'Comment nous servons la communauté'},
+  {cid:'about-8d', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ assists individuals, families, institutions, and community organ', default_en:'CJHQ assists individuals, families, institutions, and community organizations with matters involving government and municipal services, public safety, religious accommodations, travel and border issues, community events, and other concerns affecting daily life.', default_fr:'Le CJHQ aide les personnes, les familles, les institutions et les organismes communautaires pour des enjeux touchant les services gouvernementaux et municipaux, la sécurité publique, les accommodements religieux, les questions de voyage et de frontière, les événements communautaires et d\'autres préoccupations touchant la vie quotidienne.'},
+  {cid:'about-8e', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'We represent the needs of Quebec\'s Hasidic Jewish communities before ', default_en:'We represent the needs of Quebec\'s Hasidic Jewish communities before governments, law enforcement agencies, public institutions, service providers, and other decision-makers. We also provide timely guidance and reliable information when changes, emergencies, or public developments affect the community.', default_fr:'Nous représentons les besoins des communautés juives hassidiques du Québec auprès des gouvernements, des services policiers, des institutions publiques, des fournisseurs de services et d\'autres décideurs. Nous fournissons également des conseils rapides et une information fiable lorsque des changements, des urgences ou des événements publics touchent la communauté.'},
+  {cid:'about-9', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Constructive Engagement. Practical Solutions.', default_en:'Constructive Engagement. Practical Solutions.', default_fr:'Engagement constructif. Solutions pratiques.'},
+  {cid:'about-10', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'CJHQ believes that effective advocacy combines strong relationships wi', default_en:'CJHQ believes that effective advocacy combines strong relationships with a clear and responsible community voice.', default_fr:'Le CJHQ croit qu\'une représentation efficace combine des relations solides avec une voix communautaire claire et responsable.'},
+  {cid:'about-11', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Whenever possible, we seek practical solutions through respectful dial', default_en:'Whenever possible, we seek practical solutions through respectful dialogue, direct engagement, and professional collaboration. When circumstances require public advocacy, CJHQ speaks clearly and firmly on behalf of the community.', default_fr:'Dans la mesure du possible, nous recherchons des solutions pratiques par le dialogue respectueux, l\'engagement direct et la collaboration professionnelle. Lorsque les circonstances exigent une représentation publique, le CJHQ s\'exprime clairement et fermement au nom de la communauté.'},
+  {cid:'about-12', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'As a non-partisan organization, CJHQ works constructively with elected', default_en:'As a non-partisan organization, CJHQ works constructively with elected officials and governments of every political affiliation. Our commitment is to the community and to achieving meaningful, lasting results.', default_fr:'En tant qu\'organisme non partisan, le CJHQ travaille de façon constructive avec les élus et les gouvernements de toutes allégeances politiques. Notre engagement est envers la communauté et l\'atteinte de résultats significatifs et durables.'},
+  {cid:'about-13', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'The Principles That Guide Our Work', default_en:'The Principles That Guide Our Work', default_fr:'Les principes qui guident notre travail'},
+  {cid:'about-17', page:'page-about', pageLabel:'About CJHQ', tag:'h2', label:'Connect With CJHQ', default_en:'Connect With CJHQ', default_fr:'Communiquer avec le CJHQ'},
+  {cid:'about-18', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'Whether you are a community member, government representative, public ', default_en:'Whether you are a community member, government representative, public institution, journalist, community organization, or member of the public, we welcome the opportunity to connect with you.', default_fr:'Que vous soyez un membre de la communauté, un représentant gouvernemental, une institution publique, un journaliste, un organisme communautaire ou un membre du public, nous serions heureux d\'entrer en contact avec vous.'},
+  {cid:'about-19', page:'page-about', pageLabel:'About CJHQ', tag:'p', label:'If you have a question, require assistance, or would like to learn mor', default_en:'If you have a question, require assistance, or would like to learn more about our work, our team is here to help.', default_fr:'Si vous avez une question, avez besoin d\'aide ou souhaitez en apprendre davantage sur notre travail, notre équipe est là pour vous aider.'},
+  {cid:'home-1', page:'page-home', pageLabel:'Home', tag:'h1', label:'Serving Quebec\'s Hasidic Jewish Communities', default_en:'Serving Quebec\'s Hasidic Jewish Communities', default_fr:'Servir les communautés juives hassidiques du Québec'},
+  {cid:'home-2', page:'page-home', pageLabel:'Home', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ) is a central point of cont', default_en:'The Jewish Hasidic Council of Quebec (CJHQ) is a central point of contact for Quebec\'s Hasidic Jewish communities, providing community services, practical assistance, trusted information, representation, and advocacy.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) est un point de contact central pour les communautés juives hassidiques du Québec, offrant des services communautaires, une assistance pratique, une information fiable, la représentation et la défense de leurs intérêts.'},
+  {cid:'home-3', page:'page-home', pageLabel:'Home', tag:'p', label:'CJHQ works with government, public institutions, law enforcement, serv', default_en:'CJHQ works with government, public institutions, law enforcement, service providers, and community organizations to address community needs, improve access to services, strengthen public safety, and ensure that the concerns of Hasidic residents are understood and effectively represented.', default_fr:'Le CJHQ travaille avec les gouvernements, les institutions publiques, les services policiers, les fournisseurs de services et les organismes communautaires afin de répondre aux besoins de la communauté, d\'améliorer l\'accès aux services, de renforcer la sécurité publique et de veiller à ce que les préoccupations des résidents hassidiques soient comprises et efficacement représentées.'},
+  {cid:'home-5', page:'page-home', pageLabel:'Home', tag:'h2', label:'Working Alongside Community Organizations', default_en:'Working Alongside Community Organizations', default_fr:'En collaboration avec les organismes communautaires'},
+  {cid:'home-6', page:'page-home', pageLabel:'Home', tag:'p', label:'CJHQ works alongside a wide network of community organizations dedicat', default_en:'CJHQ works alongside a wide network of community organizations dedicated to serving Quebec\'s Hasidic Jewish communities.', default_fr:'Le CJHQ travaille aux côtés d\'un vaste réseau d\'organismes communautaires voués au service des communautés juives hassidiques du Québec.'},
+];
+const RESOURCE_BY_SLUG = {};
+let REVIEWED_OVERRIDES = {};
+let RESOURCE_OVERRIDES_CACHE = {};
+
+/* ---------- Untrusted-value helpers ----------
+   Resource overrides, pending notices, custom pages and partner records all
+   come from Firestore. Anything Firestore supplies is treated as untrusted:
+   escaped before it reaches innerHTML, and scheme-checked before it is used
+   as a navigation target.
+
+   Allowed: http, https, mailto, tel. Rejected: javascript: and data: execute
+   in the page or the opened tab, file: can probe the local disk. mailto: and
+   tel: cannot execute anything and are genuinely in use — the Outremont
+   visitor-parking resource links to a City of Montreal mailto: address with a
+   prefilled subject and body. All 143 real URLs pass unchanged. */
+// Admin-authored HTML from Firestore is rendered with innerHTML in three
+// places: custom pages, the site banner and the site popup. DOMPurify does that
+// safely. If DOMPurify is not available - blocked CDN, ad blocker, offline, an
+// outage - the previous fallback stripped <script> tags with a regex and
+// nothing else, so <img src=x onerror=...> went straight through. A sanitiser
+// that only appears to work is worse than none.
+//
+// This fails closed instead: with no DOMPurify the content is escaped and
+// renders as visible text. Formatting is lost for that visitor, nothing
+// executes, and no content silently disappears.
+function cjhqSanitizeHtml(v){
+  const raw = (v == null) ? '' : String(v);
+  if(typeof DOMPurify !== 'undefined' && DOMPurify && typeof DOMPurify.sanitize === 'function'){
+    return DOMPurify.sanitize(raw);
+  }
+  console.warn('[CJHQ] DOMPurify unavailable - rendering admin HTML as escaped text.');
+  return cjhqEscapeHtml(raw);
+}
+
+function cjhqEscapeHtml(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function cjhqSafeUrl(u){
+  if(!u) return null;
+  try{
+    const parsed = new URL(String(u), location.href);
+    const ok = ['http:', 'https:', 'mailto:', 'tel:'];
+    return ok.includes(parsed.protocol) ? parsed.href : null;
+  }catch(err){ return null; }
+}
+let HIDDEN_PAGES_CACHE = {};
+let CUSTOM_PAGES_CACHE = {};
+let PENDING_NOTICES = {};
+async function enhanceResourceMetaFromBackend(){
+  const overrides = await fetchCollection('reviewed_overrides');
+  REVIEWED_OVERRIDES = Object.fromEntries(overrides.map(o => [o.slug, o.reviewed]));
+  const notices = await fetchCollection('pending_change_notices');
+  PENDING_NOTICES = Object.fromEntries(notices.map(n => [n.slug, n]));
+}
+
+/* ---------- Generic page-content overrides (admin-editable text blocks) ---------- */
+async function applyContentOverrides(){
+  const overrides = await fetchCollection('content_overrides');
+  overrides.forEach(o => {
+    const el = document.querySelector(`[data-cid="${o.cid}"]`);
+    if(!el) return;
+    const enSpan = el.querySelector('span[data-en]');
+    const frSpan = el.querySelector('span[data-fr]');
+    if(enSpan && o.en) enSpan.innerHTML = o.en;
+    if(frSpan && o.fr) frSpan.innerHTML = o.fr;
+  });
+}
+function translateReviewedDate(s){
+  const months = {January:'janvier',February:'février',March:'mars',April:'avril',May:'mai',June:'juin',July:'juillet',August:'août',September:'septembre',October:'octobre',November:'novembre',December:'décembre'};
+  for(const [en, fr] of Object.entries(months)){ if(s.startsWith(en)) return s.replace(en, fr); }
+  return s;
+}
+let currentResourceSlug = null;
+
+/* ---------- Error reporting: 404s and unexpected JS errors ---------- */
+async function submitErrorReport(extra){
+  const report = {
+    type: extra.type || 'broken_link',
+    attemptedUrl: location.origin + (extra.path || window.__last404Path || location.pathname),
+    message: extra.message || '',
+    referrer: document.referrer || '',
+    userAgent: navigator.userAgent,
+    lang: document.documentElement.classList.contains('lang-fr') ? 'fr' : 'en',
+    reportedAt: new Date().toISOString(),
+  };
+  try{ await saveToCollection('error_reports', report); }catch(e){ console.warn('Could not save error report:', e); }
+  return report;
+}
+
+(function initErrorHandling(){
+  // Passive capture: unexpected JS errors, logged silently (no UI interruption for visitors)
+  window.addEventListener('error', (e)=>{
+    if(e.message && e.message.includes('ResizeObserver')) return; // noisy browser quirk, not a real bug
+    submitErrorReport({ type:'js_error', message:`${e.message} (${e.filename}:${e.lineno})` });
+  });
+  window.addEventListener('unhandledrejection', (e)=>{
+    submitErrorReport({ type:'js_error', message:'Unhandled promise rejection: ' + (e.reason?.message || e.reason) });
+  });
+  // 404 "report this" button
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('reportBrokenLinkBtn');
+    if(!btn) return;
+    btn.addEventListener('click', async ()=>{
+      btn.disabled = true;
+      await submitErrorReport({ type:'broken_link', path: window.__last404Path });
+      btn.style.display = 'none';
+      document.getElementById('reportBrokenLinkStatus').style.display = 'block';
+    });
+  });
+})();
+
+function initResourceCellHandlers(){
+  const wrap = document.getElementById('accordionWrap');
+  if(wrap.dataset.delegated) return; // only attach once
+  wrap.dataset.delegated = '1';
+  wrap.addEventListener('click', (e)=>{
+    const cell = e.target.closest('.res-item');
+    if(!cell) return;
+    openResourcePopup(cell.dataset.slug);
+  });
+}
+
+function openResourcePopup(slug, opts){
+  opts = opts || {};
+  const it = RESOURCE_BY_SLUG[slug];
+  if(!it) return;
+  currentResourceSlug = slug;
+  const isFr = document.documentElement.classList.contains('lang-fr');
+  const isInsurance = INSURANCE_URLS.includes(it.url);
+  // Every field below is replaceable from Firestore via resource_overrides,
+  // so all of it is untrusted. The built-in content contains no HTML tags at
+  // all (verified across all 62 resources), so escaping changes nothing visible.
+  const esc  = (v) => cjhqEscapeHtml(v);
+  const escL = (a) => Array.isArray(a) ? a.map(cjhqEscapeHtml) : a;
+  const title = esc(isFr ? it.fr : it.en);
+  const fallbackWhat = isFr ? 'Cliquez ci-dessous pour accéder à cette ressource officielle.' : 'Click below to visit this official resource.';
+  const what = esc(isFr ? (it.what_fr || it.desc_fr || fallbackWhat) : (it.what_en || it.desc_en || fallbackWhat));
+  const questionLabel = esc(isFr ? it.question_fr : it.question_en);
+  const answerText = esc(isFr ? it.answer_fr : it.answer_en);
+  const needHeading = esc(isFr ? it.need_heading_fr : it.need_heading_en);
+  const needIntro = esc(isFr ? it.need_intro_fr : it.need_intro_en);
+  const needList = escL(isFr ? it.need_list_fr : it.need_list_en);
+  const need = esc(isFr ? it.need_fr : it.need_en);
+  const needText = esc(isFr ? it.need_fr : it.need_en);
+  const stepsHeading = esc((isFr ? it.steps_heading_fr : it.steps_heading_en) || (isFr ? 'Comment faire la demande' : 'How to Apply'));
+  const stepsList = escL(isFr ? it.steps_list_fr : it.steps_list_en);
+  const stepsText = esc(isFr ? it.steps_fr : it.steps_en);
+  const tipsHeading = esc((isFr ? it.tips_heading_fr : it.tips_heading_en) || (isFr ? 'Bon à savoir' : 'Good to Know'));
+  const tipsList = escL(isFr ? it.tips_list_fr : it.tips_list_en);
+  const officialLinks = it.official_links || [];
+  const related = (it.related || []).map(s => RESOURCE_BY_SLUG[s]).filter(Boolean);
+  const reviewedDate = REVIEWED_OVERRIDES[slug] || it.reviewed;
+  const pendingNotice = PENDING_NOTICES[slug];
+  const href2 = cjhqSafeUrl(it.url2);
+  const secondaryBtn = it.url2 ? (href2
+        ? `<a class="btn res-popup-secondary-btn" href="${cjhqEscapeHtml(href2)}" target="_blank" rel="noopener noreferrer" data-popup-open2>
+          <span data-en>${cjhqEscapeHtml(it.label_en2)}</span><span data-fr>${cjhqEscapeHtml(it.label_fr2)}</span>
+        </a>`
+        : `<button class="btn res-popup-secondary-btn" type="button" data-popup-open2>
+          <span data-en>${cjhqEscapeHtml(it.label_en2)}</span><span data-fr>${cjhqEscapeHtml(it.label_fr2)}</span>
+        </button>`) : '';
+  const bulletList = (arr) => arr && arr.length ? `<ul class="res-popup-list">${arr.map(x=>`<li>${x}</li>`).join('')}</ul>` : '';
+  const body = document.getElementById('resourceShareModalBody');
+  body.innerHTML = `
+    <div class="site-modal-head">
+      <h2 id="resourceModalTitle" style="margin:2px 0; font-size:1.1rem;">${title}</h2>
+      <button class="site-modal-close" onclick="closeResourceShareModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="site-modal-body">
+      ${pendingNotice ? `
+      <div class="site-modal-section res-pending-notice">
+        <span data-en>⚠️ Heads up: ${cjhqEscapeHtml(pendingNotice.notice_en)}</span><span data-fr>⚠️ À noter : ${cjhqEscapeHtml(pendingNotice.notice_fr)}</span>
+      </div>` : ''}
+      <div class="site-modal-section">
+        <p class="res-popup-what">${what}</p>
+      </div>
+      ${questionLabel ? `
+      <div class="site-modal-section res-popup-block">
+        <h3>${questionLabel}</h3>
+        <p>${answerText}</p>
+      </div>` : ''}
+      ${(needList && needList.length) || need ? `
+      <div class="site-modal-section res-popup-block">
+        <h3>${needHeading || (isFr ? "Ce qu'il vous faut" : "What You'll Need")}</h3>
+        ${needIntro ? `<p class="res-popup-intro-line">${needIntro}</p>` : ''}
+        ${needList && needList.length ? bulletList(needList) : `<p>${needText}</p>`}
+      </div>` : ''}
+      ${(stepsList && stepsList.length) || stepsText ? `
+      <div class="site-modal-section res-popup-block">
+        <h3>${stepsHeading}</h3>
+        ${stepsList && stepsList.length ? `<ol class="res-popup-list res-popup-list-numbered">${stepsList.map(x=>`<li>${x}</li>`).join('')}</ol>` : `<p>${stepsText}</p>`}
+      </div>` : ''}
+      ${tipsList && tipsList.length ? `
+      <div class="site-modal-section res-popup-block">
+        <h3>${tipsHeading}</h3>
+        ${bulletList(tipsList)}
+      </div>` : ''}
+      <div class="site-modal-section" style="display:flex; flex-wrap:wrap; gap:10px;">
+        ${(() => {
+          const href1 = cjhqSafeUrl(it.url);
+          const label1 = `<span data-en>${esc(it.label_en1 || 'Go to Application →')}</span><span data-fr>${esc(it.label_fr1 || "Aller à la demande →")}</span>`;
+          // A real link, so it announces as a link, shows its destination on
+          // hover, and supports middle-click / "copy link address". The
+          // insurance disclaimer still intercepts the click below. If the URL
+          // fails validation we fall back to a button rather than emit a
+          // link with no destination.
+          return href1
+            ? `<a class="btn dark" href="${cjhqEscapeHtml(href1)}" target="_blank" rel="noopener noreferrer" data-popup-open1>${label1}</a>`
+            : `<button class="btn dark" type="button" data-popup-open1>${label1}</button>`;
+        })()}${secondaryBtn}
+      </div>
+      ${officialLinks.length ? `
+      <div class="site-modal-section res-popup-block">
+        <h3><span data-en>Official Links</span><span data-fr>Liens officiels</span></h3>
+        <ul class="res-popup-list res-official-links">
+          ${officialLinks.map(l => { const u = cjhqSafeUrl(l.url); const t = cjhqEscapeHtml(isFr ? l.label_fr : l.label_en);
+             return u ? `<li><a href="${cjhqEscapeHtml(u)}" target="_blank" rel="noopener noreferrer">${t}</a></li>` : `<li>${t}</li>`; }).join('')}
+        </ul>
+      </div>` : ''}
+      ${related.length ? `
+      <div class="site-modal-section res-popup-block">
+        <h3><span data-en>Related Resources</span><span data-fr>Ressources connexes</span></h3>
+        <div class="res-related-pills">
+          ${related.map(r => `<button type="button" class="res-related-pill" data-related-slug="${esc(r.slug)}">${esc(isFr ? r.fr : r.en)}</button>`).join('')}
+        </div>
+      </div>` : ''}
+      ${reviewedDate ? `<p class="res-reviewed"><span data-en>Last reviewed by CJHQ: ${esc(reviewedDate)}</span><span data-fr>Dernière révision par le CJHQ : ${esc(translateReviewedDate(reviewedDate))}</span></p>` : ''}
+      <div class="site-modal-section res-share-row">
+        <span class="res-share-label"><span data-en>Share this resource</span><span data-fr>Partager cette ressource</span></span>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('email')" title="Email" aria-label="Share by Email"><span aria-hidden="true">📧</span></button>
+          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('whatsapp')" title="WhatsApp" aria-label="Share via WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></button>
+          <button class="res-share-icon-btn" type="button" onclick="shareResourceVia('copy')" title="Copy Link" aria-label="Copy Link"><span aria-hidden="true">🔗</span></button>
+        </div>
+      </div>
+    </div>`;
+  body.querySelector('[data-popup-open1]').addEventListener('click', (e)=>{
+    if(isInsurance){
+      e.preventDefault();
+      closeResourceShareModal(); showInsuranceDisclaimer(it.url); return;
+    }
+    // Rendered as <a> with a validated href: let the browser handle it, so
+    // modifier-clicks and middle-clicks work. The <button> fallback (unsafe
+    // URL) has no href, so nothing happens - which is the intent.
+    if(e.currentTarget.tagName !== 'A'){
+      e.preventDefault();
+      console.warn('Blocked unsafe resource URL for', slug);
+    }
+  });
+  const btn2 = body.querySelector('[data-popup-open2]');
+  if(btn2) btn2.addEventListener('click', (e)=>{
+    if(e.currentTarget.tagName !== 'A'){
+      e.preventDefault();
+      console.warn('Blocked unsafe secondary URL for', slug);
+    }
+  });
+  body.querySelectorAll('[data-related-slug]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ openResourcePopup(btn.dataset.relatedSlug); });
+  });
+
+  document.getElementById('resourceShareModal').classList.add('open');
+  // Accessibility: move focus into modal so keyboard users & screen readers know it opened
+  const modalBody = document.getElementById('resourceShareModalBody');
+  modalBody.setAttribute('aria-labelledby', 'resourceModalTitle');
+  setTimeout(()=>{ modalBody.focus(); }, 50);
+  // Store trigger element so focus returns correctly on close
+  document.getElementById('resourceShareModal')._triggerEl = document.activeElement;
+  if(!opts.skipHistory){
+    const newPath = SITE_BASE_PATH + `/resources/${slug}`;
+    if(location.pathname !== newPath) history.pushState({page:'resources', slug}, '', newPath);
+  }
+}
+function closeResourceShareModal(){
+  const modal = document.getElementById('resourceShareModal');
+  modal.classList.remove('open');
+  // Return focus to the element that opened the modal
+  const trigger = modal._triggerEl;
+  if(trigger && typeof trigger.focus === 'function') setTimeout(()=> trigger.focus(), 50);
+  modal._triggerEl = null;
+  const resourcesPrefix = SITE_BASE_PATH + '/resources/';
+  if(location.pathname.startsWith(resourcesPrefix)) history.pushState({page:'resources'}, '', SITE_BASE_PATH + '/resources');
+}
+function resourceDeepLink(slug){
+  return location.origin + SITE_BASE_PATH + '/resources/' + slug;
+}
+function shareResourceVia(method){
+  const slug = currentResourceSlug;
+  const it = RESOURCE_BY_SLUG[slug];
+  const isFr = document.documentElement.classList.contains('lang-fr');
+  const title = isFr ? it.fr : it.en;
+  const link = resourceDeepLink(slug);
+  if(method === 'email'){
+    window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent((isFr?'Voici une ressource du CJHQ : ':'Here is a CJHQ resource: ')+link)}`;
+  } else if(method === 'whatsapp'){
+    window.open(`https://wa.me/?text=${encodeURIComponent(title+' — '+link)}`, '_blank', 'noopener');
+  } else if(method === 'copy'){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link);
+    } else {
+      prompt(isFr?'Copiez ce lien :':'Copy this link:', link);
+    }
+  }
+}
+
+/* ---------- On-page resource search ---------- */
+function initResourceSearch(){
+  const input = document.getElementById('resourceSearch');
+  if(!input) return;
+  const clearBtn = document.getElementById('resourceSearchClear');
+  const countEl = document.getElementById('resourceSearchCount');
+  const noResultsEl = document.getElementById('resourceNoResults');
+
+  function runFilter(){
+    const q = input.value.trim().toLowerCase();
+    const isFr = document.documentElement.classList.contains('lang-fr');
+    clearBtn.style.display = q ? 'block' : 'none';
+
+    if(!q){
+      countEl.style.display = 'none';
+      noResultsEl.style.display = 'none';
+      document.querySelectorAll('#accordionWrap .accordion-item').forEach(el=>{
+        el.style.display = '';
+        el.classList.remove('open');
+        el.querySelectorAll('.res-item').forEach(li => li.style.display = '');
+        el.querySelectorAll('.res-group').forEach(g => g.style.display = '');
+      });
+      syncAccordionAria();
+      return;
+    }
+
+    let totalMatches = 0;
+    const accItems = document.querySelectorAll('#accordionWrap .accordion-item');
+    accItems.forEach((el, catIdx) => {
+      const cat = categories[catIdx];
+      let catHasMatch = false;
+      const groupEls = el.querySelectorAll('.res-group');
+      groupEls.forEach((groupEl, gIdx) => {
+        const group = cat.groups[gIdx];
+        let groupHasMatch = false;
+        const liEls = groupEl.querySelectorAll('.res-item');
+        liEls.forEach((li, iIdx) => {
+          const it = group.items[iIdx];
+          const haystack = cjhqNormalizeSearch([it.en, it.fr, it.desc_en, it.desc_fr, it.what_en, it.what_fr].join(' '));
+          const match = haystack.includes(cjhqNormalizeSearch(q));
+          li.style.display = match ? '' : 'none';
+          if(match){ groupHasMatch = true; totalMatches++; }
+        });
+        groupEl.style.display = groupHasMatch ? '' : 'none';
+        if(groupHasMatch) catHasMatch = true;
+      });
+      el.style.display = catHasMatch ? '' : 'none';
+      el.classList.toggle('open', catHasMatch);
+    });
+    syncAccordionAria();
+
+    countEl.style.display = 'block';
+    countEl.textContent = isFr
+      ? `${totalMatches} résultat${totalMatches===1?'':'s'} pour « ${input.value.trim()} »`
+      : `${totalMatches} result${totalMatches===1?'':'s'} for "${input.value.trim()}"`;
+    noResultsEl.style.display = totalMatches === 0 ? 'block' : 'none';
+  }
+
+  input.addEventListener('input', runFilter);
+  clearBtn.addEventListener('click', ()=>{ input.value=''; runFilter(); input.focus(); });
+}
+
+
+function showInsuranceDisclaimer(url){
+  document.getElementById('insuranceModalOverlay').classList.add('open');
+  document.getElementById('insuranceModalOverlay').dataset.targetUrl = url;
+  return false;
+}
+function closeInsuranceModal(){
+  document.getElementById('insuranceModalOverlay').classList.remove('open');
+}
+function continueToInsuranceProvider(){
+  const url = document.getElementById('insuranceModalOverlay').dataset.targetUrl;
+  const safeDest = cjhqSafeUrl(url);
+  if(safeDest) window.open(safeDest, '_blank', 'noopener');
+  else console.warn('Blocked unsafe insurance destination');
+  closeInsuranceModal();
+}
+
+function renderContactCats(){
+  const wrap = document.getElementById('catToggle');
+  contactCats.forEach((c,i)=>{
+    wrap.innerHTML += `<button class="${i===0?'active':''}" onclick="selectCat(this,${i})"><span data-en>${c.en}</span><span data-fr>${c.fr}</span></button>`;
+  });
+}
+function selectCat(btn,index){
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const group = contactFieldGroups[index];
+  const field = document.getElementById('inquiryTypeField');
+  if(field) field.value = group.en;
+  renderDynamicFields(index);
+}
+
+function renderDynamicFields(index){
+  const wrap = document.getElementById('dynamicFields');
+  if(!wrap) return;
+  const group = contactFieldGroups[index];
+  wrap.innerHTML = group.fields.map(f=>{
+    const req = f.required ? 'required' : '';
+    // The visible <label> elements were not programmatically associated with
+    // their inputs (no for/id pair), so a screen reader announced six
+    // unlabelled fields on the contact form. Pairing them changes nothing
+    // visible: same labels, same text, same markup shape, same styling.
+    // Both the EN and FR label point at the same input; only one is displayed
+    // at a time, and a display:none label is excluded from the accessible name.
+    const fid = 'cf-' + String(f.name).replace(/[^a-zA-Z0-9_-]/g, '');
+    const input = f.type === 'textarea'
+      ? `<textarea id="${fid}" name="${f.name}" ${req}></textarea>`
+      : `<input id="${fid}" type="${f.type}" name="${f.name}" ${req}>`;
+    return `<div class="form-group">
+      <label for="${fid}" data-en>${f.en}</label><label for="${fid}" data-fr>${f.fr}</label>
+      ${input}
+    </div>`;
+  }).join('');
+}
+
+function renderInitiatives(){
+  const grid = document.getElementById('initiativeGrid');
+  initiatives.forEach(i=>{
+    grid.innerHTML += `<div class="init-card">
+      <div class="icon-badge">${iconSVG(i.icon)}</div>
+      <h3 data-en>${i.en}</h3><h3 data-fr>${i.fr}</h3>
+    </div>`;
+  });
+}
+
+function renderNewsTopics(){
+  const wrap = document.getElementById('topicList');
+  newsTopics.forEach(t=>{
+    wrap.innerHTML += `<div class="topic-item">${iconSVG(t.icon)}<span><span data-en>${t.en}</span><span data-fr>${t.fr}</span></span></div>`;
+  });
+}
+
+const pageLabels = {
+  'home':{en:'Home', fr:'Accueil'}, 'about':{en:'About', fr:'À propos'},
+  'resources':{en:'Resources', fr:'Ressources'}, 'stay-informed':{en:'News & Updates', fr:'Actualités'},
+  'contact':{en:'Contact', fr:'Contact'}, 'privacy':{en:'Privacy Policy', fr:'Politique de confidentialité'},
+  'terms':{en:'Terms of Use', fr:'Conditions d\'utilisation'}, 'accessibility':{en:'Accessibility', fr:'Accessibilité'},
+};
+
+function handleSearch(q, targetId){
+  q = q.trim().toLowerCase();
+  const box = document.getElementById(targetId || 'searchResults');
+  const isFr = document.documentElement.classList.contains('lang-fr');
+
+  if(!q){ box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  const qn = cjhqNormalizeSearch(q);
+  let matches = searchIndex
+    .filter(item => cjhqNormalizeSearch(isFr ? item.fr : item.en).includes(qn) || cjhqNormalizeSearch(isFr ? item.body_fr : item.body_en).includes(qn))
+    .map(item => ({ page:item.page, title: isFr ? item.fr : item.en, body: isFr ? item.body_fr : item.body_en }));
+
+  categories.forEach(c => {
+    const title = isFr ? c.fr : c.en;
+    const allItems = c.groups.flatMap(g => g.items.map(it => isFr ? it.fr : it.en));
+    const items = allItems.join(', ');
+    if(cjhqNormalizeSearch(title).includes(qn) || cjhqNormalizeSearch(items).includes(qn)){
+      matches.push({ page:'resources', title, body:items });
+    }
+  });
+
+  // de-duplicate by page+title, cap results
+  const seen = new Set();
+  matches = matches.filter(m => {
+    const key = m.page + '|' + m.title;
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 8);
+
+  if(matches.length === 0){
+    box.innerHTML = `<div class="search-result-empty">${isFr ? 'Aucun résultat pour "' + q + '"' : 'No results for "' + q + '"'}</div>`;
+  } else {
+    box.innerHTML = matches.map(m => `
+      <button class="search-result-item" onclick="goToSearchResult('${m.page}')">
+        <span class="search-cat">${(isFr ? pageLabels[m.page].fr : pageLabels[m.page].en)}</span>
+        <strong>${m.title}</strong>
+        <span>${m.body}</span>
+      </button>`).join('');
+  }
+  box.style.display = 'block';
+}
+
+function goToSearchResult(page){
+  goPage(page);
+  [['searchResults','siteSearch'], ['drawerSearchResults','drawerSearch']].forEach(([boxId, inputId])=>{
+    const box = document.getElementById(boxId);
+    const input = document.getElementById(inputId);
+    if(box){ box.style.display = 'none'; box.innerHTML = ''; }
+    if(input) input.value = '';
+  });
+  const drawer = document.getElementById('mobileDrawer');
+  const overlay = document.getElementById('mobileDrawerOverlay');
+  if(drawer){ drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+document.addEventListener('click', (e) => {
+  const wrap = document.querySelector('.search-box-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    document.getElementById('searchResults').style.display = 'none';
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('siteSearch').blur();
+    // Close resource modal if open
+    if(document.getElementById('resourceShareModal').classList.contains('open')){
+      closeResourceShareModal();
+    }
+    // Close site notice popup if open
+    const popup = document.getElementById('sitePopupOverlay');
+    if(popup && popup.classList.contains('open')) popup.classList.remove('open');
+  }
+});
+
+function renderCoreValues(){
+  const grid = document.getElementById('coreValuesGrid');
+  if(!grid) return;
+  coreValues.forEach(v=>{
+    grid.innerHTML += `<div class="card" style="text-align:center;">
+      <div class="icon-badge" style="margin:0 auto 12px;">${iconSVG(v.icon)}</div>
+      <h3 data-en>${v.en}</h3><h3 data-fr>${v.fr}</h3>
+    </div>`;
+  });
+}
+
+renderAccordion();
+initResourceSearch();
+renderContactCats();
+renderDynamicFields(0);
+renderNewsTopics();
+renderCoreValues();
+
+let PARTNERS_DATA = [
+  {type:'img', src:"/assets/renewal-canada.webp", w:320, h:111, alt:"Renewal Canada", url:"https://www.renewalcanada.org/"},
+  {type:'img', src:"/assets/yaldei.webp", w:320, h:213, alt:"Yaldei", url:"https://www.yaldei.org/"},
+  {type:'img', src:"/assets/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
+  {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
+  {type:'img', src:"/assets/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
+  {type:'img', src:"/assets/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
+  {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:null},
+  {type:'img', src:"/assets/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
+  {type:'img', src:"/assets/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
+  {type:'img', src:"/assets/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
+  {type:'img', src:"/assets/yad-ve-ezer.webp", w:320, h:164, alt:"Yad Ve'ezer", url:"https://www.yadvaezer.ca/"},
+  {type:'img', src:"/assets/tzum-gezunt.webp", w:562, h:158, alt:"Tzum Gezunt", url:"https://tzumgezunt.ca/"},
+  {type:'img', src:"/assets/chai-lifeline-montreal.webp", w:801, h:220, alt:"Chai Lifeline Montreal", url:"https://chailifelinecanada.org/"},
+  {type:'img', src:"/assets/misaskim-montreal.webp", w:396, h:220, alt:"Misaskim Montreal", url:"https://misaskimmtl.org/"},
+  {type:'img', src:"/assets/bonei-olam-montreal.webp", w:166, h:159, alt:"Bonei Olam Montreal", url:"https://www.boneiolam.org/"},
+  {type:'img', src:"/assets/interstate-chaverim.webp", w:220, h:210, alt:"Interstate Chaverim", url:"https://www.interstatechaverim.com/"}
+];
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+let PARTNER_OVERRIDES_CACHE = {};
+function renderPartners(){
+  const track = document.getElementById('partnersTrack');
+  if(!track) return;
+  const visible = PARTNERS_DATA.filter(p => {
+    const key = p.type === 'img' ? p.alt : p.name;
+    const ov = PARTNER_OVERRIDES_CACHE[key];
+    return !(ov && ov.hidden);
+  });
+  const shuffled = shuffleArray(visible);
+  // Partner labels and override URLs come from Firestore, so they are
+  // attacker-reachable. Escape every interpolated attribute and allow only
+  // http/https destinations - a javascript: URL here would otherwise execute
+  // for every visitor. Visible text, images and markup shape are unchanged.
+  const escAttr = (v) => String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const safeUrl = (u) => {
+    if(!u) return null;
+    try{
+      const parsed = new URL(String(u), location.href);
+      return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : null;
+    }catch(err){ return null; }
+  };
+  const badgeHtml = (p) => {
+    const key = p.type === 'img' ? p.alt : p.name;
+    const ov = PARTNER_OVERRIDES_CACHE[key];
+    const url = safeUrl((ov && ov.url !== undefined) ? ov.url : p.url);
+    const label = p.type === 'img' ? p.alt : p.name;
+    // width/height let the browser reserve the box before the file loads, so the
+    // marquee cannot shift. CSS still controls the rendered size (height is set,
+    // width:auto), so these attributes change nothing visually.
+    const dims = (p.w && p.h) ? ` width="${p.w}" height="${p.h}"` : '';
+    const inner = p.type === 'img'
+      ? `<img src="${escAttr(p.src)}" alt="${escAttr(p.alt)}"${dims} loading="lazy" decoding="async">`
+      : escAttr(p.name);
+    const cls = 'partner-badge' + (p.type === 'img' ? ' partner-badge-logo' : '');
+    return url
+      ? `<a class="${cls}" href="${escAttr(url)}" target="_blank" rel="noopener noreferrer" title="${escAttr(label)}">${inner}</a>`
+      : `<div class="${cls}">${inner}</div>`;
+  };
+  // The track is emitted twice so the marquee can loop seamlessly. The second
+  // copy is a visual duplicate only: hide it from assistive technology and take
+  // it out of the tab order so each partner is announced and tabbed to once.
+  const realHtml = shuffled.map(badgeHtml).join('');
+  const dupHtml  = `<div class="partners-dup" aria-hidden="true">${realHtml}</div>`;
+  track.innerHTML = realHtml + dupHtml;
+  track.querySelectorAll('.partners-dup a').forEach(a=>a.setAttribute('tabindex','-1'));
+}
+renderPartners();
+async function applyPartnerOverrides(){
+  const overrides = await fetchCollection('partner_overrides');
+  PARTNER_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.key, o]));
+  renderPartners();
+}
+
+/* Marquee: auto-scroll + drag/touch scroll */
+(function initPartnersMarquee(){
+  const el = document.getElementById('partnersMarquee');
+  if(!el) return;
+  let isDown = false, startX = 0, startScroll = 0, autoScroll = true, resumeTimer = null;
+
+  // The `prefers-reduced-motion` rule in the stylesheet only disables a CSS
+  // animation, and this marquee is driven by JS - so the guard has to be here.
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Only animate while the marquee is actually on screen. A display:none
+  // element never intersects, so this also stops the loop on every other page.
+  let inView = false;
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(entries=>{ inView = entries[0].isIntersecting; }, {threshold:0.01}).observe(el);
+  }else{
+    inView = true;
+  }
+
+  function tick(){
+    if(autoScroll && !isDown && inView && !document.hidden && !reduceMotion.matches){
+      el.scrollLeft += 0.6;
+      const half = el.scrollWidth / 2;
+      if(el.scrollLeft >= half) el.scrollLeft -= half;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function pauseThenResume(){
+    autoScroll = false;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(()=>{ autoScroll = true; }, 3500);
+  }
+
+  el.addEventListener('mousedown', e=>{
+    isDown = true; el.classList.add('dragging');
+    startX = e.pageX; startScroll = el.scrollLeft;
+    pauseThenResume();
+  });
+  window.addEventListener('mouseup', ()=>{ isDown = false; el.classList.remove('dragging'); });
+  window.addEventListener('mousemove', e=>{
+    if(!isDown) return;
+    e.preventDefault();
+    el.scrollLeft = startScroll - (e.pageX - startX);
+  });
+  el.addEventListener('touchstart', ()=>{ pauseThenResume(); }, {passive:true});
+  el.addEventListener('wheel', ()=>{ pauseThenResume(); }, {passive:true});
+
+  const leftBtn = document.getElementById('partnersArrowLeft');
+  const rightBtn = document.getElementById('partnersArrowRight');
+  if(leftBtn) leftBtn.addEventListener('click', ()=>{ pauseThenResume(); el.scrollBy({left:-320, behavior:'smooth'}); });
+  if(rightBtn) rightBtn.addEventListener('click', ()=>{ pauseThenResume(); el.scrollBy({left:320, behavior:'smooth'}); });
+
+  // Normalize scroll position within the looping range as the user drags
+  el.addEventListener('scroll', ()=>{
+    const half = el.scrollWidth / 2;
+    if(el.scrollLeft >= half) el.scrollLeft -= half;
+    else if(el.scrollLeft < 0) el.scrollLeft += half;
+  });
+})();
+
+
+// ---------- NAVIGATION ----------
+function pathForPage(name){
+  return name === 'home' ? (SITE_BASE_PATH + '/') : (SITE_BASE_PATH + '/' + name);
+}
+function goPage(name, opts){
+  opts = opts || {};
+  // Deactivated built-in page -> show 404 instead
+  if(HIDDEN_PAGES_CACHE[name] && HIDDEN_PAGES_CACHE[name].hidden){
+    if(typeof show404 === 'function'){ show404(name, opts); return; }
+  }
+  const builtIn = document.getElementById('page-'+name);
+  if(builtIn){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    builtIn.classList.add('active');
+    highlightActiveNav(name);
+    if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
+    if(!opts.skipHistory) updateUrlForPage(name);
+    else { updatePageMeta(name); trackPageView(); }
+    return;
+  }
+  // Not a built-in page -> check custom pages
+  const custom = CUSTOM_PAGES_CACHE[name];
+  if(custom){
+    document.getElementById('customPageTitle').innerHTML =
+      `<span data-en>${cjhqEscapeHtml(custom.title_en)}</span><span data-fr>${cjhqEscapeHtml(custom.title_fr)}</span>`;
+    const sanitize = cjhqSanitizeHtml;
+    document.getElementById('customPageBody').innerHTML =
+      `<div data-en>${sanitize(custom.body_en)}</div><div data-fr>${sanitize(custom.body_fr)}</div>`;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-custom').classList.add('active');
+    highlightActiveNav(name);
+    if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
+    if(!opts.skipHistory) updateUrlForPage(name);
+    else { updatePageMeta(name); trackPageView(); }
+    return;
+  }
+  // Nothing matches -> 404
+  if(opts.deferUnknown){ window.__routeDeferred = true; return; }
+  if(typeof show404 === 'function') show404(name, opts);
+}
+// Report a view to GA4 after the URL and the title are both settled. Wrapped
+// so an ad blocker, an offline visitor or a failed gtag load can never break
+// navigation - analytics must not be able to take the site down.
+function trackPageView(){
+  try{
+    if(typeof gtag !== 'function') return;
+    gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: location.href,
+      page_path: location.pathname
+    });
+  }catch(e){ /* analytics is never allowed to break routing */ }
+}
+
+function updateUrlForPage(name){
+  const path = pathForPage(name);
+  if(location.pathname !== path){
+    history.pushState({page:name}, '', path);
+  }
+  updatePageMeta(name);
+  trackPageView();
+}
+const PAGE_META = {
+  // Assembled verbatim from the 404 page's existing approved copy: the eyebrow
+  // ("Page Not Found" / "Page introuvable") plus the first sentence of the body
+  // paragraph. No new wording was written. The "— CJHQ" suffix matches every
+  // other entry. Without this, a 404 inherited the previous page's title and
+  // canonical - telling search engines an error page was a real one.
+  '404':        { en:'Page Not Found — CJHQ',                          fr:'Page introuvable — CJHQ',
+                  desc_en:'The link you followed may be outdated, or the page may have moved.',
+                  desc_fr:'Le lien que vous avez suivi est peut-être désuet, ou la page a été déplacée.' },
+  home:         { en:'CJHQ — Jewish Hasidic Council of Quebec',       fr:'CJHQ — Conseil des Juifs Hassidiques du Québec',
+                  desc_en:'The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec\'s Hasidic Jewish communities — practical assistance, advocacy, and resources.',
+                  desc_fr:'Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.' },
+  resources:    { en:'Community Resource Centre — CJHQ',               fr:'Centre de ressources communautaires — CJHQ',
+                  desc_en:'Government services, travel documents, NEXUS, border crossing, immigration, family benefits, healthcare, and municipal resources for Quebec\'s Hasidic Jewish communities.',
+                  desc_fr:'Services gouvernementaux, documents de voyage, NEXUS, passage frontalier, immigration, prestations familiales, soins de santé et ressources municipales.' },
+  'stay-informed':{ en:'News & Updates — CJHQ',                        fr:'Actualités — CJHQ',
+                  desc_en:'Official statements, public announcements, and community information updates from CJHQ — Quebec\'s Hasidic Jewish communities.',
+                  desc_fr:'Déclarations officielles, annonces publiques et mises à jour communautaires du CJHQ.' },
+  contact:      { en:'Contact CJHQ',                                   fr:'Contacter le CJHQ',
+                  desc_en:'Contact the Jewish Hasidic Council of Quebec for assistance, inquiries, media requests, or community matters.',
+                  desc_fr:'Communiquer avec le Conseil des Juifs Hassidiques du Québec pour de l\'aide, des demandes ou des enjeux communautaires.' },
+  about:        { en:'About CJHQ — Jewish Hasidic Council of Quebec',  fr:'À propos du CJHQ — Conseil des Juifs Hassidiques du Québec',
+                  desc_en:'About the Jewish Hasidic Council of Quebec — our mission, values, and how we serve Quebec\'s Hasidic Jewish communities.',
+                  desc_fr:'À propos du Conseil des Juifs Hassidiques du Québec — notre mission, nos valeurs et notre façon de servir les communautés juives hassidiques.' },
+  privacy:      { en:'Privacy Policy — CJHQ',                          fr:'Politique de confidentialité — CJHQ',
+                  desc_en:'Privacy Policy of the Jewish Hasidic Council of Quebec.',
+                  desc_fr:'Politique de confidentialité du Conseil des Juifs Hassidiques du Québec.' },
+  terms:        { en:'Terms of Use — CJHQ',                            fr:'Conditions d\'utilisation — CJHQ',
+                  desc_en:'Terms of Use for the CJHQ website.',
+                  desc_fr:'Conditions d\'utilisation du site Web du CJHQ.' },
+  accessibility:{ en:'Accessibility Statement — CJHQ',                 fr:'Déclaration d\'accessibilité — CJHQ',
+                  desc_en:'Accessibility Statement for the CJHQ website.',
+                  desc_fr:'Déclaration d\'accessibilité du site Web du CJHQ.' },
+};
+function updatePageMeta(name){
+  const isFr = document.documentElement.classList.contains('lang-fr');
+  const meta = PAGE_META[name] || PAGE_META['home'];
+  const title = isFr ? meta.fr : meta.en;
+  const desc  = isFr ? meta.desc_fr : meta.desc_en;
+  // For 404 the canonical must self-reference the URL the visitor actually
+  // requested, not a fabricated "/404" path that serves nothing.
+  // /fr/ is the home page served at its own URL. Without this branch,
+  // pathForPage('home') returns '/' and this function would rewrite the French
+  // page's canonical and og:url to the English homepage - telling Google the two
+  // are the same page and collapsing /fr/ out of the index. The raw HTML is
+  // correct; only this runtime update needed to respect the route.
+  const onFrenchHome = /^\/fr\/?$/.test(location.pathname) && name === 'home';
+  const url   = (name === '404')
+    ? (location.origin + location.pathname)
+    : onFrenchHome
+      ? (location.origin + '/fr/')
+      : (location.origin + pathForPage(name));
+  document.getElementById('pageTitle').textContent = title;
+  document.title = title;
+  const setMeta = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
+  setMeta('ogTitle', title);
+  setMeta('ogDescription', desc);
+  setMeta('ogUrl', url);
+  setMeta('twitterTitle', title);
+  setMeta('twitterDescription', desc);
+  const canon = document.getElementById('canonicalTag');
+  if(canon) canon.setAttribute('href', url);
+  // An error page must not claim to be a real URL, and must not be indexed.
+  // Every other route stays "index, follow" exactly as before.
+  const robots = document.querySelector('meta[name="robots"]');
+  if(robots) robots.setAttribute('content', name === '404' ? 'noindex, follow' : 'index, follow');
+  // Also update on lang switch
+  document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', desc));
+}
+
+// Footer "Subscribe" link. The Constant Contact form is injected
+// asynchronously into an empty placeholder, so the old fixed 100ms timer
+// scrolled to whatever height the placeholder happened to have at that
+// instant, then drifted once the iframe rendered - landing roughly 60% down
+// the page with the section heading off screen.
+//
+// Wait for the iframe to actually have height, then scroll to the card that
+// wraps the form (so its lead-in paragraph stays visible) offset by the
+// sticky header. Falls back to scrolling anyway if the widget never loads.
+function goToSubscribeForm(){
+  goPage('stay-informed');
+  const holder = document.querySelector('.ctct-inline-form');
+  if(!holder) return;
+  const target = holder.closest('.card') || holder;
+  const doScroll = () => {
+    const header = document.querySelector('header');
+    const offset = (header ? header.offsetHeight : 0) + 16;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  };
+  const started = Date.now();
+  (function waitForForm(){
+    const frame = holder.querySelector('iframe');
+    const ready = frame && frame.getBoundingClientRect().height > 40;
+    if(ready || Date.now() - started > 4000){ doScroll(); return; }
+    requestAnimationFrame(waitForForm);
+  })();
+}
+
+function highlightActiveNav(name){
+  document.querySelectorAll('#mainNav a').forEach(b=>{
+    const on = b.dataset.page===name;
+    b.classList.toggle('active', on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('#mobileDrawerNav a').forEach(a=>{
+    const on = a.dataset.page===name;
+    a.classList.toggle('active', on);
+    if(on) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+  });
+}
+// Header and drawer nav items are real anchors so they are crawlable and
+// support middle-click / modifier-click / "copy link address". Their hrefs are
+// rewritten through the existing pathForPage() so a GitHub Pages project
+// subpath keeps working. Plain left-clicks are intercepted for SPA routing;
+// modifier and non-primary clicks fall through to the browser.
+// Every internal link now carries data-page, not just the header nav: the brand
+// mark, the footer quick links, the legal links and the "contact CJHQ" links in
+// the no-results message. They were href="#" with an inline onclick, which meant
+// no crawler could follow them and nobody could middle-click them.
+function refreshInternalLinkHrefs(root){
+  const scope = root || document;
+  scope.querySelectorAll('a[data-page]').forEach(a=>{
+    a.setAttribute('href', pathForPage(a.dataset.page));
+  });
+  // The subscribe button routes AND scrolls to the form, so it must not be
+  // handled by the generic data-page listener - it carries its own attribute
+  // purely so the href is real and crawlable.
+  scope.querySelectorAll('a[data-href-page]').forEach(a=>{
+    a.setAttribute('href', pathForPage(a.dataset.hrefPage));
+  });
+}
+refreshInternalLinkHrefs();
+
+// One delegated listener covers every data-page link, including any rendered
+// later. The drawer keeps its own listener because it must also close itself.
+document.addEventListener('click', (e)=>{
+  const a = e.target.closest && e.target.closest('a[data-page]');
+  if(!a) return;
+  if(a.closest('#mobileDrawerNav')) return;
+  if(a.classList.contains('nav-dropdown-trigger')) return;
+  if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  goPage(a.dataset.page);
+});
+
+// Nav dropdown: clicking "About" toggles the menu open/closed. Simple and
+// reliable on purpose — no hover-to-reveal (fragile across trackpads/gaps)
+// and no split click-target between the label and the caret.
+(function initNavDropdown(){
+  const dropdown = document.getElementById('aboutDropdown');
+  if(!dropdown) return;
+  const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+  trigger.addEventListener('click', (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+  dropdown.querySelectorAll('.nav-dropdown-menu a').forEach(a=>{
+    a.addEventListener('click', ()=>dropdown.classList.remove('open'));
+  });
+  document.addEventListener('click', (e)=>{
+    if(!dropdown.contains(e.target)) dropdown.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape') dropdown.classList.remove('open');
+  });
+})();
+
+// ---------- LANGUAGE ----------
+function setLang(lang){
+  document.documentElement.classList.toggle('lang-fr', lang==='fr');
+  document.getElementById('btnEN').classList.toggle('active', lang==='en');
+  document.getElementById('btnFR').classList.toggle('active', lang==='fr');
+  document.getElementById('btnEN').textContent = lang==='fr' ? 'AN' : 'EN';
+  document.documentElement.lang = lang;
+  const searchInput = document.getElementById('siteSearch');
+  searchInput.placeholder = lang==='fr' ? searchInput.dataset.frPh : searchInput.dataset.enPh;
+  const drawerEN = document.getElementById('drawerBtnEN'), drawerFR = document.getElementById('drawerBtnFR');
+  if(drawerEN && drawerFR){
+    drawerEN.classList.toggle('active', lang==='en');
+    drawerFR.classList.toggle('active', lang==='fr');
+    drawerEN.textContent = lang==='fr' ? 'AN' : 'EN';
+  }
+  const drawerSearch = document.getElementById('drawerSearch');
+  if(drawerSearch) drawerSearch.placeholder = lang==='fr' ? drawerSearch.dataset.frPh : drawerSearch.dataset.enPh;
+  translateCtctForm(lang);
+  // Refresh per-page meta tags for the new language
+  const activePage = document.querySelector('.page.active');
+  if(activePage){
+    const pageName = activePage.id.replace('page-','');
+    if(typeof updatePageMeta === 'function') updatePageMeta(pageName);
+  }
+}
+// Translates the Constant Contact signup form's labels/notice/button between
+// English and French. Stores each element's original English text in a
+// data-attribute the first time it's seen, so switching back to English
+// always restores the exact original — nothing is ever permanently
+// overwritten. Runs on every language switch (not just to French), which
+// is what makes the "stays French when switching back" bug impossible.
+// Retries a few times since Constant Contact's widget can finish rendering
+// at different times depending on network speed.
+const CTCT_LABEL_TRANSLATIONS = {
+  'Email': 'Courriel',
+  'First Name': 'Prénom',
+  'Last Name': 'Nom de famille',
+  'Phone': 'Téléphone',
+  'Email Lists': "Listes d'envoi",
+};
+const CTCT_LEGAL_MARKER = 'By submitting this form';
+const CTCT_LEGAL_FR = 'En soumettant ce formulaire, vous consentez à recevoir des courriels promotionnels de la part de : CJHQ, 1040, avenue Van Horne, 2e étage, Outremont, QC, H2V 1J5, CA. Vous pouvez révoquer votre consentement à recevoir des courriels en tout temps en utilisant le lien de désabonnement SafeUnsubscribe®, situé au bas de chaque courriel. Les courriels sont gérés par Constant Contact.';
+function translateCtctForm(lang){
+  function apply(){
+    document.querySelectorAll('label, legend, span, div, p, small, h4, h3').forEach(function(el){
+      if(el.children.length > 0) return; // leaf text nodes only
+      const text = el.textContent.trim();
+      if(!el.dataset.ctctOriginalEn){
+        const knownMatch = Object.keys(CTCT_LABEL_TRANSLATIONS).find(k => k.toLowerCase() === text.toLowerCase());
+        if(knownMatch){
+          el.dataset.ctctOriginalEn = knownMatch;
+        } else if(text.indexOf(CTCT_LEGAL_MARKER) !== -1){
+          el.dataset.ctctOriginalEn = text;
+          el.dataset.ctctIsLegal = '1';
+        }
+      }
+      if(el.dataset.ctctOriginalEn){
+        if(lang === 'fr'){
+          el.textContent = el.dataset.ctctIsLegal ? CTCT_LEGAL_FR : CTCT_LABEL_TRANSLATIONS[el.dataset.ctctOriginalEn];
+        } else {
+          el.textContent = el.dataset.ctctOriginalEn;
+        }
+      }
+    });
+    document.querySelectorAll("button,input[type='submit']").forEach(function(btn){
+      const isInput = btn.tagName === 'INPUT';
+      const current = (isInput ? btn.value : btn.innerHTML).trim();
+      if(!btn.dataset.ctctOriginalEn && (current === 'Sign Up!' || current === "S'inscrire")){
+        btn.dataset.ctctOriginalEn = 'Sign Up!';
+      }
+      if(btn.dataset.ctctOriginalEn){
+        const newText = lang === 'fr' ? "S'inscrire" : btn.dataset.ctctOriginalEn;
+        if(isInput) btn.value = newText; else btn.innerHTML = newText;
+      }
+    });
+  }
+  // Multiple attempts: the widget can render well after the language
+  // switch, especially on a slower connection or first page load.
+  // Cancel any pending attempts from a previous call first — otherwise a
+  // stale retry from an earlier language switch can fire after this one
+  // and silently revert the more recent, correct result.
+  if(window.__ctctTranslateTimers){
+    window.__ctctTranslateTimers.forEach(t => clearTimeout(t));
+  }
+  window.__ctctTranslateTimers = [800, 1800, 3000, 5000].map(delay => setTimeout(apply, delay));
+}
+// Persist ONLY on an explicit click. A geographic first-visit default is
+// deliberately not written to storage, so "saved" always means "the visitor
+// chose this" and never "we guessed this once".
+function chooseLang(lang){
+  setLang(lang);
+  try{ localStorage.setItem('cjhq_language', lang); }catch(e){}
+}
+document.getElementById('btnEN').addEventListener('click', ()=>chooseLang('en'));
+document.getElementById('btnFR').addEventListener('click', ()=>chooseLang('fr'));
+document.getElementById('drawerBtnEN').addEventListener('click', ()=>chooseLang('en'));
+document.getElementById('drawerBtnFR').addEventListener('click', ()=>chooseLang('fr'));
+
+// Sync the toggle buttons, search placeholders and meta tags with whatever the
+// head script already applied. The class and lang attribute are set before
+// first paint; this only catches up the controls, so there is no flash.
+setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
+
+// ---------- MOBILE DRAWER ----------
+(function initMobileDrawer(){
+  const toggle = document.getElementById('mobileNavToggle');
+  const drawer = document.getElementById('mobileDrawer');
+  const overlay = document.getElementById('mobileDrawerOverlay');
+  const header = document.querySelector('header');
+  if(!toggle || !drawer) return;
+
+  // The panel hangs off the bottom of the header, and the header is not a fixed
+  // height: the brand mark is 112px on desktop and 64px below 860px, and French
+  // labels can wrap. Measuring the rendered header keeps the panel attached
+  // instead of relying on a magic number that breaks at some width.
+  function setHeaderHeightVar(){
+    if(!header) return;
+    const h = Math.round(header.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  setHeaderHeightVar();
+  window.addEventListener('resize', setHeaderHeightVar);
+  window.addEventListener('orientationchange', setHeaderHeightVar);
+  // Late webfont loads change the header height after first paint.
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderHeightVar);
+
+  function openDrawer(){
+    setHeaderHeightVar();
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    toggle.setAttribute('aria-expanded','true');
+    // The page behind is scroll-locked, but the panel itself still scrolls
+    // because .mobile-drawer-inner has its own overflow.
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');
+    document.body.style.overflow = '';
+  }
+  function toggleDrawer(){
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+  }
+
+  // One control opens and closes it, so there is no separate close button to
+  // duplicate the hamburger.
+  toggle.addEventListener('click', toggleDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && drawer.classList.contains('open')){
+      closeDrawer();
+      toggle.focus();
+    }
+  });
+  // Above the breakpoint the panel is irrelevant; make sure it cannot be left open.
+  window.addEventListener('resize', ()=>{
+    if(window.innerWidth > 860 && drawer.classList.contains('open')) closeDrawer();
+  });
+
+  document.querySelectorAll('#mobileDrawerNav a').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      // Subscribe has no data-page: it runs its own handler (route + scroll to
+      // the form), so routing it here as well would fire goPage(undefined) and
+      // cancel the scroll. It still closes the panel.
+      if(!a.dataset.page){ closeDrawer(); return; }
+      e.preventDefault();
+      goPage(a.dataset.page);
+      closeDrawer();
+    });
+  });
+})();
+
+// ---------- CONTACT FORM (Formspree) ----------
+const contactForm = document.getElementById('contactForm');
+if(contactForm){
+  contactForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const statusEl = document.getElementById('contactFormStatus');
+    const btn = document.getElementById('contactSubmitBtn');
+    const isFr = document.documentElement.classList.contains('lang-fr');
+    btn.disabled = true;
+    const formData = new FormData(contactForm);
+    // Save a copy to our own admin panel, independent of whether Formspree succeeds
+    try{
+      const plain = {};
+      formData.forEach((v,k) => { if(typeof v === 'string') plain[k] = v; });
+      if(typeof saveToCollection === 'function'){
+        saveToCollection('contact_submissions', { ...plain, submittedAt: new Date().toISOString(), lang: isFr?'fr':'en' });
+      }
+    }catch(err){ console.warn('Could not save local copy of contact submission:', err); }
+    fetch(contactForm.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    }).then(response => {
+      if(response.ok){
+        statusEl.textContent = isFr
+          ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
+          : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
+        statusEl.style.color = '#2E7D32';
+        statusEl.style.display = 'block';
+        contactForm.reset();
+      } else {
+        throw new Error('submit failed');
+      }
+    }).catch(() => {
+      statusEl.textContent = isFr
+        ? 'Une erreur est survenue. Veuillez réessayer ou nous écrire directement à info@cjhq.org.'
+        : 'Something went wrong. Please try again, or email us directly at info@cjhq.org.';
+      statusEl.style.color = '#B3261E';
+      statusEl.style.display = 'block';
+    }).finally(() => {
+      btn.disabled = false;
+    });
+  });
+}
+</script>
+
+<script>
+
+/* ================================================================
+   CJHQ BACKEND — Firebase-backed site admin system
+   ================================================================
+   SECURITY MODEL (current):
+   Admin access uses Firebase Authentication - email/password or Google -
+   gated by a staff allowlist. The client checks a SHA-256 of the signed-in
+   address; Firestore rules enforce the same list server-side, which is the
+   real boundary. Any other account is refused and signed out.
+
+   Firestore rules: public read on the collections the site renders, create
+   only on the two public inboxes, writes restricted to the staff allowlist,
+   deny-all catch-all. Never use `allow read, write: if true` - that makes
+   every collection world-writable by anyone, bypassing this page entirely.
+
+   Rules live in `firestore.rules`, which is deliberately NOT committed to
+   this repository. Publish from the Firebase Console. To add or remove a
+   staff member you must update BOTH the allowlist in the rules and the
+   hash list in this file, or the panel and the database will disagree.
+
+   ADMIN ACCESS: the admin panel signs in with Firebase Authentication
+   (email + password). Firestore rules require request.auth != null for every
+   write, so the panel and the database enforce the same condition. The old
+   client-side PIN has been removed - it was visible in page source and was
+   never an authentication boundary.
+   Collections used: notices, partners, resources, events, settings (single doc "site").
+   That's it — no other code changes needed, everything below already
+   expects this shape.
+   ================================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDPzTFbsiOtJ4LOKiFjL0aVtSKhl21zwuc",
+  authDomain: "cjhqinfo.firebaseapp.com",
+  projectId: "cjhqinfo",
+  storageBucket: "cjhqinfo.firebasestorage.app",
+  messagingSenderId: "158970385688",
+  appId: "1:158970385688:web:c9bdc737f4e123b69aba6d"
+};
+
+let fbDb = null;
+let firebaseReady = false;
+let fbAuth = null;
+let adminUser = null;
+
+async function initFirebase(){
+  if(FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY'){
+    firebaseReady = false;
+    return;
+  }
+  try{
+    const appMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const fsMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const authMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    fbDb = fsMod.getFirestore(app);
+    window.__fbFirestore = fsMod;
+    window.__fbAuth = authMod;
+    window.__fbApp = app;
+    fbAuth = authMod.getAuth(app);
+    firebaseReady = true;
+
+    // Firestore rules require request.auth != null for every write. Drive the
+    // admin panel from the real auth state rather than a client-side flag, so
+    // the UI can never show an editable panel that Firestore will reject.
+    authMod.onAuthStateChanged(fbAuth, (user) => {
+      adminUser = user || null;
+      syncAdminAuthUI();
+    });
+  }catch(e){
+    console.warn('Firebase init failed, running in local-only mode:', e);
+    firebaseReady = false;
+  }
+}
+
+/* ---------- Generic collection helpers ---------- */
+const localCache = { notices: [], partners: [], resources: [], events: [], reviewed_overrides: [], pending_change_notices: [], link_audits: [] };
+
+async function fetchCollection(name){
+  if(!localCache[name]) localCache[name] = [];
+  if(firebaseReady){
+    try{
+      const fs = window.__fbFirestore;
+      const snap = await fs.getDocs(fs.collection(fbDb, name));
+      const data = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      localCache[name] = data;
+      return data;
+    }catch(e){
+      console.warn(`Firestore fetch (${name}) failed:`, e);
+      return localCache[name];
+    }
+  }
+  return localCache[name];
+}
+
+// A rejected write used to throw out of here with nothing caught anywhere up
+// the chain: the caller's success message could still run, so an editor saw no
+// error and lost the change. Firestore rules now require an authenticated
+// session, so every admin write is rejected until Firebase Auth is wired in -
+// which makes a visible failure essential rather than optional.
+function reportSaveFailure(name, err){
+  const denied = err && (err.code === 'permission-denied' || /permission/i.test(err.message || ''));
+  const msg = denied
+    ? 'Could not save: the database rejected the change.\n\n' +
+      'Your session may have expired. Sign out and sign back in with your CJHQ ' +
+      'staff account, then try again. Your change has NOT been saved - please ' +
+      'copy anything you typed before leaving this page.'
+    : 'Could not save: ' + ((err && err.message) || 'unknown error') +
+      '\n\nYour change has NOT been saved.';
+  console.error('[CJHQ] save failed for "' + name + '":', err);
+  try{ alert(msg); }catch(e){}
+}
+
+async function saveToCollection(name, record){
+  if(!localCache[name]) localCache[name] = [];
+  if(firebaseReady){
+    const fs = window.__fbFirestore;
+    try{
+      if(record.id){
+        const ref = fs.doc(fbDb, name, record.id);
+        const { id, ...data } = record;
+        await fs.setDoc(ref, data, { merge:true });
+      } else {
+        const ref = await fs.addDoc(fs.collection(fbDb, name), record);
+        record.id = ref.id;
+      }
+    }catch(err){
+      reportSaveFailure(name, err);
+      throw err;   // stop the caller from reporting success
+    }
+  } else {
+    if(record.id){
+      const idx = localCache[name].findIndex(n=>n.id===record.id);
+      if(idx>-1) localCache[name][idx] = record;
+      else localCache[name].push(record);
+    } else {
+      record.id = 'local-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+      localCache[name].push(record);
+    }
+  }
+  return record;
+}
+
+async function deleteFromCollection(name, id){
+  if(!localCache[name]) localCache[name] = [];
+  if(firebaseReady){
+    const fs = window.__fbFirestore;
+    try{
+      await fs.deleteDoc(fs.doc(fbDb, name, id));
+    }catch(err){
+      reportSaveFailure(name, err);
+      throw err;
+    }
+  } else {
+    localCache[name] = localCache[name].filter(n=>n.id!==id);
+  }
+}
+
+async function fetchSettingsDoc(){
+  if(firebaseReady){
+    try{
+      const fs = window.__fbFirestore;
+      const ref = fs.doc(fbDb, 'settings', 'site');
+      const snap = await fs.getDoc(ref);
+      return snap.exists() ? snap.data() : null;
+    }catch(e){
+      console.warn('Firestore settings fetch failed:', e);
+      return window.__localSettings || null;
+    }
+  }
+  return window.__localSettings || null;
+}
+async function saveSettingsDoc(data){
+  if(firebaseReady){
+    const fs = window.__fbFirestore;
+    await fs.setDoc(fs.doc(fbDb, 'settings', 'site'), data, { merge:true });
+  } else {
+    window.__localSettings = data;
+  }
+}
+
+/* ---------- Public-facing: Notices & Popups ---------- */
+async function renderPublicNotices(){
+  const notices = await fetchCollection('notices');
+  const active = notices.filter(n => n.active);
+  const isFr = document.documentElement.classList.contains('lang-fr');
+
+  const banner = active.find(n => n.type === 'banner');
+  const bannerEl = document.getElementById('siteNoticeBanner');
+  if(bannerEl){
+    if(banner && !sessionStorage.getItem('dismissed-banner-'+banner.id)){
+      bannerEl.className = 'notice-' + (banner.style||'info');
+      bannerEl.style.display = 'block';
+      const title = isFr ? banner.title_fr : banner.title_en;
+      const body = isFr ? banner.body_fr : banner.body_en;
+      const sp = cjhqSanitizeHtml;
+      bannerEl.innerHTML = `${title?`<b>${sp(title)}</b>`:''}${sp(body)}<button class="notice-close" onclick="dismissBanner('${banner.id}')">&times;</button>`;
+    } else {
+      bannerEl.style.display = 'none';
+    }
+  }
+
+  const popup = active.find(n => n.type === 'popup');
+  if(popup && !sessionStorage.getItem('seen-popup-'+popup.id)){
+    const overlay = document.getElementById('sitePopupOverlay');
+    const body = document.getElementById('sitePopupBody');
+    if(overlay && body){
+      const title = isFr ? popup.title_fr : popup.title_en;
+      const msg = isFr ? popup.body_fr : popup.body_en;
+      const sp2 = cjhqSanitizeHtml;
+      body.innerHTML = `
+        <div class="site-modal-head"><h2 style="margin:2px 0;">${sp2(title)||''}</h2>
+          <button class="site-modal-close" onclick="closeSitePopup('${popup.id}')">&times;</button></div>
+        <div class="site-modal-body"><div class="site-modal-section"><p>${sp2(msg)||''}</p></div></div>`;
+      overlay.classList.add('open');
+    }
+  }
+}
+function dismissBanner(id){
+  sessionStorage.setItem('dismissed-banner-'+id, '1');
+  document.getElementById('siteNoticeBanner').style.display = 'none';
+}
+function closeSitePopup(id){
+  sessionStorage.setItem('seen-popup-'+id, '1');
+  document.getElementById('sitePopupOverlay').classList.remove('open');
+}
+
+/* ---------- Public-facing: Settings applied to header/footer/contact ---------- */
+function applySettingsToSite(s){
+  if(!s) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.textContent = val; };
+  set('footerOrgEn', s.org_en); set('footerOrgFr', s.org_fr);
+  set('contactOrgEn', s.org_en); set('contactOrgFr', s.org_fr);
+  set('footerTaglineEn', s.tagline_en); set('footerTaglineFr', s.tagline_fr);
+  set('footerPhone', s.phone); set('contactPhone', s.phone);
+  set('footerEmail', s.email); set('contactEmail', s.email);
+  if(s.addr_en){ const e1=document.getElementById('footerAddrEn'), e2=document.getElementById('contactAddrEn'); if(e1) e1.innerHTML=s.addr_en; if(e2) e2.innerHTML=s.addr_en; }
+  if(s.addr_fr){ const e1=document.getElementById('footerAddrFr'), e2=document.getElementById('contactAddrFr'); if(e1) e1.innerHTML=s.addr_fr; if(e2) e2.innerHTML=s.addr_fr; }
+  if(s.facebook){ const el=document.getElementById('footerFacebookLink'); if(el) el.href=s.facebook; }
+  if(s.x_url){ const el=document.getElementById('footerXLink'); if(el) el.href=s.x_url; }
+  if(s.instagram){ const el=document.getElementById('footerInstagramLink'); if(el) el.href=s.instagram; }
+  if(s.logo_url){ const el=document.getElementById('brandLogoImg'); if(el) el.src=s.logo_url; }
+  if(s.color_primary){ document.documentElement.style.setProperty('--ink', s.color_primary); document.documentElement.style.setProperty('--burgundy', s.color_primary); }
+  if(s.color_accent){ document.documentElement.style.setProperty('--bronze', s.color_accent); }
+}
+
+/* ---------- Public-facing: extra Partners merged into marquee ---------- */
+let PARTNERS_DATA_BASE = null;
+async function enhancePartnersFromBackend(){
+  if(PARTNERS_DATA_BASE === null) PARTNERS_DATA_BASE = PARTNERS_DATA.slice();
+  const extra = await fetchCollection('partners');
+  const converted = extra.map(p => p.logoUrl
+    ? { type:'img', src:p.logoUrl, alt:p.name, url:p.linkUrl||null }
+    : { type:'text', name:p.name, url:p.linkUrl||null }
+  );
+  PARTNERS_DATA = PARTNERS_DATA_BASE.concat(converted);
+  if(typeof renderPartners === 'function') renderPartners();
+}
+
+/* ---------- Public-facing: extra Resource links merged into categories ---------- */
+async function enhanceResourcesFromBackend(){
+  const extra = await fetchCollection('resources');
+  // Strip any previously-merged backend items first so repeated calls don't duplicate
+  categories.forEach(cat => {
+    cat.groups.forEach(g => { g.items = g.items.filter(it => !it._fromBackend); });
+  });
+  extra.forEach(r => {
+    const cat = categories.find(c => c.en === r.category);
+    if(!cat || !cat.groups.length) return;
+    const lastGroup = cat.groups[cat.groups.length-1];
+    const slug = 'admin-' + (r.title_en||'resource').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') + '-' + (r.id || Date.now());
+    lastGroup.items.push({ en:r.title_en, fr:r.title_fr, desc_en:r.desc_en, desc_fr:r.desc_fr, url:r.url, slug, _fromBackend:true });
+  });
+  const wrap = document.getElementById('accordionWrap');
+  if(wrap){ wrap.innerHTML = ''; renderAccordion(); }
+}
+
+/* ---------- Admin panel: shared ---------- */
+// Signed in with Firebase Auth. Firestore enforces the same condition on every
+// write, so the panel and the database agree instead of relying on a flag the
+// browser could set for itself.
+function adminUnlocked(){ return !!adminUser && adminIsStaff === true; }
+
+// Signing in proves who you are, not that you are staff. This decides whether
+// to OPEN the panel; Firestore rules remain the actual security boundary and
+// reject every write from a non-staff account regardless of what the UI does.
+//
+// An earlier version probed a staff-only collection to find out. That was wrong:
+// the Firestore read can hang instead of returning permission-denied, which left
+// the answer undetermined and could stall a real staff member out of the panel.
+//
+// This compares a SHA-256 of the signed-in address against a fixed list. No
+// network call, so it cannot hang. Hashes rather than plain addresses because
+// this file is public - six real staff email addresses in page source would be
+// harvested by scrapers.
+const STAFF_EMAIL_HASHES = [
+  '802f29f18f2c21c1e75ed93c8370a46e42e1f6d1351dd65da0ee6defc356ec0a',
+  'c56b62a4276676b8988ba6e92f4569c6e9c9a09fefddf7fc4d5ab0b1c4727955',
+  'bfb5888a455e596f356dfad1cebf7b7be594b69e795b60c5cd68bb6657c27e21',
+  'da8379e0210c9cf3fd4fee3d0c53b167f459201045c39eef986ddbf65e7c6d82',
+  '40470a896474b00dfc2b9e05996a2f4bdb340d456301d65bdcaac5b132c3adaa',
+  '71b41552fc55fe00e35e511f40cd4e84975dbb16e39ea726ded0d7c680d2671b'
+];
+
+let adminIsStaff = null;   // null = not yet determined
+
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyAdminIsStaff(){
+  if(!adminUser || !adminUser.email){ adminIsStaff = false; return false; }
+  try{
+    const hash = await sha256Hex(String(adminUser.email).trim().toLowerCase());
+    adminIsStaff = STAFF_EMAIL_HASHES.includes(hash);
+  }catch(err){
+    // crypto.subtle needs a secure context. Fail closed rather than open.
+    console.warn('[CJHQ] could not verify staff access:', err);
+    adminIsStaff = false;
+  }
+  return adminIsStaff === true;
+}
+
+async function syncAdminAuthUI(){
+  const loginBox = document.getElementById('adminLoginBox');
+  const panelBox = document.getElementById('adminPanelBox');
+  const whoami   = document.getElementById('adminSignedInAs');
+  if(!loginBox || !panelBox) return;
+  const onAdminRoute = document.getElementById('page-admin').classList.contains('active');
+
+  if(!adminUser){
+    adminIsStaff = null;
+    panelBox.style.display = 'none';
+    loginBox.style.display = 'block';
+    return;
+  }
+
+  // Signed in - but is this account on the staff list?
+  if(adminIsStaff === null) await verifyAdminIsStaff();
+
+  if(adminIsStaff === true){
+    loginBox.style.display = 'none';
+    if(whoami) whoami.textContent = adminUser.email || '';
+    if(onAdminRoute) showAdminPanel();
+    return;
+  }
+
+  // Authenticated, not authorised. Close the panel, say so plainly, and sign
+  // the account out so it is not left in a half-open state.
+  panelBox.style.display = 'none';
+  loginBox.style.display = 'block';
+  const email = adminUser.email || 'That account';
+  showLoginErrorGlobal(adminIsStaff === false
+    ? `${email} does not have access to the CJHQ admin panel. Contact the site administrator if you believe this is a mistake.`
+    : 'Could not confirm your access. Check your connection and try signing in again.');
+  try{
+    if(fbAuth && window.__fbAuth) await window.__fbAuth.signOut(fbAuth);
+  }catch(e){ /* already signed out, or offline */ }
+  adminUser = null;
+  adminIsStaff = null;
+}
+
+// showLoginError lives inside the admin IIFE; this reaches the same element
+// from syncAdminAuthUI, which is called from onAuthStateChanged.
+function showLoginErrorGlobal(msg){
+  const el = document.getElementById('adminLoginError');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showAdminPanel(){
+  document.getElementById('adminLoginBox').style.display = 'none';
+  document.getElementById('adminPanelBox').style.display = 'block';
+  // The banner now means "not signed in", which is the condition that actually
+  // stops saves from working.
+  // Superseded: the banner used to key off firebaseReady, which is true even
+  // when nobody is signed in - so it stayed hidden in exactly the case that
+  // blocks saving. It now keys off the auth state, which is the real condition.
+  const warn = document.getElementById('adminFirebaseWarning');
+  if(warn) warn.style.display = adminUser ? 'none' : 'block';
+  renderPagesList();
+  renderCustomPagesList();
+  renderContentBlocksList();
+  renderEmbeddedPartnersList();
+  renderAdminNoticesList();
+  renderAdminPartnersList();
+  renderAdminResourcesList();
+  renderExistingResourcesList();
+  renderAdminEventsList();
+  renderLinkAuditList();
+  renderErrorReportsList();
+  renderMessagesList();
+  loadSettingsIntoForm();
+}
+
+function switchAdminTab(tab){
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = (p.id === 'tab-'+tab) ? 'block' : 'none');
+}
+
+/* ---------- Admin panel: Pages ---------- */
+const SITE_PAGES = [
+  { id:'home', en:'Home', fr:'Accueil' },
+  { id:'resources', en:'Community Resource Centre', fr:'Centre de ressources communautaires' },
+  { id:'stay-informed', en:'Stay Informed', fr:'Restez informés' },
+  { id:'contact', en:'Contact CJHQ', fr:'Contacter le CJHQ' },
+  { id:'about', en:'About CJHQ', fr:'À propos du CJHQ' },
+  { id:'privacy', en:'Privacy Policy', fr:'Politique de confidentialité' },
+  { id:'terms', en:'Terms of Use', fr:'Conditions d\'utilisation' },
+  { id:'accessibility', en:'Accessibility Statement', fr:'Déclaration d\'accessibilité' },
+];
+async function renderPagesList(){
+  const hidden = await fetchCollection('page_settings');
+  HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
+  const list = document.getElementById('pagesList');
+  list.innerHTML = SITE_PAGES.map(p => {
+    const isHidden = HIDDEN_PAGES_CACHE[p.id] && HIDDEN_PAGES_CACHE[p.id].hidden;
+    return `
+    <div class="card admin-row" style="${isHidden?'opacity:.55;':''}">
+      <div><p style="margin:0; font-weight:600;">${p.en}${isHidden ? ' <span style="color:#A23B3B; font-weight:600; font-size:.75rem;">(deactivated)</span>' : ''}</p>
+        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">${p.fr} · #${p.id}</p></div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.id}'), '_blank')">View</button>
+        <button class="admin-small-btn" onclick="toggleBuiltInPageHidden('${p.id}')">${isHidden ? 'Reactivate' : 'Deactivate'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function toggleBuiltInPageHidden(pageId){
+  if(pageId === 'home'){ alert("The Home page can't be deactivated, since it's where visitors land by default."); return; }
+  const existing = HIDDEN_PAGES_CACHE[pageId] || {};
+  await saveToCollection('page_settings', { id: pageId, pageId, hidden: !existing.hidden });
+  await enhancePagesFromBackend();
+  renderPagesList();
+  refreshNav();
+}
+
+/* ---------- Admin panel: Custom Pages ---------- */
+async function renderCustomPagesList(){
+  const pages = await fetchCollection('custom_pages');
+  CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
+  const list = document.getElementById('customPagesList');
+  if(!pages.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No custom pages added yet.</p>`; return; }
+  list.innerHTML = pages.map(p => `
+    <div class="card admin-row">
+      <div>
+        <p style="margin:0; font-weight:600;">${p.title_en}${p.show_in_nav ? ' <span class="pill" style="font-size:.65rem;">in nav</span>' : ''}</p>
+        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">#${p.slug}</p>
+      </div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.slug}'), '_blank')">View</button>
+        <button class="admin-small-btn" onclick="editCustomPage('${p.slug}')">Edit</button>
+        <button class="admin-small-btn" style="color:#A23B3B;" onclick="deleteCustomPage('${p.slug}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+function editCustomPage(slug){
+  const p = CUSTOM_PAGES_CACHE[slug];
+  if(!p) return;
+  document.getElementById('customPageId').value = p.slug;
+  document.getElementById('customPageSlug').value = p.slug;
+  document.getElementById('customPageSlug').disabled = true;
+  document.getElementById('customPageTitleEn').value = p.title_en || '';
+  document.getElementById('customPageTitleFr').value = p.title_fr || '';
+  document.getElementById('customPageBodyEn').value = p.body_en || '';
+  document.getElementById('customPageBodyFr').value = p.body_fr || '';
+  document.getElementById('customPageShowNav').checked = !!p.show_in_nav;
+  document.getElementById('customPageNavLabelFields').style.display = p.show_in_nav ? 'block' : 'none';
+  document.getElementById('customPageNavEn').value = p.nav_en || '';
+  document.getElementById('customPageNavFr').value = p.nav_fr || '';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+async function deleteCustomPage(slug){
+  if(!confirm('Permanently delete this page? This cannot be undone.')) return;
+  await deleteFromCollection('custom_pages', slug);
+  await enhancePagesFromBackend();
+  renderCustomPagesList();
+  refreshNav();
+}
+
+/* ---------- Public-facing: apply page settings + custom pages ---------- */
+async function enhancePagesFromBackend(){
+  const hidden = await fetchCollection('page_settings');
+  HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
+  const pages = await fetchCollection('custom_pages');
+  CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
+  refreshNav();
+}
+function refreshNav(){
+  const nav = document.getElementById('mainNav');
+  const drawerNav = document.getElementById('mobileDrawerNav');
+  if(!nav) return;
+  // Hide/show built-in nav buttons based on deactivation state
+  nav.querySelectorAll('button[data-page]').forEach(btn => {
+    const pid = btn.dataset.page;
+    const isHidden = HIDDEN_PAGES_CACHE[pid] && HIDDEN_PAGES_CACHE[pid].hidden;
+    btn.style.display = isHidden ? 'none' : '';
+  });
+  if(drawerNav){
+    drawerNav.querySelectorAll('a[data-page]').forEach(a => {
+      const pid = a.dataset.page;
+      const isHidden = HIDDEN_PAGES_CACHE[pid] && HIDDEN_PAGES_CACHE[pid].hidden;
+      a.style.display = isHidden ? 'none' : '';
+    });
+  }
+  // Remove previously-injected custom nav buttons, then re-add current ones
+  nav.querySelectorAll('button[data-custom-nav]').forEach(b => b.remove());
+  if(drawerNav) drawerNav.querySelectorAll('a[data-custom-nav]').forEach(a => a.remove());
+  Object.values(CUSTOM_PAGES_CACHE).filter(p => p.show_in_nav).forEach(p => {
+    const btn = document.createElement('button');
+    btn.dataset.customNav = '1';
+    btn.dataset.page = p.slug;
+    btn.innerHTML = `<span data-en>${p.nav_en || p.title_en}</span><span data-fr>${p.nav_fr || p.title_fr}</span>`;
+    btn.addEventListener('click', () => goPage(p.slug));
+    nav.appendChild(btn);
+    if(drawerNav){
+      const link = document.createElement('a');
+      link.href = '#'; link.dataset.customNav = '1'; link.dataset.page = p.slug;
+      link.innerHTML = `<span data-en>${p.nav_en || p.title_en}</span><span data-fr>${p.nav_fr || p.title_fr}</span>`;
+      link.addEventListener('click', (e)=>{ e.preventDefault(); goPage(p.slug); document.getElementById('mobileDrawer').classList.remove('open'); document.getElementById('mobileDrawerOverlay').classList.remove('open'); document.body.style.overflow=''; });
+      drawerNav.appendChild(link);
+    }
+  });
+}
+
+/* ---------- Admin panel: Page Content editor ---------- */
+let CONTENT_OVERRIDES_CACHE = {};
+function initContentEditorPageSelect(){
+  const sel = document.getElementById('contentPageSelect');
+  if(sel.dataset.built) return;
+  sel.dataset.built = '1';
+  const seen = new Set();
+  CONTENT_MANIFEST.forEach(m => {
+    if(seen.has(m.page)) return;
+    seen.add(m.page);
+    const opt = document.createElement('option');
+    opt.value = m.page; opt.textContent = m.pageLabel;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', renderContentBlocksList);
+}
+async function renderContentBlocksList(){
+  initContentEditorPageSelect();
+  const overrides = await fetchCollection('content_overrides');
+  CONTENT_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.cid, o]));
+  const selectedPage = document.getElementById('contentPageSelect').value || CONTENT_MANIFEST[0].page;
+  document.getElementById('contentPageSelect').value = selectedPage;
+  const blocks = CONTENT_MANIFEST.filter(m => m.page === selectedPage);
+  const list = document.getElementById('contentBlocksList');
+  list.innerHTML = blocks.map(m => {
+    const ov = CONTENT_OVERRIDES_CACHE[m.cid];
+    const hasOverride = !!ov;
+    return `
+    <div class="card" style="margin-bottom:12px;">
+      <div class="admin-row" style="align-items:flex-start;">
+        <span class="pill" style="font-size:.68rem;">${m.tag}${hasOverride ? ' · edited' : ''}</span>
+      </div>
+      <p style="font-size:.78rem; color:var(--muted); margin:6px 0 8px; font-style:italic;">"${m.label}${m.label.length>=70?'…':''}"</p>
+      <label class="admin-label">English</label>
+      <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="en">${hasOverride ? (ov.en||'') : m.default_en}</textarea>
+      <label class="admin-label">French</label>
+      <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="fr">${hasOverride ? (ov.fr||'') : m.default_fr}</textarea>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="admin-small-btn" onclick="saveContentBlock('${m.cid}')">Save</button>
+        ${hasOverride ? `<button class="admin-small-btn" style="color:#A23B3B;" onclick="resetContentBlock('${m.cid}')">Reset to Default</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function saveContentBlock(cid){
+  const enVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="en"]`).value;
+  const frVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="fr"]`).value;
+  await saveToCollection('content_overrides', { id: cid, cid, en: enVal, fr: frVal });
+  await applyContentOverrides();
+  renderContentBlocksList();
+}
+async function resetContentBlock(cid){
+  if(!confirm('Reset this block to the site\'s original wording?')) return;
+  await deleteFromCollection('content_overrides', cid);
+  const m = CONTENT_MANIFEST.find(x => x.cid === cid);
+  const el = document.querySelector(`[data-cid="${cid}"]`);
+  if(el && m){
+    const enSpan = el.querySelector('span[data-en]');
+    const frSpan = el.querySelector('span[data-fr]');
+    if(enSpan) enSpan.innerHTML = m.default_en;
+    if(frSpan) frSpan.innerHTML = m.default_fr;
+  }
+  renderContentBlocksList();
+}
+
+/* ---------- Admin panel: Notices ---------- */
+async function renderAdminNoticesList(){
+  const notices = await fetchCollection('notices');
+  const list = document.getElementById('noticesList');
+  if(!notices.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No notices yet.</p>`; return; }
+  list.innerHTML = notices.map(n => `
+    <div class="card admin-row">
+      <div>
+        <span class="pill" style="font-size:.7rem; margin-bottom:6px; display:inline-block;">${n.type} · ${n.style} ${n.active ? '' : '· inactive'}</span>
+        <p style="margin:4px 0 0; font-weight:600;">${n.title_en || '(no title)'}</p>
+        <p style="margin:2px 0 0; font-size:.85rem; color:var(--muted);">${n.body_en || ''}</p>
+      </div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="admin-small-btn" onclick="editNotice('${n.id}')">Edit</button>
+        <button class="admin-small-btn" style="color:#A23B3B;" onclick="removeNotice('${n.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+async function editNotice(id){
+  const n = (await fetchCollection('notices')).find(x=>x.id===id);
+  if(!n) return;
+  document.getElementById('noticeId').value = n.id;
+  document.getElementById('noticeType').value = n.type;
+  document.getElementById('noticeStyle').value = n.style;
+  document.getElementById('noticeTitleEn').value = n.title_en||'';
+  document.getElementById('noticeTitleFr').value = n.title_fr||'';
+  document.getElementById('noticeBodyEn').value = n.body_en||'';
+  document.getElementById('noticeBodyFr').value = n.body_fr||'';
+  document.getElementById('noticeActive').checked = !!n.active;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+async function removeNotice(id){
+  if(!confirm('Delete this notice? This cannot be undone.')) return;
+  await deleteFromCollection('notices', id);
+  renderAdminNoticesList();
+}
+
+/* ---------- Admin panel: Settings ---------- */
+async function loadSettingsIntoForm(){
+  const s = await fetchSettingsDoc();
+  if(!s) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val!=null) el.value = val; };
+  set('setOrgEn', s.org_en); set('setOrgFr', s.org_fr);
+  set('setAddrEn', s.addr_en); set('setAddrFr', s.addr_fr);
+  set('setPhone', s.phone); set('setEmail', s.email);
+  set('setFacebook', s.facebook); set('setX', s.x_url);
+  set('setTaglineEn', s.tagline_en); set('setTaglineFr', s.tagline_fr);
+  set('setLogoUrl', s.logo_url);
+  set('setColorPrimary', s.color_primary || '#0E2149');
+  set('setColorAccent', s.color_accent || '#2F4C7A');
+}
+
+/* ---------- Admin panel: Partners ---------- */
+async function renderEmbeddedPartnersList(){
+  const list = document.getElementById('embeddedPartnersList');
+  if(!list) return;
+  const overrides = await fetchCollection('partner_overrides');
+  PARTNER_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.key, o]));
+  const base = PARTNERS_DATA_BASE || PARTNERS_DATA;
+  list.innerHTML = base.map(p => {
+    const key = p.type === 'img' ? p.alt : p.name;
+    const name = key;
+    const ov = PARTNER_OVERRIDES_CACHE[key];
+    const isHidden = ov && ov.hidden;
+    const currentUrl = (ov && ov.url !== undefined) ? ov.url : (p.url || '');
+    const safeKey = key.replace(/'/g, "\\'");
+    return `
+    <div class="card" style="margin-bottom:8px; ${isHidden?'opacity:.55;':''}">
+      <div class="admin-row" style="align-items:flex-start;">
+        <p style="margin:0; font-weight:600; font-size:.9rem;">${name}${isHidden ? ' <span style="color:#A23B3B; font-weight:600; font-size:.75rem;">(hidden)</span>' : ''}</p>
+        <div style="display:flex; gap:6px; flex-shrink:0;">
+          <button class="admin-small-btn" onclick="document.getElementById('editor-partner-${btoa(key).replace(/=/g,'')}').classList.toggle('open-editor')">Edit Link</button>
+          <button class="admin-small-btn" onclick="togglePartnerHidden('${safeKey}')">${isHidden ? 'Unhide' : 'Hide'}</button>
+        </div>
+      </div>
+      <div id="editor-partner-${btoa(key).replace(/=/g,'')}" class="partner-link-editor" style="display:none; margin-top:10px; border-top:1px solid var(--line); padding-top:10px;">
+        <label class="admin-label">Website URL</label>
+        <input type="text" class="admin-input" id="ov-purl-${btoa(key).replace(/=/g,'')}" value="${currentUrl.replace(/"/g,'&quot;')}" placeholder="https://...">
+        <button class="admin-small-btn" style="margin-top:8px;" onclick="savePartnerLinkOverride('${safeKey}', '${btoa(key).replace(/=/g,'')}')">Save Link</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function togglePartnerHidden(key){
+  const existing = PARTNER_OVERRIDES_CACHE[key] || {};
+  await saveToCollection('partner_overrides', { ...existing, id: key, key, hidden: !existing.hidden });
+  await applyPartnerOverrides();
+  renderEmbeddedPartnersList();
+}
+async function savePartnerLinkOverride(key, domId){
+  const url = document.getElementById('ov-purl-'+domId).value;
+  const existing = PARTNER_OVERRIDES_CACHE[key] || {};
+  await saveToCollection('partner_overrides', { ...existing, id: key, key, url, hidden: existing.hidden || false });
+  await applyPartnerOverrides();
+  renderEmbeddedPartnersList();
+}
+async function renderAdminPartnersList(){
+  const partners = await fetchCollection('partners');
+  const list = document.getElementById('partnersAdminList');
+  if(!partners.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No additional partners added yet.</p>`; return; }
+  list.innerHTML = partners.map(p => `
+    <div class="card admin-row">
+      <div><p style="margin:0; font-weight:600;">${p.name}</p>
+        <p style="margin:2px 0 0; font-size:.82rem; color:var(--muted);">${p.linkUrl || '(no link)'}</p></div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="admin-small-btn" onclick="editPartner('${p.id}')">Edit</button>
+        <button class="admin-small-btn" style="color:#A23B3B;" onclick="removePartner('${p.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+async function editPartner(id){
+  const p = (await fetchCollection('partners')).find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('partnerId').value = p.id;
+  document.getElementById('partnerName').value = p.name||'';
+  document.getElementById('partnerLogoUrl').value = p.logoUrl||'';
+  document.getElementById('partnerLinkUrl').value = p.linkUrl||'';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+async function removePartner(id){
+  if(!confirm('Delete this partner? This cannot be undone.')) return;
+  await deleteFromCollection('partners', id);
+  renderAdminPartnersList();
+}
+
+/* ---------- Admin panel: Resource Links ---------- */
+async function renderAdminResourcesList(){
+  const items = await fetchCollection('resources');
+  const list = document.getElementById('resourcesAdminList');
+  if(!items.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No additional resource links added yet.</p>`; return; }
+  list.innerHTML = items.map(r => `
+    <div class="card admin-row">
+      <div>
+        <span class="pill" style="font-size:.7rem; margin-bottom:6px; display:inline-block;">${r.category}</span>
+        <p style="margin:4px 0 0; font-weight:600;">${r.title_en}</p>
+        <p style="margin:2px 0 0; font-size:.82rem; color:var(--muted);">${r.desc_en||''}</p>
+      </div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="admin-small-btn" onclick="editResource('${r.id}')">Edit</button>
+        <button class="admin-small-btn" style="color:#A23B3B;" onclick="removeResource('${r.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+async function editResource(id){
+  const r = (await fetchCollection('resources')).find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('resourceId').value = r.id;
+  document.getElementById('resourceCategory').value = r.category;
+  document.getElementById('resourceTitleEn').value = r.title_en||'';
+  document.getElementById('resourceTitleFr').value = r.title_fr||'';
+  document.getElementById('resourceDescEn').value = r.desc_en||'';
+  document.getElementById('resourceDescFr').value = r.desc_fr||'';
+  document.getElementById('resourceUrl').value = r.url||'';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+async function removeResource(id){
+  if(!confirm('Delete this resource link? This cannot be undone.')) return;
+  await deleteFromCollection('resources', id);
+  renderAdminResourcesList();
+}
+
+function populateResourceCategoryDropdown(){
+  const sel = document.getElementById('resourceCategory');
+  if(!sel || sel.dataset.built) return;
+  sel.dataset.built = '1';
+  categories.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.en; opt.textContent = c.en;
+    sel.appendChild(opt);
+  });
+}
+
+let OPEN_RESOURCE_EDITORS = new Set();
+async function renderExistingResourcesList(){
+  populateResourceCategoryDropdown();
+  const overrides = await fetchCollection('resource_overrides');
+  RESOURCE_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.slug, o]));
+  const query = (document.getElementById('existingResourceSearch').value || '').toLowerCase();
+  const all = Object.values(RESOURCE_BY_SLUG).filter(it => !it._fromBackend);
+  const filtered = query ? all.filter(it => it.en.toLowerCase().includes(query) || it.url.toLowerCase().includes(query)) : all;
+  const list = document.getElementById('existingResourcesList');
+  if(!filtered.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No matches.</p>`; return; }
+  const esc = (s) => (s||'').replace(/"/g,'&quot;');
+  const joinLines = (arr) => (arr||[]).join('\n');
+  const joinLinks = (arr) => (arr||[]).map(l => `${l.label_en}|${l.label_fr}|${l.url}`).join('\n');
+  list.innerHTML = filtered.map(it => {
+    const ov = RESOURCE_OVERRIDES_CACHE[it.slug];
+    const isHidden = ov && ov.hidden;
+    const titleEn = it.en, descEn = it.desc_en || '', url = it.url;
+    const id = it.slug;
+    return `
+    <div class="card" style="margin-bottom:8px; ${isHidden?'opacity:.55;':''}">
+      <div class="admin-row" style="align-items:flex-start;">
+        <div style="flex:1; min-width:0;">
+          <p style="margin:0; font-weight:600;">${titleEn}${isHidden ? ' <span style="color:#A23B3B; font-weight:600; font-size:.75rem;">(hidden)</span>' : ''}</p>
+          <p style="margin:2px 0 0; font-size:.78rem; color:var(--muted); word-break:break-all;">${url}</p>
+        </div>
+        <div style="display:flex; gap:6px; flex-shrink:0;">
+          <button class="admin-small-btn" onclick="toggleExistingResourceEditor('${id}')">Edit</button>
+          <button class="admin-small-btn" onclick="toggleResourceHidden('${id}')">${isHidden ? 'Unhide' : 'Hide'}</button>
+        </div>
+      </div>
+      <div id="editor-res-${id}" style="display:${OPEN_RESOURCE_EDITORS.has(id)?'block':'none'}; margin-top:12px; border-top:1px solid var(--line); padding-top:12px;">
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:0 0 8px;">Cell &amp; Basics</h4>
+        <label class="admin-label">Title — English</label>
+        <input type="text" class="admin-input" id="ov-title_en-${id}" value="${esc(it.en)}">
+        <label class="admin-label">Title — French</label>
+        <input type="text" class="admin-input" id="ov-title_fr-${id}" value="${esc(it.fr)}">
+        <label class="admin-label">Summary — English (shown on the cell itself)</label>
+        <input type="text" class="admin-input" id="ov-desc_en-${id}" value="${esc(descEn)}">
+        <label class="admin-label">Summary — French</label>
+        <input type="text" class="admin-input" id="ov-desc_fr-${id}" value="${esc(it.desc_fr)}">
+        <label class="admin-label">Primary Link (URL)</label>
+        <input type="text" class="admin-input" id="ov-url-${id}" value="${esc(url)}">
+        <label class="admin-label">"Go to Application" Button Label — English (optional, defaults to "Go to Application →")</label>
+        <input type="text" class="admin-input" id="ov-label_en1-${id}" value="${esc(it.label_en1)}">
+        <label class="admin-label">Button Label — French</label>
+        <input type="text" class="admin-input" id="ov-label_fr1-${id}" value="${esc(it.label_fr1)}">
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: What Is This?</h4>
+        <label class="admin-label">English</label>
+        <textarea class="admin-input" rows="2" id="ov-what_en-${id}">${esc(it.what_en)}</textarea>
+        <label class="admin-label">French</label>
+        <textarea class="admin-input" rows="2" id="ov-what_fr-${id}">${esc(it.what_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: Question &amp; Answer (optional)</h4>
+        <label class="admin-label">Question — English</label>
+        <input type="text" class="admin-input" id="ov-question_en-${id}" value="${esc(it.question_en)}">
+        <label class="admin-label">Question — French</label>
+        <input type="text" class="admin-input" id="ov-question_fr-${id}" value="${esc(it.question_fr)}">
+        <label class="admin-label">Answer — English</label>
+        <textarea class="admin-input" rows="2" id="ov-answer_en-${id}">${esc(it.answer_en)}</textarea>
+        <label class="admin-label">Answer — French</label>
+        <textarea class="admin-input" rows="2" id="ov-answer_fr-${id}">${esc(it.answer_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: What You'll Need</h4>
+        <label class="admin-label">Section Heading — English</label>
+        <input type="text" class="admin-input" id="ov-need_heading_en-${id}" value="${esc(it.need_heading_en)}">
+        <label class="admin-label">Section Heading — French</label>
+        <input type="text" class="admin-input" id="ov-need_heading_fr-${id}" value="${esc(it.need_heading_fr)}">
+        <label class="admin-label">Intro Line — English (optional)</label>
+        <input type="text" class="admin-input" id="ov-need_intro_en-${id}" value="${esc(it.need_intro_en)}">
+        <label class="admin-label">Intro Line — French</label>
+        <input type="text" class="admin-input" id="ov-need_intro_fr-${id}" value="${esc(it.need_intro_fr)}">
+        <label class="admin-label">List Items — English (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-need_list_en-${id}">${joinLines(it.need_list_en)}</textarea>
+        <label class="admin-label">List Items — French (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-need_list_fr-${id}">${joinLines(it.need_list_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: How to Apply</h4>
+        <label class="admin-label">Section Heading — English</label>
+        <input type="text" class="admin-input" id="ov-steps_heading_en-${id}" value="${esc(it.steps_heading_en)}">
+        <label class="admin-label">Section Heading — French</label>
+        <input type="text" class="admin-input" id="ov-steps_heading_fr-${id}" value="${esc(it.steps_heading_fr)}">
+        <label class="admin-label">Steps — English (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-steps_list_en-${id}">${joinLines(it.steps_list_en)}</textarea>
+        <label class="admin-label">Steps — French (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-steps_list_fr-${id}">${joinLines(it.steps_list_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Popup: Good to Know (optional tips)</h4>
+        <label class="admin-label">Tips — English (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-tips_list_en-${id}">${joinLines(it.tips_list_en)}</textarea>
+        <label class="admin-label">Tips — French (one per line)</label>
+        <textarea class="admin-input" rows="3" id="ov-tips_list_fr-${id}">${joinLines(it.tips_list_fr)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Official Links (optional — one per line, format: Label EN | Label FR | URL)</h4>
+        <textarea class="admin-input" rows="3" id="ov-official_links-${id}" placeholder="Passport Processing Times|Délais de traitement|https://...">${joinLinks(it.official_links)}</textarea>
+
+        <h4 style="font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--bronze); margin:16px 0 8px;">Related Resources (optional — comma-separated page addresses, e.g. passport-renewal, child-passport)</h4>
+        <input type="text" class="admin-input" id="ov-related-${id}" value="${esc((it.related||[]).join(', '))}">
+
+        <div style="margin-top:14px; display:flex; gap:8px;">
+          <button class="admin-small-btn" onclick="saveExistingResourceOverride('${id}')">Save All Changes</button>
+          ${ov ? `<button class="admin-small-btn" style="color:#A23B3B;" onclick="resetExistingResourceOverride('${id}')">Reset to Default</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleExistingResourceEditor(slug){
+  const el = document.getElementById('editor-res-'+slug);
+  if(!el) return;
+  const willOpen = el.style.display === 'none';
+  el.style.display = willOpen ? 'block' : 'none';
+  if(willOpen) OPEN_RESOURCE_EDITORS.add(slug); else OPEN_RESOURCE_EDITORS.delete(slug);
+}
+async function saveExistingResourceOverride(slug){
+  const v = (field) => { const el = document.getElementById(`ov-${field}-${slug}`); return el ? el.value : ''; };
+  const lines = (field) => v(field).split('\n').map(s=>s.trim()).filter(Boolean);
+  const links = () => v('official_links').split('\n').map(s=>s.trim()).filter(Boolean).map(line => {
+    const [label_en, label_fr, url] = line.split('|').map(s=>(s||'').trim());
+    return { label_en: label_en||'', label_fr: label_fr||'', url: url||'' };
+  });
+  const relatedSlugs = () => v('related').split(',').map(s=>s.trim()).filter(Boolean);
+  const existing = RESOURCE_OVERRIDES_CACHE[slug] || {};
+  const record = {
+    id: slug, slug, hidden: existing.hidden || false,
+    title_en: v('title_en'), title_fr: v('title_fr'),
+    desc_en: v('desc_en'), desc_fr: v('desc_fr'),
+    url: v('url'),
+    label_en1: v('label_en1'), label_fr1: v('label_fr1'),
+    what_en: v('what_en'), what_fr: v('what_fr'),
+    question_en: v('question_en'), question_fr: v('question_fr'),
+    answer_en: v('answer_en'), answer_fr: v('answer_fr'),
+    need_heading_en: v('need_heading_en'), need_heading_fr: v('need_heading_fr'),
+    need_intro_en: v('need_intro_en'), need_intro_fr: v('need_intro_fr'),
+    need_list_en: lines('need_list_en'), need_list_fr: lines('need_list_fr'),
+    steps_heading_en: v('steps_heading_en'), steps_heading_fr: v('steps_heading_fr'),
+    steps_list_en: lines('steps_list_en'), steps_list_fr: lines('steps_list_fr'),
+    tips_list_en: lines('tips_list_en'), tips_list_fr: lines('tips_list_fr'),
+    official_links: links(),
+    related: relatedSlugs(),
+  };
+  await saveToCollection('resource_overrides', record);
+  await applyResourceOverrides();
+  renderExistingResourcesList();
+}
+async function resetExistingResourceOverride(slug){
+  if(!confirm('Reset this resource to its original text and link? This clears every field you\'ve customized for it.')) return;
+  const existing = RESOURCE_OVERRIDES_CACHE[slug];
+  const hiddenState = existing ? existing.hidden : false;
+  if(hiddenState){
+    await saveToCollection('resource_overrides', { id: slug, slug, hidden: true });
+  } else {
+    await deleteFromCollection('resource_overrides', slug);
+  }
+  await applyResourceOverrides();
+  renderExistingResourcesList();
+}
+async function toggleResourceHidden(slug){
+  const existing = RESOURCE_OVERRIDES_CACHE[slug] || {};
+  await saveToCollection('resource_overrides', { ...existing, id: slug, slug, hidden: !existing.hidden });
+  await applyResourceOverrides();
+  renderExistingResourcesList();
+}
+async function applyResourceOverrides(){
+  const overrides = await fetchCollection('resource_overrides');
+  RESOURCE_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.slug, o]));
+  const wrap = document.getElementById('accordionWrap');
+  if(wrap){ wrap.innerHTML = ''; renderAccordion(); }
+}
+
+/* ---------- Admin panel: Calendar (Community Events) ---------- */
+async function renderAdminEventsList(){
+  const events = await fetchCollection('events');
+  const list = document.getElementById('eventsAdminList');
+  if(!list) return;
+  if(!events.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No community events yet.</p>`; return; }
+  const sorted = events.slice().sort((a,b) => (a.date||'') < (b.date||'') ? -1 : 1);
+  list.innerHTML = sorted.map(e => `
+    <div class="card admin-row">
+      <div>
+        <p style="margin:0; font-weight:600;">${e.date || '(no date)'} — ${e.title_en || '(no title)'}</p>
+        <p style="margin:2px 0 0; font-size:.82rem; color:var(--muted);">${[e.start_time, e.location].filter(Boolean).join(' · ')}</p>
+      </div>
+      <div style="display:flex; gap:6px; flex-shrink:0;">
+        <button class="admin-small-btn" onclick="editEvent('${e.id}')">Edit</button>
+        <button class="admin-small-btn" style="color:#A23B3B;" onclick="removeEvent('${e.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+async function editEvent(id){
+  const e = (await fetchCollection('events')).find(x=>x.id===id);
+  if(!e) return;
+  document.getElementById('eventId').value = e.id;
+  document.getElementById('eventTitleEn').value = e.title_en||'';
+  document.getElementById('eventTitleFr').value = e.title_fr||'';
+  document.getElementById('eventDate').value = e.date||'';
+  document.getElementById('eventStart').value = e.start_time||'';
+  document.getElementById('eventEnd').value = e.end_time||'';
+  document.getElementById('eventLocation').value = e.location||'';
+  document.getElementById('eventDescEn').value = e.desc_en||'';
+  document.getElementById('eventDescFr').value = e.desc_fr||'';
+  document.getElementById('eventLink').value = e.link||'';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+async function removeEvent(id){
+  if(!confirm('Delete this event? This cannot be undone.')) return;
+  await deleteFromCollection('events', id);
+  renderAdminEventsList();
+}
+
+/* ---------- Admin panel: Link Audit ---------- */
+async function syncResourcesToBackend(){
+  const btn = document.getElementById('syncResourcesBtn');
+  const original = btn.textContent;
+  btn.textContent = 'Syncing…'; btn.disabled = true;
+  try{
+    const all = Object.values(RESOURCE_BY_SLUG);
+    for(const it of all){
+      const record = {
+        id: it.slug, slug: it.slug, en: it.en, url: it.url,
+        what_en: it.what_en || it.desc_en || '',
+        need_en: it.need_en || '',
+        need_list_en: it.need_list_en || null,
+        steps_en: it.steps_en || '',
+        steps_list_en: it.steps_list_en || null,
+      };
+      if(firebaseReady){
+        const fs = window.__fbFirestore;
+        await fs.setDoc(fs.doc(fbDb, 'resources_master', it.slug), record, { merge:true });
+      }
+    }
+    btn.textContent = firebaseReady ? `Synced ${all.length} resources ✓` : 'Firebase not connected — nothing to sync to';
+  }catch(e){
+    btn.textContent = 'Sync failed — see console';
+    console.error(e);
+  }
+  setTimeout(()=>{ btn.textContent = original; btn.disabled = false; }, 3000);
+}
+
+async function renderLinkAuditList(){
+  document.getElementById('linkAuditSetupWarning').style.display = firebaseReady ? 'none' : 'block';
+  const audits = await fetchCollection('link_audits');
+  const flagged = audits.filter(a => a.slug && a.slug !== '_run_summary' && a.status && a.status !== 'ok');
+  const list = document.getElementById('linkAuditList');
+  if(!flagged.length){
+    list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No flagged items. Once the monthly checker has run at least once, anything needing attention will show up here.</p>`;
+    return;
+  }
+  const statusColor = { broken:'#A23B3B', changed:'#B4881A', unclear:'#6B7280', error:'#A23B3B' };
+  list.innerHTML = flagged.map(a => `
+    <div class="card" style="margin-bottom:10px;">
+      <div class="admin-row">
+        <div>
+          <span class="pill" style="font-size:.7rem; background:${statusColor[a.status]||'#6B7280'}; color:#fff; border:none;">${a.status}</span>
+          <p style="margin:6px 0 0; font-weight:600;">${a.title || a.slug}</p>
+          <p style="margin:4px 0 0; font-size:.85rem; color:var(--muted);">${a.summary || ''}</p>
+          ${a.announcedFutureChange ? `<p style="margin:6px 0 0; font-size:.85rem; color:#7A5B0E;"><strong>Announced future change:</strong> ${a.announcedFutureChange}</p>` : ''}
+          <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">Last checked: ${a.lastChecked ? new Date(a.lastChecked).toLocaleDateString() : '—'} · <a href="${a.url}" target="_blank" rel="noopener">View live page</a></p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
+          <button class="admin-small-btn" onclick="markResourceReviewed('${a.slug}')">Mark Reviewed</button>
+          ${a.announcedFutureChange ? `<button class="admin-small-btn" onclick="publishChangeNotice('${a.slug}')">Publish Notice</button>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function renderErrorReportsList(){
+  const reports = await fetchCollection('error_reports');
+  const sorted = reports.slice().sort((a,b) => (b.reportedAt||'').localeCompare(a.reportedAt||'')).slice(0, 30);
+  const list = document.getElementById('errorReportsList');
+  if(!sorted.length){
+    list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No issues reported yet.</p>`;
+    return;
+  }
+  list.innerHTML = sorted.map(r => `
+    <div class="card admin-row" style="margin-bottom:8px;">
+      <div>
+        <span class="pill" style="font-size:.68rem;">${r.type === 'broken_link' ? '🔗 broken link' : '⚠️ js error'}</span>
+        <p style="margin:4px 0 0; font-size:.85rem; font-family:monospace; word-break:break-all;">${r.attemptedUrl || r.message || ''}</p>
+        ${r.message && r.type==='broken_link' ? '' : (r.message ? `<p style="margin:2px 0 0; font-size:.78rem; color:var(--muted);">${r.message}</p>` : '')}
+        <p style="margin:4px 0 0; font-size:.72rem; color:var(--muted);">${r.reportedAt ? new Date(r.reportedAt).toLocaleString() : ''}${r.referrer ? ' · from: '+r.referrer : ''}</p>
+      </div>
+      <button class="admin-small-btn" onclick="deleteFromCollection('error_reports','${r.id}').then(renderErrorReportsList)">Dismiss</button>
+    </div>`).join('');
+}
+
+async function renderMessagesList(){
+  const messages = await fetchCollection('contact_submissions');
+  const query = (document.getElementById('messagesSearch').value || '').toLowerCase();
+  const sorted = messages.slice().sort((a,b) => (b.submittedAt||'').localeCompare(a.submittedAt||''));
+  const filtered = query
+    ? sorted.filter(m => Object.values(m).some(v => typeof v==='string' && v.toLowerCase().includes(query)))
+    : sorted;
+  const list = document.getElementById('messagesList');
+  if(!filtered.length){
+    list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No messages yet.</p>`;
+    return;
+  }
+  const skipKeys = new Set(['id','submittedAt','lang']);
+  list.innerHTML = filtered.map(m => {
+    const fields = Object.entries(m).filter(([k,v]) => !skipKeys.has(k) && v);
+    const nameField = fields.find(([k]) => /name/i.test(k));
+    const title = nameField ? nameField[1] : 'Message';
+    return `
+    <div class="card admin-row" style="margin-bottom:8px; align-items:flex-start;">
+      <div>
+        <p style="margin:0; font-weight:600;">${title} <span class="pill" style="font-size:.65rem; margin-left:6px;">${m.lang==='fr'?'FR':'EN'}</span></p>
+        <div style="margin:6px 0 0; font-size:.82rem; color:var(--ink-soft); line-height:1.6;">
+          ${fields.map(([k,v]) => `<div><strong>${k.replace(/_/g,' ')}:</strong> ${v}</div>`).join('')}
+        </div>
+        <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">${m.submittedAt ? new Date(m.submittedAt).toLocaleString() : ''}</p>
+      </div>
+      <button class="admin-small-btn" onclick="deleteFromCollection('contact_submissions','${m.id}').then(renderMessagesList)">Delete</button>
+    </div>`;
+  }).join('');
+}
+
+async function markResourceReviewed(slug){
+  const today = new Date().toLocaleDateString('en-US', { month:'long', year:'numeric' });
+  await saveToCollection('reviewed_overrides', { id: slug, slug, reviewed: today });
+  await deleteFromCollection('link_audits', slug);
+  renderLinkAuditList();
+}
+
+async function publishChangeNotice(slug){
+  const audits = await fetchCollection('link_audits');
+  const a = audits.find(x => x.slug === slug);
+  if(!a) return;
+  await saveToCollection('pending_change_notices', { id: slug, slug, notice_en: a.announcedFutureChange, notice_fr: a.announcedFutureChange });
+  alert('Notice published. It will now show on the public resource popup until you clear it (edit the resource once the change takes effect, then delete this notice from Firestore or extend the admin panel to manage it directly).');
+}
+
+/* ---------- Wire up admin UI ---------- */
+(function initAdmin(){
+  const loginBtn = document.getElementById('adminLoginBtn');
+  if(!loginBtn) return;
+
+  // Firebase restores the session asynchronously, so reconcile now with
+  // whatever is known and let onAuthStateChanged correct it a moment later.
+  syncAdminAuthUI();
+
+  document.getElementById('syncResourcesBtn').addEventListener('click', syncResourcesToBackend);
+  document.getElementById('refreshAuditBtn').addEventListener('click', renderLinkAuditList);
+  document.getElementById('existingResourceSearch').addEventListener('input', renderExistingResourcesList);
+  document.getElementById('messagesSearch').addEventListener('input', renderMessagesList);
+
+  document.getElementById('customPageShowNav').addEventListener('change', (e)=>{
+    document.getElementById('customPageNavLabelFields').style.display = e.target.checked ? 'block' : 'none';
+  });
+  document.getElementById('customPageCancelBtn').addEventListener('click', ()=>{
+    document.getElementById('customPageForm').reset();
+    document.getElementById('customPageId').value = '';
+    document.getElementById('customPageSlug').disabled = false;
+    document.getElementById('customPageNavLabelFields').style.display = 'none';
+  });
+  document.getElementById('customPageForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const isEdit = !!document.getElementById('customPageId').value;
+    const slug = document.getElementById('customPageSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
+    if(!slug){ alert('Please enter a page address.'); return; }
+    if(!isEdit && (document.getElementById('page-'+slug) || CUSTOM_PAGES_CACHE[slug])){
+      alert('That page address is already in use — please choose another.');
+      return;
+    }
+    const page = {
+      id: slug, slug,
+      title_en: document.getElementById('customPageTitleEn').value,
+      title_fr: document.getElementById('customPageTitleFr').value,
+      body_en: document.getElementById('customPageBodyEn').value,
+      body_fr: document.getElementById('customPageBodyFr').value,
+      show_in_nav: document.getElementById('customPageShowNav').checked,
+      nav_en: document.getElementById('customPageNavEn').value,
+      nav_fr: document.getElementById('customPageNavFr').value,
+    };
+    await saveToCollection('custom_pages', page);
+    await enhancePagesFromBackend();
+    document.getElementById('customPageForm').reset();
+    document.getElementById('customPageId').value = '';
+    document.getElementById('customPageSlug').disabled = false;
+    document.getElementById('customPageNavLabelFields').style.display = 'none';
+    renderCustomPagesList();
+  });
+
+  // PIN rate-limiting: max 5 attempts within 15 minutes, then 15-minute lockout
+  // Firebase Auth sign-in. Firebase applies its own throttling after repeated
+  // failures, so the old client-side attempt counter is gone - it could be
+  // bypassed by reloading the page and never protected the database anyway.
+  const showLoginError = (msg) => {
+    const el = document.getElementById('adminLoginError');
+    el.textContent = msg;
+    el.style.display = 'block';
+  };
+
+  async function attemptAdminSignIn(){
+    const emailEl = document.getElementById('adminEmailInput');
+    const passEl  = document.getElementById('adminPasswordInput');
+    const email = (emailEl.value || '').trim();
+    const password = passEl.value || '';
+    if(!email || !password){
+      showLoginError('Enter your email address and password.');
+      return;
+    }
+    if(!firebaseReady || !fbAuth){
+      showLoginError('Cannot reach the sign-in service. Check your connection and try again.');
+      return;
+    }
+    loginBtn.disabled = true;
+    const originalLabel = loginBtn.textContent;
+    loginBtn.textContent = 'Signing in…';
+    try{
+      await window.__fbAuth.signInWithEmailAndPassword(fbAuth, email, password);
+      document.getElementById('adminLoginError').style.display = 'none';
+      passEl.value = '';
+      // onAuthStateChanged opens the panel.
+    }catch(err){
+      const code = (err && err.code) || '';
+      let msg;
+      if(code === 'auth/invalid-email')            msg = 'That does not look like a valid email address.';
+      else if(code === 'auth/too-many-requests')   msg = 'Too many attempts. Please wait a few minutes and try again.';
+      else if(code === 'auth/network-request-failed') msg = 'Network error. Check your connection and try again.';
+      else if(code === 'auth/user-disabled')       msg = 'This account has been disabled. Contact the site administrator.';
+      else if(code === 'auth/operation-not-allowed') msg = 'Email sign-in is not enabled for this project yet.';
+      else msg = 'Email or password is incorrect.';
+      showLoginError(msg);
+      console.warn('[CJHQ] admin sign-in failed:', code || err);
+      passEl.value = '';
+    }finally{
+      loginBtn.disabled = false;
+      loginBtn.textContent = originalLabel;
+    }
+  }
+
+  async function attemptGoogleSignIn(){
+    if(!firebaseReady || !fbAuth){
+      showLoginError('Cannot reach the sign-in service. Check your connection and try again.');
+      return;
+    }
+    const btn = document.getElementById('adminGoogleBtn');
+    btn.disabled = true;
+    try{
+      const provider = new window.__fbAuth.GoogleAuthProvider();
+      // Always ask which account to use. Without this, a browser signed into a
+      // personal Google account signs in with it silently.
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await window.__fbAuth.signInWithPopup(fbAuth, provider);
+      document.getElementById('adminLoginError').style.display = 'none';
+      // onAuthStateChanged opens the panel.
+    }catch(err){
+      const code = (err && err.code) || '';
+      let msg;
+      if(code === 'auth/popup-blocked')                    msg = 'Your browser blocked the sign-in window. Allow pop-ups for this site and try again.';
+      else if(code === 'auth/popup-closed-by-user' ||
+              code === 'auth/cancelled-popup-request')     msg = '';   // user backed out; not an error
+      else if(code === 'auth/operation-not-allowed')       msg = 'Google sign-in is not enabled for this project yet.';
+      else if(code === 'auth/unauthorized-domain')         msg = 'This domain is not authorised for Google sign-in. Add it in Firebase Authentication settings.';
+      else if(code === 'auth/network-request-failed')      msg = 'Network error. Check your connection and try again.';
+      else msg = 'Google sign-in did not complete. Please try again.';
+      if(msg) showLoginError(msg);
+      if(code) console.warn('[CJHQ] Google sign-in:', code);
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  loginBtn.addEventListener('click', attemptAdminSignIn);
+  document.getElementById('adminGoogleBtn').addEventListener('click', attemptGoogleSignIn);
+  ['adminEmailInput','adminPasswordInput'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); attemptAdminSignIn(); } });
+  });
+
+  document.getElementById('adminLogoutBtn').addEventListener('click', async ()=>{
+    try{
+      if(fbAuth && window.__fbAuth) await window.__fbAuth.signOut(fbAuth);
+    }catch(err){
+      console.warn('[CJHQ] sign-out failed:', err);
+    }
+    // onAuthStateChanged closes the panel; do it here too so the UI responds
+    // immediately even if the network call is slow.
+    adminUser = null;
+    syncAdminAuthUI();
+  });
+
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>{
+    b.addEventListener('click', ()=>switchAdminTab(b.dataset.tab));
+  });
+
+  // Notices form
+  document.getElementById('noticeCancelBtn').addEventListener('click', ()=>{
+    document.getElementById('noticeForm').reset();
+    document.getElementById('noticeId').value = '';
+  });
+  document.getElementById('noticeForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const notice = {
+      id: document.getElementById('noticeId').value || null,
+      type: document.getElementById('noticeType').value,
+      style: document.getElementById('noticeStyle').value,
+      title_en: document.getElementById('noticeTitleEn').value,
+      title_fr: document.getElementById('noticeTitleFr').value,
+      body_en: document.getElementById('noticeBodyEn').value,
+      body_fr: document.getElementById('noticeBodyFr').value,
+      active: document.getElementById('noticeActive').checked,
+    };
+    if(!notice.id) delete notice.id;
+    await saveToCollection('notices', notice);
+    document.getElementById('noticeForm').reset();
+    document.getElementById('noticeId').value = '';
+    renderAdminNoticesList();
+    renderPublicNotices();
+  });
+
+  // Settings form
+  document.getElementById('settingsForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const s = {
+      org_en: document.getElementById('setOrgEn').value,
+      org_fr: document.getElementById('setOrgFr').value,
+      addr_en: document.getElementById('setAddrEn').value,
+      addr_fr: document.getElementById('setAddrFr').value,
+      phone: document.getElementById('setPhone').value,
+      email: document.getElementById('setEmail').value,
+      facebook: document.getElementById('setFacebook').value,
+      x_url: document.getElementById('setX').value,
+      tagline_en: document.getElementById('setTaglineEn').value,
+      tagline_fr: document.getElementById('setTaglineFr').value,
+      logo_url: document.getElementById('setLogoUrl').value,
+      color_primary: document.getElementById('setColorPrimary').value,
+      color_accent: document.getElementById('setColorAccent').value,
+    };
+    await saveSettingsDoc(s);
+    applySettingsToSite(s);
+    const msg = document.getElementById('settingsSavedMsg');
+    msg.style.display = 'inline';
+    setTimeout(()=>{ msg.style.display = 'none'; }, 2500);
+  });
+
+  document.getElementById('resetColorsBtn').addEventListener('click', async ()=>{
+    document.getElementById('setColorPrimary').value = '#0E2149';
+    document.getElementById('setColorAccent').value = '#2F4C7A';
+    document.documentElement.style.removeProperty('--ink');
+    document.documentElement.style.removeProperty('--burgundy');
+    document.documentElement.style.removeProperty('--bronze');
+    const existing = await fetchSettingsDoc() || {};
+    await saveSettingsDoc({ ...existing, color_primary: '', color_accent: '' });
+  });
+
+  // Partners form
+  document.getElementById('partnerCancelBtn').addEventListener('click', ()=>{
+    document.getElementById('partnerForm').reset();
+    document.getElementById('partnerId').value = '';
+  });
+  document.getElementById('partnerForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const p = {
+      id: document.getElementById('partnerId').value || null,
+      name: document.getElementById('partnerName').value,
+      logoUrl: document.getElementById('partnerLogoUrl').value,
+      linkUrl: document.getElementById('partnerLinkUrl').value,
+    };
+    if(!p.id) delete p.id;
+    if(!p.name){ alert('Organization name is required.'); return; }
+    await saveToCollection('partners', p);
+    document.getElementById('partnerForm').reset();
+    document.getElementById('partnerId').value = '';
+    renderAdminPartnersList();
+    enhancePartnersFromBackend();
+  });
+
+  // Resources form
+  document.getElementById('resourceCancelBtn').addEventListener('click', ()=>{
+    document.getElementById('resourceForm').reset();
+    document.getElementById('resourceId').value = '';
+  });
+  document.getElementById('resourceForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const r = {
+      id: document.getElementById('resourceId').value || null,
+      category: document.getElementById('resourceCategory').value,
+      title_en: document.getElementById('resourceTitleEn').value,
+      title_fr: document.getElementById('resourceTitleFr').value,
+      desc_en: document.getElementById('resourceDescEn').value,
+      desc_fr: document.getElementById('resourceDescFr').value,
+      url: document.getElementById('resourceUrl').value,
+    };
+    if(!r.id) delete r.id;
+    if(!r.title_en || !r.url){ alert('Title and URL are required.'); return; }
+    await saveToCollection('resources', r);
+    document.getElementById('resourceForm').reset();
+    document.getElementById('resourceId').value = '';
+    renderAdminResourcesList();
+    enhanceResourcesFromBackend();
+  });
+
+  // Calendar events form
+  document.getElementById('eventCancelBtn').addEventListener('click', ()=>{
+    document.getElementById('eventForm').reset();
+    document.getElementById('eventId').value = '';
+  });
+  document.getElementById('eventForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const ev = {
+      id: document.getElementById('eventId').value || null,
+      title_en: document.getElementById('eventTitleEn').value,
+      title_fr: document.getElementById('eventTitleFr').value,
+      date: document.getElementById('eventDate').value,
+      start_time: document.getElementById('eventStart').value,
+      end_time: document.getElementById('eventEnd').value,
+      location: document.getElementById('eventLocation').value,
+      desc_en: document.getElementById('eventDescEn').value,
+      desc_fr: document.getElementById('eventDescFr').value,
+      link: document.getElementById('eventLink').value,
+    };
+    if(!ev.id) delete ev.id;
+    if(!ev.title_en || !ev.date){ alert('Title and date are required.'); return; }
+    await saveToCollection('events', ev);
+    document.getElementById('eventForm').reset();
+    document.getElementById('eventId').value = '';
+    renderAdminEventsList();
+  });
+})();
+
+function checkCurrentPath(opts){
+  opts = opts || {};
+  let full = location.pathname.replace(/\/+$/, '') || '/';
+  // Strip the base path (empty on a custom domain, "/CJHQ" style on a
+  // GitHub Pages project subpath) before parsing the route itself.
+  let path = full;
+  if(SITE_BASE_PATH && path.startsWith(SITE_BASE_PATH)){
+    path = path.slice(SITE_BASE_PATH.length) || '/';
+  }
+  // A visit to /index.html (or /index.htm) is the same as the bare root —
+  // without this, it would be parsed as an unrecognized page name and 404.
+  if(/^\/index\.html?$/i.test(path)) path = '/';
+  // /fr/ is the French homepage: a distinct crawlable URL serving the same
+  // home page. Without this it fell through to the unknown-route branch and
+  // JavaScript replaced the correctly-rendered French page with the 404 page.
+  // The URL is left alone so the canonical, hreflang and history all stay /fr/.
+  if(path === '/fr' || /^\/fr\/index\.html?$/i.test(path)){
+    goPage('home', {skipHistory:true, skipScroll:opts.skipScroll});
+    return;
+  }
+  if(path === '/'){
+    goPage('home', {skipHistory:true, skipScroll:opts.skipScroll});
+    return;
+  }
+  const parts = path.split('/').filter(Boolean);
+  if(parts[0] === 'resources' && parts[1]){
+    const slug = parts[1];
+    goPage('resources', {skipHistory:true, skipScroll:opts.skipScroll});
+    // wait a tick for accordion to be rendered/populated
+    setTimeout(()=>{
+      if(RESOURCE_BY_SLUG[slug]) openResourcePopup(slug, {skipHistory:true});
+      else show404(path, {skipHistory:true});
+    }, 150);
+    return;
+  }
+  goPage(parts[0], {skipHistory:true, skipScroll:opts.skipScroll, deferUnknown:opts.deferUnknown});
+}
+
+function show404(attemptedName, opts){
+  opts = opts || {};
+  if(!opts.skipHistory && attemptedName){
+    const rel = attemptedName.startsWith('/') ? attemptedName : '/' + attemptedName;
+    const path = SITE_BASE_PATH + rel;
+    if(location.pathname !== path) history.pushState({page:'404'}, '', path);
+  }
+  window.__last404Path = location.pathname;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-404').classList.add('active');
+  highlightActiveNav('404');
+  trackPageView();
+  updatePageMeta('404');
+  if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
+  document.getElementById('reportBrokenLinkStatus').style.display = 'none';
+  const btn = document.getElementById('reportBrokenLinkBtn');
+  if(btn) btn.style.display = '';
+}
+window.addEventListener('popstate', ()=>checkCurrentPath({skipHistory:true}));
+
+// Resolve the route before the backend chain so a deep link renders its page
+// immediately instead of waiting on ten sequential Firestore awaits. Custom
+// (admin-created) pages are the only routes that need the backend, so an
+// unrecognised path on this first pass is treated as "not loaded yet" rather
+// than "not found" - it holds position instead of flashing a 404 - and is
+// re-resolved once the backend lands.
+checkCurrentPath({deferUnknown:true});
+
+(async function initBackend(){
+  try{
+    await initFirebase();
+    await renderPublicNotices();
+    const settings = await fetchSettingsDoc();
+    if(settings) applySettingsToSite(settings);
+    await enhancePartnersFromBackend();
+    await enhanceResourcesFromBackend();
+    await enhanceResourceMetaFromBackend();
+    await applyContentOverrides();
+    await applyResourceOverrides();
+    await applyPartnerOverrides();
+    await enhancePagesFromBackend();
+  }catch(e){
+    console.warn('Backend init step failed, continuing with routing regardless:', e);
+  }finally{
+    // Routing must never be blocked by a backend hiccup — the visitor
+    // should always land on the right page even if Firestore is slow,
+    // unreachable, or a single step above throws. The first pass above
+    // already resolved every built-in route, so only re-run when it could
+    // not resolve the path (custom page, or a genuine 404).
+    const active = document.querySelector('.page.active');
+    if(window.__routeDeferred || !active || active.id === 'page-404'){
+      window.__routeDeferred = false;
+      checkCurrentPath({skipHistory:true});
+    }
+  }
+})();
+</script>
+
+
+<!-- Begin Constant Contact Active Forms -->
+<script> var _ctct_m = "e9166a9e087397b9011843b153dfb1d3"; </script>
+<script id="signupScript" src="//static.ctctcdn.com/js/signup-form-widget/current/signup-form-widget.min.js" async defer></script>
+<!-- End Constant Contact Active Forms -->
+
+<!-- Facebook Page Plugin loader (renders the .fb-page embed) -->
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"></script>
+
+<!-- X (Twitter) hashtag button loader (renders the .twitter-hashtag-button) -->
+<script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
+
+</body>
+</html>
