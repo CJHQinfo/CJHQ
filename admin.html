@@ -1965,6 +1965,9 @@
           <button type="button" class="btn outline" id="ctcPrintBtn">
             <span data-en>Print Letter</span><span data-fr>Imprimer la lettre</span>
           </button>
+          <button type="button" class="btn outline" id="ctcShareBtn">
+            <span data-en>Share Letter</span><span data-fr>Partager la lettre</span>
+          </button>
         </div>
         <div class="ctc-letter-wrap"><div class="ctc-letter" id="ctcLetter"></div></div>
       </div>
@@ -4446,16 +4449,30 @@ if(contactForm){
         ? 'Sens du voyage :   [  ] Canada \u2192 \u00c9tats-Unis      [  ] \u00c9tats-Unis \u2192 Canada'
         : 'Travel Direction:   [  ] Canada \u2192 United States      [  ] United States \u2192 Canada';
     }
+    // Round trip: one consent letter must cover the outbound AND return leg.
+    // The wording only mentions the return journey when a return date exists,
+    // since that field is not mandatory.
+    const hasReturn = d.blank ? true : !!d.ret;
+    const retDate   = d.blank ? FILL : prettyDate(d.ret);
+    const depDate   = d.blank ? FILL : prettyDate(d.departure);
+    // Back-leg wording reverses the outbound countries.
+    const backFr = `, y compris le voyage de retour ${fromTo[1].replace(/^aux /,'des ').replace(/^au /,'du ').replace(/^vers /,'de ')} ${fromTo[0].replace(/^du /,'vers le ').replace(/^des /,'vers les ').replace(/^de /,'vers ')}`;
+    const backEn = `, including the return journey from ${fromTo[1]} back to ${fromTo[0]}`;
+
     const body = fr
-      ? [`Je soussign\u00e9(e), ${B(d.parentName)}, parent ou tuteur l\u00e9gal de ${B(d.childName)}, n\u00e9(e) le ${d.blank ? FILL : prettyDate(d.childDob)}, consens \u00e0 ce que mon enfant voyage ${fromTo[0]} ${fromTo[1]} avec ${B(d.adultName)}, ${B(d.adultRel)}, du ${d.blank ? FILL : prettyDate(d.departure)} au ${d.blank ? FILL : prettyDate(d.ret)}.`,
+      ? [`Je soussign\u00e9(e), ${B(d.parentName)}, parent ou tuteur l\u00e9gal de ${B(d.childName)}, n\u00e9(e) le ${d.blank ? FILL : prettyDate(d.childDob)}, consens \u00e0 ce que mon enfant voyage ${fromTo[0]} ${fromTo[1]} avec ${B(d.adultName)}${(d.blank || d.adultRel) ? `, ${B(d.adultRel)}` : ''}, ${hasReturn ? `du ${depDate} au ${retDate}${backFr}` : `\u00e0 partir du ${depDate}`}.`,
          `Le num\u00e9ro de passeport de l\u2019enfant est ${B(d.childPassport)}, d\u00e9livr\u00e9 par : ${B(d.childCountry)}.`,
          `La destination du voyage est ${B(d.destination)}.`,
-         `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour le voyage mentionn\u00e9 ci-dessus.`]
-      : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${d.blank ? FILL : prettyDate(d.childDob)}, and give my consent for my child to travel from ${fromTo[0]} to ${fromTo[1]} with ${B(d.adultName)}, ${B(d.adultRel)}, from ${d.blank ? FILL : prettyDate(d.departure)} through ${d.blank ? FILL : prettyDate(d.ret)}.`,
+         hasReturn
+           ? `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour l\u2019aller et le retour de ce voyage.`
+           : `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour le voyage mentionn\u00e9 ci-dessus.`]
+      : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${d.blank ? FILL : prettyDate(d.childDob)}, and give my consent for my child to travel from ${fromTo[0]} to ${fromTo[1]} with ${B(d.adultName)}${(d.blank || d.adultRel) ? `, ${B(d.adultRel)}` : ''}, ${hasReturn ? `from ${depDate} through ${retDate}${backEn}` : `departing ${depDate}`}.`,
          `The child\u2019s passport number is ${B(d.childPassport)}, issued by ${B(d.childCountry)}.`,
          `The destination of travel is ${B(d.destination)}.`,
-         `I authorize the accompanying adult to travel with the child for the above-mentioned trip.`];
-    return {
+         hasReturn
+           ? `I authorize the accompanying adult to travel with the child for both the outbound and return journey of the above-mentioned trip.`
+           : `I authorize the accompanying adult to travel with the child for the above-mentioned trip.`];
+        return {
       title: fr ? 'LETTRE DE CONSENTEMENT AU VOYAGE D\u2019UN ENFANT' : 'CHILD TRAVEL CONSENT LETTER',
       sub: d.dir === 'custom'
         ? (fr ? 'Consentement au voyage international d\u2019un enfant' : 'Consent for a Child\u2019s International Travel')
@@ -4493,7 +4510,6 @@ if(contactForm){
         <p class="ctc-sigline">${esc(x.lblPrinted)}: ____________________________________</p>
         <p class="ctc-sigline">${esc(x.lblDate)}: ______________________________________</p></div>`;
     $('ctcLetter').innerHTML = `
-      <div class="ctc-brand">CJHQ</div>
       <h2>${esc(x.title)}</h2>
       <p class="ctc-sub">${esc(x.sub)}</p>
       <p class="ctc-dirline">${esc(x.dirLine)}</p>
@@ -4600,7 +4616,6 @@ if(contactForm){
       });
     }
 
-    put('CJHQ', 12, true, 0, 3, 'center');
     put(x.title, 15, true, 0, 2, 'center');
     put(x.sub, 9.5, false, 0, 2, 'center');
     put(x.dirLine, 9.5, true, 0, 3, 'center');
@@ -4738,6 +4753,65 @@ if(contactForm){
 
   $('ctcEditBtn').addEventListener('click', showForm);
   $('ctcPrintBtn').addEventListener('click', ()=> window.print());
+
+  // Share the COMPLETED letter. The PDF is built in the browser and handed to
+  // the OS share sheet as a file - nothing is uploaded and no URL carrying the
+  // child's details is ever created. Blank forms are never shared here: this
+  // button only exists on the preview screen, after Generate.
+  $('ctcShareBtn').addEventListener('click', async ()=>{
+    const d = collect();
+    const fr = isFr();
+    const fileName = `CJHQ-Child-Travel-Consent-${safeFileName(d.childName)}.pdf`;
+    const title = fr ? 'Lettre de consentement au voyage d\u2019un enfant' : 'Child Travel Consent Letter';
+    let blob;
+    try{
+      blob = buildPdf(d);
+    }catch(err){
+      console.warn('[CJHQ] consent letter PDF generation failed');
+      alert(fr ? 'La lettre n\u2019a pas pu \u00eatre pr\u00e9par\u00e9e pour le partage.'
+               : 'The letter could not be prepared for sharing.');
+      return;
+    }
+
+    // 1. Native share with the PDF attached (most phones).
+    try{
+      const file = new File([blob], fileName, { type:'application/pdf' });
+      if(navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
+        await navigator.share({ files:[file], title });
+        return;
+      }
+    }catch(err){
+      if(err && err.name === 'AbortError') return;   // user dismissed the sheet
+      console.warn('[CJHQ] file share unavailable, falling back');
+    }
+
+    // 2. Native share without file support: send the letter text instead.
+    try{
+      if(navigator.share){
+        const text = $('ctcLetter').innerText.replace(/\n{3,}/g, '\n\n').trim();
+        await navigator.share({ title, text });
+        return;
+      }
+    }catch(err){
+      if(err && err.name === 'AbortError') return;
+      console.warn('[CJHQ] text share failed, falling back to download');
+    }
+
+    // 3. Desktop with no share support: download the PDF so it can be attached.
+    let url;
+    try{
+      url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      alert(fr ? 'Votre navigateur ne prend pas en charge le partage direct. Le PDF a \u00e9t\u00e9 t\u00e9l\u00e9charg\u00e9 \u2014 vous pouvez maintenant le joindre \u00e0 un courriel ou \u00e0 un message.'
+               : 'Your browser does not support direct sharing. The PDF has been downloaded \u2014 you can now attach it to an email or message.');
+    }catch(err){
+      console.warn('[CJHQ] share fallback download failed');
+    }finally{
+      if(url) setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    }
+  });
   $('ctcDownloadBtn').addEventListener('click', ()=>{
     const d = collect();
     let url;
