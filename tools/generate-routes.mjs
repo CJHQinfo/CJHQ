@@ -20,7 +20,7 @@
  *       node tools/generate-routes.mjs --check   (verify only, non-zero on drift)
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,6 +39,34 @@ const ROUTES = [
   'terms',
   'accessibility',
 ];
+
+// The admin panel is ~24 KB of markup no visitor can use. It lives in
+// tools/admin-panel.html and is injected into admin.html only - keeping it out
+// of index.html is what makes this generator idempotent.
+const ADMIN_PARTIAL = join(dirname(fileURLToPath(import.meta.url)), 'admin-panel.html');
+const ADMIN_PLACEHOLDER =
+  '<!-- Admin panel: source lives in tools/admin-panel.html and is injected into admin.html only. -->';
+
+// Reciprocal hreflang, on / and /fr/ only. The other routes have no French URL.
+const HREFLANG = [
+  '<link rel="alternate" hreflang="en" href="https://cjhq.org/">',
+  '<link rel="alternate" hreflang="fr" href="https://cjhq.org/fr/">',
+  '<link rel="alternate" hreflang="x-default" href="https://cjhq.org/">',
+].join('\n');
+
+// index.html carries hreflang in the source. It is correct there and on /fr/,
+// and wrong on every other route - there is no French equivalent of /about to
+// point at - so those get it stripped.
+function stripHreflang(doc) {
+  return doc.replace(/\n<!-- Reciprocal with \/fr\/[\s\S]*?-->/, '')
+            .replace(/\n<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g, '');
+}
+function assertHreflang(doc, label) {
+  for (const tag of HREFLANG.split('\n')) {
+    if (!doc.includes(tag)) throw new Error(`${label}: missing hreflang ${tag}`);
+  }
+  return doc;
+}
 
 const checkOnly = process.argv.includes('--check');
 
@@ -134,6 +162,12 @@ function buildRoute(route) {
     throw new Error(`${route}: expected 1 active page, found ${activeCount}`);
   }
 
+  if (out.includes('id="page-admin"')) {
+    throw new Error(`${route}: admin markup leaked into a public route`);
+  }
+  out = stripHreflang(out);
+  if (out.includes('hreflang=')) throw new Error(`${route}: hreflang should not be on this route`);
+
   // Nothing outside <head> may differ from index.html except that one class.
   const normalise = (s) => s.slice(s.indexOf('</head>'))
     .replace(/<div class="page active" id="page-[a-z0-9-]+"/g, '<div class="page" id="PAGE"')
@@ -141,6 +175,60 @@ function buildRoute(route) {
   if (normalise(out) !== normalise(html)) {
     throw new Error(`${route}: content outside <head> changed - aborting`);
   }
+  return out;
+}
+
+/* ---- /admin: the only page that carries the admin panel ---- */
+function buildAdmin() {
+  let out = html;
+  out = replaceOnce(out, /<title id="pageTitle">[\s\S]*?<\/title>/,
+    '<title id="pageTitle">Admin — CJHQ</title>', 'admin: title');
+  out = replaceOnce(out, /<meta name="robots" content="[^"]*">/,
+    '<meta name="robots" content="noindex, nofollow">', 'admin: robots');
+  out = replaceOnce(out, /<link rel="canonical" id="canonicalTag" href="[^"]*">/,
+    '<link rel="canonical" id="canonicalTag" href="https://cjhq.org/admin">', 'admin: canonical');
+  out = replaceOnce(out, /<div class="page active" id="page-home"/,
+    '<div class="page" id="page-home"', 'admin: deactivate home');
+  if (!existsSync(ADMIN_PARTIAL)) throw new Error('tools/admin-panel.html is missing');
+  const panel = readFileSync(ADMIN_PARTIAL, 'utf8')
+    .replace('<div class="page" id="page-admin">', '<div class="page active" id="page-admin">');
+  if (!out.includes(ADMIN_PLACEHOLDER)) throw new Error('admin: placeholder not found in index.html');
+  out = out.replace(ADMIN_PLACEHOLDER, panel);
+  out = stripHreflang(out);
+  if (!out.includes('id="page-admin"')) throw new Error('admin.html lost its panel');
+  return out;
+}
+
+/* ---- /fr/: one crawlable French homepage. Not a French site. ---- */
+function buildFrenchHome() {
+  const meta = META.home;
+  if (!meta || !meta.fr || !meta.desc_fr) throw new Error('PAGE_META.home lacks fr/desc_fr');
+  const title = esc(meta.fr), desc = esc(meta.desc_fr), url = `${ORIGIN}/fr/`;
+  let out = html;
+  // French before any JavaScript runs, so a crawler sees French.
+  out = replaceOnce(out, /<html lang="en">/,
+    '<html lang="fr" class="lang-fr" data-force-lang="fr">', 'fr: html lang + force marker');
+  out = replaceOnce(out, /<title id="pageTitle">[\s\S]*?<\/title>/,
+    `<title id="pageTitle">${title}</title>`, 'fr: title');
+  out = replaceOnce(out, /<meta name="description" content="[^"]*">/,
+    `<meta name="description" content="${desc}">`, 'fr: description');
+  out = replaceOnce(out, /<link rel="canonical" id="canonicalTag" href="[^"]*">/,
+    `<link rel="canonical" id="canonicalTag" href="${url}">`, 'fr: canonical');
+  out = replaceOnce(out, /<meta property="og:url" id="ogUrl" content="[^"]*">/,
+    `<meta property="og:url" id="ogUrl" content="${url}">`, 'fr: og:url');
+  out = replaceOnce(out, /<meta property="og:title" id="ogTitle" content="[^"]*">/,
+    `<meta property="og:title" id="ogTitle" content="${title}">`, 'fr: og:title');
+  out = replaceOnce(out, /<meta property="og:description" id="ogDescription" content="[^"]*">/,
+    `<meta property="og:description" id="ogDescription" content="${desc}">`, 'fr: og:description');
+  out = replaceOnce(out, /<meta name="twitter:title" id="twitterTitle" content="[^"]*">/,
+    `<meta name="twitter:title" id="twitterTitle" content="${title}">`, 'fr: twitter:title');
+  out = replaceOnce(out, /<meta name="twitter:description" id="twitterDescription" content="[^"]*">/,
+    `<meta name="twitter:description" id="twitterDescription" content="${desc}">`, 'fr: twitter:description');
+  out = replaceOnce(out, /<meta property="og:locale" content="[^"]*">/,
+    '<meta property="og:locale" content="fr_CA">', 'fr: og:locale');
+  out = replaceOnce(out, /<meta property="og:locale:alternate" content="[^"]*">/,
+    '<meta property="og:locale:alternate" content="en_CA">', 'fr: og:locale:alternate');
+  if (out.includes('id="page-admin"')) throw new Error('fr: admin markup leaked');
   return out;
 }
 
@@ -161,8 +249,50 @@ for (const route of ROUTES) {
   }
 }
 
+/* ---- index.html (served copy), admin.html, fr/index.html ---- */
+// index.html is the source AND the served homepage, so the generator does not
+// rewrite it - it only asserts the hreflang block is present.
+assertHreflang(html, 'index.html (source)');
+const extras = [
+  ['admin.html', buildAdmin()],
+  [join('fr', 'index.html'), assertHreflang(buildFrenchHome(), 'fr')],
+];
+
+// The forced-language marker must exist ONLY on the French page. Test the
+// attribute on <html>, not the string anywhere - the language script contains
+// getAttribute('data-force-lang') on every page, which is correct and expected.
+const hasForceAttr = (doc) => /<html[^>]*\sdata-force-lang="fr"/.test(doc);
+for (const [name, doc] of extras) {
+  const has = hasForceAttr(doc);
+  if (name.startsWith('fr') && !has) throw new Error('fr/index.html lost its force-lang marker');
+  if (!name.startsWith('fr') && has) throw new Error(`${name}: force-lang marker leaked`);
+}
+if (hasForceAttr(html)) throw new Error('index.html source must not carry the force-lang marker');
+// Only admin.html may contain the admin panel.
+for (const [name, doc] of extras) {
+  const has = doc.includes('id="page-admin"');
+  if (name === 'admin.html' && !has) throw new Error('admin.html lost its panel');
+  if (name !== 'admin.html' && has) throw new Error(`${name}: admin markup leaked`);
+}
+
+for (const [name, doc] of extras) {
+  const target = join(ROOT, name);
+  const dir = dirname(target);
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const current = existsSync(target) ? readFileSync(target, 'utf8') : null;
+  if (checkOnly) {
+    if (current !== doc) { console.error(`DRIFT: ${name} is out of date`); drift++; }
+    else console.log(`ok: ${name}`);
+  } else if (current === doc) {
+    console.log(`unchanged: ${name}`);
+  } else {
+    writeFileSync(target, doc);
+    console.log(`written: ${name}`);
+  }
+}
+
 if (checkOnly && drift > 0) {
   console.error(`\n${drift} route file(s) out of date. Run: node tools/generate-routes.mjs`);
   process.exit(1);
 }
-console.log(`\n${ROUTES.length} routes processed.`);
+console.log(`\n${ROUTES.length} routes + ${extras.length} extras processed.`);
