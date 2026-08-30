@@ -675,6 +675,72 @@
     .partner-badge-logo img{ height:56px; max-width:170px; }
   }
   @media (prefers-reduced-motion: reduce){ .partners-track{animation:none;} }
+
+  /* ---------- Child Travel Consent Letter tool ---------- */
+  /* Uses the existing tokens and .btn/.form-group classes; only the pieces the
+     tool genuinely needs are defined here. */
+  .ctc-block{border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; margin:0 0 22px;}
+  .ctc-legend{font-family:'Lora',serif; font-weight:600; font-size:1.05rem; color:var(--ink); padding:0 8px;}
+  .ctc-req{color:#A23B3B; text-decoration:none; border:none; font-weight:700;}
+  .ctc-opt{color:var(--muted); font-weight:400; font-size:.85rem;}
+  .ctc-block label{display:block; font-size:.88rem; font-weight:600; color:var(--ink); margin-bottom:5px;}
+  .ctc-block input, .ctc-block select, .ctc-block textarea{
+    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:var(--radius);
+    font-size:1rem; font-family:inherit; color:var(--ink); background:var(--paper); min-height:44px;}
+  .ctc-block textarea{resize:vertical; min-height:84px;}
+  .ctc-block input:focus, .ctc-block select:focus, .ctc-block textarea:focus{border-color:var(--bronze); outline:2px solid transparent;}
+  .ctc-block input[aria-invalid="true"], .ctc-block select[aria-invalid="true"], .ctc-block textarea[aria-invalid="true"]{border-color:#A23B3B;}
+  .ctc-err{color:#A23B3B; font-size:.85rem; margin:6px 0 0;}
+  .ctc-err-summary{margin:0 0 14px;}
+  .ctc-dir{display:flex; gap:14px; flex-wrap:wrap;}
+  .ctc-dir-btn{
+    flex:1 1 240px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:20px 16px; border:2px solid var(--line); border-radius:var(--radius);
+    background:var(--paper); cursor:pointer; font-family:inherit; font-size:1rem;
+    font-weight:600; color:var(--ink); min-height:88px; transition:border-color .15s, background .15s;}
+  .ctc-dir-btn:hover{border-color:var(--bronze-soft);}
+  .ctc-dir-btn[aria-checked="true"]{border-color:var(--bronze); background:var(--bg-alt);}
+  .ctc-dir-flag{font-size:1.5rem; line-height:1;}
+  .ctc-generate{width:100%; justify-content:center; font-size:1.05rem; padding:15px 24px;}
+  .ctc-actions{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 22px;}
+  .ctc-actions .btn{flex:1 1 auto; justify-content:center;}
+  /* On-screen preview approximates the printed sheet so what you see matches
+     what prints: same 8.5in width and the same margins as the PDF. */
+  .ctc-letter-wrap{background:var(--bg-alt); padding:20px; border-radius:var(--radius); overflow-x:auto;}
+  .ctc-letter{
+    background:#fff; width:8.5in; max-width:100%; min-height:11in; margin:0 auto;
+    padding:0.7in; box-sizing:border-box; box-shadow:0 2px 12px rgba(14,33,73,.12);
+    font-family:'Inter',sans-serif; font-size:10.5pt; line-height:1.5; color:#111;}
+  .ctc-letter h2{font-family:'Lora',serif; font-size:15pt; text-align:center; margin:0 0 2px; letter-spacing:.02em;}
+  .ctc-letter .ctc-brand{font-family:'Lora',serif; font-weight:700; font-size:12pt; letter-spacing:.12em; text-align:center; color:var(--ink);}
+  .ctc-letter .ctc-sub{text-align:center; font-size:9.5pt; color:#444; margin:0 0 4px;}
+  .ctc-letter .ctc-dirline{text-align:center; font-size:9.5pt; font-weight:600; margin:0 0 16px; padding-bottom:10px; border-bottom:1px solid #bbb;}
+  .ctc-letter h3{font-size:9.5pt; letter-spacing:.09em; text-transform:uppercase; margin:16px 0 6px; color:#111; border-bottom:1px solid #ddd; padding-bottom:3px;}
+  .ctc-letter p{margin:0 0 9px;}
+  .ctc-row{display:flex; gap:8px; margin-bottom:3px;}
+  .ctc-row .k{font-weight:700; min-width:1.9in;}
+  .ctc-row .v{flex:1; word-break:break-word;}
+  .ctc-siglines{margin-top:6px;}
+  .ctc-sigline{margin:0 0 13px; font-size:10pt;}
+  .ctc-note{margin-top:18px; padding-top:10px; border-top:1px solid #ddd; font-size:8.5pt; color:#444; line-height:1.45;}
+  @media (max-width:600px){
+    .ctc-block{padding:16px 14px;}
+    .ctc-actions .btn{flex:1 1 100%;}
+    .ctc-letter{padding:0.45in; font-size:10pt;}
+    .ctc-row{flex-direction:column; gap:0;}
+    .ctc-row .k{min-width:0;}
+  }
+  /* Print: only the letter itself. Everything else on the page is hidden, and
+     the sheet is forced to US Letter portrait to match the generated PDF. */
+  @media print{
+    @page{size:8.5in 11in portrait; margin:0.7in;}
+    body *{visibility:hidden !important;}
+    #ctcLetter, #ctcLetter *{visibility:visible !important;}
+    #ctcLetter{position:absolute; left:0; top:0; width:100%; max-width:none;
+      margin:0; padding:0; box-shadow:none; min-height:0;}
+    .ctc-letter-wrap{background:none; padding:0; overflow:visible;}
+    header, footer, .ctc-actions, #ctcFormScreen, .mobile-drawer, .mobile-drawer-overlay{display:none !important;}
+  }
 </style>
 <!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -1700,6 +1766,174 @@
 
 
 <!-- ============ 404 / PAGE NOT FOUND ============ -->
+<!-- ============ CHILD TRAVEL CONSENT LETTER ============ -->
+<div class="page" id="page-child-travel-consent">
+  <section style="padding-top:56px; padding-bottom:48px;">
+    <div class="section-inner" style="max-width:820px;">
+
+      <div class="ctc-screen" id="ctcFormScreen">
+        <span class="eyebrow" data-en>Travel &amp; Border Crossing</span><span class="eyebrow" data-fr>Voyage et passage frontalier</span>
+        <h1 style="font-size:clamp(1.8rem,3.6vw,2.4rem); margin-top:10px;">
+          <span data-en>Child Travel Consent Letter</span><span data-fr>Lettre de consentement au voyage d'un enfant</span>
+        </h1>
+        <p style="font-size:1.05rem; color:var(--ink-soft); margin-top:6px;">
+          <span data-en>Create a simple consent letter for your child's Canada–U.S. travel.</span>
+          <span data-fr>Créez une lettre de consentement simple pour le voyage Canada–États-Unis de votre enfant.</span>
+        </p>
+        <p style="color:var(--muted); margin-top:4px;">
+          <span data-en>Complete the information below, generate your letter, then print and sign it.</span>
+          <span data-fr>Remplissez les renseignements ci-dessous, générez votre lettre, puis imprimez-la et signez-la.</span>
+        </p>
+
+        <form id="ctcForm" novalidate>
+          <fieldset class="ctc-block">
+            <legend class="ctc-legend"><span data-en>Travel Direction</span><span data-fr>Sens du voyage</span></legend>
+            <div class="ctc-dir" role="radiogroup" aria-labelledby="ctcDirLabel">
+              <button type="button" class="ctc-dir-btn" data-dir="ca-us" role="radio" aria-checked="false">
+                <span class="ctc-dir-flag" aria-hidden="true">🇨🇦&nbsp;→&nbsp;🇺🇸</span>
+                <span class="ctc-dir-txt" data-en>Canada → United States</span><span class="ctc-dir-txt" data-fr>Canada → États-Unis</span>
+              </button>
+              <button type="button" class="ctc-dir-btn" data-dir="us-ca" role="radio" aria-checked="false">
+                <span class="ctc-dir-flag" aria-hidden="true">🇺🇸&nbsp;→&nbsp;🇨🇦</span>
+                <span class="ctc-dir-txt" data-en>United States → Canada</span><span class="ctc-dir-txt" data-fr>États-Unis → Canada</span>
+              </button>
+            </div>
+            <p class="ctc-err" id="err-direction" hidden></p>
+          </fieldset>
+
+          <fieldset class="ctc-block">
+            <legend class="ctc-legend"><span data-en>Child Information</span><span data-fr>Renseignements sur l'enfant</span></legend>
+            <div class="form-group">
+              <label for="ctcChildName"><span data-en>Child's Full Name</span><span data-fr>Nom complet de l'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcChildName" autocomplete="off" placeholder="First and Last Name">
+              <p class="ctc-err" id="err-ctcChildName" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcChildDob"><span data-en>Date of Birth</span><span data-fr>Date de naissance</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="date" id="ctcChildDob">
+              <p class="ctc-err" id="err-ctcChildDob" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcChildPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcChildPassport" autocomplete="off" spellcheck="false">
+              <p class="ctc-err" id="err-ctcChildPassport" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcChildCountry"><span data-en>Passport Issuing Country</span><span data-fr>Pays émetteur du passeport</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <select id="ctcChildCountry">
+                <option value=""></option>
+                <option value="Canada">Canada</option>
+                <option value="United States">United States</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="ctcChildCountryOther" hidden placeholder="Country">
+              <p class="ctc-err" id="err-ctcChildCountry" hidden></p>
+            </div>
+          </fieldset>
+
+          <fieldset class="ctc-block">
+            <legend class="ctc-legend"><span data-en>Travelling With</span><span data-fr>Accompagné de</span></legend>
+            <div class="form-group">
+              <label for="ctcAdultName"><span data-en>Accompanying Adult's Full Name</span><span data-fr>Nom complet de l'adulte accompagnateur</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcAdultName" autocomplete="off">
+              <p class="ctc-err" id="err-ctcAdultName" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcAdultRel"><span data-en>Relationship to Child</span><span data-fr>Lien avec l'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcAdultRel" autocomplete="off" placeholder="Parent, Grandparent, Relative, etc.">
+              <p class="ctc-err" id="err-ctcAdultRel" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcAdultPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcAdultPassport" autocomplete="off" spellcheck="false">
+              <p class="ctc-err" id="err-ctcAdultPassport" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcAdultPhone"><span data-en>Phone Number</span><span data-fr>Numéro de téléphone</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="tel" id="ctcAdultPhone" autocomplete="off">
+              <p class="ctc-err" id="err-ctcAdultPhone" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcAdultEmail"><span data-en>Email</span><span data-fr>Courriel</span> <span class="ctc-opt" data-en>(optional)</span><span class="ctc-opt" data-fr>(facultatif)</span></label>
+              <input type="email" id="ctcAdultEmail" autocomplete="off">
+            </div>
+          </fieldset>
+
+          <fieldset class="ctc-block">
+            <legend class="ctc-legend"><span data-en>Parent / Guardian Giving Consent</span><span data-fr>Parent / tuteur donnant son consentement</span></legend>
+            <div class="form-group">
+              <label for="ctcParentName"><span data-en>Full Name</span><span data-fr>Nom complet</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcParentName" autocomplete="off">
+              <p class="ctc-err" id="err-ctcParentName" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcParentAddress"><span data-en>Address</span><span data-fr>Adresse</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <textarea id="ctcParentAddress" rows="3"></textarea>
+              <p class="ctc-err" id="err-ctcParentAddress" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcParentPhone"><span data-en>Phone</span><span data-fr>Téléphone</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="tel" id="ctcParentPhone" autocomplete="off">
+              <p class="ctc-err" id="err-ctcParentPhone" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcParentEmail"><span data-en>Email</span><span data-fr>Courriel</span> <span class="ctc-opt" data-en>(optional)</span><span class="ctc-opt" data-fr>(facultatif)</span></label>
+              <input type="email" id="ctcParentEmail" autocomplete="off">
+            </div>
+          </fieldset>
+
+          <fieldset class="ctc-block">
+            <legend class="ctc-legend"><span data-en>Trip Information</span><span data-fr>Renseignements sur le voyage</span></legend>
+            <div class="form-group">
+              <label for="ctcDeparture"><span data-en>Departure Date</span><span data-fr>Date de départ</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="date" id="ctcDeparture">
+              <p class="ctc-err" id="err-ctcDeparture" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcReturn"><span data-en>Return Date</span><span data-fr>Date de retour</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="date" id="ctcReturn">
+              <p class="ctc-err" id="err-ctcReturn" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="ctcDestination"><span data-en>Destination</span><span data-fr>Destination</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcDestination" autocomplete="off" placeholder="City, State/Province, Country">
+              <p class="ctc-err" id="err-ctcDestination" hidden></p>
+            </div>
+          </fieldset>
+
+          <p class="ctc-err ctc-err-summary" id="ctcSummaryErr" hidden></p>
+          <button type="submit" class="btn dark ctc-generate" id="ctcGenerate">
+            <span data-en>Generate Travel Consent Letter</span><span data-fr>Générer la lettre de consentement</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="ctc-screen" id="ctcPreviewScreen" hidden>
+        <h1 style="font-size:clamp(1.8rem,3.6vw,2.4rem);">
+          <span data-en>Your Child Travel Consent Letter</span><span data-fr>Votre lettre de consentement au voyage</span>
+        </h1>
+        <p style="color:var(--muted); margin-top:4px;">
+          <span data-en>Please review the information before downloading.</span>
+          <span data-fr>Veuillez vérifier les renseignements avant de télécharger.</span>
+        </p>
+        <div class="ctc-actions">
+          <button type="button" class="btn outline" id="ctcEditBtn">
+            <span data-en>← Edit Information</span><span data-fr>← Modifier les renseignements</span>
+          </button>
+          <button type="button" class="btn dark" id="ctcDownloadBtn">
+            <span data-en>Download PDF</span><span data-fr>Télécharger le PDF</span>
+          </button>
+          <button type="button" class="btn outline" id="ctcPrintBtn">
+            <span data-en>Print Letter</span><span data-fr>Imprimer la lettre</span>
+          </button>
+        </div>
+        <div class="ctc-letter-wrap"><div class="ctc-letter" id="ctcLetter"></div></div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
 <div class="page" id="page-404">
   <section style="padding-top:80px; min-height:60vh; display:flex; align-items:center;">
     <div class="section-inner" style="max-width:560px; text-align:center; margin:0 auto;">
@@ -2011,7 +2245,8 @@ const categories = [
         {en:'Border Wait Times', fr:'Temps d\'attente à la frontière', desc_en:'View live wait times at Canada–U.S. land border crossings.', desc_fr:'Consultez les temps d\'attente en direct aux postes frontaliers terrestres Canada–États-Unis.', url:"https://www.cbsa-asfc.gc.ca/bwt-taf/menu-eng.html", what_en:'Check current border wait times before leaving home. The tool shows estimated wait times for most Canada–U.S. land border crossings.', what_fr:'Vérifiez les temps d\'attente actuels avant de quitter la maison. L\'outil affiche les temps d\'attente estimés pour la plupart des postes frontaliers terrestres Canada–États-Unis.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Check it before you leave, especially on busy travel days, to pick the crossing with the shortest wait.', steps_fr:'Vérifiez-le avant de partir, surtout les jours de grand achalandage, pour choisir le poste frontalier avec le moins d\'attente.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Wait times change throughout the day.','Friday afternoons, Sunday evenings, long weekends, and holiday periods are usually the busiest.','If you have flexibility, choosing another crossing can often save considerable time.'], tips_list_fr:['Les temps d\'attente changent tout au long de la journée.','Les vendredis après-midi, dimanches soirs, longs weekends et périodes de congé sont habituellement les plus achalandés.','Si vous avez de la flexibilité, choisir un autre poste frontalier peut souvent faire économiser beaucoup de temps.'], official_links:[{label_en:'Canada–U.S. Border Wait Times', label_fr:'Temps d\'attente à la frontière Canada–États-Unis', url:"https://www.cbsa-asfc.gc.ca/bwt-taf/menu-eng.html"}], related:['apply-for-nexus','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'August 2026', slug:'border-wait-times', label_en1:'Check Wait Times →', label_fr1:'Vérifier les temps d\'attente →'},
         {en:'Duty-Free Allowances', fr:'Exemptions hors taxes', desc_en:'Understand what you can bring back to Canada without paying duty or taxes.', desc_fr:'Comprenez ce que vous pouvez rapporter au Canada sans payer de droits ou de taxes.', url:"https://travel.gc.ca/returning/customs/bringing-to-canada/personal-exemptions-mini-guide", what_en:'Review these exemptions before returning to Canada after travelling outside the country.', what_fr:'Consultez ces exemptions avant de revenir au Canada après un voyage à l\'extérieur du pays.', need_heading_en:'Duty-Free Exemptions', need_heading_fr:'Exemptions hors taxes', need_list_en:['Less than 24 hours: No personal exemption.','24 hours or more: Up to CAN\$200 worth of goods. Alcohol and tobacco products are not included in this exemption.','48 hours or more: Up to CAN\$800 worth of goods, plus an alcohol allowance — choose one of 1.5 litres of wine, or 1.14 litres of liquor, or 8.5 litres of beer/ale — and a tobacco allowance of all of the following: 200 cigarettes, 50 cigars, 200 g of manufactured tobacco, and 200 tobacco sticks.','7 days or more: The same CAN\$800 personal exemption. Goods other than alcohol and tobacco may follow you by mail or courier, but alcohol and tobacco must be in your possession when you enter Canada. Everything must still be declared on arrival.'], need_list_fr:['Moins de 24 heures : Aucune exemption personnelle.','24 heures ou plus : Jusqu\'à 200 \$ CA de biens. L\'alcool et le tabac ne sont pas inclus dans cette exemption.','48 heures ou plus : Jusqu\'à 800 \$ CA de biens, plus une quantité d\'alcool — au choix, 1,5 litre de vin, ou 1,14 litre de spiritueux, ou 8,5 litres de bière — et une quantité de tabac correspondant à la totalité de : 200 cigarettes, 50 cigares, 200 g de tabac manufacturé, et 200 bâtonnets de tabac.','7 jours ou plus : La même exemption personnelle de 800 \$ CA. Les biens autres que l\'alcool et le tabac peuvent vous suivre par la poste ou par messagerie, mais l\'alcool et le tabac doivent être en votre possession à votre entrée au Canada. Tout doit tout de même être déclaré à l\'arrivée.'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'We\'ve put together a quick reference table further down this page showing the exemption amounts by trip length.', steps_fr:'Nous avons préparé un tableau de référence rapide plus bas sur cette page montrant les montants d\'exemption selon la durée du voyage.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Keep receipts for everything you purchased while travelling — border officers may ask to see them.','If you exceed your exemption, you generally only pay duty and taxes on the amount over your allowance — not on everything you purchased.','The tobacco allowance applies to stamped tobacco. Product not marked \'duty paid Canada droit acquitté\' attracts a special duty even inside your exemption.','You must meet the legal drinking age of the province or territory where you enter Canada.'], tips_list_fr:['Conservez les reçus de tous vos achats en voyage — les agents frontaliers pourraient les demander.','Si vous dépassez votre exemption, vous payez généralement des droits et taxes seulement sur le montant excédentaire — pas sur la totalité de vos achats.','L\'exemption de tabac s\'applique au tabac estampillé. Un produit non marqué « droit acquitté Canada duty paid » est assujetti à un droit spécial même à l\'intérieur de votre exemption.','Vous devez respecter l\'âge légal pour consommer de l\'alcool dans la province ou le territoire où vous entrez au Canada.'], official_links:[{label_en:'Personal Exemptions Mini Guide', label_fr:'Mini-guide des exemptions personnelles', url:"https://travel.gc.ca/returning/customs/bringing-to-canada/personal-exemptions-mini-guide"},{label_en:'I Declare: A Guide for Residents Returning to Canada', label_fr:'Je déclare : Guide à l\'intention des résidents revenant au Canada', url:"https://www.cbsa-asfc.gc.ca/travel-voyage/declare-eng.html"},{label_en:'Alcohol and Tobacco Limits', label_fr:'Limites d\'alcool et de tabac', url:"https://www.cbsa-asfc.gc.ca/travel-voyage/atl-lat-eng.html"}], related:['canada-border-services-agency-cbsa'], reviewed:'August 2026', slug:'duty-free-allowances', label_en1:'View Allowances →', label_fr1:'Voir les exemptions →'},
         {en:'Travel Advisories', fr:'Avis de voyage', desc_en:'Current travel advisories issued by the Government of Canada.', desc_fr:'Avis de voyage actuels émis par le gouvernement du Canada.', url:"https://travel.gc.ca/travelling/advisories", what_en:'This page shows the government\'s current travel advisories for destinations around the world.', what_fr:'Cette page présente les avis de voyage actuels du gouvernement pour des destinations à travers le monde.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Search for your destination before booking or travelling, since advisories can change closer to your trip date.', steps_fr:'Recherchez votre destination avant de réserver ou de voyager, puisque les avis peuvent changer à l\'approche de votre voyage.', official_links:[{label_en:'Travel Advisories', label_fr:'Avis de voyage', url:"https://travel.gc.ca/travelling/advisories"}], related:['canada-border-services-agency-cbsa','border-wait-times'], reviewed:'August 2026', label_en1:'View Advisories →', label_fr1:'Voir les avis →', slug:'travel-advisories'},
-        {en:'Children Travelling', fr:'Enfants voyageant', desc_en:'Recommended documents when travelling with children.', desc_fr:'Documents recommandés lors de voyages avec des enfants.', url:"https://travel.gc.ca/travelling/children", what_en:'Review this information if only one parent is travelling with a child, a grandparent or relative is travelling with a child, or someone other than the child\'s parent is travelling with the child.', what_fr:'Consultez cette information si un seul parent voyage avec un enfant, un grand-parent ou un proche voyage avec un enfant, ou une personne autre que le parent voyage avec l\'enfant.', need_heading_en:'Bring With You', need_heading_fr:'Apportez avec vous', need_intro_en:'It is strongly recommended to carry:', need_intro_fr:'Il est fortement recommandé d\'apporter :', need_list_en:['The child\'s passport','A consent letter signed by the parent(s) or legal guardian(s) who are not travelling','Contact information for the parent(s)'], need_list_fr:['Le passeport de l\'enfant','Une lettre de consentement signée par le ou les parents ou tuteurs légaux qui ne voyagent pas','Les coordonnées des parents'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Prepare this documentation before you travel — border officers may ask for it, and having it ready avoids delays.', steps_fr:'Préparez ces documents avant votre voyage — les agents frontaliers peuvent les demander, et les avoir en main évite des délais.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Although a consent letter is not always legally required, border officers in Canada and the United States may ask for it.','Having it ready can help prevent delays.'], tips_list_fr:['Bien qu\'une lettre de consentement ne soit pas toujours légalement requise, les agents frontaliers au Canada et aux États-Unis peuvent la demander.','L\'avoir en main peut aider à éviter des délais.'], official_links:[{label_en:'Children Travelling', label_fr:'Enfants voyageant', url:"https://travel.gc.ca/travelling/children"}], related:['child-passport','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'August 2026', slug:'children-travelling', label_en1:'Learn More →', label_fr1:'En savoir plus →'}
+        {en:'Children Travelling', fr:'Enfants voyageant', desc_en:'Recommended documents when travelling with children.', desc_fr:'Documents recommandés lors de voyages avec des enfants.', url:"https://travel.gc.ca/travelling/children", what_en:'Review this information if only one parent is travelling with a child, a grandparent or relative is travelling with a child, or someone other than the child\'s parent is travelling with the child.', what_fr:'Consultez cette information si un seul parent voyage avec un enfant, un grand-parent ou un proche voyage avec un enfant, ou une personne autre que le parent voyage avec l\'enfant.', need_heading_en:'Bring With You', need_heading_fr:'Apportez avec vous', need_intro_en:'It is strongly recommended to carry:', need_intro_fr:'Il est fortement recommandé d\'apporter :', need_list_en:['The child\'s passport','A consent letter signed by the parent(s) or legal guardian(s) who are not travelling','Contact information for the parent(s)'], need_list_fr:['Le passeport de l\'enfant','Une lettre de consentement signée par le ou les parents ou tuteurs légaux qui ne voyagent pas','Les coordonnées des parents'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Prepare this documentation before you travel — border officers may ask for it, and having it ready avoids delays.', steps_fr:'Préparez ces documents avant votre voyage — les agents frontaliers peuvent les demander, et les avoir en main évite des délais.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Although a consent letter is not always legally required, border officers in Canada and the United States may ask for it.','Having it ready can help prevent delays.'], tips_list_fr:['Bien qu\'une lettre de consentement ne soit pas toujours légalement requise, les agents frontaliers au Canada et aux États-Unis peuvent la demander.','L\'avoir en main peut aider à éviter des délais.'], official_links:[{label_en:'Children Travelling', label_fr:'Enfants voyageant', url:"https://travel.gc.ca/travelling/children"}], related:['child-passport','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'August 2026', slug:'children-travelling', label_en1:'Learn More →', label_fr1:'En savoir plus →'},
+      {en:'Child Travel Consent Letter', fr:'Lettre de consentement au voyage d\'un enfant', desc_en:'Create and download a printable consent letter for a child\'s Canada\u2013U.S. travel.', desc_fr:'Cr\u00e9ez et t\u00e9l\u00e9chargez une lettre de consentement imprimable pour le voyage Canada\u2013\u00c9tats-Unis d\'un enfant.', url:'/child-travel-consent', internalPage:'child-travel-consent', label_en1:'Create Letter \u2192', label_fr1:'Cr\u00e9er la lettre \u2192', what_en:'A free CJHQ tool that fills in a standard travel consent letter for a child travelling between Canada and the United States without both parents or guardians. You complete a short form, review the letter, then download or print it and sign it by hand.', what_fr:'Un outil gratuit du CJHQ qui remplit une lettre de consentement type pour un enfant voyageant entre le Canada et les \u00c9tats-Unis sans ses deux parents ou tuteurs. Vous remplissez un court formulaire, v\u00e9rifiez la lettre, puis vous la t\u00e9l\u00e9chargez ou l\'imprimez et la signez \u00e0 la main.', question_en:'Is this the right tool?', question_fr:'Est-ce le bon outil?', answer_en:'Use this if a child is crossing the Canada\u2013U.S. border with one parent, a grandparent, a relative or another adult. Border officers may ask for a consent letter. This tool creates the letter only \u2014 it is not legal advice, and it does not replace custody or court documents.', answer_fr:'Utilisez cet outil si un enfant traverse la fronti\u00e8re Canada\u2013\u00c9tats-Unis avec un seul parent, un grand-parent, un proche ou un autre adulte. Les agents frontaliers peuvent demander une lettre de consentement. Cet outil ne fait que produire la lettre \u2014 il ne constitue pas un avis juridique et ne remplace pas les documents de garde ou une ordonnance du tribunal.', need_heading_en:'What You\'ll Need', need_heading_fr:'Ce dont vous aurez besoin', need_list_en:['The child\'s full name, date of birth and passport number','The accompanying adult\'s full name, passport number and phone number','Your address and phone number','Departure and return dates, and the destination'], need_list_fr:['Le nom complet, la date de naissance et le num\u00e9ro de passeport de l\'enfant','Le nom complet, le num\u00e9ro de passeport et le num\u00e9ro de t\u00e9l\u00e9phone de l\'adulte accompagnateur','Votre adresse et votre num\u00e9ro de t\u00e9l\u00e9phone','Les dates de d\u00e9part et de retour, ainsi que la destination'], tips_list_en:['The letter is created in your browser. Nothing you enter is sent to CJHQ or stored anywhere.','Print the letter and sign it by hand \u2014 the signature lines are left blank on purpose.','Where possible, have the other parent or guardian sign as well.'], tips_list_fr:['La lettre est cr\u00e9\u00e9e dans votre navigateur. Rien de ce que vous saisissez n\'est envoy\u00e9 au CJHQ ni conserv\u00e9.','Imprimez la lettre et signez-la \u00e0 la main \u2014 les lignes de signature sont volontairement laiss\u00e9es vides.','Dans la mesure du possible, faites-la signer aussi par l\'autre parent ou tuteur.'], official_links:[{label_en:'Government of Canada \u2014 Children Travelling Abroad', label_fr:'Gouvernement du Canada \u2014 Enfants voyageant \u00e0 l\'\u00e9tranger', url:"https://travel.gc.ca/travelling/children"}], related:['children-travelling'], reviewed:'August 2026', slug:'child-travel-consent-letter'}
       ] },
       { heading_en:'Travel Insurance', heading_fr:'Assurance voyage', items:[
         {en:'Manulife Travel Insurance', fr:'Assurance voyage Manulife', desc_en:'Purchase travel medical insurance before leaving Canada.', desc_fr:'Achetez une assurance médicale voyage avant de quitter le Canada.', url:"https://manulife-travel.ca/dist/home.html?as=wllebovits", what_en:'Travel medical insurance helps protect you against unexpected medical expenses while travelling outside your home province or country.', what_fr:'L\'assurance médicale voyage vous protège contre des dépenses médicales imprévues lors d\'un voyage à l\'extérieur de votre province ou pays.', need_heading_en:'Before You Buy', need_heading_fr:'Avant d\'acheter', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your travel dates','Destination','Traveller information','Basic health information'], need_list_fr:['Vos dates de voyage','La destination','Les renseignements du voyageur','Des renseignements de santé de base'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Get a quote directly on their site, compare coverage options, and purchase your policy before you leave.', steps_fr:'Obtenez une soumission directement sur leur site, comparez les options de couverture, et achetez votre police avant de partir.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Provincial health coverage generally pays only a small portion of medical costs outside Canada.','Travel medical insurance can help cover emergency medical treatment, hospital stays, and medical transportation.'], tips_list_fr:['La couverture santé provinciale ne couvre généralement qu\'une petite partie des frais médicaux à l\'extérieur du Canada.','L\'assurance médicale voyage peut couvrir les traitements médicaux d\'urgence, les séjours hospitaliers et le transport médical.'], official_links:[{label_en:'Manulife Travel Insurance', label_fr:'Assurance voyage Manulife', url:"https://manulife-travel.ca/dist/home.html?as=wllebovits"}], related:['tugo-travel-insurance'], reviewed:'August 2026', slug:'manulife-travel-insurance', label_en1:'Get a Quote →', label_fr1:'Obtenir une soumission →'},
@@ -2641,6 +2876,13 @@ function openResourcePopup(slug, opts){
         ${(() => {
           const href1 = cjhqSafeUrl(it.url);
           const label1 = `<span data-en>${esc(it.label_en1 || 'Go to Application →')}</span><span data-fr>${esc(it.label_fr1 || "Aller à la demande →")}</span>`;
+          // A resource may target an internal tool page rather than an external
+          // site. data-page lets the existing delegated router handle the click,
+          // so it stays in the SPA and modifier-clicks still work.
+          if(it.internalPage){
+            const p1 = pathForPage(it.internalPage);
+            return `<a class="btn dark" href="${cjhqEscapeHtml(p1)}" data-page="${cjhqEscapeHtml(it.internalPage)}" data-popup-open1>${label1}</a>`;
+          }
           // A real link, so it announces as a link, shows its destination on
           // hover, and supports middle-click / "copy link address". The
           // insurance disclaimer still intercepts the click below. If the URL
@@ -2677,6 +2919,7 @@ function openResourcePopup(slug, opts){
       </div>
     </div>`;
   body.querySelector('[data-popup-open1]').addEventListener('click', (e)=>{
+    if(it.internalPage){ closeResourceShareModal(); return; }   // the router navigates
     if(isInsurance){
       e.preventDefault();
       closeResourceShareModal(); showInsuranceDisclaimer(it.url); return;
@@ -3141,6 +3384,11 @@ function goPage(name, opts){
     builtIn.classList.add('active');
     highlightActiveNav(name);
     if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
+    if(name === 'child-travel-consent' && typeof window.__ctcOnOpen === 'function'){
+      // Re-seed the departure date so the default is always today, even if
+      // the tab has been open since yesterday.
+      window.__ctcOnOpen();
+    }
     if(!opts.skipHistory) updateUrlForPage(name);
     else { updatePageMeta(name); trackPageView(); }
     return;
@@ -3193,6 +3441,9 @@ const PAGE_META = {
   // paragraph. No new wording was written. The "— CJHQ" suffix matches every
   // other entry. Without this, a 404 inherited the previous page's title and
   // canonical - telling search engines an error page was a real one.
+  'child-travel-consent': { en:'Child Travel Consent Letter — CJHQ', fr:'Lettre de consentement au voyage d\'un enfant — CJHQ',
+                  desc_en:'Create a simple consent letter for your child\'s Canada-U.S. travel. Complete the form, generate your letter, then print and sign it.',
+                  desc_fr:'Créez une lettre de consentement simple pour le voyage Canada-États-Unis de votre enfant. Remplissez le formulaire, générez la lettre, puis imprimez-la et signez-la.' },
   '404':        { en:'Page Not Found — CJHQ',                          fr:'Page introuvable — CJHQ',
                   desc_en:'The link you followed may be outdated, or the page may have moved.',
                   desc_fr:'Le lien que vous avez suivi est peut-être désuet, ou la page a été déplacée.' },
@@ -3574,6 +3825,437 @@ if(contactForm){
     });
   });
 }
+
+
+/* ================= CHILD TRAVEL CONSENT LETTER =================
+   A self-contained utility. Everything happens in the browser: nothing is
+   sent anywhere, nothing is written to Firestore, nothing is persisted, and
+   the form values never touch the URL, analytics or the console. That matters
+   here because the form collects a child's passport number.
+
+   The PDF is written by hand rather than with a library. A text-only US Letter
+   document needs no dependency, and adding one would mean a third-party script
+   handling passport numbers - not a reasonable trade for a few hundred lines.
+   ============================================================== */
+(function initChildTravelConsent(){
+  const form = document.getElementById('ctcForm');
+  if(!form) return;
+
+  const $ = (id) => document.getElementById(id);
+  const isFr = () => document.documentElement.classList.contains('lang-fr');
+  let direction = null;      // 'ca-us' | 'us-ca'
+  let returnTouched = false; // don't clobber a return date the user chose
+
+  /* ---------- dates ---------- */
+  // Local date as yyyy-mm-dd. Built from the device clock every time the tool
+  // opens, never hard-coded and never cached, so the default rolls over daily.
+  function todayISO(){
+    const d = new Date();
+    const p = (n) => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  }
+  const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  // yyyy-mm-dd -> "August 30, 2026" / "30 août 2026". Parsed as plain numbers,
+  // not through Date(), so a timezone west of UTC cannot shift it a day back.
+  function prettyDate(iso){
+    if(!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
+    const [y,m,d] = iso.split('-').map(Number);
+    return isFr() ? `${d} ${MONTHS_FR[m-1]} ${y}` : `${MONTHS_EN[m-1]} ${d}, ${y}`;
+  }
+
+  function setDepartureDefault(){
+    const dep = $('ctcDeparture');
+    if(dep && !dep.value) dep.value = todayISO();
+    syncReturnMin();
+  }
+  function syncReturnMin(){
+    const dep = $('ctcDeparture'), ret = $('ctcReturn');
+    if(!dep || !ret) return;
+    ret.min = dep.value || '';
+    // Only correct a return date the user has not chosen themselves.
+    if(!returnTouched && ret.value && dep.value && ret.value < dep.value) ret.value = dep.value;
+  }
+  $('ctcDeparture').addEventListener('change', syncReturnMin);
+  $('ctcReturn').addEventListener('change', ()=>{ returnTouched = true; });
+
+  /* ---------- direction ---------- */
+  document.querySelectorAll('.ctc-dir-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      direction = btn.dataset.dir;
+      document.querySelectorAll('.ctc-dir-btn').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
+      hideError('direction');
+    });
+  });
+
+  /* ---------- "Other" issuing country ---------- */
+  $('ctcChildCountry').addEventListener('change', function(){
+    const other = $('ctcChildCountryOther');
+    other.hidden = this.value !== 'Other';
+    if(other.hidden) other.value = '';
+  });
+
+  /* ---------- validation ---------- */
+  const MSG = {
+    ctcChildName:     ['Please enter the child\u2019s full name.','Veuillez saisir le nom complet de l\u2019enfant.'],
+    ctcChildDob:      ['Please select the child\u2019s date of birth.','Veuillez choisir la date de naissance de l\u2019enfant.'],
+    ctcChildPassport: ['Please enter the passport number.','Veuillez saisir le num\u00e9ro de passeport.'],
+    ctcChildCountry:  ['Please select the passport issuing country.','Veuillez choisir le pays \u00e9metteur du passeport.'],
+    ctcAdultName:     ['Please enter the accompanying adult\u2019s full name.','Veuillez saisir le nom complet de l\u2019adulte accompagnateur.'],
+    ctcAdultRel:      ['Please enter the relationship to the child.','Veuillez pr\u00e9ciser le lien avec l\u2019enfant.'],
+    ctcAdultPassport: ['Please enter the passport number.','Veuillez saisir le num\u00e9ro de passeport.'],
+    ctcAdultPhone:    ['Please enter a phone number.','Veuillez saisir un num\u00e9ro de t\u00e9l\u00e9phone.'],
+    ctcParentName:    ['Please enter your full name.','Veuillez saisir votre nom complet.'],
+    ctcParentAddress: ['Please enter your address.','Veuillez saisir votre adresse.'],
+    ctcParentPhone:   ['Please enter a phone number.','Veuillez saisir un num\u00e9ro de t\u00e9l\u00e9phone.'],
+    ctcDeparture:     ['Please select a departure date.','Veuillez choisir une date de d\u00e9part.'],
+    ctcReturn:        ['Please select a return date.','Veuillez choisir une date de retour.'],
+    ctcDestination:   ['Please enter the destination.','Veuillez saisir la destination.'],
+    direction:        ['Please choose a travel direction.','Veuillez choisir le sens du voyage.'],
+    returnBefore:     ['The return date cannot be earlier than the departure date.','La date de retour ne peut pas pr\u00e9c\u00e9der la date de d\u00e9part.']
+  };
+  const t = (k) => MSG[k][isFr() ? 1 : 0];
+
+  function showError(key, msgKey){
+    const el = $('err-' + key);
+    if(el){ el.textContent = t(msgKey || key); el.hidden = false; }
+    const field = $(key);
+    if(field){ field.setAttribute('aria-invalid','true'); field.setAttribute('aria-describedby','err-'+key); }
+  }
+  function hideError(key){
+    const el = $('err-' + key);
+    if(el) el.hidden = true;
+    const field = $(key);
+    if(field){ field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby'); }
+  }
+  const REQUIRED = ['ctcChildName','ctcChildDob','ctcChildPassport','ctcChildCountry',
+    'ctcAdultName','ctcAdultRel','ctcAdultPassport','ctcAdultPhone',
+    'ctcParentName','ctcParentAddress','ctcParentPhone',
+    'ctcDeparture','ctcReturn','ctcDestination'];
+
+  function validate(){
+    let firstBad = null;
+    REQUIRED.forEach(hideError);
+    hideError('direction');
+    $('ctcSummaryErr').hidden = true;
+
+    if(!direction){ showError('direction'); firstBad = firstBad || document.querySelector('.ctc-dir-btn'); }
+    REQUIRED.forEach(id=>{
+      const el = $(id);
+      if(!el.value.trim()){ showError(id); firstBad = firstBad || el; }
+    });
+    const dep = $('ctcDeparture').value, ret = $('ctcReturn').value;
+    if(dep && ret && ret < dep){ showError('ctcReturn','returnBefore'); firstBad = firstBad || $('ctcReturn'); }
+
+    if(firstBad){
+      const s = $('ctcSummaryErr');
+      s.textContent = isFr()
+        ? 'Veuillez remplir les champs indiqu\u00e9s ci-dessous.'
+        : 'Please complete the fields marked below.';
+      s.hidden = false;
+      firstBad.focus();
+      firstBad.scrollIntoView({block:'center', behavior:'smooth'});
+      return false;
+    }
+    return true;
+  }
+
+  /* ---------- gather ---------- */
+  function issuingCountry(){
+    const sel = $('ctcChildCountry').value;
+    return sel === 'Other' ? ($('ctcChildCountryOther').value.trim() || 'Other') : sel;
+  }
+  function collect(){
+    const v = (id) => $(id).value.trim();
+    return {
+      dir: direction,
+      childName: v('ctcChildName'), childDob: v('ctcChildDob'),
+      childPassport: v('ctcChildPassport'), childCountry: issuingCountry(),
+      adultName: v('ctcAdultName'), adultRel: v('ctcAdultRel'),
+      adultPassport: v('ctcAdultPassport'), adultPhone: v('ctcAdultPhone'), adultEmail: v('ctcAdultEmail'),
+      parentName: v('ctcParentName'), parentAddress: v('ctcParentAddress'),
+      parentPhone: v('ctcParentPhone'), parentEmail: v('ctcParentEmail'),
+      departure: v('ctcDeparture'), ret: v('ctcReturn'), destination: v('ctcDestination')
+    };
+  }
+
+  /* ---------- letter copy ---------- */
+  function L(d){
+    const fr = isFr();
+    const fromTo = fr
+      ? (d.dir==='ca-us' ? ['du Canada','aux \u00c9tats-Unis'] : ['des \u00c9tats-Unis','au Canada'])
+      : (d.dir==='ca-us' ? ['Canada','the United States'] : ['the United States','Canada']);
+    const dirLine = fr
+      ? (d.dir==='ca-us' ? 'Sens du voyage : Canada \u2192 \u00c9tats-Unis' : 'Sens du voyage : \u00c9tats-Unis \u2192 Canada')
+      : (d.dir==='ca-us' ? 'Travel Direction: Canada \u2192 United States' : 'Travel Direction: United States \u2192 Canada');
+    const body = fr
+      ? [`Je soussign\u00e9(e), ${d.parentName}, parent ou tuteur l\u00e9gal de ${d.childName}, n\u00e9(e) le ${prettyDate(d.childDob)}, consens \u00e0 ce que mon enfant voyage ${fromTo[0]} ${fromTo[1]} avec ${d.adultName}, ${d.adultRel}, du ${prettyDate(d.departure)} au ${prettyDate(d.ret)}.`,
+         `Le num\u00e9ro de passeport de l\u2019enfant est ${d.childPassport}, d\u00e9livr\u00e9 par : ${d.childCountry}.`,
+         `La destination du voyage est ${d.destination}.`,
+         `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour le voyage mentionn\u00e9 ci-dessus.`]
+      : [`I, ${d.parentName}, am the parent/legal guardian of ${d.childName}, born ${prettyDate(d.childDob)}, and give my consent for my child to travel from ${fromTo[0]} to ${fromTo[1]} with ${d.adultName}, ${d.adultRel}, from ${prettyDate(d.departure)} through ${prettyDate(d.ret)}.`,
+         `The child\u2019s passport number is ${d.childPassport}, issued by ${d.childCountry}.`,
+         `The destination of travel is ${d.destination}.`,
+         `I authorize the accompanying adult to travel with the child for the above-mentioned trip.`];
+    return {
+      title: fr ? 'LETTRE DE CONSENTEMENT AU VOYAGE D\u2019UN ENFANT' : 'CHILD TRAVEL CONSENT LETTER',
+      sub: fr ? 'Pour les voyages entre le Canada et les \u00c9tats-Unis' : 'For Travel Between Canada and the United States',
+      dirLine, salutation: fr ? '\u00c0 qui de droit :' : 'To Whom It May Concern:', body,
+      secChild:  fr ? 'RENSEIGNEMENTS SUR L\u2019ENFANT' : 'CHILD INFORMATION',
+      secAdult:  fr ? 'ADULTE ACCOMPAGNATEUR' : 'ACCOMPANYING ADULT',
+      secParent: fr ? 'PARENT / TUTEUR DONNANT SON CONSENTEMENT' : 'PARENT / GUARDIAN PROVIDING CONSENT',
+      secTravel: fr ? 'RENSEIGNEMENTS SUR LE VOYAGE' : 'TRAVEL INFORMATION',
+      sigParent: fr ? 'SIGNATURE DU PARENT / TUTEUR' : 'PARENT / GUARDIAN SIGNATURE',
+      sigOther:  fr ? 'SIGNATURE D\u2019UN AUTRE PARENT / TUTEUR' : 'ADDITIONAL PARENT / GUARDIAN SIGNATURE',
+      sigWit:    fr ? 'T\u00c9MOIN / NOTAIRE' : 'WITNESS / NOTARY',
+      lblSig: fr ? 'Signature' : 'Signature',
+      lblPrinted: fr ? 'Nom en lettres moul\u00e9es' : 'Printed Name',
+      lblDate: fr ? 'Date' : 'Date',
+      k: fr
+        ? {name:'Nom complet :', dob:'Date de naissance :', passport:'Num\u00e9ro de passeport :', country:'Pays \u00e9metteur du passeport :',
+           rel:'Lien avec l\u2019enfant :', phone:'T\u00e9l\u00e9phone :', email:'Courriel :', address:'Adresse :',
+           dep:'Date de d\u00e9part :', retn:'Date de retour :', dest:'Destination :'}
+        : {name:'Full Name:', dob:'Date of Birth:', passport:'Passport Number:', country:'Passport Issuing Country:',
+           rel:'Relationship to Child:', phone:'Phone:', email:'Email:', address:'Address:',
+           dep:'Departure Date:', retn:'Return Date:', dest:'Destination:'},
+      note: fr
+        ? 'Important : cette lettre vise \u00e0 documenter le consentement parental ou du tuteur au voyage. Les voyageurs devraient avoir sur eux des pi\u00e8ces d\u2019identit\u00e9 appropri\u00e9es ainsi que tout document pertinent relatif \u00e0 la garde, au partage des responsabilit\u00e9s parentales ou toute ordonnance judiciaire applicable.'
+        : 'Important: This letter is intended to document parental/guardian consent for travel. Travellers should carry appropriate identification and any applicable custody, parenting, or court documentation.'
+    };
+  }
+
+  /* ---------- on-screen preview ---------- */
+  function renderPreview(d){
+    const x = L(d), esc = cjhqEscapeHtml;
+    const row = (k,v) => v ? `<div class="ctc-row"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>` : '';
+    const sig = (heading) => `<h3>${esc(heading)}</h3><div class="ctc-siglines">
+        <p class="ctc-sigline">${esc(x.lblSig)}: _________________________________________</p>
+        <p class="ctc-sigline">${esc(x.lblPrinted)}: ____________________________________</p>
+        <p class="ctc-sigline">${esc(x.lblDate)}: ______________________________________</p></div>`;
+    $('ctcLetter').innerHTML = `
+      <div class="ctc-brand">CJHQ</div>
+      <h2>${esc(x.title)}</h2>
+      <p class="ctc-sub">${esc(x.sub)}</p>
+      <p class="ctc-dirline">${esc(x.dirLine)}</p>
+      <p>${esc(x.salutation)}</p>
+      ${x.body.map(pp=>`<p>${esc(pp)}</p>`).join('')}
+      <h3>${esc(x.secChild)}</h3>
+      ${row(x.k.name,d.childName)}${row(x.k.dob,prettyDate(d.childDob))}${row(x.k.passport,d.childPassport)}${row(x.k.country,d.childCountry)}
+      <h3>${esc(x.secAdult)}</h3>
+      ${row(x.k.name,d.adultName)}${row(x.k.rel,d.adultRel)}${row(x.k.passport,d.adultPassport)}${row(x.k.phone,d.adultPhone)}${row(x.k.email,d.adultEmail)}
+      <h3>${esc(x.secParent)}</h3>
+      ${row(x.k.name,d.parentName)}${row(x.k.address,d.parentAddress.replace(/\s*\n\s*/g,', '))}${row(x.k.phone,d.parentPhone)}${row(x.k.email,d.parentEmail)}
+      <h3>${esc(x.secTravel)}</h3>
+      ${row(x.k.dep,prettyDate(d.departure))}${row(x.k.retn,prettyDate(d.ret))}${row(x.k.dest,d.destination)}
+      ${sig(x.sigParent)}${sig(x.sigOther)}${sig(x.sigWit)}
+      <p class="ctc-note">${esc(x.note)}</p>`;
+  }
+
+  /* ================= minimal PDF writer =================
+     US Letter, 612 x 792 points, portrait, base-14 fonts with WinAnsiEncoding
+     (covers the accented characters French names and Qu\u00e9bec place names need).
+     No external library, so nothing third-party ever sees this data. */
+  function pdfEscape(str){
+    return String(str).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+  }
+  // WinAnsi is a single-byte encoding; map the characters this document can
+  // actually contain and fall back to a plain ASCII equivalent otherwise, so a
+  // stray character can never corrupt the file.
+  const WINANSI = {'\u2019':"'", '\u2018':"'", '\u201C':'"', '\u201D':'"', '\u2013':'-', '\u2014':'-', '\u2192':'->', '\u00a0':' '};
+  function toWinAnsi(str){
+    let out = '';
+    for(const ch of String(str)){
+      if(WINANSI[ch]){ out += WINANSI[ch]; continue; }
+      const c = ch.codePointAt(0);
+      out += (c <= 0xFF) ? ch : '?';
+    }
+    return out;
+  }
+  const FONT_W = {}; // crude width table: Helvetica averages ~0.5em, bold ~0.55em
+  function textWidth(str, size, bold){
+    return String(str).length * size * (bold ? 0.545 : 0.5);
+  }
+  function wrapText(str, size, bold, maxW){
+    const words = String(str).split(/\s+/).filter(Boolean);
+    const lines = []; let cur = '';
+    words.forEach(w=>{
+      const probe = cur ? cur + ' ' + w : w;
+      if(textWidth(probe, size, bold) > maxW && cur){ lines.push(cur); cur = w; }
+      else cur = probe;
+    });
+    if(cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  }
+
+  function buildPdf(d){
+    const x = L(d);
+    const PW = 612, PH = 792, M = 50.4; // 0.7in margins
+    const CW = PW - M*2;
+    const pages = [];
+    let ops = [], y = PH - M;
+
+    const newPage = () => { pages.push(ops.join('\n')); ops = []; y = PH - M; };
+    const need = (h) => { if(y - h < M){ newPage(); } };
+    function put(str, size, bold, indent, gap, align){
+      const f = bold ? '/F2' : '/F1';
+      wrapText(str, size, bold, CW - (indent||0)).forEach(line=>{
+        need(size * 1.35);
+        let tx = M + (indent||0);
+        if(align === 'center') tx = (PW - textWidth(line, size, bold)) / 2;
+        ops.push(`BT ${f} ${size} Tf 1 0 0 1 ${tx.toFixed(2)} ${(y - size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(line))}) Tj ET`);
+        y -= size * 1.35;
+      });
+      y -= (gap || 0);
+    }
+    function rule(){ need(8); ops.push(`0.72 w 0.75 G ${M} ${(y-3).toFixed(2)} m ${PW-M} ${(y-3).toFixed(2)} l S`); y -= 9; }
+    function kv(k, v){
+      if(!v) return;
+      const kw = 132, size = 10;
+      const lines = wrapText(v, size, false, CW - kw);
+      need(size * 1.35 * lines.length);
+      ops.push(`BT /F2 ${size} Tf 1 0 0 1 ${M} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(k))}) Tj ET`);
+      lines.forEach((line,i)=>{
+        ops.push(`BT /F1 ${size} Tf 1 0 0 1 ${(M+kw).toFixed(2)} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(line))}) Tj ET`);
+        y -= size * 1.35;
+        if(i < lines.length-1) need(size*1.35);
+      });
+      y -= 1.5;
+    }
+    function section(title){ y -= 7; need(30); put(title, 10, true, 0, 1); rule(); }
+    function sigBlock(heading){
+      section(heading);
+      [x.lblSig, x.lblPrinted, x.lblDate].forEach(lbl=>{
+        need(26);
+        put(lbl + ': ' + '_'.repeat(46), 10, false, 0, 5);
+      });
+    }
+
+    put('CJHQ', 12, true, 0, 3, 'center');
+    put(x.title, 15, true, 0, 2, 'center');
+    put(x.sub, 9.5, false, 0, 2, 'center');
+    put(x.dirLine, 9.5, true, 0, 3, 'center');
+    rule();
+    y -= 4;
+    put(x.salutation, 10.5, false, 0, 7);
+    x.body.forEach(pp => put(pp, 10.5, false, 0, 7));
+
+    section(x.secChild);
+    kv(x.k.name, d.childName); kv(x.k.dob, prettyDate(d.childDob));
+    kv(x.k.passport, d.childPassport); kv(x.k.country, d.childCountry);
+
+    section(x.secAdult);
+    kv(x.k.name, d.adultName); kv(x.k.rel, d.adultRel);
+    kv(x.k.passport, d.adultPassport); kv(x.k.phone, d.adultPhone); kv(x.k.email, d.adultEmail);
+
+    section(x.secParent);
+    kv(x.k.name, d.parentName); kv(x.k.address, d.parentAddress.replace(/\s*\n\s*/g, ', '));
+    kv(x.k.phone, d.parentPhone); kv(x.k.email, d.parentEmail);
+
+    section(x.secTravel);
+    kv(x.k.dep, prettyDate(d.departure)); kv(x.k.retn, prettyDate(d.ret)); kv(x.k.dest, d.destination);
+
+    sigBlock(x.sigParent); sigBlock(x.sigOther); sigBlock(x.sigWit);
+
+    y -= 6; rule();
+    put(x.note, 8.5, false, 0, 0);
+    newPage();
+
+    // ---- assemble the PDF objects ----
+    const objs = [];
+    const kids = pages.map((_,i)=> `${4 + i} 0 R`).join(' ');
+    objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+    objs[2] = `<< /Type /Pages /Count ${pages.length} /Kids [${kids}] >>`;
+    objs[3] = '<< /Font << /F1 ' + (4 + pages.length*2) + ' 0 R /F2 ' + (5 + pages.length*2) + ' 0 R >> >>';
+    pages.forEach((content, i)=>{
+      const pageObj = 4 + i;
+      const streamObj = 4 + pages.length + i;
+      objs[pageObj] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources 3 0 R /Contents ${streamObj} 0 R >>`;
+      objs[streamObj] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+    });
+    objs[4 + pages.length*2] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+    objs[5 + pages.length*2] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+
+    let out = '%PDF-1.4\n';
+    const offsets = [];
+    for(let i = 1; i < objs.length; i++){
+      if(objs[i] === undefined) continue;
+      offsets[i] = out.length;
+      out += `${i} 0 obj\n${objs[i]}\nendobj\n`;
+    }
+    const xrefPos = out.length;
+    const maxObj = objs.length;
+    out += `xref\n0 ${maxObj}\n0000000000 65535 f \n`;
+    for(let i = 1; i < maxObj; i++){
+      out += (offsets[i] === undefined ? '0000000000 65535 f \n'
+                                       : String(offsets[i]).padStart(10,'0') + ' 00000 n \n');
+    }
+    out += `trailer\n<< /Size ${maxObj} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+
+    // Latin-1 bytes: WinAnsi is single-byte, so each char maps to one byte.
+    const bytes = new Uint8Array(out.length);
+    for(let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 0xFF;
+    return new Blob([bytes], {type:'application/pdf'});
+  }
+
+  function safeFileName(name){
+    const cleaned = String(name).normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
+    return cleaned || 'Child';
+  }
+
+  /* ---------- screens ---------- */
+  function showPreview(){
+    $('ctcFormScreen').hidden = true;
+    $('ctcPreviewScreen').hidden = false;
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function showForm(){
+    $('ctcPreviewScreen').hidden = true;
+    $('ctcFormScreen').hidden = false;   // values are untouched, so nothing is lost
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    if(!validate()) return;
+    renderPreview(collect());
+    showPreview();
+  });
+  $('ctcEditBtn').addEventListener('click', showForm);
+  $('ctcPrintBtn').addEventListener('click', ()=> window.print());
+  $('ctcDownloadBtn').addEventListener('click', ()=>{
+    const d = collect();
+    let url;
+    try{
+      const blob = buildPdf(d);
+      url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CJHQ-Child-Travel-Consent-${safeFileName(d.childName)}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(err){
+      // Never surface form values in an error.
+      console.warn('[CJHQ] consent letter PDF generation failed');
+      alert(isFr() ? 'Le PDF n\u2019a pas pu \u00eatre g\u00e9n\u00e9r\u00e9. Vous pouvez utiliser « Imprimer la lettre » \u00e0 la place.'
+                   : 'The PDF could not be generated. You can use \u201cPrint Letter\u201d instead.');
+    }finally{
+      if(url) setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    }
+  });
+
+  // Re-render the preview if the language is switched while it is open.
+  document.addEventListener('cjhq:langchange', ()=>{
+    if(!$('ctcPreviewScreen').hidden) renderPreview(collect());
+  });
+
+  // Called by goPage() so the departure default is today's date on every visit.
+  window.__ctcOnOpen = function(){
+    setDepartureDefault();
+    if(!$('ctcPreviewScreen').hidden) showForm();
+  };
+  setDepartureDefault();
+})();
+
 </script>
 
 <script>
@@ -3987,6 +4669,7 @@ const SITE_PAGES = [
   { id:'privacy', en:'Privacy Policy', fr:'Politique de confidentialité' },
   { id:'terms', en:'Terms of Use', fr:'Conditions d\'utilisation' },
   { id:'accessibility', en:'Accessibility Statement', fr:'Déclaration d\'accessibilité' },
+  { id:'child-travel-consent', en:'Child Travel Consent Letter', fr:'Lettre de consentement au voyage d\'un enfant' },
 ];
 async function renderPagesList(){
   const hidden = await fetchCollection('page_settings');
