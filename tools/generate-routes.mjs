@@ -38,6 +38,7 @@ const ROUTES = [
   'privacy',
   'terms',
   'accessibility',
+  'child-travel-consent',
 ];
 
 // The admin panel is ~24 KB of markup no visitor can use. It lives in
