@@ -1838,6 +1838,22 @@
           </fieldset>
 
           <fieldset class="ctc-block">
+            <legend class="ctc-legend"><span data-en>Who is the child travelling with?</span><span data-fr>Avec qui l'enfant voyage-t-il?</span></legend>
+            <div class="ctc-dir" role="radiogroup" aria-label="Who is the child travelling with">
+              <button type="button" class="ctc-dir-btn ctc-with-btn" data-with="parent" role="radio" aria-checked="false">
+                <span class="ctc-dir-txt" data-en>One parent / guardian</span><span class="ctc-dir-txt" data-fr>Un parent / tuteur</span>
+              </button>
+              <button type="button" class="ctc-dir-btn ctc-with-btn" data-with="adult" role="radio" aria-checked="false">
+                <span class="ctc-dir-txt" data-en>Another adult</span><span class="ctc-dir-txt" data-fr>Un autre adulte</span>
+              </button>
+              <button type="button" class="ctc-dir-btn ctc-with-btn" data-with="alone" role="radio" aria-checked="false">
+                <span class="ctc-dir-txt" data-en>Travelling alone</span><span class="ctc-dir-txt" data-fr>Voyage seul(e)</span>
+              </button>
+            </div>
+            <p class="ctc-err" id="err-travelWith" hidden></p>
+          </fieldset>
+
+          <fieldset class="ctc-block">
             <legend class="ctc-legend"><span data-en>Child Information</span><span data-fr>Renseignements sur l'enfant</span></legend>
             <div class="form-group">
               <label for="ctcChildName"><span data-en>Child's Full Name</span><span data-fr>Nom complet de l'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>
@@ -1869,7 +1885,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="ctc-block">
+          <fieldset class="ctc-block" id="ctcAdultBlock">
             <legend class="ctc-legend"><span data-en>Travelling With</span><span data-fr>Accompagné de</span></legend>
             <div class="form-group">
               <label for="ctcAdultName"><span data-en>Accompanying Adult's Full Name</span><span data-fr>Nom complet de l'adulte accompagnateur</span> <abbr class="ctc-req" title="required">*</abbr></label>
@@ -1903,6 +1919,11 @@
               <label for="ctcParentName"><span data-en>Full Name</span><span data-fr>Nom complet</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <input type="text" id="ctcParentName" autocomplete="off">
               <p class="ctc-err" id="err-ctcParentName" hidden></p>
+            </div>
+            <div class="form-group" id="ctcParent2Wrap" hidden>
+              <label for="ctcParent2Name"><span data-en>Second Parent / Guardian Full Name</span><span data-fr>Nom complet du second parent / tuteur</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <input type="text" id="ctcParent2Name" autocomplete="off">
+              <p class="ctc-err" id="err-ctcParent2Name" hidden></p>
             </div>
             <div class="form-group">
               <label for="ctcParentPhone"><span data-en>Phone</span><span data-fr>Téléphone</span> <abbr class="ctc-req" title="required">*</abbr></label>
@@ -4234,7 +4255,8 @@ if(contactForm){
 
   const $ = (id) => document.getElementById(id);
   const isFr = () => document.documentElement.classList.contains('lang-fr');
-  let direction = null;      // 'ca-us' | 'us-ca'
+  let direction = null;      // 'ca-us' | 'us-ca' | 'custom'
+  let travelWith = null;     // 'parent' | 'adult' | 'alone'
   let returnTouched = false; // don't clobber a return date the user chose
 
   /* ---------- dates ---------- */
@@ -4271,10 +4293,30 @@ if(contactForm){
   $('ctcReturn').addEventListener('change', ()=>{ returnTouched = true; });
 
   /* ---------- direction ---------- */
-  document.querySelectorAll('.ctc-dir-btn').forEach(btn=>{
+  // Who the child travels with: switches the exact letter wording, the
+  // signature blocks and whether the accompanying-adult section applies.
+  document.querySelectorAll('.ctc-with-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      travelWith = btn.dataset.with;
+      document.querySelectorAll('.ctc-with-btn').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
+      hideError('travelWith');
+      const alone = travelWith === 'alone';
+      $('ctcAdultBlock').hidden = alone;
+      $('ctcParent2Wrap').hidden = !alone;
+      if(alone){
+        ['ctcAdultName','ctcAdultRel','ctcAdultPassport','ctcAdultPhone','ctcAdultEmail'].forEach(id=>{
+          const el = $(id); if(el){ el.value=''; hideError(id); }
+        });
+      }else{
+        $('ctcParent2Name').value = ''; hideError('ctcParent2Name');
+      }
+    });
+  });
+
+  document.querySelectorAll('.ctc-dir-btn:not(.ctc-with-btn)').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       direction = btn.dataset.dir;
-      document.querySelectorAll('.ctc-dir-btn').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
+      document.querySelectorAll('.ctc-dir-btn:not(.ctc-with-btn)').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
       hideError('direction');
       // "Other countries" reveals two free-text country fields. They are only
       // required while that option is selected.
@@ -4327,6 +4369,8 @@ if(contactForm){
     ctcReturn:        ['Please select a return date.','Veuillez choisir une date de retour.'],
     ctcDestination:   ['Please enter the destination.','Veuillez saisir la destination.'],
     direction:        ['Please choose a travel direction.','Veuillez choisir le sens du voyage.'],
+    travelWith:       ['Please choose who the child is travelling with.','Veuillez indiquer avec qui l\u2019enfant voyage.'],
+    ctcParent2Name:   ['Please enter the second parent or guardian\u2019s full name.','Veuillez saisir le nom complet du second parent ou tuteur.'],
     ctcFromCountry:   ['Please enter the country you are travelling from.','Veuillez saisir le pays de d\u00e9part.'],
     ctcToCountry:     ['Please enter the country you are travelling to.','Veuillez saisir le pays d\u2019arriv\u00e9e.'],
     returnBefore:     ['The return date cannot be earlier than the departure date.','La date de retour ne peut pas pr\u00e9c\u00e9der la date de d\u00e9part.']
@@ -4358,14 +4402,22 @@ if(contactForm){
     hideError('direction');
     $('ctcSummaryErr').hidden = true;
 
-    if(!direction){ showError('direction'); firstBad = firstBad || document.querySelector('.ctc-dir-btn'); }
+    if(!travelWith){ showError('travelWith'); firstBad = firstBad || document.querySelector('.ctc-with-btn'); }
+    if(travelWith === 'alone'){
+      hideError('ctcParent2Name');
+      if(!$('ctcParent2Name').value.trim()){ showError('ctcParent2Name'); firstBad = firstBad || $('ctcParent2Name'); }
+    }
+    if(!direction){ showError('direction'); firstBad = firstBad || document.querySelector('.ctc-dir-btn:not(.ctc-with-btn)'); }
     if(direction === 'custom'){
       ['ctcFromCountry','ctcToCountry'].forEach(id=>{
         hideError(id);
         if(!$(id).value.trim()){ showError(id); firstBad = firstBad || $(id); }
       });
     }
-    REQUIRED.forEach(id=>{
+    // Travelling alone hides the accompanying-adult section, so requiring that
+    // name would produce an error against a field the user cannot see or fill.
+    const required = REQUIRED.filter(id => !(travelWith === 'alone' && id === 'ctcAdultName'));
+    required.forEach(id=>{
       const el = $(id);
       if(!el.value.trim()){ showError(id); firstBad = firstBad || el; }
     });
@@ -4395,7 +4447,7 @@ if(contactForm){
   // page size can never drift from the filled-in version.
   const FILL = '\u00a0'.repeat(2) + '_'.repeat(26);
   function blankData(){
-    return { blank:true, dir:direction || '',
+    return { blank:true, dir:direction || '', travelWith: travelWith || 'adult', parent2Name:'',
       fromCountry:'', toCountry:'',
       childName:'', childDob:'', childPassport:'', childCountry:'',
       adultName:'', adultRel:'', adultPassport:'', adultPhone:'', adultEmail:'',
@@ -4407,6 +4459,7 @@ if(contactForm){
     const v = (id) => $(id).value.trim();
     return {
       dir: direction,
+      travelWith, parent2Name: v('ctcParent2Name'),
       fromCountry: v('ctcFromCountry'), toCountry: v('ctcToCountry'),
       childName: v('ctcChildName'), childDob: v('ctcChildDob'),
       childPassport: v('ctcChildPassport'), childCountry: issuingCountry(),
@@ -4449,50 +4502,84 @@ if(contactForm){
         ? 'Sens du voyage :   [  ] Canada \u2192 \u00c9tats-Unis      [  ] \u00c9tats-Unis \u2192 Canada'
         : 'Travel Direction:   [  ] Canada \u2192 United States      [  ] United States \u2192 Canada';
     }
-    // Round trip: one consent letter must cover the outbound AND return leg.
-    // The wording only mentions the return journey when a return date exists,
-    // since that field is not mandatory.
+    // Exact supplied wording. Only the bracketed values are substituted and the
+    // correct variant chosen from: travel direction, who the child travels
+    // with, whether a return date exists, and whether a relationship was given.
     const hasReturn = d.blank ? true : !!d.ret;
     const retDate   = d.blank ? FILL : prettyDate(d.ret);
     const depDate   = d.blank ? FILL : prettyDate(d.departure);
-    // Back-leg wording reverses the outbound countries.
-    const backFr = `, y compris le voyage de retour ${fromTo[1].replace(/^aux /,'des ').replace(/^au /,'du ').replace(/^vers /,'de ')} ${fromTo[0].replace(/^du /,'vers le ').replace(/^des /,'vers les ').replace(/^de /,'vers ')}`;
-    const backEn = `, including the return journey from ${fromTo[1]} back to ${fromTo[0]}`;
+    const dob       = d.blank ? FILL : prettyDate(d.childDob);
+    const origin    = fromTo[0];
+    const destCtry  = fromTo[1];
+    const who       = d.travelWith || 'adult';
+    const rel       = (d.adultRel || '').trim();
 
-    const body = fr
-      ? [`Je soussign\u00e9(e), ${B(d.parentName)}, parent ou tuteur l\u00e9gal de ${B(d.childName)}, n\u00e9(e) le ${d.blank ? FILL : prettyDate(d.childDob)}, consens \u00e0 ce que mon enfant voyage ${fromTo[0]} ${fromTo[1]} avec ${B(d.adultName)}${(d.blank || d.adultRel) ? `, ${B(d.adultRel)}` : ''}, ${hasReturn ? `du ${depDate} au ${retDate}${backFr}` : `\u00e0 partir du ${depDate}`}.`,
-         `Le num\u00e9ro de passeport de l\u2019enfant est ${B(d.childPassport)}, d\u00e9livr\u00e9 par : ${B(d.childCountry)}.`,
-         `La destination du voyage est ${B(d.destination)}.`,
-         hasReturn
-           ? `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour l\u2019aller et le retour de ce voyage.`
-           : `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant pour le voyage mentionn\u00e9 ci-dessus.`]
-      : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${d.blank ? FILL : prettyDate(d.childDob)}, and give my consent for my child to travel from ${fromTo[0]} to ${fromTo[1]} with ${B(d.adultName)}${(d.blank || d.adultRel) ? `, ${B(d.adultRel)}` : ''}, ${hasReturn ? `from ${depDate} through ${retDate}${backEn}` : `departing ${depDate}`}.`,
-         `The child\u2019s passport number is ${B(d.childPassport)}, issued by ${B(d.childCountry)}.`,
-         `The destination of travel is ${B(d.destination)}.`,
-         hasReturn
-           ? `I authorize the accompanying adult to travel with the child for both the outbound and return journey of the above-mentioned trip.`
-           : `I authorize the accompanying adult to travel with the child for the above-mentioned trip.`];
-        return {
+    // Round-trip clause, appended only when a return date exists.
+    const tripEn = hasReturn
+      ? ` from ${depDate} through ${retDate}, including the return journey from ${destCtry} back to ${origin}`
+      : '';
+    const tripFr = hasReturn
+      ? ` du ${depDate} au ${retDate}, y compris le voyage de retour depuis ${destCtry} vers ${origin}`
+      : '';
+    const bothEn = hasReturn ? ' for both the outbound and return journey of the above-mentioned trip'
+                             : ' for the above-mentioned trip';
+    const bothFr = hasReturn ? ' pour l\u2019aller et le retour du voyage mentionn\u00e9 ci-dessus'
+                             : ' pour le voyage mentionn\u00e9 ci-dessus';
+
+    let body;
+    if(who === 'alone'){
+      const p1 = B(d.parentName), p2 = B(d.parent2Name);
+      body = fr
+        ? [`Nous, ${p1} et ${p2}, sommes les parents / tuteurs l\u00e9gaux de ${B(d.childName)}, n\u00e9(e) le ${dob}, et consentons \u00e0 ce que notre enfant voyage seul(e) de ${origin} \u00e0 ${destCtry}${tripFr}.`,
+           `La destination du voyage est ${B(d.destination)}.`,
+           `Nous autorisons notre enfant \u00e0 voyager seul(e)${bothFr}.`]
+        : [`We, ${p1} and ${p2}, are the parents/legal guardians of ${B(d.childName)}, born ${dob}, and give our consent for our child to travel alone from ${origin} to ${destCtry}${tripEn}.`,
+           `The destination of travel is ${B(d.destination)}.`,
+           `We authorize our child to travel alone${bothEn}.`];
+    }else{
+      const companion = B(d.adultName);
+      // "accompanying parent" when the child travels with a parent, otherwise
+      // "accompanying adult" - and the relationship only appears if supplied.
+      const authEn = who === 'parent'
+        ? `I authorize the accompanying parent to travel with the child${bothEn}.`
+        : (rel && !d.blank
+            ? `I authorize ${companion}, ${rel}, to travel with the child${bothEn}.`
+            : `I authorize the accompanying adult to travel with the child${bothEn}.`);
+      const authFr = who === 'parent'
+        ? `J\u2019autorise le parent accompagnateur \u00e0 voyager avec l\u2019enfant${bothFr}.`
+        : (rel && !d.blank
+            ? `J\u2019autorise ${companion}, ${rel}, \u00e0 voyager avec l\u2019enfant${bothFr}.`
+            : `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant${bothFr}.`);
+      body = fr
+        ? [`Je soussign\u00e9(e), ${B(d.parentName)}, parent ou tuteur l\u00e9gal de ${B(d.childName)}, n\u00e9(e) le ${dob}, consens \u00e0 ce que mon enfant voyage de ${origin} \u00e0 ${destCtry} avec ${companion}${tripFr}.`,
+           `La destination du voyage est ${B(d.destination)}.`,
+           authFr]
+        : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${dob}, and give my consent for my child to travel from ${origin} to ${destCtry} with ${companion}${tripEn}.`,
+           `The destination of travel is ${B(d.destination)}.`,
+           authEn];
+    }
+    return {
       title: fr ? 'LETTRE DE CONSENTEMENT AU VOYAGE D\u2019UN ENFANT' : 'CHILD TRAVEL CONSENT LETTER',
-      sub: d.dir === 'custom'
-        ? (fr ? 'Consentement au voyage international d\u2019un enfant' : 'Consent for a Child\u2019s International Travel')
-        : (fr ? 'Pour les voyages entre le Canada et les \u00c9tats-Unis' : 'For Travel Between Canada and the United States'),
-      dirLine, salutation: fr ? '\u00c0 qui de droit :' : 'To Whom It May Concern:', body,
+      showAdult: who !== 'alone', salutation: fr ? '\u00c0 qui de droit :' : 'To Whom It May Concern:', body,
       secChild:  fr ? 'RENSEIGNEMENTS SUR L\u2019ENFANT' : 'CHILD INFORMATION',
       secAdult:  fr ? 'ADULTE ACCOMPAGNATEUR' : 'ACCOMPANYING ADULT',
       secParent: fr ? 'PARENT / TUTEUR DONNANT SON CONSENTEMENT' : 'PARENT / GUARDIAN PROVIDING CONSENT',
       secTravel: fr ? 'RENSEIGNEMENTS SUR LE VOYAGE' : 'TRAVEL INFORMATION',
-      sigParent: fr ? 'SIGNATURE DU PARENT / TUTEUR' : 'PARENT / GUARDIAN SIGNATURE',
-      sigOther:  fr ? 'SIGNATURE D\u2019UN AUTRE PARENT / TUTEUR' : 'ADDITIONAL PARENT / GUARDIAN SIGNATURE',
+      sigParent: who === 'alone'
+        ? (fr ? 'SIGNATURE DU PARENT / TUTEUR 1' : 'PARENT / GUARDIAN 1 SIGNATURE')
+        : (fr ? 'SIGNATURE DU PARENT / TUTEUR' : 'PARENT / GUARDIAN SIGNATURE'),
+      sigOther: who === 'alone'
+        ? (fr ? 'SIGNATURE DU PARENT / TUTEUR 2' : 'PARENT / GUARDIAN 2 SIGNATURE')
+        : (fr ? 'SIGNATURE D\u2019UN AUTRE PARENT / TUTEUR' : 'ADDITIONAL PARENT / GUARDIAN SIGNATURE'),
       sigWit:    fr ? 'T\u00c9MOIN / NOTAIRE' : 'WITNESS / NOTARY',
       lblSig: fr ? 'Signature' : 'Signature',
       lblPrinted: fr ? 'Nom en lettres moul\u00e9es' : 'Printed Name',
       lblDate: fr ? 'Date' : 'Date',
       k: fr
-        ? {name:'Nom complet :', dob:'Date de naissance :', passport:'Num\u00e9ro de passeport :', country:'Pays \u00e9metteur du passeport :',
+        ? {name:'Nom complet :', name2:'Second parent / tuteur :', dob:'Date de naissance :', passport:'Num\u00e9ro de passeport :', country:'Pays \u00e9metteur du passeport :',
            rel:'Lien avec l\u2019enfant :', phone:'T\u00e9l\u00e9phone :', email:'Courriel :', address:'Adresse :',
            dep:'Date de d\u00e9part :', retn:'Date de retour :', dest:'Destination :'}
-        : {name:'Full Name:', dob:'Date of Birth:', passport:'Passport Number:', country:'Passport Issuing Country:',
+        : {name:'Full Name:', name2:'Second Parent / Guardian:', dob:'Date of Birth:', passport:'Passport Number:', country:'Passport Issuing Country:',
            rel:'Relationship to Child:', phone:'Phone:', email:'Email:', address:'Address:',
            dep:'Departure Date:', retn:'Return Date:', dest:'Destination:'},
       note: fr
@@ -4511,16 +4598,14 @@ if(contactForm){
         <p class="ctc-sigline">${esc(x.lblDate)}: ______________________________________</p></div>`;
     $('ctcLetter').innerHTML = `
       <h2>${esc(x.title)}</h2>
-      <p class="ctc-sub">${esc(x.sub)}</p>
-      <p class="ctc-dirline">${esc(x.dirLine)}</p>
       <p>${esc(x.salutation)}</p>
-      ${x.body.map(pp=>`<p>${esc(pp)}</p>`).join('')}
+      ${x.body.filter(Boolean).map(pp=>`<p>${esc(pp)}</p>`).join('')}
       <h3>${esc(x.secChild)}</h3>
-      ${row(x.k.name,d.childName)}${row(x.k.dob,prettyDate(d.childDob))}${row(x.k.passport,d.childPassport)}${row(x.k.country,d.childCountry)}
-      <h3>${esc(x.secAdult)}</h3>
-      ${row(x.k.name,d.adultName)}${row(x.k.rel,d.adultRel)}${row(x.k.passport,d.adultPassport)}${row(x.k.phone,d.adultPhone)}${row(x.k.email,d.adultEmail)}
+      ${row(x.k.name,d.childName)}${row(x.k.dob,prettyDate(d.childDob))}
+      ${x.showAdult ? `<h3>${esc(x.secAdult)}</h3>
+      ${row(x.k.name,d.adultName)}${row(x.k.rel,d.adultRel)}${row(x.k.phone,d.adultPhone)}${row(x.k.email,d.adultEmail)}` : ''}
       <h3>${esc(x.secParent)}</h3>
-      ${row(x.k.name,d.parentName)}${row(x.k.address,d.parentAddress.replace(/\s*\n\s*/g,', '))}${row(x.k.phone,d.parentPhone)}${row(x.k.email,d.parentEmail)}
+      ${row(x.k.name,d.parentName)}${row(x.k.name2,d.parent2Name)}${row(x.k.address,d.parentAddress.replace(/\s*\n\s*/g,', '))}${row(x.k.phone,d.parentPhone)}${row(x.k.email,d.parentEmail)}
       <h3>${esc(x.secTravel)}</h3>
       ${row(x.k.dep,prettyDate(d.departure))}${row(x.k.retn,prettyDate(d.ret))}${row(x.k.dest,d.destination)}
       ${sig(x.sigParent)}${sig(x.sigOther)}${sig(x.sigWit)}
@@ -4616,24 +4701,24 @@ if(contactForm){
       });
     }
 
-    put(x.title, 15, true, 0, 2, 'center');
-    put(x.sub, 9.5, false, 0, 2, 'center');
-    put(x.dirLine, 9.5, true, 0, 3, 'center');
+    put(x.title, 15, true, 0, 3, 'center');
     rule();
     y -= 4;
     put(x.salutation, 10.5, false, 0, 7);
-    x.body.forEach(pp => put(pp, 10.5, false, 0, 7));
+    x.body.filter(Boolean).forEach(pp => put(pp, 10.5, false, 0, 7));
 
     section(x.secChild);
     kv(x.k.name, d.childName); kv(x.k.dob, prettyDate(d.childDob));
-    kv(x.k.passport, d.childPassport); kv(x.k.country, d.childCountry);
 
-    section(x.secAdult);
-    kv(x.k.name, d.adultName); kv(x.k.rel, d.adultRel);
-    kv(x.k.passport, d.adultPassport); kv(x.k.phone, d.adultPhone); kv(x.k.email, d.adultEmail);
+    if(x.showAdult){
+      section(x.secAdult);
+      kv(x.k.name, d.adultName); kv(x.k.rel, d.adultRel);
+      kv(x.k.phone, d.adultPhone); kv(x.k.email, d.adultEmail);
+    }
 
     section(x.secParent);
-    kv(x.k.name, d.parentName); kv(x.k.address, d.parentAddress.replace(/\s*\n\s*/g, ', '));
+    kv(x.k.name, d.parentName); kv(x.k.name2, d.parent2Name);
+    kv(x.k.address, d.parentAddress.replace(/\s*\n\s*/g, ', '));
     kv(x.k.phone, d.parentPhone); kv(x.k.email, d.parentEmail);
 
     section(x.secTravel);
