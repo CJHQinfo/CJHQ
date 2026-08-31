@@ -46,6 +46,8 @@
           <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
           <button class="admin-tab-btn" data-tab="linkaudit">Link Audit</button>
           <button class="admin-tab-btn" data-tab="messages">Messages</button>
+          <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ</button>
+          <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
         </div>
 
         <!-- ===== TAB: PAGES ===== -->
@@ -328,6 +330,65 @@
           </p>
           <input type="text" id="messagesSearch" class="admin-input" placeholder="Search messages…" style="margin:12px 0;">
           <div id="messagesList"></div>
+        </div>
+
+        <!-- ================= Ask CJHQ (admin test mode) =================
+             Lives inside the existing admin panel so it inherits the existing
+             Firebase Auth gate and staff allowlist. Nothing here is reachable
+             from the public site: this markup ships only in admin.html. -->
+        <div class="admin-tab-panel" id="tab-askcjhq" style="display:none;">
+          <div class="ask-banner" role="status">
+            <strong>ADMIN TEST MODE — NOT PUBLIC.</strong>
+            Ask CJHQ is not launched. Visitors cannot see or reach it.
+          </div>
+
+          <h2 class="ask-title">Ask CJHQ</h2>
+          <p class="ask-sub">Your Jewish Community Assistant</p>
+
+          <div class="ask-status" id="askBackendStatus"></div>
+
+          <div class="ask-shell">
+            <div class="ask-log" id="askLog" role="log" aria-live="polite" aria-label="Conversation"></div>
+
+            <div class="ask-prompts" id="askPrompts"></div>
+
+            <form class="ask-input-row" id="askForm">
+              <label class="visually-hidden" for="askInput">What can I help you with?</label>
+              <input type="text" id="askInput" class="admin-input" autocomplete="off"
+                     placeholder="What can I help you with?">
+              <button type="submit" class="btn dark" id="askSend">Send</button>
+            </form>
+
+            <div class="ask-actions">
+              <button type="button" class="btn admin-btn-outline" id="askNew">New Conversation</button>
+              <button type="button" class="btn admin-btn-outline" id="askClear">Clear</button>
+              <button type="button" class="btn admin-btn-outline" id="askCopy">Copy Response</button>
+              <button type="button" class="btn admin-btn-outline" id="askToggleSources" aria-pressed="true">Hide Sources</button>
+            </div>
+          </div>
+
+          <h3 class="ask-h3">Knowledge Sources</h3>
+          <p class="ask-help">
+            The registry the assistant draws on. Stored in Firestore and editable here, so sources can be
+            added or retired without a code change.
+          </p>
+          <div id="askSourcesList"></div>
+          <button type="button" class="btn admin-btn-outline" id="askAddSource" style="margin-top:10px;">Add Source</button>
+          <button type="button" class="btn admin-btn-outline" id="askSeedSources" style="margin-top:10px;">Load Default Sources</button>
+        </div>
+
+        <!-- ============ Publishing / public visibility ============
+             Controls whether a built-but-unreviewed section is visible to the
+             public. Default hidden; publishing is always a deliberate act. -->
+        <div class="admin-tab-panel" id="tab-visibility" style="display:none;">
+          <h2 class="ask-title">Publishing</h2>
+          <p class="ask-sub">Control what the public can see</p>
+          <p class="ask-help">
+            Sections listed here are built but not automatically public. Content and visibility are
+            separate: editing a section never publishes it. Publishing is always a deliberate action,
+            and it is recorded.
+          </p>
+          <div id="visibilityList"></div>
         </div>
 
         <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
