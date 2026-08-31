@@ -1920,15 +1920,15 @@
               <input type="text" id="ctcParentName" autocomplete="off">
               <p class="ctc-err" id="err-ctcParentName" hidden></p>
             </div>
-            <div class="form-group" id="ctcParent2Wrap" hidden>
-              <label for="ctcParent2Name"><span data-en>Second Parent / Guardian Full Name</span><span data-fr>Nom complet du second parent / tuteur</span> <abbr class="ctc-req" title="required">*</abbr></label>
-              <input type="text" id="ctcParent2Name" autocomplete="off">
-              <p class="ctc-err" id="err-ctcParent2Name" hidden></p>
-            </div>
             <div class="form-group">
               <label for="ctcParentPhone"><span data-en>Phone</span><span data-fr>Téléphone</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <input type="tel" id="ctcParentPhone" autocomplete="off">
               <p class="ctc-err" id="err-ctcParentPhone" hidden></p>
+            </div>
+            <div class="form-group" id="ctcParent2Wrap">
+              <label for="ctcParent2Name"><span data-en>Second Parent / Guardian Full Name</span><span data-fr>Nom complet du second parent / tuteur</span> <abbr class="ctc-req" id="ctcParent2Req" title="required" hidden>*</abbr></label>
+              <input type="text" id="ctcParent2Name" autocomplete="off">
+              <p class="ctc-err" id="err-ctcParent2Name" hidden></p>
             </div>
             <div class="form-group">
               <label for="ctcParentAddress"><span data-en>Address</span><span data-fr>Adresse</span></label>
@@ -4302,13 +4302,15 @@ if(contactForm){
       hideError('travelWith');
       const alone = travelWith === 'alone';
       $('ctcAdultBlock').hidden = alone;
-      $('ctcParent2Wrap').hidden = !alone;
+      // The field stays available in every mode; only the required marker moves,
+      // and the entered name is never discarded when switching modes.
+      $('ctcParent2Req').hidden = !alone;
       if(alone){
         ['ctcAdultName','ctcAdultRel','ctcAdultPassport','ctcAdultPhone','ctcAdultEmail'].forEach(id=>{
           const el = $(id); if(el){ el.value=''; hideError(id); }
         });
       }else{
-        $('ctcParent2Name').value = ''; hideError('ctcParent2Name');
+        hideError('ctcParent2Name');
       }
     });
   });
@@ -4571,7 +4573,7 @@ if(contactForm){
       sigOther: who === 'alone'
         ? (fr ? 'SIGNATURE DU PARENT / TUTEUR 2' : 'PARENT / GUARDIAN 2 SIGNATURE')
         : (fr ? 'SIGNATURE D\u2019UN AUTRE PARENT / TUTEUR' : 'ADDITIONAL PARENT / GUARDIAN SIGNATURE'),
-      sigWit:    fr ? 'T\u00c9MOIN / NOTAIRE' : 'WITNESS / NOTARY',
+      sigWit: fr ? 'T\u00c9MOIN / NOTAIRE' : 'WITNESS / NOTARY',
       lblSig: fr ? 'Signature' : 'Signature',
       lblPrinted: fr ? 'Nom en lettres moul\u00e9es' : 'Printed Name',
       lblDate: fr ? 'Date' : 'Date',
@@ -4592,9 +4594,12 @@ if(contactForm){
   function renderPreview(d){
     const x = L(d), esc = cjhqEscapeHtml;
     const row = (k,v) => v ? `<div class="ctc-row"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>` : '';
-    const sig = (heading) => `<h3>${esc(heading)}</h3><div class="ctc-siglines">
+    // The consenting parent's name is already known, so it is printed rather
+    // than left as a rule. Only the signature and the date of signing - which
+    // cannot be known when the letter is generated - stay handwritten.
+    const sig = (heading, printedName) => `<h3>${esc(heading)}</h3><div class="ctc-siglines">
         <p class="ctc-sigline">${esc(x.lblSig)}: _________________________________________</p>
-        <p class="ctc-sigline">${esc(x.lblPrinted)}: ____________________________________</p>
+        <p class="ctc-sigline">${esc(x.lblPrinted)}: ${printedName ? esc(printedName) : '____________________________________'}</p>
         <p class="ctc-sigline">${esc(x.lblDate)}: ______________________________________</p></div>`;
     $('ctcLetter').innerHTML = `
       <h2>${esc(x.title)}</h2>
@@ -4608,7 +4613,7 @@ if(contactForm){
       ${row(x.k.name,d.parentName)}${row(x.k.name2,d.parent2Name)}${row(x.k.address,d.parentAddress.replace(/\s*\n\s*/g,', '))}${row(x.k.phone,d.parentPhone)}${row(x.k.email,d.parentEmail)}
       <h3>${esc(x.secTravel)}</h3>
       ${row(x.k.dep,prettyDate(d.departure))}${row(x.k.retn,prettyDate(d.ret))}${row(x.k.dest,d.destination)}
-      ${sig(x.sigParent)}${sig(x.sigOther)}${sig(x.sigWit)}
+      ${sig(x.sigParent, d.blank ? '' : d.parentName)}${sig(x.sigOther, d.blank ? '' : d.parent2Name)}${sig(x.sigWit, '')}
       <p class="ctc-note">${esc(x.note)}</p>`;
   }
 
@@ -4693,12 +4698,11 @@ if(contactForm){
       y -= 1.5;
     }
     function section(title){ y -= 7; need(30); put(title, 10, true, 0, 1); rule(); }
-    function sigBlock(heading){
+    function sigBlock(heading, printedName){
       section(heading);
-      [x.lblSig, x.lblPrinted, x.lblDate].forEach(lbl=>{
-        need(26);
-        put(lbl + ': ' + '_'.repeat(46), 10, false, 0, 5);
-      });
+      need(26); put(x.lblSig + ': ' + '_'.repeat(46), 10, false, 0, 5);
+      need(26); put(x.lblPrinted + ': ' + (printedName || '_'.repeat(46)), 10, false, 0, 5);
+      need(26); put(x.lblDate + ': ' + '_'.repeat(46), 10, false, 0, 5);
     }
 
     put(x.title, 15, true, 0, 3, 'center');
@@ -4724,7 +4728,9 @@ if(contactForm){
     section(x.secTravel);
     kv(x.k.dep, prettyDate(d.departure)); kv(x.k.retn, prettyDate(d.ret)); kv(x.k.dest, d.destination);
 
-    sigBlock(x.sigParent); sigBlock(x.sigOther); sigBlock(x.sigWit);
+    sigBlock(x.sigParent, d.blank ? '' : d.parentName);
+    sigBlock(x.sigOther, d.blank ? '' : d.parent2Name);
+    sigBlock(x.sigWit, '');
 
     y -= 6; rule();
     put(x.note, 8.5, false, 0, 0);
