@@ -1851,9 +1851,6 @@
               <button type="button" class="ctc-dir-btn ctc-with-btn" data-with="adult" role="radio" aria-checked="false">
                 <span class="ctc-dir-txt" data-en>Another adult</span><span class="ctc-dir-txt" data-fr>Un autre adulte</span>
               </button>
-              <button type="button" class="ctc-dir-btn ctc-with-btn" data-with="alone" role="radio" aria-checked="false">
-                <span class="ctc-dir-txt" data-en>Travelling alone</span><span class="ctc-dir-txt" data-fr>Voyage seul(e)</span>
-              </button>
             </div>
             <p class="ctc-err" id="err-travelWith" hidden></p>
           </fieldset>
@@ -1870,24 +1867,6 @@
               <input type="date" id="ctcChildDob">
               <p class="ctc-err" id="err-ctcChildDob" hidden></p>
             </div>
-            <div class="form-group">
-              <label for="ctcChildPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span></label>
-              <input type="text" id="ctcChildPassport" autocomplete="off" spellcheck="false">
-              <p class="ctc-err" id="err-ctcChildPassport" hidden></p>
-            </div>
-            <div class="form-group">
-              <label for="ctcChildCountry"><span data-en>Passport Issuing Country</span><span data-fr>Pays émetteur du passeport</span></label>
-              <select id="ctcChildCountry">
-                <option value=""></option>
-                <option value="Canada">Canada</option>
-                <option value="United States" data-en-txt="United States" data-fr-txt="États-Unis">United States</option>
-                <option value="Other" data-en-txt="Other (enter below)" data-fr-txt="Autre (précisez ci-dessous)">Other (enter below)</option>
-              </select>
-              <label for="ctcChildCountryOther" id="ctcChildCountryOtherLabel" hidden><span data-en>Country name</span><span data-fr>Nom du pays</span></label>
-              <input type="text" id="ctcChildCountryOther" hidden autocomplete="off"
-                     data-ph-en="Enter the issuing country" data-ph-fr="Indiquez le pays émetteur">
-              <p class="ctc-err" id="err-ctcChildCountry" hidden></p>
-            </div>
           </fieldset>
 
           <fieldset class="ctc-block" id="ctcAdultBlock">
@@ -1901,11 +1880,6 @@
               <label for="ctcAdultRel"><span data-en>Relationship to Child</span><span data-fr>Lien avec l'enfant</span></label>
               <input type="text" id="ctcAdultRel" autocomplete="off" placeholder="Parent, Grandparent, Relative, etc.">
               <p class="ctc-err" id="err-ctcAdultRel" hidden></p>
-            </div>
-            <div class="form-group">
-              <label for="ctcAdultPassport"><span data-en>Passport Number</span><span data-fr>Numéro de passeport</span></label>
-              <input type="text" id="ctcAdultPassport" autocomplete="off" spellcheck="false">
-              <p class="ctc-err" id="err-ctcAdultPassport" hidden></p>
             </div>
             <div class="form-group">
               <label for="ctcAdultPhone"><span data-en>Phone Number</span><span data-fr>Numéro de téléphone</span></label>
@@ -3924,7 +3898,7 @@ if(contactForm){
   const $ = (id) => document.getElementById(id);
   const isFr = () => document.documentElement.classList.contains('lang-fr');
   let direction = null;      // 'ca-us' | 'us-ca' | 'custom'
-  let travelWith = null;     // 'parent' | 'adult' | 'alone'
+  let travelWith = null;     // 'parent' | 'adult'
   let returnTouched = false; // don't clobber a return date the user chose
 
   /* ---------- dates ---------- */
@@ -3968,18 +3942,7 @@ if(contactForm){
       travelWith = btn.dataset.with;
       document.querySelectorAll('.ctc-with-btn').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
       hideError('travelWith');
-      const alone = travelWith === 'alone';
-      $('ctcAdultBlock').hidden = alone;
-      // The field stays available in every mode; only the required marker moves,
-      // and the entered name is never discarded when switching modes.
-      $('ctcParent2Req').hidden = !alone;
-      if(alone){
-        ['ctcAdultName','ctcAdultRel','ctcAdultPassport','ctcAdultPhone','ctcAdultEmail'].forEach(id=>{
-          const el = $(id); if(el){ el.value=''; hideError(id); }
-        });
-      }else{
-        hideError('ctcParent2Name');
-      }
+      hideError('ctcParent2Name');
     });
   });
 
@@ -4006,31 +3969,13 @@ if(contactForm){
     });
   });
 
-  /* ---------- "Other" issuing country ---------- */
-  $('ctcChildCountry').addEventListener('change', function(){
-    const other = $('ctcChildCountryOther');
-    const lab   = $('ctcChildCountryOtherLabel');
-    const show  = this.value === 'Other';
-    other.hidden = !show;
-    if(lab) lab.hidden = !show;
-    if(show){
-      // Placeholder follows the current language, like every other field.
-      other.placeholder = isFr() ? other.dataset.phFr : other.dataset.phEn;
-      other.focus();
-    }else{
-      other.value = '';
-    }
-  });
 
   /* ---------- validation ---------- */
   const MSG = {
     ctcChildName:     ['Please enter the child\u2019s full name.','Veuillez saisir le nom complet de l\u2019enfant.'],
     ctcChildDob:      ['Please select the child\u2019s date of birth.','Veuillez choisir la date de naissance de l\u2019enfant.'],
-    ctcChildPassport: ['Please enter the passport number.','Veuillez saisir le num\u00e9ro de passeport.'],
-    ctcChildCountry:  ['Please select the passport issuing country.','Veuillez choisir le pays \u00e9metteur du passeport.'],
     ctcAdultName:     ['Please enter the accompanying adult\u2019s full name.','Veuillez saisir le nom complet de l\u2019adulte accompagnateur.'],
     ctcAdultRel:      ['Please enter the relationship to the child.','Veuillez pr\u00e9ciser le lien avec l\u2019enfant.'],
-    ctcAdultPassport: ['Please enter the passport number.','Veuillez saisir le num\u00e9ro de passeport.'],
     ctcAdultPhone:    ['Please enter a phone number.','Veuillez saisir un num\u00e9ro de t\u00e9l\u00e9phone.'],
     ctcParentName:    ['Please enter your full name.','Veuillez saisir votre nom complet.'],
     ctcParentAddress: ['Please enter your address.','Veuillez saisir votre adresse.'],
@@ -4073,10 +4018,6 @@ if(contactForm){
     $('ctcSummaryErr').hidden = true;
 
     if(!travelWith){ showError('travelWith'); firstBad = firstBad || document.querySelector('.ctc-with-btn'); }
-    if(travelWith === 'alone'){
-      hideError('ctcParent2Name');
-      if(!$('ctcParent2Name').value.trim()){ showError('ctcParent2Name'); firstBad = firstBad || $('ctcParent2Name'); }
-    }
     if(!direction){ showError('direction'); firstBad = firstBad || document.querySelector('.ctc-dir-btn:not(.ctc-with-btn)'); }
     if(direction === 'custom'){
       ['ctcFromCountry','ctcToCountry'].forEach(id=>{
@@ -4086,8 +4027,7 @@ if(contactForm){
     }
     // Travelling alone hides the accompanying-adult section, so requiring that
     // name would produce an error against a field the user cannot see or fill.
-    const required = REQUIRED.filter(id => !(travelWith === 'alone' && id === 'ctcAdultName'));
-    required.forEach(id=>{
+    REQUIRED.forEach(id=>{
       const el = $(id);
       if(!el.value.trim()){ showError(id); firstBad = firstBad || el; }
     });
@@ -4108,10 +4048,6 @@ if(contactForm){
   }
 
   /* ---------- gather ---------- */
-  function issuingCountry(){
-    const sel = $('ctcChildCountry').value;
-    return sel === 'Other' ? ($('ctcChildCountryOther').value.trim() || 'Other') : sel;
-  }
   // A blank form is the same document with every value replaced by a rule to
   // write on. Reusing the real builder means the printed layout, wording and
   // page size can never drift from the filled-in version.
@@ -4119,8 +4055,8 @@ if(contactForm){
   function blankData(){
     return { blank:true, dir:direction || '', travelWith: travelWith || 'adult', parent2Name:'',
       fromCountry:'', toCountry:'',
-      childName:'', childDob:'', childPassport:'', childCountry:'',
-      adultName:'', adultRel:'', adultPassport:'', adultPhone:'', adultEmail:'',
+      childName:'', childDob:'',
+      adultName:'', adultRel:'', adultPhone:'', adultEmail:'',
       parentName:'', parentAddress:'', parentPhone:'', parentEmail:'',
       departure:'', ret:'', destination:'' };
   }
@@ -4132,9 +4068,9 @@ if(contactForm){
       travelWith, parent2Name: v('ctcParent2Name'),
       fromCountry: v('ctcFromCountry'), toCountry: v('ctcToCountry'),
       childName: v('ctcChildName'), childDob: v('ctcChildDob'),
-      childPassport: v('ctcChildPassport'), childCountry: issuingCountry(),
+
       adultName: v('ctcAdultName'), adultRel: v('ctcAdultRel'),
-      adultPassport: v('ctcAdultPassport'), adultPhone: v('ctcAdultPhone'), adultEmail: v('ctcAdultEmail'),
+      adultPhone: v('ctcAdultPhone'), adultEmail: v('ctcAdultEmail'),
       parentName: v('ctcParentName'), parentAddress: v('ctcParentAddress'),
       parentPhone: v('ctcParentPhone'), parentEmail: v('ctcParentEmail'),
       departure: v('ctcDeparture'), ret: v('ctcReturn'), destination: v('ctcDestination')
@@ -4197,16 +4133,6 @@ if(contactForm){
                              : ' pour le voyage mentionn\u00e9 ci-dessus';
 
     let body;
-    if(who === 'alone'){
-      const p1 = B(d.parentName), p2 = B(d.parent2Name);
-      body = fr
-        ? [`Nous, ${p1} et ${p2}, sommes les parents / tuteurs l\u00e9gaux de ${B(d.childName)}, n\u00e9(e) le ${dob}, et consentons \u00e0 ce que notre enfant voyage seul(e) de ${origin} \u00e0 ${destCtry}${tripFr}.`,
-           `La destination du voyage est ${B(d.destination)}.`,
-           `Nous autorisons notre enfant \u00e0 voyager seul(e)${bothFr}.`]
-        : [`We, ${p1} and ${p2}, are the parents/legal guardians of ${B(d.childName)}, born ${dob}, and give our consent for our child to travel alone from ${origin} to ${destCtry}${tripEn}.`,
-           `The destination of travel is ${B(d.destination)}.`,
-           `We authorize our child to travel alone${bothEn}.`];
-    }else{
       const companion = B(d.adultName);
       // "accompanying parent" when the child travels with a parent, otherwise
       // "accompanying adult" - and the relationship only appears if supplied.
@@ -4226,31 +4152,22 @@ if(contactForm){
            authFr]
         : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${dob}, and give my consent for my child to travel from ${origin} to ${destCtry} with ${companion}${tripEn}.`,
            `The destination of travel is ${B(d.destination)}.`,
-           authEn];
-    }
-    return {
+           authEn];    return {
       title: fr ? 'LETTRE DE CONSENTEMENT AU VOYAGE D\u2019UN ENFANT' : 'CHILD TRAVEL CONSENT LETTER',
-      showAdult: who !== 'alone', salutation: fr ? '\u00c0 qui de droit :' : 'To Whom It May Concern:', body,
+      showAdult: true, salutation: fr ? '\u00c0 qui de droit :' : 'To Whom It May Concern:', body,
       secChild:  fr ? 'RENSEIGNEMENTS SUR L\u2019ENFANT' : 'CHILD INFORMATION',
       secAdult:  fr ? 'ADULTE ACCOMPAGNATEUR' : 'ACCOMPANYING ADULT',
       secParent: fr ? 'PARENT / TUTEUR DONNANT SON CONSENTEMENT' : 'PARENT / GUARDIAN PROVIDING CONSENT',
       secTravel: fr ? 'RENSEIGNEMENTS SUR LE VOYAGE' : 'TRAVEL INFORMATION',
-      sigParent: who === 'alone'
-        ? (fr ? 'SIGNATURE DU PARENT / TUTEUR 1' : 'PARENT / GUARDIAN 1 SIGNATURE')
-        : (fr ? 'SIGNATURE DU PARENT / TUTEUR' : 'PARENT / GUARDIAN SIGNATURE'),
-      sigOther: who === 'alone'
-        ? (fr ? 'SIGNATURE DU PARENT / TUTEUR 2' : 'PARENT / GUARDIAN 2 SIGNATURE')
-        : (fr ? 'SIGNATURE D\u2019UN AUTRE PARENT / TUTEUR' : 'ADDITIONAL PARENT / GUARDIAN SIGNATURE'),
-      sigWit: fr ? 'T\u00c9MOIN / NOTAIRE' : 'WITNESS / NOTARY',
+      sigParent: fr ? 'SIGNATURE DU PARENT / TUTEUR' : 'PARENT / GUARDIAN SIGNATURE',
+      sigOther:  fr ? 'SIGNATURE D\u2019UN AUTRE PARENT / TUTEUR' : 'ADDITIONAL PARENT / GUARDIAN SIGNATURE',
       lblSig: fr ? 'Signature' : 'Signature',
       lblPrinted: fr ? 'Nom en lettres moul\u00e9es' : 'Printed Name',
       lblDate: fr ? 'Date' : 'Date',
       k: fr
-        ? {name:'Nom complet :', name2:'Second parent / tuteur :', dob:'Date de naissance :', passport:'Num\u00e9ro de passeport :', country:'Pays \u00e9metteur du passeport :',
-           rel:'Lien avec l\u2019enfant :', phone:'T\u00e9l\u00e9phone :', email:'Courriel :', address:'Adresse :',
+        ? {name:'Nom complet :', name2:'Second parent / tuteur :', dob:'Date de naissance :', rel:'Lien avec l\u2019enfant :', phone:'T\u00e9l\u00e9phone :', email:'Courriel :', address:'Adresse :',
            dep:'Date de d\u00e9part :', retn:'Date de retour :', dest:'Destination :'}
-        : {name:'Full Name:', name2:'Second Parent / Guardian:', dob:'Date of Birth:', passport:'Passport Number:', country:'Passport Issuing Country:',
-           rel:'Relationship to Child:', phone:'Phone:', email:'Email:', address:'Address:',
+        : {name:'Full Name:', name2:'Second Parent / Guardian:', dob:'Date of Birth:', rel:'Relationship to Child:', phone:'Phone:', email:'Email:', address:'Address:',
            dep:'Departure Date:', retn:'Return Date:', dest:'Destination:'},
       note: fr
         ? 'Important : cette lettre vise \u00e0 documenter le consentement parental ou du tuteur au voyage. Les voyageurs devraient avoir sur eux des pi\u00e8ces d\u2019identit\u00e9 appropri\u00e9es ainsi que tout document pertinent relatif \u00e0 la garde, au partage des responsabilit\u00e9s parentales ou toute ordonnance judiciaire applicable.'
@@ -4281,7 +4198,7 @@ if(contactForm){
       ${row(x.k.name,d.parentName)}${row(x.k.name2,d.parent2Name)}${row(x.k.address,d.parentAddress.replace(/\s*\n\s*/g,', '))}${row(x.k.phone,d.parentPhone)}${row(x.k.email,d.parentEmail)}
       <h3>${esc(x.secTravel)}</h3>
       ${row(x.k.dep,prettyDate(d.departure))}${row(x.k.retn,prettyDate(d.ret))}${row(x.k.dest,d.destination)}
-      ${sig(x.sigParent, d.blank ? '' : d.parentName)}${sig(x.sigOther, d.blank ? '' : d.parent2Name)}${sig(x.sigWit, '')}
+      ${sig(x.sigParent, d.blank ? '' : d.parentName)}${sig(x.sigOther, d.blank ? '' : d.parent2Name)}
       <p class="ctc-note">${esc(x.note)}</p>`;
   }
 
@@ -4398,7 +4315,6 @@ if(contactForm){
 
     sigBlock(x.sigParent, d.blank ? '' : d.parentName);
     sigBlock(x.sigOther, d.blank ? '' : d.parent2Name);
-    sigBlock(x.sigWit, '');
 
     y -= 6; rule();
     put(x.note, 8.5, false, 0, 0);
