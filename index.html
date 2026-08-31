@@ -492,6 +492,105 @@
   /* ===== ADMIN PANEL ===== */
   .admin-tab-btn{background:none; border:none; padding:10px 4px; margin-right:20px; font-size:.88rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;}
   .admin-tab-btn.active{color:var(--ink); border-bottom-color:var(--ink);}
+
+  /* ---- Ask CJHQ (admin test mode) ---- */
+  .ask-banner{background:#FBF3DD; border:1px solid #B4881A; border-radius:4px; padding:10px 14px;
+    font-size:.86rem; color:#5A4407; margin-bottom:18px;}
+  .ask-title{font-family:'Lora',serif; font-size:1.5rem; margin:0;}
+  .ask-sub{font-size:.92rem; color:var(--muted); margin:2px 0 14px;}
+  .ask-status{font-size:.82rem; color:var(--muted); margin-bottom:14px;}
+  .ask-shell{border:1px solid var(--line); border-radius:6px; background:var(--paper); overflow:hidden;}
+  .ask-log{min-height:220px; max-height:420px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px;}
+  .ask-empty{color:var(--muted); font-size:.9rem;}
+  .ask-msg{max-width:88%;}
+  .ask-msg.user{align-self:flex-end; background:var(--bg-alt); border:1px solid var(--line);
+    border-radius:10px 10px 2px 10px; padding:10px 13px; font-size:.92rem;}
+  .ask-msg.bot{align-self:flex-start;}
+  .ask-bubble{background:#F4F7FB; border:1px solid var(--line); border-radius:10px 10px 10px 2px;
+    padding:12px 14px; font-size:.92rem; line-height:1.5; white-space:pre-wrap;}
+  .ask-acts{display:flex; flex-wrap:wrap; gap:8px; margin-top:9px;}
+  .ask-act{display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid var(--line);
+    border-radius:4px; background:var(--paper); color:var(--ink); font-size:.82rem; font-weight:600;
+    text-decoration:none; cursor:pointer;}
+  .ask-act:hover{border-color:var(--bronze-soft); background:var(--bg-alt);}
+  .ask-srcbox{margin-top:9px; border:1px dashed var(--line); border-radius:4px; padding:9px 12px; font-size:.78rem; color:var(--muted);}
+  .ask-srcbox b{color:var(--ink);}
+  /* Muted text at opacity .7 measured 2.8:1 against white. Use the palette's
+     muted colour at full opacity instead, which clears 4.5:1. */
+  .ask-srcbox .ask-dim, .ask-src-row .ask-dim{color:var(--muted); opacity:1;}
+  .ask-flag{display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    padding:2px 6px; border-radius:3px; margin-left:6px;}
+  .ask-flag.auth{background:#E4EEFB; color:#20456F;}
+  .ask-flag.time{background:#FBECE4; color:#8A3B12;}
+  .ask-prompts{display:flex; flex-wrap:wrap; gap:7px; padding:0 16px 12px;}
+  .ask-chip{border:1px solid var(--line); background:var(--paper); border-radius:20px; padding:6px 12px;
+    font-size:.79rem; color:var(--ink); cursor:pointer;}
+  .ask-chip:hover{border-color:var(--bronze-soft); background:var(--bg-alt);}
+  .ask-input-row{display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); background:var(--bg-alt);}
+  .ask-input-row .admin-input{flex:1; margin:0;}
+  .ask-actions{display:flex; flex-wrap:wrap; gap:8px; padding:12px 16px; border-top:1px solid var(--line);}
+  .ask-h3{font-family:'Lora',serif; font-size:1.1rem; margin:30px 0 4px;}
+  .ask-help{font-size:.86rem; color:var(--muted); margin:0 0 12px;}
+  .ask-src-row{border:1px solid var(--line); border-radius:5px; padding:11px 13px; margin-bottom:9px; font-size:.86rem;}
+  .ask-src-row .u{color:var(--muted); font-size:.79rem; word-break:break-all;}
+  .ask-src-row.inactive{opacity:.55;}
+
+  /* ---- Publishing ---- */
+  .vis-row{border:1px solid var(--line); border-radius:6px; padding:16px 18px; margin-bottom:14px;}
+  .vis-name{font-weight:600; font-size:1rem;}
+  .vis-status{display:inline-flex; align-items:center; gap:7px; font-size:.9rem; font-weight:600; margin:8px 0;}
+  .vis-dot{width:11px; height:11px; border-radius:50%; display:inline-block;}
+  .vis-dot.hidden{background:#C0392B;}
+  .vis-dot.published{background:#1E8449;}
+  .vis-audit{font-size:.8rem; color:var(--muted); margin-top:4px;}
+  /* ---- Special Information ---- */
+  /* A hidden section must stay hidden even when the router marks it active;
+     .page.active sets display:block and would otherwise win over [hidden]. */
+  .page[hidden]{display:none !important;}
+  .si-preview{background:#FBF3DD; border:1px solid #B4881A; border-radius:4px; padding:11px 15px;
+    font-size:.88rem; color:#5A4407; margin-bottom:20px;}
+  .si-notice{background:var(--bg-alt); border-left:3px solid var(--bronze-soft); padding:13px 16px;
+    border-radius:3px; font-size:.92rem; margin:18px 0;}
+  .si-warn{background:#FBECE4; border-left:3px solid #C0623A; padding:13px 16px; border-radius:3px;
+    font-size:.92rem; margin:16px 0;}
+  .si-h2{font-family:'Lora',serif; font-size:1.35rem; margin:34px 0 6px;}
+  .si-sub{color:var(--muted); font-size:.92rem; margin:0 0 14px;}
+  .si-picker{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;}
+  .si-chip{display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line);
+    background:var(--paper); border-radius:5px; padding:10px 15px; font-size:.9rem; font-weight:600;
+    color:var(--ink); cursor:pointer;}
+  .si-chip:hover{border-color:var(--bronze-soft); background:var(--bg-alt);}
+  .si-chip[aria-checked="true"]{border-color:var(--ink); background:var(--bg-alt); box-shadow:inset 0 0 0 1px var(--ink);}
+  .si-flag{width:26px; height:17px; border:1px solid var(--line); border-radius:2px; display:block; flex-shrink:0;}
+  .si-card{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin-bottom:22px;}
+  .si-card h3{font-family:'Lora',serif; font-size:1.1rem; margin:0 0 8px;}
+  .si-card ul{margin:8px 0 0; padding-left:20px;}
+  .si-card li{margin-bottom:5px; font-size:.92rem;}
+  .si-label{font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); margin-top:16px;}
+  .si-verify{font-size:.82rem; color:var(--muted); margin-top:14px; padding-top:12px; border-top:1px solid var(--line);}
+  .si-verify.unverified{color:#8A3B12;}
+  .si-links{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:8px;}
+  .si-link{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--paper);
+    border-radius:4px; padding:9px 14px; font-size:.86rem; font-weight:600; color:var(--ink); text-decoration:none;}
+  .si-link:hover{border-color:var(--bronze-soft); background:var(--bg-alt);}
+  .si-disclaimer{margin-top:34px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:.84rem; color:var(--muted); line-height:1.6;}
+  .si-pending{font-size:.86rem; color:#8A3B12; font-style:italic;}
+  @media (max-width:600px){
+    .si-picker{flex-direction:column;}
+    .si-chip{width:100%;}
+    .si-link{width:100%;}
+  }
+
+  .vis-preview-flag{display:inline-block; background:#FBF3DD; border:1px solid #B4881A; color:#5A4407;
+    font-size:.72rem; font-weight:700; letter-spacing:.05em; padding:3px 8px; border-radius:3px; margin-left:8px;}
+  @media (max-width:600px){
+    .ask-msg{max-width:100%;}
+    .ask-input-row{flex-direction:column;}
+    .ask-input-row .btn{width:100%;}
+    .ask-actions .btn{flex:1 1 46%;}
+  }
   .admin-label{display:block; font-size:.78rem; font-weight:600; color:var(--muted); margin:10px 0 4px;}
   .admin-input{width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font-size:.9rem; font-family:inherit;}
   .admin-btn-outline{background:transparent; border:1.5px solid var(--ink); color:var(--ink);}
@@ -1784,6 +1883,84 @@
 
 <!-- ============ 404 / PAGE NOT FOUND ============ -->
 <!-- ============ CHILD TRAVEL CONSENT LETTER ============ -->
+<!-- Special Information: Holidays, Travel & Local Information.
+     Gated by the section visibility flag; hidden until an admin publishes it. -->
+<div class="page" id="page-special-information" data-section="yomim-tovim-travel" hidden aria-hidden="true">
+  <section class="section">
+    <div class="section-inner" style="max-width:900px;">
+      <div class="si-preview" id="siPreviewBanner" hidden>
+        <strong>ADMIN PREVIEW — NOT PUBLIC.</strong>
+        This section is hidden from visitors. Publish it from Admin Panel → Publishing.
+      </div>
+
+      <p class="eyebrow"><span data-en>Holidays, Travel &amp; Local Information</span><span data-fr>Fêtes, voyage et information locale</span></p>
+      <h1><span data-en>Special Information</span><span data-fr>Information spéciale</span></h1>
+      <p class="lede">
+        <span data-en>Practical information for the Jewish community when travelling, preparing for Yomim Tovim, or dealing with local services and requirements.</span>
+        <span data-fr>De l’information pratique pour la communauté juive lors de déplacements, en préparation des Yomim Tovim, ou face aux services et exigences localement.</span>
+      </p>
+
+      <div class="si-notice">
+        <span data-en><strong>This is practical information only. It is not religious or legal advice.</strong> Rules can change. Always check the current official government information before travelling.</span>
+        <span data-fr><strong>Il s’agit d’information pratique seulement. Ce n’est ni un avis religieux ni un avis juridique.</strong> Les règles peuvent changer. Vérifiez toujours l’information gouvernementale officielle en vigueur avant de voyager.</span>
+      </div>
+
+      <h2 class="si-h2"><span data-en>Travelling with Holiday Items</span><span data-fr>Voyager avec des articles de fête</span></h2>
+      <p>
+        <span data-en>Travelling around Yomim Tovim can involve items that are not normally carried across international borders — Arba Minim, matzah, wine and grape products, prepared foods, plants and seeds, religious articles, and medication.</span>
+        <span data-fr>Les déplacements autour des Yomim Tovim peuvent impliquer des articles rarement transportés à l’international — Arba Minim, matzah, vin et produits de raisin, aliments préparés, plantes et semences, articles religieux et médicaments.</span>
+      </p>
+      <p>
+        <span data-en>Whether an item may enter a country can depend on <strong>what the item is, where it came from, how it is packaged, and the country you are entering.</strong></span>
+        <span data-fr>L’admissibilité d’un article peut dépendre de <strong>la nature de l’article, de sa provenance, de son emballage et du pays où vous entrez.</strong></span>
+      </p>
+      <div class="si-warn">
+        <span data-en>If an item is subject to customs, agricultural, food, plant-health or other border restrictions, <strong>declare it when required.</strong> Do not assume that an item is permitted simply because it is for personal use or because it is commonly carried by travellers.</span>
+        <span data-fr>Si un article est visé par des restrictions douanières, agricoles, alimentaires, phytosanitaires ou autres, <strong>déclarez-le lorsque c’est requis.</strong> Ne présumez pas qu’un article est permis simplement parce qu’il sert à un usage personnel ou parce qu’il est couramment transporté.</span>
+      </div>
+
+      <h2 class="si-h2"><span data-en>Select your destination</span><span data-fr>Choisissez votre destination</span></h2>
+      <p class="si-sub"><span data-en>Choose the country you are travelling <strong>to</strong>.</span><span data-fr>Choisissez le pays où vous <strong>allez</strong>.</span></p>
+      <div class="si-picker" id="siCountries" role="radiogroup" aria-label="Destination country"></div>
+      <div id="siCountryDetail" aria-live="polite"></div>
+
+      <h2 class="si-h2"><span data-en>Holiday items</span><span data-fr>Articles de fête</span></h2>
+      <p class="si-sub"><span data-en>Select an item to see what to check before travelling.</span><span data-fr>Choisissez un article pour savoir quoi vérifier avant de voyager.</span></p>
+      <div class="si-picker" id="siItems" role="radiogroup" aria-label="Holiday item"></div>
+      <div id="siItemDetail" aria-live="polite"></div>
+
+      <h2 class="si-h2"><span data-en>Travel documents</span><span data-fr>Documents de voyage</span></h2>
+      <p class="si-sub">
+        <span data-en>CJHQ does not duplicate what is already in Resources. The main Resources section remains the source for government services and applications.</span>
+        <span data-fr>CJHQ ne duplique pas ce qui se trouve déjà dans les Ressources. La section Ressources demeure la source pour les services et demandes gouvernementaux.</span>
+      </p>
+      <div class="si-links" id="siDocLinks"></div>
+
+      <h2 class="si-h2"><span data-en>Local travel &amp; parking</span><span data-fr>Déplacements et stationnement à Montréal</span></h2>
+      <p>
+        <span data-en>Holiday travel can create additional transportation and parking issues: temporary parking restrictions, no-parking zones, street closures, construction, snow-removal restrictions, special-event restrictions, public transportation changes, airport access and parking permits.</span>
+        <span data-fr>Les déplacements de fête peuvent créer des enjeux de transport et de stationnement : restrictions temporaires, zones d’interdiction, fermetures de rues, chantiers, opérations de déneigement, événements spéciaux, changements de transport en commun, accès à l’aéroport et vignettes de stationnement.</span>
+      </p>
+      <div class="si-links" id="siLocalLinks"></div>
+
+      <h2 class="si-h2"><span data-en>CJHQ &amp; local authorities</span><span data-fr>CJHQ et les autorités locales</span></h2>
+      <p>
+        <span data-en>CJHQ briefs relevant officials at local airports and border crossings ahead of major Jewish holidays, so officials understand what to expect from Jewish travellers and community members have a smoother, more predictable experience.</span>
+        <span data-fr>CJHQ informe les responsables des aéroports et postes frontaliers avant les grandes fêtes juives, afin qu’ils sachent à quoi s’attendre et que les membres de la communauté vivent une expérience plus fluide et prévisible.</span>
+      </p>
+      <div class="si-warn">
+        <span data-en>This does <strong>not</strong> change government requirements or exempt travellers from customs, security or agricultural rules. Travellers remain responsible for following the requirements of the country they are entering.</span>
+        <span data-fr>Cela ne <strong>modifie pas</strong> les exigences gouvernementales et n’exempte pas les voyageurs des règles douanières, de sécurité ou agricoles. Les voyageurs demeurent responsables de respecter les exigences du pays où ils entrent.</span>
+      </div>
+
+      <div class="si-disclaimer">
+        <span data-en><strong>Important.</strong> This information is provided as a practical community resource and is not legal, customs, immigration, agricultural, medical or religious advice. Government requirements can change without notice, and may depend on your citizenship, country of origin, destination, item, quantity, packaging and other circumstances. Always check the current official requirements before travelling. If an official authority requires an item to be declared, declare it. CJHQ does not guarantee that an item will be admitted to a country. For questions about religious requirements, please consult your appropriate rabbinic authority.</span>
+        <span data-fr><strong>Important.</strong> Cette information est fournie comme ressource communautaire pratique et ne constitue pas un avis juridique, douanier, migratoire, agricole, médical ou religieux. Les exigences gouvernementales peuvent changer sans préavis et peuvent dépendre de votre citoyenneté, de votre pays d’origine, de la destination, de l’article, de la quantité, de l’emballage et d’autres circonstances. Vérifiez toujours les exigences officielles en vigueur avant de voyager. Si une autorité exige qu’un article soit déclaré, déclarez-le. CJHQ ne garantit pas l’admission d’un article dans un pays. Pour les questions de nature religieuse, consultez votre autorité rabbinique.</span>
+      </div>
+    </div>
+  </section>
+</div>
+
 <div class="page" id="page-child-travel-consent">
   <section style="padding-top:56px; padding-bottom:48px;">
     <div class="section-inner" style="max-width:820px;">
@@ -3495,6 +3672,10 @@ const PAGE_META = {
   // paragraph. No new wording was written. The "— CJHQ" suffix matches every
   // other entry. Without this, a 404 inherited the previous page's title and
   // canonical - telling search engines an error page was a real one.
+  'special-information': { en:'Special Information — Holidays, Travel & Local Information — CJHQ',
+    fr:'Information spéciale — Fêtes, voyage et information locale — CJHQ',
+    d_en:'Practical CJHQ information for travelling around Yomim Tovim: what to check before crossing a border with holiday items, and links to the official government sources.',
+    d_fr:'Information pratique de CJHQ pour voyager autour des Yomim Tovim : quoi vérifier avant de traverser une frontière avec des articles de fête, et liens vers les sources gouvernementales officielles.' },
   'child-travel-consent': { en:'Child Travel Consent Letter — CJHQ', fr:'Lettre de consentement au voyage d\'un enfant — CJHQ',
                   desc_en:'Create a simple consent letter for your child\'s Canada-U.S. travel. Complete the form, generate your letter, then print and sign it.',
                   desc_fr:'Créez une lettre de consentement simple pour le voyage Canada-États-Unis de votre enfant. Remplissez le formulaire, générez la lettre, puis imprimez-la et signez-la.' },
@@ -4552,6 +4733,13 @@ if(contactForm){
    That's it — no other code changes needed, everything below already
    expects this shape.
    ================================================================ */
+/* ================= FEATURE FLAGS =================
+   ASK_CJHQ_PUBLIC controls whether Ask CJHQ is offered to visitors. It is OFF
+   and must stay OFF until CJHQ approves the launch. Admins reach the tool
+   through the admin panel regardless of this flag, so testing does not require
+   turning it on. Flipping it to true is the only code change a launch needs.  */
+const ASK_CJHQ_PUBLIC = false;
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDPzTFbsiOtJ4LOKiFjL0aVtSKhl21zwuc",
   authDomain: "cjhqinfo.firebaseapp.com",
@@ -4693,6 +4881,100 @@ async function fetchSettingsDoc(){
   }
   return window.__localSettings || null;
 }
+/* Remove every public trace of a hidden section: its resource card, any
+   navigation or search entry, and its route. Called after the flag is known.
+   Because the default is hidden and this runs on every load, an unpublished
+   section is never rendered even momentarily. */
+function applySectionVisibility(){
+  SECTION_KEYS.forEach(key=>{
+    const published = isSectionPublished(key);
+    document.querySelectorAll('[data-section="' + key + '"]').forEach(el=>{
+      el.hidden = !published;
+      if(!published) el.setAttribute('aria-hidden','true'); else el.removeAttribute('aria-hidden');
+    });
+  });
+  // If the visitor is sitting on a section route that is not published, send
+  // them to the existing 404 rather than leaving unreviewed content on screen.
+  const active = document.querySelector('.page.active');
+  if(active){
+    const routeId = active.id.replace(/^page-/, '');
+    if(isSectionRouteBlocked(routeId)) goPage('404', { skipHistory:true });
+  }
+}
+
+/* A hidden section's URL must behave like any other unknown path - the existing
+   404, not a glimpse of unreviewed content. */
+const SECTION_ROUTES = { 'special-information': 'yomim-tovim-travel' };
+function isSectionRouteBlocked(routeId){
+  const key = SECTION_ROUTES[routeId];
+  if(key && !isSectionPublished(key)) return true;
+  for(const k of SECTION_KEYS){
+    if(routeId === k && !isSectionPublished(k)) return true;
+  }
+  return false;
+}
+
+/* ================= SECTION VISIBILITY =================
+   Publishing is a deliberate, audited, server-side decision.
+
+   The flag lives in the existing settings/site Firestore document, which is
+   public-read and staff-write under the published rules. That matters: a
+   visitor can READ the flag (they must, or the page could not decide what to
+   render) but cannot CHANGE it. There is no client-side variable a visitor
+   could flip.
+
+   Default is HIDDEN, and it is hidden by ABSENCE - a missing or unreadable
+   settings document yields hidden, never published. Failing closed is the
+   only safe direction for unreviewed government and travel information.      */
+const SECTION_KEYS = ['yomim-tovim-travel'];
+
+let __sectionVisibility = {};   // populated from Firestore on load
+
+function isSectionPublished(key){
+  const v = __sectionVisibility[key];
+  return !!(v && v.status === 'published');
+}
+function sectionAudit(key){
+  const v = __sectionVisibility[key] || {};
+  return { status: v.status === 'published' ? 'published' : 'hidden',
+           changedAt: v.changedAt || '', changedBy: v.changedBy || '' };
+}
+async function loadSectionVisibility(){
+  try{
+    const s = await fetchSettingsDoc();
+    const raw = (s && s.sectionVisibility) || {};
+    const out = {};
+    SECTION_KEYS.forEach(k=>{
+      const v = raw[k];
+      // Anything other than an explicit "published" is hidden.
+      out[k] = { status: (v && v.status === 'published') ? 'published' : 'hidden',
+                 changedAt: (v && v.changedAt) || '', changedBy: (v && v.changedBy) || '' };
+    });
+    __sectionVisibility = out;
+  }catch(err){
+    console.warn('[CJHQ] section visibility unavailable - defaulting to hidden');
+    __sectionVisibility = {};   // fail closed
+  }
+  return __sectionVisibility;
+}
+
+/* Only ever called from the admin panel, where the caller is already
+   authenticated and on the staff allowlist. Firestore rules enforce the same
+   condition server-side, so this cannot be driven from a public page. */
+async function setSectionVisibility(key, published, adminEmail){
+  const entry = {
+    status: published ? 'published' : 'hidden',
+    changedAt: new Date().toISOString(),
+    changedBy: adminEmail || (adminUser && adminUser.email) || 'unknown'
+  };
+  const current = (await fetchSettingsDoc()) || {};
+  const merged = Object.assign({}, current.sectionVisibility || {});
+  merged[key] = entry;
+  await saveSettingsDoc({ sectionVisibility: merged });
+  __sectionVisibility[key] = entry;
+  return entry;
+}
+
 async function saveSettingsDoc(data){
   if(firebaseReady){
     const fs = window.__fbFirestore;
@@ -4924,6 +5206,746 @@ function switchAdminTab(tab){
 }
 
 /* ---------- Admin panel: Pages ---------- */
+/* ================= SPECIAL INFORMATION =================
+   Holidays, Travel & Local Information.
+
+   Editorial rule for this section: CJHQ states PROCESS, never the RULE. Import
+   requirements change without notice - the UK banned EU meat and dairy at short
+   notice during 2025 - so anything that reads "X is allowed" would be a liability
+   the moment it goes stale. Every entry therefore tells the traveller what to
+   check and links the authority that decides.
+
+   lastVerified is empty until a human confirms the entry. The UI says so plainly
+   rather than implying currency it does not have.                             */
+
+const SPECIAL_INFO_SECTION = 'yomim-tovim-travel';
+
+/* Only URLs confirmed against the live government site are included. Israel and
+   the EU are intentionally left without a deep link: I could not verify one, and
+   a wrong government link is worse than no link. An admin can add them. */
+const SPECIAL_INFO_COUNTRIES = [
+  {
+    id:'canada', name_en:'Canada', name_fr:'Canada', flag:'ca',
+    lastVerified:'August 31, 2026',
+    intro_en:'Etrogim, lulavim and other plant material are regulated when entering Canada. Requirements depend on the item, its country of origin and the time of year.',
+    intro_fr:'Les etroguim, loulavim et autres produits v\u00e9g\u00e9taux sont r\u00e9glement\u00e9s \u00e0 l\u2019entr\u00e9e au Canada. Les exigences d\u00e9pendent de l\u2019article, de son pays d\u2019origine et de la p\u00e9riode de l\u2019ann\u00e9e.',
+    before_en:['Check the exact item and its country of origin.',
+               'Willow from Europe is not covered by the personal-use lulav provision.',
+               'Check whether the authorized seasonal period applies.',
+               'Declare plant material and food when required.',
+               'Keep the item accessible for inspection.',
+               'Recheck the current requirement shortly before departure.'],
+    before_fr:['V\u00e9rifiez l\u2019article exact et son pays d\u2019origine.',
+               'Le saule provenant d\u2019Europe n\u2019est pas vis\u00e9 par la disposition pour loulav \u00e0 usage personnel.',
+               'V\u00e9rifiez si la p\u00e9riode saisonni\u00e8re autoris\u00e9e s\u2019applique.',
+               'D\u00e9clarez les produits v\u00e9g\u00e9taux et alimentaires lorsque requis.',
+               'Gardez l\u2019article accessible pour inspection.',
+               'V\u00e9rifiez de nouveau l\u2019exigence peu avant le d\u00e9part.'],
+    warning_en:'The Canadian personal-use provision for lulavim does not automatically apply to etrogim or to other holiday plants.',
+    warning_fr:'La disposition canadienne pour les loulavim \u00e0 usage personnel ne s\u2019applique pas automatiquement aux etroguim ni aux autres plantes de f\u00eate.',
+    official:[{ label_en:'CFIA \u2014 Directive D-14-03 (includes the lulav provision)',
+                label_fr:'ACIA \u2014 Directive D-14-03 (contient la disposition pour loulav)', url:'https://inspection.canada.ca/en/plant-health/invasive-pests-and-plants/directives/horticulture/14-03' },
+              { label_en:'CBSA \u2014 Bringing food, plant and animal products into Canada',
+                label_fr:'ASFC \u2014 Apporter des aliments, v\u00e9g\u00e9taux et produits animaux au Canada', url:'https://www.cbsa-asfc.gc.ca/services/fpa-apa/bringing-apporter-fpa-eng.html' }]
+  },
+  {
+    id:'united-states', name_en:'United States', name_fr:'\u00c9tats-Unis', flag:'us',
+    lastVerified:'August 31, 2026',
+    intro_en:'CBP issues guidance each year covering ethrogim, palm fronds, willow and myrtle. These items are inspected by CBP agriculture specialists, who make the admissibility decision.',
+    intro_fr:'Le CBP publie chaque ann\u00e9e des directives visant les etroguim, palmes, saule et myrte. Ces articles sont inspect\u00e9s par des sp\u00e9cialistes en agriculture du CBP, qui d\u00e9cident de l\u2019admissibilit\u00e9.',
+    before_en:['Ethrogim are admitted only through specified North Atlantic or Northern Pacific ports \u2014 confirm your airport or crossing first.',
+               'Expect the container to be opened and the ethrog unwrapped for inspection.',
+               'Willow from Europe is prohibited.',
+               'Willow that is green, soft, or has sprouted buds is prohibited because it could grow.',
+               'Declare the items and let the agriculture specialist decide.'],
+    before_fr:['Les etroguim ne sont admis que par certains ports de l\u2019Atlantique Nord ou du Pacifique Nord \u2014 confirmez d\u2019abord votre a\u00e9roport ou poste frontalier.',
+               'Attendez-vous \u00e0 ce que le contenant soit ouvert et l\u2019etrog d\u00e9ball\u00e9 pour inspection.',
+               'Le saule provenant d\u2019Europe est interdit.',
+               'Le saule vert, mou ou dont les bourgeons ont pouss\u00e9 est interdit, car il pourrait pousser.',
+               'D\u00e9clarez les articles et laissez le sp\u00e9cialiste en agriculture d\u00e9cider.'],
+    warning_en:'Not every U.S. airport or border crossing accepts ethrogim. Confirm your specific port before travelling.',
+    warning_fr:'Tous les a\u00e9roports et postes frontaliers am\u00e9ricains n\u2019acceptent pas les etroguim. Confirmez votre point d\u2019entr\u00e9e avant de voyager.',
+    official:[{ label_en:'CBP \u2014 Sukkot travel guidance', label_fr:'CBP \u2014 Directives de voyage pour Souccot', url:'https://www.cbp.gov/newsroom/national-media-release/cbp-reminds-travelers-sukkot-travel-guidance' },
+              { label_en:'USDA APHIS \u2014 Traveling with agricultural products',
+                label_fr:'USDA APHIS \u2014 Voyager avec des produits agricoles', url:'https://www.aphis.usda.gov/traveling-with-ag-products' }]
+  },
+  {
+    id:'israel', name_en:'Israel', name_fr:'Isra\u00ebl', flag:'il',
+    lastVerified:'',
+    intro_en:'Israel has agricultural import controls covering plants and plant products. Requirements can depend on the item and its country of origin.',
+    intro_fr:'Isra\u00ebl applique des contr\u00f4les d\u2019importation agricole visant les plantes et produits v\u00e9g\u00e9taux. Les exigences peuvent d\u00e9pendre de l\u2019article et de son pays d\u2019origine.',
+    before_en:['Check the current requirement with the Israeli agricultural authorities before departure.',
+               'Do not assume an item permitted in Canada or the United States is permitted in Israel.',
+               'Check whether documentation or inspection is required for your specific item.'],
+    before_fr:['V\u00e9rifiez l\u2019exigence en vigueur aupr\u00e8s des autorit\u00e9s agricoles isra\u00e9liennes avant le d\u00e9part.',
+               'Ne pr\u00e9sumez pas qu\u2019un article permis au Canada ou aux \u00c9tats-Unis l\u2019est en Isra\u00ebl.',
+               'V\u00e9rifiez si des documents ou une inspection sont requis pour votre article.'],
+    warning_en:'CJHQ does not currently have a verified official link for Israel. Check the current requirements with the relevant Israeli authority before travelling.',
+    warning_fr:'CJHQ n\u2019a pas actuellement de lien officiel v\u00e9rifi\u00e9 pour Isra\u00ebl. V\u00e9rifiez les exigences en vigueur aupr\u00e8s de l\u2019autorit\u00e9 isra\u00e9lienne comp\u00e9tente avant de voyager.',
+    official:[]
+  },
+  {
+    id:'united-kingdom', name_en:'United Kingdom', name_fr:'Royaume-Uni', flag:'gb',
+    lastVerified:'August 31, 2026',
+    intro_en:'Great Britain regulates plants and plant products entering from outside the EU. Depending on the item, a phytosanitary certificate may be required.',
+    intro_fr:'La Grande-Bretagne r\u00e9glemente les plantes et produits v\u00e9g\u00e9taux en provenance de l\u2019ext\u00e9rieur de l\u2019UE. Selon l\u2019article, un certificat phytosanitaire peut \u00eatre exig\u00e9.',
+    before_en:['Check the current rule for the exact item and its country of origin.',
+               'Check whether a phytosanitary certificate is required.',
+               'Check the rules for your specific point of entry.'],
+    before_fr:['V\u00e9rifiez la r\u00e8gle en vigueur pour l\u2019article exact et son pays d\u2019origine.',
+               'V\u00e9rifiez si un certificat phytosanitaire est requis.',
+               'V\u00e9rifiez les r\u00e8gles de votre point d\u2019entr\u00e9e.'],
+    warning_en:'Northern Ireland has different arrangements from Great Britain. Do not automatically apply Great Britain rules to Northern Ireland.',
+    warning_fr:'L\u2019Irlande du Nord a des r\u00e8gles diff\u00e9rentes de celles de la Grande-Bretagne. N\u2019appliquez pas automatiquement les r\u00e8gles britanniques \u00e0 l\u2019Irlande du Nord.',
+    official:[{ label_en:'GOV.UK \u2014 Bringing food into Great Britain',
+                label_fr:'GOV.UK \u2014 Apporter des aliments en Grande-Bretagne', url:'https://www.gov.uk/bringing-food-into-great-britain' }]
+  },
+  {
+    id:'european-union', name_en:'European Union', name_fr:'Union europ\u00e9enne', flag:'eu',
+    lastVerified:'',
+    intro_en:'The EU has strict plant-health rules for travellers. Plants, plant products, fruit and vegetables carried in passenger luggage from a non-EU country are generally subject to plant-health requirements and may require a phytosanitary certificate.',
+    intro_fr:'L\u2019UE applique des r\u00e8gles phytosanitaires strictes pour les voyageurs. Les plantes, produits v\u00e9g\u00e9taux, fruits et l\u00e9gumes transport\u00e9s dans les bagages depuis un pays hors UE sont g\u00e9n\u00e9ralement soumis \u00e0 des exigences phytosanitaires et peuvent exiger un certificat phytosanitaire.',
+    before_en:['Check the exact item and its country of origin.',
+               'Check whether a phytosanitary certificate is required.',
+               'Requirements and exemptions differ by item \u2014 verify before travelling.'],
+    before_fr:['V\u00e9rifiez l\u2019article exact et son pays d\u2019origine.',
+               'V\u00e9rifiez si un certificat phytosanitaire est requis.',
+               'Les exigences et exemptions varient selon l\u2019article \u2014 v\u00e9rifiez avant de voyager.'],
+    warning_en:'CJHQ does not currently have a verified official link for the EU. Check the current EU rules before travelling.',
+    warning_fr:'CJHQ n\u2019a pas actuellement de lien officiel v\u00e9rifi\u00e9 pour l\u2019UE. V\u00e9rifiez les r\u00e8gles europ\u00e9ennes en vigueur avant de voyager.',
+    official:[]
+  }
+];
+
+
+const SPECIAL_INFO_ITEMS = [
+  { id:'etrog', name_en:'Etrog', name_fr:'Etrog', lastVerified:'August 31, 2026',
+    body_en:'An etrog is a citrus fruit (Citrus medica) and may be subject to agricultural and plant-health rules when crossing international borders. The fact that an etrog is used for Sukkot does not automatically exempt it from inspection or import restrictions. Requirements can differ substantially by destination and country of origin.',
+    body_fr:'L\u2019etrog est un agrume (Citrus medica) et peut \u00eatre vis\u00e9 par des r\u00e8gles agricoles et phytosanitaires au passage des fronti\u00e8res. Le fait qu\u2019un etrog serve pour Souccot ne l\u2019exempte pas automatiquement d\u2019inspection ou de restrictions. Les exigences varient sensiblement selon la destination et le pays d\u2019origine.',
+    checks_en:['United States: personal ethrogim may be admitted through specified North Atlantic or Northern Pacific ports after inspection by a CBP agriculture specialist. Confirm your port before travelling.',
+               'United States: expect the container to be opened and the etrog unwrapped. If pests or insect damage are found, it may be refused entry.',
+               'Canada: etrogim are plant material. Verify current requirements with the CFIA before departure.',
+               'Canada: the personal-use provision for lulavim should not be read as applying to etrogim.',
+               'Israel: check current requirements with the Israeli agricultural authorities.',
+               'United Kingdom and EU: a phytosanitary certificate may be required depending on the item and origin.'],
+    checks_fr:['\u00c9tats-Unis : les etroguim personnels peuvent \u00eatre admis par certains ports de l\u2019Atlantique Nord ou du Pacifique Nord apr\u00e8s inspection par un sp\u00e9cialiste en agriculture du CBP. Confirmez votre point d\u2019entr\u00e9e.',
+               '\u00c9tats-Unis : le contenant sera ouvert et l\u2019etrog d\u00e9ball\u00e9. En cas de parasites ou de dommages d\u2019insectes, l\u2019entr\u00e9e peut \u00eatre refus\u00e9e.',
+               'Canada : les etroguim sont des produits v\u00e9g\u00e9taux. V\u00e9rifiez les exigences aupr\u00e8s de l\u2019ACIA avant le d\u00e9part.',
+               'Canada : la disposition pour loulavim \u00e0 usage personnel ne doit pas \u00eatre appliqu\u00e9e aux etroguim.',
+               'Isra\u00ebl : v\u00e9rifiez aupr\u00e8s des autorit\u00e9s agricoles isra\u00e9liennes.',
+               'Royaume-Uni et UE : un certificat phytosanitaire peut \u00eatre exig\u00e9 selon l\u2019article et l\u2019origine.'],
+    warning_en:'Do not assume an etrog is permitted because it is for religious use.',
+    warning_fr:'Ne pr\u00e9sumez pas qu\u2019un etrog est permis parce qu\u2019il sert \u00e0 un usage religieux.',
+    official:[{ label_en:'CBP \u2014 Sukkot travel guidance', label_fr:'CBP \u2014 Directives pour Souccot', url:'https://www.cbp.gov/newsroom/national-media-release/cbp-reminds-travelers-sukkot-travel-guidance' },
+              { label_en:'CFIA \u2014 Directive D-14-03', label_fr:'ACIA \u2014 Directive D-14-03', url:'https://inspection.canada.ca/en/plant-health/invasive-pests-and-plants/directives/horticulture/14-03' }] },
+
+  { id:'lulav', name_en:'Lulav (palm)', name_fr:'Loulav (palme)', lastVerified:'August 31, 2026',
+    body_en:'Canada has a specific provision for personal-use lulavim during Sukkot. CFIA Directive D-14-03 permits Salix (willow) contained in a fresh lulav for ceremonial or religious use, from all origins other than Europe, under set conditions.',
+    body_fr:'Le Canada pr\u00e9voit une disposition sp\u00e9cifique pour les loulavim \u00e0 usage personnel pendant Souccot. La directive D-14-03 de l\u2019ACIA permet le Salix (saule) contenu dans un loulav frais pour usage c\u00e9r\u00e9moniel ou religieux, de toutes origines sauf l\u2019Europe, sous conditions.',
+    checks_en:['Personal use only, and must accompany the traveller at entry. Commercial imports are not permitted.',
+               'Authorized period: 7 days before the beginning of Sukkot through 8 days after the end of the holiday.',
+               'Must be free from insect and disease pests.',
+               'Willow branches, including leaves and buds, must be dry and not capable of growing.',
+               'The traveller must state the origin of the willow.',
+               'Not for propagation.',
+               'Willow from Europe is not covered by this provision.',
+               'No Permit to Import and no Phytosanitary Certificate are required under this provision.',
+               'United States: palm fronds and myrtle are inspected and released if no pests are found. European willow is prohibited; green, soft or sprouted willow is prohibited.'],
+    checks_fr:['Usage personnel seulement; doit accompagner le voyageur \u00e0 l\u2019entr\u00e9e. Les importations commerciales ne sont pas permises.',
+               'P\u00e9riode autoris\u00e9e : 7 jours avant le d\u00e9but de Souccot jusqu\u2019\u00e0 8 jours apr\u00e8s la fin de la f\u00eate.',
+               'Doit \u00eatre exempt de parasites et de maladies.',
+               'Les branches de saule, feuilles et bourgeons compris, doivent \u00eatre s\u00e8ches et incapables de pousser.',
+               'Le voyageur doit d\u00e9clarer l\u2019origine du saule.',
+               'Pas destin\u00e9 \u00e0 la propagation.',
+               'Le saule provenant d\u2019Europe n\u2019est pas vis\u00e9 par cette disposition.',
+               'Aucun permis d\u2019importation ni certificat phytosanitaire n\u2019est requis sous cette disposition.',
+               '\u00c9tats-Unis : les palmes et le myrte sont inspect\u00e9s et lib\u00e9r\u00e9s si aucun parasite n\u2019est trouv\u00e9. Le saule europ\u00e9en est interdit; le saule vert, mou ou bourgeonn\u00e9 est interdit.'],
+    warning_en:'This is a specific Canadian provision for lulavim. It should not automatically be applied to etrogim or other holiday plants.',
+    warning_fr:'Il s\u2019agit d\u2019une disposition canadienne propre aux loulavim. Elle ne doit pas \u00eatre appliqu\u00e9e automatiquement aux etroguim ni \u00e0 d\u2019autres plantes de f\u00eate.',
+    official:[{ label_en:'CFIA \u2014 Directive D-14-03 (lulav provision)', label_fr:'ACIA \u2014 Directive D-14-03 (disposition loulav)', url:'https://inspection.canada.ca/en/plant-health/invasive-pests-and-plants/directives/horticulture/14-03' },
+              { label_en:'CBP \u2014 Sukkot travel guidance', label_fr:'CBP \u2014 Directives pour Souccot', url:'https://www.cbp.gov/newsroom/national-media-release/cbp-reminds-travelers-sukkot-travel-guidance' }] },
+
+  { id:'hadassim', name_en:'Hadassim / Myrtle', name_fr:'Hadassim / Myrte', lastVerified:'August 31, 2026',
+    body_en:'Myrtle twigs are plant material and are inspected at the border.',
+    body_fr:'Les branches de myrte sont des produits v\u00e9g\u00e9taux et sont inspect\u00e9es \u00e0 la fronti\u00e8re.',
+    checks_en:['United States: myrtle twigs are inspected by agriculture specialists and released if no pests or symptoms of disease are found.',
+               'Canada and other destinations: verify the current requirement for the exact item and origin.'],
+    checks_fr:['\u00c9tats-Unis : les branches de myrte sont inspect\u00e9es par des sp\u00e9cialistes en agriculture et lib\u00e9r\u00e9es si aucun parasite ni sympt\u00f4me de maladie n\u2019est trouv\u00e9.',
+               'Canada et autres destinations : v\u00e9rifiez l\u2019exigence en vigueur pour l\u2019article et l\u2019origine.'],
+    official:[{ label_en:'CBP \u2014 Sukkot travel guidance', label_fr:'CBP \u2014 Directives pour Souccot', url:'https://www.cbp.gov/newsroom/national-media-release/cbp-reminds-travelers-sukkot-travel-guidance' }] },
+
+  { id:'aravot', name_en:'Aravot / Willow', name_fr:'Aravot / Saule', lastVerified:'August 31, 2026',
+    body_en:'Willow is the most restricted of the four species. Both Canada and the United States treat willow from Europe differently from other origins.',
+    body_fr:'Le saule est la plus r\u00e9glement\u00e9e des quatre esp\u00e8ces. Le Canada et les \u00c9tats-Unis traitent le saule europ\u00e9en diff\u00e9remment des autres origines.',
+    checks_en:['United States: willow from Europe is prohibited. From other origins it is inspected and released if no pests are found.',
+               'United States: willow that is green, has soft tissue, or has sprouted buds is prohibited because it is capable of growing.',
+               'Canada: willow in a fresh lulav is permitted only under the D-14-03 personal-use provision, from origins other than Europe, and must be dry and incapable of growing.',
+               'The traveller must be able to state the origin of the willow.'],
+    checks_fr:['\u00c9tats-Unis : le saule europ\u00e9en est interdit. D\u2019autres origines, il est inspect\u00e9 et lib\u00e9r\u00e9 si aucun parasite n\u2019est trouv\u00e9.',
+               '\u00c9tats-Unis : le saule vert, \u00e0 tissu mou ou dont les bourgeons ont pouss\u00e9 est interdit, car capable de pousser.',
+               'Canada : le saule d\u2019un loulav frais n\u2019est permis que sous la disposition D-14-03 \u00e0 usage personnel, d\u2019origines autres que l\u2019Europe, et doit \u00eatre sec et incapable de pousser.',
+               'Le voyageur doit pouvoir d\u00e9clarer l\u2019origine du saule.'],
+    warning_en:'Willow from Europe is prohibited by both the United States and the Canadian lulav provision.',
+    warning_fr:'Le saule provenant d\u2019Europe est interdit tant aux \u00c9tats-Unis que par la disposition canadienne pour loulav.',
+    official:[{ label_en:'CFIA \u2014 Directive D-14-03', label_fr:'ACIA \u2014 Directive D-14-03', url:'https://inspection.canada.ca/en/plant-health/invasive-pests-and-plants/directives/horticulture/14-03' },
+              { label_en:'CBP \u2014 Sukkot travel guidance', label_fr:'CBP \u2014 Directives pour Souccot', url:'https://www.cbp.gov/newsroom/national-media-release/cbp-reminds-travelers-sukkot-travel-guidance' }] },
+
+  { id:'other-plant', name_en:'Other plant material', name_fr:'Autres produits v\u00e9g\u00e9taux', lastVerified:'',
+    body_en:'CJHQ does not currently have a verified country-specific rule for this item. Check the official government source before travelling.',
+    body_fr:'CJHQ n\u2019a pas actuellement de r\u00e8gle v\u00e9rifi\u00e9e par pays pour cet article. Consultez la source gouvernementale officielle avant de voyager.',
+    checks_en:['Identify the exact plant material and its country of origin.',
+               'Check the destination authority\u2019s current requirement.',
+               'Check whether a phytosanitary certificate is required.'],
+    checks_fr:['Identifiez le produit v\u00e9g\u00e9tal exact et son pays d\u2019origine.',
+               'V\u00e9rifiez l\u2019exigence en vigueur de l\u2019autorit\u00e9 de destination.',
+               'V\u00e9rifiez si un certificat phytosanitaire est requis.'],
+    official:[] },
+
+  { id:'food', name_en:'Food / holiday products', name_fr:'Aliments / produits de f\u00eate', lastVerified:'',
+    body_en:'Food, fresh produce, plants, seeds, wood and other products can be subject to customs, agricultural, food-safety or transportation requirements. Requirements vary by country and sometimes by origin.',
+    body_fr:'Les aliments, produits frais, plantes, semences, bois et autres produits peuvent \u00eatre soumis \u00e0 des exigences douani\u00e8res, agricoles, de salubrit\u00e9 ou de transport. Les exigences varient selon le pays et parfois l\u2019origine.',
+    checks_en:['Check the official destination-country rules before travelling.',
+               'Declare food and agricultural products when required.'],
+    checks_fr:['V\u00e9rifiez les r\u00e8gles officielles du pays de destination avant de voyager.',
+               'D\u00e9clarez les produits alimentaires et agricoles lorsque requis.'],
+    official:[] },
+
+  { id:'wine', name_en:'Wine and beverages', name_fr:'Vin et boissons', lastVerified:'',
+    body_en:'CJHQ does not currently have a verified country-specific rule for this item. Alcohol is subject to separate customs allowances and duty rules. Check the official government source before travelling.',
+    body_fr:'CJHQ n\u2019a pas actuellement de r\u00e8gle v\u00e9rifi\u00e9e par pays pour cet article. L\u2019alcool est soumis \u00e0 des exemptions douani\u00e8res et \u00e0 des droits distincts. Consultez la source officielle avant de voyager.',
+    checks_en:['Check the personal exemption limits for your destination.',
+               'Declare alcohol when required.'],
+    checks_fr:['V\u00e9rifiez les limites d\u2019exemption personnelle de votre destination.',
+               'D\u00e9clarez l\u2019alcool lorsque requis.'],
+    official:[] },
+
+  { id:'other-items', name_en:'Other items', name_fr:'Autres articles', lastVerified:'',
+    body_en:'CJHQ does not currently have a verified country-specific rule for this item. Check the official government source before travelling.',
+    body_fr:'CJHQ n\u2019a pas actuellement de r\u00e8gle v\u00e9rifi\u00e9e par pays pour cet article. Consultez la source gouvernementale officielle avant de voyager.',
+    checks_en:['Identify the exact item.','Check the destination authority\u2019s current requirement.'],
+    checks_fr:['Identifiez l\u2019article exact.','V\u00e9rifiez l\u2019exigence en vigueur de l\u2019autorit\u00e9 de destination.'],
+    official:[] }
+];
+
+
+/* ================= ASK CJHQ =================
+   Admin-only assistant. Phase 1: no AI provider is connected and no credential
+   exists anywhere in this file. Everything below answers from structured data
+   or from the CJHQ resource index, or says plainly that it cannot answer yet.
+
+   Architecture:
+     askCommunityAssistant(question)  - provider-independent entry point
+       -> structured handlers (calendar, zmanim, eruv, emergency)
+       -> CJHQ resource matcher
+       -> ASK_BACKEND (null in Phase 1) for anything open-ended
+
+   When a server-side gateway exists, implement ASK_BACKEND.ask() and the rest
+   of the system keeps working unchanged. Nothing here needs a rewrite.        */
+
+const ASK_ASSISTANT_NAME = 'Ask CJHQ';
+const ASK_ASSISTANT_SUB  = 'Your Jewish Community Assistant';
+
+/* ---- Model / provider configuration ----
+   Switching model or provider is these three lines and nothing else. The
+   frontend never holds a key: AI_GATEWAY_URL points at the CJHQ-controlled
+   gateway, which holds the credential and forwards to whichever OpenAI-
+   compatible endpoint is configured there.
+
+   Because every candidate model is served behind an OpenAI-compatible API,
+   moving between Qwen, Gemma, Mistral, DeepSeek, or a self-hosted Ollama box
+   is a value change here plus one variable in the gateway. No code rewrite. */
+const ASK_AI_CONFIG = {
+  gatewayUrl: '',                 // e.g. 'https://ask.cjhq.org/v1/chat' - empty = not connected
+  model:      'qwen3-27b',        // provider-side model id
+  temperature: 0.2,               // low: this assistant should not be creative
+  maxTokens:  700,
+  timeoutMs:  20000
+};
+
+/* Phase 2 plugs a real gateway in here. Deliberately null so nothing can
+   silently pretend an AI answered. Implementing this one function is the whole
+   integration - askCommunityAssistant() already routes through it. */
+const ASK_BACKEND = ASK_AI_CONFIG.gatewayUrl ? {
+  async ask(question, context){
+    const ctrl = new AbortController();
+    const t = setTimeout(()=> ctrl.abort(), ASK_AI_CONFIG.timeoutMs);
+    try{
+      const idToken = (fbAuth && fbAuth.currentUser) ? await fbAuth.currentUser.getIdToken() : null;
+      const res = await fetch(ASK_AI_CONFIG.gatewayUrl, {
+        method:'POST',
+        headers: Object.assign({ 'Content-Type':'application/json' },
+                               idToken ? { 'Authorization':'Bearer ' + idToken } : {}),
+        body: JSON.stringify({
+          model: ASK_AI_CONFIG.model,
+          temperature: ASK_AI_CONFIG.temperature,
+          max_tokens: ASK_AI_CONFIG.maxTokens,
+          question,
+          context: context || null
+        }),
+        signal: ctrl.signal
+      });
+      if(!res.ok) throw new Error('gateway ' + res.status);
+      return await res.json();
+    }finally{
+      clearTimeout(t);
+    }
+  }
+} : null;
+
+/* Default source registry. Seeded into Firestore on request so CJHQ can edit
+   it without a code change; used read-only if Firestore is unavailable. */
+const ASK_DEFAULT_SOURCES = [
+  { id:'cjhq-resources', name:'CJHQ Resource Centre', url:'https://cjhq.org/resources',
+    type:'CJHQ', description:'The 63 government and community resources maintained by CJHQ.',
+    active:true, authoritative:true, timeSensitive:false, updateFrequency:'monthly',
+    lastChecked:'', lastIndexed:'', integration:'connected', notes:'Indexed directly from the site, no external call needed.' },
+  { id:'cjhq-tools', name:'CJHQ Tools', url:'https://cjhq.org/child-travel-consent',
+    type:'CJHQ', description:'CJHQ-built tools such as the Child Travel Consent Letter.',
+    active:true, authoritative:true, timeSensitive:false, updateFrequency:'as needed',
+    lastChecked:'', lastIndexed:'', integration:'connected', notes:'' },
+  { id:'hebcal-calendar', name:'Hebcal — Jewish Calendar', url:'https://www.hebcal.com/',
+    type:'Calendar', description:'Hebrew dates and holiday dates.',
+    active:true, authoritative:true, timeSensitive:false, updateFrequency:'live',
+    lastChecked:'', lastIndexed:'', integration:'pending', notes:'Public JSON API, no credential required. Wire in Phase 2.' },
+  { id:'hebcal-zmanim', name:'Hebcal — Montreal Zmanim', url:'https://www.hebcal.com/zmanim?geonameid=6077243',
+    type:'Zmanim', description:'Daily zmanim for Montreal.',
+    active:true, authoritative:true, timeSensitive:true, updateFrequency:'live',
+    lastChecked:'', lastIndexed:'', integration:'pending', notes:'Times must never be calculated or guessed by an LLM.' },
+  { id:'montreal-eruv', name:'Montreal Eruv', url:'https://montrealeruv.ca/',
+    type:'Eruv', description:'Official Montreal Eruv status and map.',
+    active:true, authoritative:true, timeSensitive:true, updateFrequency:'weekly',
+    lastChecked:'', lastIndexed:'', integration:'link-only', notes:'Status is never cached. Users are sent to the official page.' },
+  { id:'hatzolah-montreal', name:'Hatzolah Montreal', url:'https://www.hatzolahmontreal.com/',
+    type:'Emergency', description:'Volunteer emergency medical service.',
+    active:true, authoritative:true, timeSensitive:false, updateFrequency:'as needed',
+    lastChecked:'', lastIndexed:'', integration:'link-only', notes:'Never state a phone number that is not verified from the official site.' },
+  { id:'findmtl', name:'FindMTL', url:'https://findmtl.ca/',
+    type:'FindMTL', description:'Montreal Jewish community directory: shuls, kosher food, organisations.',
+    active:false, authoritative:false, timeSensitive:false, updateFrequency:'unknown',
+    lastChecked:'', lastIndexed:'', integration:'pending', notes:'Returns 403 to automated requests. Do not scrape. Needs permission or an API before use.' },
+  { id:'canada-gov', name:'Government of Canada', url:'https://www.canada.ca/',
+    type:'Government', description:'Official federal guidance on travel, passports and border crossing.',
+    active:true, authoritative:true, timeSensitive:false, updateFrequency:'as needed',
+    lastChecked:'', lastIndexed:'', integration:'link-only', notes:'' }
+];
+
+const ASK_SOURCE_TYPES = ['CJHQ','Government','Jewish Organization','FindMTL','Community','Zmanim','Eruv','Emergency','Calendar','Other'];
+
+/* ---------- structured service records (spec sections 7, 11, 13) ----------
+   These hold FACTS ABOUT SOURCES, never the volatile values themselves. The
+   Eruv record deliberately has no "status" field: storing "the eruv is up"
+   would be wrong within a week. Phone numbers are left empty rather than
+   guessed - an invented emergency number is the worst failure this system
+   could produce.                                                              */
+const ASK_ERUV_RECORD = {
+  id:'montreal-eruv',
+  organization:'Montreal Eruv',
+  website:'https://montrealeruv.ca/',
+  statusPage:'https://montrealeruv.ca/',
+  mapUrl:'https://montrealeruv.ca/',
+  serviceArea:'Montreal',
+  source:'montrealeruv.ca',
+  lastVerified:'',          // set when a human confirms the links
+  timeSensitive:true,       // status must always be fetched, never stored
+  statusPolicy:'never-cache'
+};
+
+const ASK_HATZOLAH_RECORD = {
+  id:'hatzolah-montreal',
+  organization:'Hatzolah Montreal',
+  emergencyNumbers:[],      // EMPTY BY DESIGN - never invent an emergency number
+  website:'https://www.hatzolahmontreal.com/',
+  mapUrl:'',
+  serviceArea:'Montreal',
+  source:'hatzolahmontreal.com',
+  lastVerified:'',
+  timeSensitive:false,
+  note:'Numbers must be entered by an admin from the official site, or fetched live.'
+};
+
+/* Spec section 13: when several sources could answer, this is the order. Lower
+   number wins. Used to sort sources on an answer so the admin can see which
+   source was preferred and why. */
+const ASK_SOURCE_PRIORITY = {
+  'CJHQ':1, 'Government':2, 'Jewish Organization':3, 'Zmanim':3, 'Eruv':3,
+  'Emergency':3, 'Calendar':3, 'FindMTL':4, 'Community':5, 'Other':6
+};
+function askSortSources(list){
+  return (list || []).slice().sort((a,b)=>
+    (ASK_SOURCE_PRIORITY[a.type] || 9) - (ASK_SOURCE_PRIORITY[b.type] || 9));
+}
+
+/* ---------- location (spec section 12) ----------
+   Montreal unless the question names somewhere else. Nothing about the user's
+   actual position is requested, derived or stored - only what they typed.     */
+const ASK_DEFAULT_LOCATION = { name:'Montreal', geonameid:6077243 };
+const ASK_KNOWN_LOCATIONS = [
+  { match:/\bmontr[e\u00e9]al\b/i,                 name:'Montreal',  geonameid:6077243 },
+  { match:/\bbrooklyn\b/i,                         name:'Brooklyn',  geonameid:5110302 },
+  { match:/\b(new york|nyc|manhattan)\b/i,          name:'New York',  geonameid:5128581 },
+  { match:/\bmonsey\b/i,                            name:'Monsey',    geonameid:5128238 },
+  { match:/\blakewood\b/i,                          name:'Lakewood',  geonameid:5100280 },
+  { match:/\btoronto\b/i,                           name:'Toronto',   geonameid:6167865 },
+  { match:/\b(jerusalem|yerushalayim|\u05d9\u05e8\u05d5\u05e9\u05dc\u05d9\u05dd)\b/i, name:'Jerusalem', geonameid:281184 }
+];
+function askDetectLocation(q){
+  const s = String(q || '');
+  for(const loc of ASK_KNOWN_LOCATIONS){
+    if(loc.match.test(s)) return { name:loc.name, geonameid:loc.geonameid, explicit:true };
+  }
+  return { name:ASK_DEFAULT_LOCATION.name, geonameid:ASK_DEFAULT_LOCATION.geonameid, explicit:false };
+}
+
+/* ---------- community directory registry ----------
+   Structure only. CJHQ has no verified shul / mikvah / kosher data yet, so this
+   ships EMPTY and nothing is invented to fill it. Entries are added by an admin
+   or, later, by a directory integration.
+
+   Entry shape:
+     { id, type:'shul'|'mikvah'|'kosher'|'minyan', name, address, neighbourhood,
+       phone, url, hours, source, verified:boolean, lastUpdated:'YYYY-MM-DD',
+       active:boolean }
+
+   verified and lastUpdated exist because this is exactly the kind of data that
+   goes stale and misleads. An unverified mikvah time is worse than none.       */
+let askDirectoryEntries = [];
+const ASK_DIRECTORY_TYPES = ['shul','mikvah','kosher','minyan'];
+
+/* ---------- CJHQ resource matcher ----------
+   Pure client-side scoring over the resource index already on the page. No AI
+   and no network call, so it works today and the AI layer can call it later. */
+// How many resource titles contain this word. Cached because it is stable for
+// the life of the page and called once per word per resource.
+let __askTitleFreq = null;
+function askTitleFrequency(word){
+  if(!__askTitleFreq){
+    __askTitleFreq = Object.create(null);
+    (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
+      (cat.groups || []).forEach(g=>{
+        (g.items || []).forEach(it=>{
+          const seen = new Set(
+            cjhqNormalizeSearch((String(it.en || '') + ' ' + String(it.fr || '')).toLowerCase())
+              .split(/\s+/).filter(Boolean));
+          seen.forEach(w => { __askTitleFreq[w] = (__askTitleFreq[w] || 0) + 1; });
+        });
+      });
+    });
+  }
+  return __askTitleFreq[word] || 0;
+}
+
+function askMatchResources(question, limit){
+  const q = cjhqNormalizeSearch(String(question || '').toLowerCase());
+  if(q.length < 2) return [];
+  // Common words appear in nearly every description, so two of them together
+  // were enough to fake a match - "what is the capital of Peru" scored on
+  // "what" and "the" alone. Strip them before scoring.
+  const STOP = new Set(['the','and','for','you','your','can','how','where','when','with','from',
+    'are','this','that','need','get','find','about','does','any','has','have','what','who','why',
+    'was','were','will','would','should','could','there','their','they','been','into','than','then',
+    'them','some','more','most','also','just','like','want','looking','know','tell','please','info',
+    'information','help','question','anything','something',
+    // French equivalents - a French question deserves the same filtering.
+    'les','des','une','pour','dans','avec','sur','est','sont','que','qui','quoi','comment','puis',
+    'peux','peut','vous','nous','mon','mes','mon','notre','avoir','faire','besoin','trouver','obtenir',
+    'demander','cette','cet','ceci','cela','plus','tout','tous','toute','ainsi','aussi','renseignement',
+    'renseignements','aide','ou']);
+  // French elides constantly - "j'ai", "d'information", "l'enfant". Stripping the
+  // apostrophe glued them into "jai" and "dinformation", which no stopword list
+  // catches, so they inflated the word count and pushed real matches below the
+  // coverage threshold. Split on the apostrophe first.
+  const words = q.replace(/[\u2019']/g, ' ').split(/\s+/)
+    .map(w => w.replace(/[^a-z0-9]/g,''))
+    .filter(w => w.length > 2 && !STOP.has(w));
+  if(!words.length) return [];
+  const out = [];
+  (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
+    (cat.groups || []).forEach(g=>{
+      (g.items || []).forEach(it=>{
+        const hay = cjhqNormalizeSearch([
+          it.en, it.fr, it.what_en, it.need_en, it.steps_en,
+          it.question_en, it.answer_en, (it.tips_list_en || []).join(' '),
+          cat.en, g.heading_en || ''
+        ].filter(Boolean).join(' ').toLowerCase());
+        // Both titles count. Previously only the English title did, so a French
+        // question ("Ou puis-je demander un passeport?") scored a single body hit
+        // and fell below the relevance threshold - it matched nothing at all.
+        const title = cjhqNormalizeSearch((String(it.en || '') + ' ' + String(it.fr || '')).toLowerCase());
+        let score = 0, titleHits = 0, bodyHits = 0;
+        words.forEach(w=>{
+          if(title.includes(w)){ score += 10; titleHits++; }
+          else if(hay.includes(w)){ score += 2; bodyHits++; }
+        });
+        if(title === q) score += 40;
+        // Frequency turned out to be the wrong signal: "passport" appears in 10
+        // titles but is exactly what the user means, while "times" appears in
+        // only 2 and still produced a nonsense match for "minyan times at my
+        // shul". What separates them is COVERAGE - how much of the question the
+        // match actually explains. One matched word out of four is a coincidence;
+        // one out of one is the question.
+        const matched = titleHits + bodyHits;
+        const coverage = matched / words.length;
+        const relevant = (titleHits > 0 && (words.length <= 2 || coverage >= 0.5))
+                       || bodyHits >= 2;
+        if(relevant && score > 0) out.push({ score, item: it, category: cat.en });
+      });
+    });
+  });
+  out.sort((a,b)=> b.score - a.score);
+  return out.slice(0, limit || 3);
+}
+
+/* ---------- structured handlers ----------
+   Each returns the shared answer shape, or null if it does not apply. Answers
+   here are either verifiable links or clearly-labelled "check the source"
+   responses - none of them assert a time-sensitive fact from memory. */
+
+/* ---------- language detection ----------
+   Decides the language of the QUESTION, which is not the same as the site
+   toggle: a French-speaking visitor may still type in English, and Hebrew
+   speakers frequently type transliterated Hebrew inside an English sentence.
+   Order matters - Hebrew script is unambiguous, so it is checked first. */
+function askDetectLanguage(q){
+  const s = String(q || '');
+  if(/[\u0590-\u05FF]/.test(s)) return 'he';          // any Hebrew character
+
+  // French markers: accents, elisions, and common question words. Checked as
+  // whole words so "est" does not fire on "interest".
+  const frWords = /\b(est|es-tu|quand|comment|pourquoi|quel|quelle|quels|quelles|o\u00f9|puis|peux|peut|dois|faut|besoin|trouver|obtenir|demander|prier|nourriture|heure|aujourd|demain|cette|mon|ma|mes|notre|votre|nous|vous|je|j'ai|c'est|qu'est|s'il|de la|du|des|le|la|les|une|un|pour|avec|dans|sur)\b/gi;
+  const frAccents = /[\u00e0\u00e2\u00e4\u00e7\u00e8\u00e9\u00ea\u00eb\u00ee\u00ef\u00f4\u00f6\u00f9\u00fb\u00fc]/;
+  // Some words are decisive on their own: no English question begins with
+  // "Comment", "Quand", "Pourquoi" or "Est-ce que". Without this, short French
+  // questions with no accent - "Comment contacter Hatzolah?" - were read as
+  // English and answered in English.
+  const frStrong = /\b(comment|quand|pourquoi|o\u00f9|quelle?s?|est-ce que|puis-je|peut-on|combien|qu'est-ce)\b/i;
+  if(frStrong.test(s)) return 'fr';
+
+  const hits = (s.match(frWords) || []).length;
+  // Otherwise: two French function words, or one plus an accent. A single "le"
+  // or "de" inside an English sentence is not enough.
+  if(hits >= 2 || (hits >= 1 && frAccents.test(s))) return 'fr';
+  return 'en';
+}
+
+/* Pick the right string from a {en, fr, he} object, falling back to English so
+   a missing translation degrades to something readable rather than blank. */
+function askT(obj, lang){
+  if(typeof obj === 'string') return obj;
+  return (obj && (obj[lang] || obj.en)) || '';
+}
+
+function askAnswerShape(){
+  return { answer:'', sources:[], actions:[], timeSensitive:false, handled:false, handler:'', lang:'en', location:'' };
+}
+
+function askEruv(q){
+  // English, French (erouv/érouv) and Hebrew script.
+  if(!/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1/i.test(q)) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handled = true; r.handler = 'Eruv'; r.timeSensitive = true;
+  r.answer = askT({
+    en:'Eruv status changes week to week, so I will not state whether it is up. Check the official Montreal Eruv page, which is updated by the people who inspect it.',
+    fr:'Le statut de l\u2019\u00e9rouv change d\u2019une semaine \u00e0 l\u2019autre. Je n\u2019affirmerai donc pas s\u2019il est en fonction. Consultez la page officielle de l\u2019\u00c9rouv de Montr\u00e9al, mise \u00e0 jour par ceux qui l\u2019inspectent.',
+    he:'\u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05e9\u05ea\u05e0\u05d4 \u05de\u05e9\u05d1\u05d5\u05e2 \u05dc\u05e9\u05d1\u05d5\u05e2, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05d0\u05dd \u05d4\u05d5\u05d0 \u05ea\u05e7\u05d9\u05df. \u05d9\u05e9 \u05dc\u05d1\u05d3\u05d5\u05e7 \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 \u05e9\u05dc \u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc.'
+  }, L);
+  // Actions come from the structured record, so changing the official URL is a
+  // one-line edit rather than a hunt through the handlers.
+  const E = ASK_ERUV_RECORD;
+  r.actions = [
+    { label: askT({en:'Check Eruv Status', fr:'V\u00e9rifier le statut de l\u2019\u00e9rouv', he:'\u05d1\u05d3\u05d9\u05e7\u05ea \u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1'}, L), url:E.statusPage, kind:'link' },
+    { label: askT({en:'View Eruv Map', fr:'Voir la carte de l\u2019\u00e9rouv', he:'\u05de\u05e4\u05ea \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1'}, L), url:E.mapUrl, kind:'map' },
+    { label: askT({en:'Eruv Website', fr:'Site de l\u2019\u00e9rouv', he:'\u05d0\u05ea\u05e8 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1'}, L), url:E.website, kind:'link' }
+  ];
+  r.sources = askSortSources([{ name:E.organization, url:E.website, type:'Eruv',
+                                authoritative:true, timeSensitive:true, lastVerified:E.lastVerified }]);
+  return r;
+}
+
+function askEmergency(q){
+  if(!/hatzol|hatzalah|ambulance|emergency|paramedic|urgence|ambulancier|\u05d4\u05e6\u05dc\u05d4/i.test(q)) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handled = true; r.handler = 'Emergency';
+  r.answer = askT({
+    en:'If this is a life-threatening emergency, call 911 first.\n\nHatzolah Montreal is the community volunteer emergency medical service. I will not quote a phone number from memory. Use the official site so you get the current one.',
+    fr:'S\u2019il s\u2019agit d\u2019une urgence vitale, composez d\u2019abord le 911.\n\nHatzolah Montr\u00e9al est le service m\u00e9dical d\u2019urgence b\u00e9n\u00e9vole de la communaut\u00e9. Je ne citerai pas un num\u00e9ro de m\u00e9moire. Consultez le site officiel pour le num\u00e9ro \u00e0 jour.',
+    he:'\u05d1\u05de\u05e7\u05e8\u05d4 \u05e9\u05dc \u05e1\u05db\u05e0\u05ea \u05d7\u05d9\u05d9\u05dd \u05d9\u05e9 \u05dc\u05d4\u05ea\u05e7\u05e9\u05e8 \u05ea\u05d7\u05d9\u05dc\u05d4 \u05dc-911.\n\n\u05d4\u05e6\u05dc\u05d4 \u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc \u05d4\u05d5\u05d0 \u05e9\u05d9\u05e8\u05d5\u05ea \u05d4\u05d7\u05d9\u05e8\u05d5\u05dd \u05d4\u05e7\u05d4\u05d9\u05dc\u05ea\u05d9. \u05dc\u05d0 \u05d0\u05e6\u05d8\u05d8 \u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. \u05d9\u05e9 \u05dc\u05d4\u05e9\u05ea\u05de\u05e9 \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9.'
+  }, L);
+  // A "Call" button appears only if an admin has entered a verified number.
+  // emergencyNumbers is empty by design, so today there is no call action -
+  // which is correct: a wrong emergency number is worse than none.
+  const H = ASK_HATZOLAH_RECORD;
+  r.actions = [];
+  (H.emergencyNumbers || []).forEach(n=>{
+    r.actions.push({ label: askT({en:'Call ' + H.organization, fr:'Appeler ' + H.organization,
+                                  he:'\u05d4\u05ea\u05e7\u05e9\u05e8\u05d5 \u05dc' + H.organization}, L),
+                     url:'tel:' + String(n).replace(/[^0-9+]/g,''), kind:'phone' });
+  });
+  r.actions.push({ label: askT({en:H.organization + ' Website', fr:'Site de ' + H.organization,
+                                he:'\u05d0\u05ea\u05e8 ' + H.organization}, L), url:H.website, kind:'link' });
+  if(H.mapUrl) r.actions.push({ label: askT({en:'View Map', fr:'Voir la carte', he:'\u05de\u05e4\u05d4'}, L), url:H.mapUrl, kind:'map' });
+  r.sources = askSortSources([{ name:H.organization, url:H.website, type:'Emergency',
+                                authoritative:true, timeSensitive:false,
+                                serviceArea:H.serviceArea, lastVerified:H.lastVerified }]);
+  return r;
+}
+
+function askZmanim(q){
+  if(!/zman|shkia|shkiah|sunset|sunrise|candle.?light|hadlak|tzeis|tzais|havdal|neitz|alos|alot|coucher du soleil|bougies|allumage/i.test(q)
+     && !/(shabbo?s|shabbat|chabbat|\u05e9\u05d1\u05ea).{0,20}(end|finish|out|over|termine|fini)/i.test(q)
+     && !/\u05e9\u05e7\u05d9\u05e2\u05d4|\u05d6\u05de\u05df|\u05d4\u05d3\u05dc\u05e7\u05ea \u05e0\u05e8\u05d5\u05ea|\u05e0\u05e8\u05d5\u05ea/i.test(q)) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  const loc = askDetectLocation(q);
+  r.location = loc.name;
+  r.handled = true; r.handler = 'Zmanim'; r.timeSensitive = true;
+  const url = 'https://www.hebcal.com/zmanim?geonameid=' + loc.geonameid;
+  r.answer = askT({
+    en:'Zmanim change daily, so these are never answered from memory. The live lookup is not connected yet. Today\u2019s times for ' + loc.name + ' are on Hebcal.',
+    fr:'Les zmanim changent chaque jour; ils ne sont donc jamais donn\u00e9s de m\u00e9moire. La consultation en direct n\u2019est pas encore branch\u00e9e. Les heures du jour pour ' + loc.name + ' se trouvent sur Hebcal.',
+    he:'\u05d4\u05d6\u05de\u05e0\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05de\u05d3\u05d9 \u05d9\u05d5\u05dd, \u05dc\u05db\u05df \u05d4\u05dd \u05dc\u05e2\u05d5\u05dc\u05dd \u05dc\u05d0 \u05e0\u05de\u05e1\u05e8\u05d9\u05dd \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. \u05d4\u05d6\u05de\u05e0\u05d9\u05dd \u05e2\u05d1\u05d5\u05e8 ' + loc.name + ' \u05e0\u05de\u05e6\u05d0\u05d9\u05dd \u05d1-Hebcal.'
+  }, L);
+  r.actions = [{ label: askT({en:'Today\u2019s ' + loc.name + ' Zmanim',
+                              fr:'Zmanim du jour \u2014 ' + loc.name,
+                              he:'\u05d6\u05de\u05e0\u05d9 \u05d4\u05d9\u05d5\u05dd \u2014 ' + loc.name}, L),
+                 url:url, kind:'link' }];
+  r.sources = askSortSources([{ name:'Hebcal \u2014 ' + loc.name + ' Zmanim', url:url,
+                                type:'Zmanim', authoritative:true, timeSensitive:true }]);
+  return r;
+}
+
+function askCalendar(q){
+  if(!/rosh hashan|roch hachana|yom kippur|kippour|sukkot|succos|souccot|pesach|passover|p\u00e2que|shavuot|shavuos|chavouot|purim|pourim|chanuk|hanukk|hanouca|tisha|hebrew date|jewish calendar|calendrier juif|yom tov|f\u00eate juive|fast day|je\u00fbne/i.test(q)
+     && !/\u05e8\u05d0\u05e9 \u05d4\u05e9\u05e0\u05d4|\u05d9\u05d5\u05dd \u05db\u05d9\u05e4\u05d5\u05e8|\u05e1\u05d5\u05db\u05d5\u05ea|\u05e4\u05e1\u05d7|\u05e9\u05d1\u05d5\u05e2\u05d5\u05ea|\u05e4\u05d5\u05e8\u05d9\u05dd|\u05d7\u05e0\u05d5\u05db\u05d4|\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4/i.test(q)) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handled = true; r.handler = 'Calendar';
+  r.answer = askT({
+    en:'Holiday dates move every year, so I will not state one until the calendar lookup is connected. Hebcal has the current dates and can add them to your calendar.',
+    fr:'Les dates des f\u00eates changent chaque ann\u00e9e; je n\u2019en indiquerai donc aucune tant que la consultation du calendrier n\u2019est pas branch\u00e9e. Hebcal a les dates \u00e0 jour et peut les ajouter \u00e0 votre calendrier.',
+    he:'\u05ea\u05d0\u05e8\u05d9\u05db\u05d9 \u05d4\u05d7\u05d2\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05de\u05d3\u05d9 \u05e9\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05ea\u05d0\u05e8\u05d9\u05da \u05e2\u05d3 \u05e9\u05d9\u05d7\u05d5\u05d1\u05e8 \u05dc\u05d5\u05d7 \u05d4\u05e9\u05e0\u05d4. \u05d1-Hebcal \u05d9\u05e9 \u05d0\u05ea \u05d4\u05ea\u05d0\u05e8\u05d9\u05db\u05d9\u05dd \u05d4\u05e2\u05d3\u05db\u05e0\u05d9\u05d9\u05dd.'
+  }, L);
+  r.actions = [{ label: askT({en:'Jewish Calendar (Hebcal)', fr:'Calendrier juif (Hebcal)', he:'\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d9 (Hebcal)'}, L),
+                 url:'https://www.hebcal.com/', kind:'link' }];
+  r.sources = [{ name:'Hebcal \u2014 Jewish Calendar', url:'https://www.hebcal.com/', type:'Calendar', authoritative:true, timeSensitive:false }];
+  return r;
+}
+
+/* CJHQ does not hold a directory of shuls, mikvaot, kosher food or minyanim -
+   that is FindMTL territory, and FindMTL is not integrated. Without this guard
+   such questions leaked into the resource matcher on an incidental word:
+   "What time does the mikvah on Van Horne close?" matched a CJHQ resource
+   because CJHQ's own address is on Van Horne. Answering a mikvah question with
+   a passport page is worse than saying we do not have it. */
+function askCommunityDirectory(q){
+  const isDirectory = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4|minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df|shul|schul|synagogue|\u05d1\u05d9\u05ea \u05db\u05e0\u05e1\u05ea|daven|davening|pray|prier|\u05dc\u05d4\u05ea\u05e4\u05dc\u05dc|kosher|casher|kashrut|cacher|\u05db\u05e9\u05e8/i.test(q);
+  if(!isDirectory) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handler = 'Community Directory';
+
+  // Answer from the registry when CJHQ has verified entries. The registry ships
+  // EMPTY on purpose: no shul, mikvah or kosher listing is invented here, and
+  // an unverified entry is worse than no entry for this kind of question.
+  const type = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4/i.test(q) ? 'mikvah'
+             : /kosher|casher|kashrut|cacher|\u05db\u05e9\u05e8/i.test(q) ? 'kosher'
+             : /minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df/i.test(q) ? 'minyan'
+             : 'shul';
+  const hits = (askDirectoryEntries || []).filter(e => e && e.active !== false && e.type === type);
+
+  if(hits.length){
+    r.handled = true;
+    r.answer = askT({
+      en:'CJHQ has ' + hits.length + ' verified listing' + (hits.length===1?'':'s') + ' for this. Details and hours can change, so confirm before relying on them.',
+      fr:'CJHQ a ' + hits.length + ' inscription' + (hits.length===1?'':'s') + ' v\u00e9rifi\u00e9e' + (hits.length===1?'':'s') + '. Les d\u00e9tails et les heures peuvent changer; confirmez avant de vous y fier.',
+      he:'\u05dc-CJHQ \u05d9\u05e9 ' + hits.length + ' \u05e8\u05e9\u05d5\u05de\u05d5\u05ea \u05de\u05d0\u05d5\u05de\u05ea\u05d5\u05ea. \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05d5\u05d4\u05e9\u05e2\u05d5\u05ea \u05e2\u05e9\u05d5\u05d9\u05d9\u05dd \u05dc\u05d4\u05e9\u05ea\u05e0\u05d5\u05ea; \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e1\u05ea\u05de\u05db\u05d5\u05ea.'
+    }, L);
+    r.actions = hits.slice(0,4).map(e => ({ label:e.name, url:e.url || '/resources', kind:e.url ? 'link' : 'internal' }));
+    r.sources = hits.slice(0,4).map(e => ({
+      name:e.name, url:e.url || '', type:'Community',
+      authoritative:!!e.verified, timeSensitive:true,
+      lastUpdated:e.lastUpdated || ''
+    }));
+    return r;
+  }
+
+  r.handled = false;
+  r.answer = askT({
+    en:'CJHQ does not yet maintain a verified directory of shuls, mikvaot, minyanim or kosher food, so I cannot answer that reliably. A community directory is the right source for it, and connecting one is still pending.',
+    fr:'CJHQ ne tient pas encore un r\u00e9pertoire v\u00e9rifi\u00e9 des synagogues, mikv\u00e9s, minyanim ou commerces cachers; je ne peux donc pas r\u00e9pondre de fa\u00e7on fiable. Un r\u00e9pertoire communautaire serait la bonne source, et son int\u00e9gration est encore \u00e0 venir.',
+    he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05e2\u05d3\u05d9\u05d9\u05df \u05de\u05d0\u05d2\u05e8 \u05de\u05d0\u05d5\u05de\u05ea \u05e9\u05dc \u05d1\u05ea\u05d9 \u05db\u05e0\u05e1\u05ea, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d5 \u05de\u05d6\u05d5\u05df \u05db\u05e9\u05e8, \u05dc\u05db\u05df \u05d0\u05d9\u05e0\u05e0\u05d9 \u05d9\u05db\u05d5\u05dc \u05dc\u05e2\u05e0\u05d5\u05ea \u05d1\u05d0\u05d5\u05e4\u05df \u05d0\u05de\u05d9\u05df.'
+  }, L);
+  r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd'}, L), url:'/resources', kind:'internal' }];
+  return r;
+}
+
+function askCjhqResources(q){
+  const hits = askMatchResources(q, 3);
+  if(!hits.length) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handled = true; r.handler = 'CJHQ Resources';
+  const top = hits[0].item;
+  const topName = (L === 'fr' && top.fr) ? top.fr : top.en;
+  r.answer = askT({
+    en: hits.length === 1
+      ? `CJHQ has a resource for that: ${topName}.`
+      : `CJHQ has ${hits.length} resources that look relevant. The closest is ${topName}.`,
+    fr: hits.length === 1
+      ? `CJHQ a une ressource pour cela : ${topName}.`
+      : `CJHQ a ${hits.length} ressources pertinentes. La plus proche est ${topName}.`,
+    he: hits.length === 1
+      ? `\u05dc-CJHQ \u05d9\u05e9 \u05de\u05e9\u05d0\u05d1 \u05dc\u05db\u05da: ${topName}.`
+      : `\u05dc-CJHQ \u05d9\u05e9 ${hits.length} \u05de\u05e9\u05d0\u05d1\u05d9\u05dd \u05e8\u05dc\u05d5\u05d5\u05e0\u05d8\u05d9\u05d9\u05dd. \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8: ${topName}.`
+  }, L);
+  r.actions = hits.map(h => {
+    const nm = (L === 'fr' && h.item.fr) ? h.item.fr : h.item.en;
+    return h.item.internalPage
+      ? { label:nm, url:'/' + h.item.internalPage, kind:'internal' }
+      : { label:nm, url:'/resources/' + h.item.slug, kind:'internal' };
+  });
+  r.sources = hits.map(h => ({
+    name:h.item.en, url:'https://cjhq.org/resources/' + h.item.slug,
+    type:'CJHQ', authoritative:true, timeSensitive:false, category:h.category, score:h.score
+  }));
+  return r;
+}
+
+/* ---------- provider-independent entry point ----------
+   The UI only ever calls this. Swapping in a real AI gateway means implementing
+   ASK_BACKEND.ask() - no other part of the app changes. */
+async function askCommunityAssistant(question){
+  const q = String(question || '').trim();
+  if(!q) return null;
+
+  // Structured and CJHQ answers first: they are verifiable and need no AI.
+  // Order matters: the directory guard runs before the resource matcher so a
+  // community question cannot be answered with an unrelated CJHQ resource.
+  const handlers = [askEruv, askEmergency, askZmanim, askCalendar,
+                    askCommunityDirectory, askCjhqResources];
+  for(const h of handlers){
+    const res = h(q);
+    if(res) return res;
+  }
+
+  if(ASK_BACKEND && typeof ASK_BACKEND.ask === 'function'){
+    return await ASK_BACKEND.ask(q);
+  }
+
+  // No handler matched and no gateway exists. Say so rather than inventing.
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handled = false; r.handler = 'none';
+  r.answer = askT({
+    en:'I could not match that to a CJHQ resource or a structured source, and the AI backend is not connected yet, so I am not going to guess. Try the Resource Centre, or rephrase using a keyword such as passport, NEXUS, RAMQ, eruv, zmanim or Hatzolah.',
+    fr:'Je n\u2019ai pas pu rattacher cela \u00e0 une ressource CJHQ ni \u00e0 une source structur\u00e9e, et le moteur d\u2019IA n\u2019est pas encore branch\u00e9; je ne vais donc pas deviner. Essayez le Centre de ressources, ou reformulez avec un mot-cl\u00e9 comme passeport, NEXUS, RAMQ, \u00e9rouv, zmanim ou Hatzolah.',
+    he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05d0\u05ea \u05d6\u05d4 \u05dc\u05de\u05e9\u05d0\u05d1 \u05e9\u05dc CJHQ \u05d0\u05d5 \u05dc\u05de\u05e7\u05d5\u05e8 \u05de\u05d5\u05d1\u05e0\u05d4, \u05d5\u05de\u05e0\u05d5\u05e2 \u05d4-AI \u05d8\u05e8\u05dd \u05d7\u05d5\u05d1\u05e8, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e0\u05d7\u05e9. \u05e0\u05e1\u05d5 \u05d0\u05ea \u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd.'
+  }, L);
+  r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd'}, L), url:'/resources', kind:'internal' }];
+  return r;
+}
+
 const SITE_PAGES = [
   { id:'home', en:'Home', fr:'Accueil' },
   { id:'resources', en:'Community Resource Centre', fr:'Centre de ressources communautaires' },
@@ -4934,6 +5956,7 @@ const SITE_PAGES = [
   { id:'terms', en:'Terms of Use', fr:'Conditions d\'utilisation' },
   { id:'accessibility', en:'Accessibility Statement', fr:'Déclaration d\'accessibilité' },
   { id:'child-travel-consent', en:'Child Travel Consent Letter', fr:'Lettre de consentement au voyage d\'un enfant' },
+  { id:'special-information', en:'Special Information', fr:'Information spéciale' },
 ];
 async function renderPagesList(){
   const hidden = await fetchCollection('page_settings');
@@ -5780,6 +6803,351 @@ async function publishChangeNotice(slug){
     document.getElementById('noticeForm').reset();
     document.getElementById('noticeId').value = '';
   });
+
+
+/* ---------- Publishing admin UI ---------- */
+(function initVisibilityAdmin(){
+  const box = document.getElementById('visibilityList');
+  if(!box) return;   // public pages carry no admin markup at all
+
+  const SECTIONS = [
+    { key:'yomim-tovim-travel',
+      name:'Special Information for Yomim Tovim & Travel',
+      note:'Seasonal travel and Yom Tov guidance. Content is managed in this panel; publishing is separate.' }
+  ];
+
+  function render(){
+    box.innerHTML = '';
+    SECTIONS.forEach(sec=>{
+      const a = sectionAudit(sec.key);
+      const published = a.status === 'published';
+      const row = document.createElement('div');
+      row.className = 'vis-row';
+
+      const head = document.createElement('div');
+      head.className = 'vis-name';
+      head.textContent = sec.name;
+      if(!published){
+        const flag = document.createElement('span');
+        flag.className = 'vis-preview-flag';
+        flag.textContent = 'ADMIN PREVIEW \u2014 NOT PUBLIC';
+        head.appendChild(flag);
+      }
+      row.appendChild(head);
+
+      const st = document.createElement('div');
+      st.className = 'vis-status';
+      st.innerHTML = '<span class="vis-dot ' + (published ? 'published' : 'hidden') + '"></span>'
+                   + 'Status: ' + (published ? 'Published' : 'Hidden');
+      row.appendChild(st);
+
+      const note = document.createElement('div');
+      note.className = 'vis-audit';
+      note.textContent = sec.note;
+      row.appendChild(note);
+
+      const audit = document.createElement('div');
+      audit.className = 'vis-audit';
+      audit.textContent = a.changedAt
+        ? ('Last changed: ' + new Date(a.changedAt).toLocaleString() + (a.changedBy ? ' \u00b7 by ' + a.changedBy : ''))
+        : 'Never changed \u2014 default is Hidden.';
+      row.appendChild(audit);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = published ? 'btn admin-btn-outline' : 'btn dark';
+      btn.style.marginTop = '12px';
+      btn.textContent = published ? 'Hide from Website' : 'Publish to Website';
+      btn.addEventListener('click', async ()=>{
+        // Deliberate confirmation, with the consequence spelled out. There is
+        // no code path where saving content flips this.
+        const msg = published
+          ? 'Hide this resource?\n\nThis will remove the ' + sec.name + ' section from public view. '
+            + 'The content will remain available in the admin panel.'
+          : 'Publish this resource?\n\nThis will make the ' + sec.name + ' section visible to the public '
+            + 'on the CJHQ website.';
+        if(!confirm(msg)) return;
+        btn.disabled = true;
+        try{
+          await setSectionVisibility(sec.key, !published, adminUser && adminUser.email);
+          render();
+        }catch(err){
+          console.warn('[CJHQ] visibility change failed:', (err && err.code) || err);
+          alert('Could not change visibility. Check that you are still signed in and that the Firestore rules allow writing to settings.');
+        }finally{
+          btn.disabled = false;
+        }
+      });
+      row.appendChild(btn);
+      box.appendChild(row);
+    });
+  }
+
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>{
+    if(b.dataset.tab === 'visibility'){
+      b.addEventListener('click', async ()=>{ await loadSectionVisibility(); render(); });
+    }
+  });
+  render();
+})();
+
+/* ---------- Ask CJHQ admin UI ----------
+   Wired only inside the admin panel. Conversations live in memory for the
+   session and are never written to Firestore or logged, per the privacy
+   requirement - "Clear" genuinely discards them. */
+(function initAskCjhq(){
+  const $a = (id) => document.getElementById(id);
+  if(!$a('askLog')) return;   // public pages have no Ask CJHQ markup at all
+
+  let askTurns = [];          // in-memory only
+  let showSources = true;
+  let lastAnswer = '';
+
+  // Spec section 20 - grouped test prompts. Deliberately includes questions the
+  // assistant should DECLINE (kosher food, mikvah, davening), so an admin can
+  // verify it refuses rather than invents.
+  const PROMPTS = [
+    'Where do I apply for NEXUS?',
+    'I need a child travel consent letter.',
+    'Where can I find passport information?',
+    'I need RAMQ information.',
+    'When is Rosh Hashana this year?',
+    'When is Yom Kippur?',
+    'What time is shkia today in Montreal?',
+    'What time is shkia today in Brooklyn?',
+    'When is candle lighting tonight?',
+    'Is the Montreal Eruv up?',
+    'Send me the Eruv map.',
+    'How do I contact Hatzolah?',
+    'Where can I daven in Hampstead?',
+    'Where can I find kosher food?',
+    'Where can I find a mikvah?',
+    'What Jewish community resources are available in Montreal?'
+  ];
+;
+
+  function backendStatus(){
+    const connected = (typeof ASK_BACKEND !== 'undefined') && ASK_BACKEND && typeof ASK_BACKEND.ask === 'function';
+    $a('askBackendStatus').innerHTML = connected
+      ? 'AI backend: <b>connected</b>.'
+      : 'AI backend: <b>not connected</b> (Phase 1). Structured sources and the CJHQ resource matcher answer directly; '
+        + 'anything else says so rather than guessing. Public flag: <b>' + (ASK_CJHQ_PUBLIC ? 'ON' : 'OFF') + '</b>.';
+  }
+
+  function renderPrompts(){
+    $a('askPrompts').innerHTML = '';
+    PROMPTS.forEach(p=>{
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'ask-chip'; b.textContent = p;
+      b.addEventListener('click', ()=>{ $a('askInput').value = p; send(); });
+      $a('askPrompts').appendChild(b);
+    });
+  }
+
+  function renderLog(){
+    const log = $a('askLog');
+    if(!askTurns.length){
+      log.innerHTML = '<p class="ask-empty">No messages yet. Ask a question or pick one of the test prompts below.</p>';
+      return;
+    }
+    log.innerHTML = '';
+    askTurns.forEach(t=>{
+      if(t.role === 'user'){
+        const d = document.createElement('div');
+        d.className = 'ask-msg user';
+        d.textContent = t.text;
+        log.appendChild(d);
+        return;
+      }
+      const wrap = document.createElement('div');
+      wrap.className = 'ask-msg bot';
+      const bub = document.createElement('div');
+      bub.className = 'ask-bubble';
+      bub.textContent = t.res.answer;
+      wrap.appendChild(bub);
+
+      if(t.res.actions && t.res.actions.length){
+        const acts = document.createElement('div');
+        acts.className = 'ask-acts';
+        t.res.actions.forEach(a=>{
+          const safe = cjhqSafeUrl(a.url);
+          if(!safe) return;                      // never render a link we cannot validate
+          const el = document.createElement('a');
+          el.className = 'ask-act';
+          el.href = safe;
+          el.textContent = a.label;
+          if(!/^\//.test(safe)){ el.target = '_blank'; el.rel = 'noopener noreferrer'; }
+          acts.appendChild(el);
+        });
+        if(acts.children.length) wrap.appendChild(acts);
+      }
+
+      if(showSources && t.res.sources && t.res.sources.length){
+        const box = document.createElement('div');
+        box.className = 'ask-srcbox';
+        const head = document.createElement('div');
+        head.innerHTML = '<b>Sources used</b> \u2014 handler: ' + cjhqEscapeHtml(t.res.handler || 'none');
+        box.appendChild(head);
+        t.res.sources.forEach(s=>{
+          const line = document.createElement('div');
+          line.style.marginTop = '5px';
+          let html = cjhqEscapeHtml(s.name) + ' <span class="ask-dim">(' + cjhqEscapeHtml(s.type || '\u2014') + ')</span>';
+          if(s.authoritative) html += '<span class="ask-flag auth">authoritative</span>';
+          if(s.timeSensitive) html += '<span class="ask-flag time">time-sensitive</span>';
+          const safe = cjhqSafeUrl(s.url);
+          if(safe) html += '<br><span style="word-break:break-all">' + cjhqEscapeHtml(safe) + '</span>';
+          line.innerHTML = html;
+          box.appendChild(line);
+        });
+        wrap.appendChild(box);
+      }
+      log.appendChild(wrap);
+    });
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async function send(){
+    const input = $a('askInput');
+    const q = input.value.trim();
+    if(!q) return;
+    askTurns.push({ role:'user', text:q });
+    input.value = '';
+    renderLog();
+    $a('askSend').disabled = true;
+    try{
+      const res = await askCommunityAssistant(q);
+      lastAnswer = res ? res.answer : '';
+      askTurns.push({ role:'bot', res });
+    }catch(err){
+      console.warn('[CJHQ] Ask CJHQ failed:', err);
+      askTurns.push({ role:'bot', res:{ answer:'Something went wrong preparing that answer.', sources:[], actions:[], handler:'error' }});
+    }finally{
+      $a('askSend').disabled = false;
+      renderLog();
+    }
+  }
+
+  $a('askForm').addEventListener('submit', (e)=>{ e.preventDefault(); send(); });
+  $a('askNew').addEventListener('click', ()=>{ askTurns = []; lastAnswer=''; renderLog(); $a('askInput').focus(); });
+  $a('askClear').addEventListener('click', ()=>{ askTurns = []; lastAnswer=''; renderLog(); });
+  $a('askCopy').addEventListener('click', ()=>{
+    if(!lastAnswer){ alert('No response to copy yet.'); return; }
+    navigator.clipboard.writeText(lastAnswer)
+      .then(()=> alert('Response copied.'))
+      .catch(()=> alert('Could not copy. Select the text manually.'));
+  });
+  $a('askToggleSources').addEventListener('click', ()=>{
+    showSources = !showSources;
+    $a('askToggleSources').textContent = showSources ? 'Hide Sources' : 'Show Sources';
+    $a('askToggleSources').setAttribute('aria-pressed', String(showSources));
+    renderLog();
+  });
+
+  /* ---------- knowledge source registry ---------- */
+  let askSources = [];
+
+  function renderSources(){
+    const box = $a('askSourcesList');
+    if(!askSources.length){
+      box.innerHTML = '<p class="ask-empty">No sources stored yet. "Load Default Sources" seeds the registry.</p>';
+      return;
+    }
+    box.innerHTML = '';
+    askSources.forEach((s, i)=>{
+      const row = document.createElement('div');
+      row.className = 'ask-src-row' + (s.active ? '' : ' inactive');
+      let flags = '';
+      if(s.authoritative) flags += '<span class="ask-flag auth">authoritative</span>';
+      if(s.timeSensitive) flags += '<span class="ask-flag time">time-sensitive</span>';
+      row.innerHTML =
+        '<div><b>' + cjhqEscapeHtml(s.name) + '</b> <span class="ask-dim">(' + cjhqEscapeHtml(s.type) + ')</span>' + flags + '</div>' +
+        '<div class="u">' + cjhqEscapeHtml(s.url || '') + '</div>' +
+        '<div style="margin-top:4px;">' + cjhqEscapeHtml(s.description || '') + '</div>' +
+        '<div class="u" style="margin-top:4px;">integration: ' + cjhqEscapeHtml(s.integration || 'pending') +
+        ' \u00b7 updates: ' + cjhqEscapeHtml(s.updateFrequency || '\u2014') + '</div>' +
+        (s.notes ? '<div class="u" style="margin-top:4px;">' + cjhqEscapeHtml(s.notes) + '</div>' : '');
+      const bar = document.createElement('div');
+      bar.style.cssText = 'display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;';
+      const t = document.createElement('button');
+      t.type='button'; t.className='btn admin-btn-outline'; t.style.fontSize='.78rem';
+      t.textContent = s.active ? 'Deactivate' : 'Activate';
+      t.addEventListener('click', ()=> saveSource(Object.assign({}, s, { active: !s.active })));
+      const d = document.createElement('button');
+      d.type='button'; d.className='btn admin-btn-outline'; d.style.fontSize='.78rem';
+      d.textContent = 'Remove';
+      d.addEventListener('click', ()=>{ if(confirm('Remove "' + s.name + '" from the registry?')) removeSource(s); });
+      bar.appendChild(t); bar.appendChild(d);
+      row.appendChild(bar);
+      box.appendChild(row);
+    });
+  }
+
+  async function loadSources(){
+    askSources = [];
+    try{
+      const fs = window.__fbFirestore;
+      if(fs && typeof fbDb !== 'undefined' && fbDb){
+        const snap = await fs.getDocs(fs.collection(fbDb, 'ask_sources'));
+        snap.forEach(doc => askSources.push(Object.assign({ id: doc.id }, doc.data())));
+      }
+    }catch(err){
+      console.warn('[CJHQ] could not load Ask CJHQ sources:', (err && err.code) || err);
+    }
+    renderSources();
+  }
+
+  async function saveSource(src){
+    try{
+      const fs = window.__fbFirestore;
+      await fs.setDoc(fs.doc(fbDb, 'ask_sources', src.id), src);
+      await loadSources();
+    }catch(err){
+      console.warn('[CJHQ] Ask CJHQ source save failed:', (err && err.code) || err);
+      alert('Could not save. The ask_sources collection may not be permitted by the published Firestore rules yet.');
+    }
+  }
+
+  async function removeSource(src){
+    try{
+      const fs = window.__fbFirestore;
+      await fs.deleteDoc(fs.doc(fbDb, 'ask_sources', src.id));
+      await loadSources();
+    }catch(err){
+      console.warn('[CJHQ] Ask CJHQ source delete failed:', (err && err.code) || err);
+      alert('Could not remove. Check the Firestore rules for ask_sources.');
+    }
+  }
+
+  $a('askSeedSources').addEventListener('click', async ()=>{
+    if(!confirm('Load the default source registry? Existing entries with the same id will be overwritten.')) return;
+    for(const s of ASK_DEFAULT_SOURCES){ await saveSource(s); }
+  });
+
+  $a('askAddSource').addEventListener('click', async ()=>{
+    const name = prompt('Source name:'); if(!name) return;
+    const url  = prompt('Source URL (https://…):') || '';
+    if(url && !cjhqSafeUrl(url)){ alert('That URL is not a valid http(s) address.'); return; }
+    const type = prompt('Source type (' + ASK_SOURCE_TYPES.join(', ') + '):', 'Community') || 'Other';
+    const src = {
+      id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) || ('src-' + Date.now()),
+      name, url, type: ASK_SOURCE_TYPES.includes(type) ? type : 'Other',
+      description: prompt('Short description:') || '',
+      active:true, authoritative: confirm('Mark as authoritative?'),
+      timeSensitive: confirm('Is this information time-sensitive?'),
+      updateFrequency:'as needed', integration:'pending', notes:''
+    };
+    await saveSource(src);
+  });
+
+  // Populate when the tab is opened, so nothing is fetched until an admin looks.
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>{
+    if(b.dataset.tab === 'askcjhq'){
+      b.addEventListener('click', ()=>{ backendStatus(); renderPrompts(); renderLog(); loadSources(); });
+    }
+  });
+  backendStatus(); renderPrompts(); renderLog();
+})();
+
   document.getElementById('noticeForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const notice = {
@@ -5974,6 +7342,226 @@ window.addEventListener('popstate', ()=>checkCurrentPath({skipHistory:true}));
 // unrecognised path on this first pass is treated as "not loaded yet" rather
 // than "not found" - it holds position instead of flashing a 404 - and is
 // re-resolved once the backend lands.
+/* ---------- Special Information renderer ---------- */
+(function initSpecialInformation(){
+  const $s = (id) => document.getElementById(id);
+  if(!$s('siCountries')) return;
+
+  const FLAGS = {
+    ca:'<svg class="si-flag" viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" fill="#fff"/><rect width="8" height="20" fill="#D52B1E"/><rect x="24" width="8" height="20" fill="#D52B1E"/><g transform="translate(16,12.7) scale(0.17)" fill="#D52B1E"><path d="m 0,-52.5 -6.5,12.5 c -0.7,1.3 -2,1.2 -3.3,0.5 l -4.7,-2.4 3.5,18.6 c 0.7,3.4 -1.7,3.4 -2.9,1.9 l -8.2,-9.2 -1.3,4.7 c -0.2,0.6 -0.8,1.2 -1.9,1 l -10.4,-2.2 2.7,9.9 c 0.6,2.2 1,3.1 -0.6,3.7 l -3.5,1.7 17,13.8 c 1.7,1.3 2.3,1.9 1.6,4 l -1.5,4.9 16.1,-1.9 c 0.5,0 1.1,0.4 1.1,1 l -0.7,18.7 3.7,0 -0.7,-18.7 c 0,-0.6 0.6,-1 1.1,-1 l 16.1,1.9 -1.5,-4.9 c -0.7,-2.1 -0.1,-2.7 1.6,-4 l 17,-13.8 -3.5,-1.7 c -1.6,-0.6 -1.2,-1.5 -0.6,-3.7 l 2.7,-9.9 -10.4,2.2 c -1.1,0.2 -1.7,-0.4 -1.9,-1 l -1.3,-4.7 -8.2,9.2 c -1.2,1.5 -3.6,1.5 -2.9,-1.9 l 3.5,-18.6 -4.7,2.4 c -1.3,0.7 -2.6,0.8 -3.3,-0.5 z"/></g></svg>',
+    us:'<svg class="si-flag" viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" fill="#fff"/><g fill="#B22234"><rect width="32" height="1.54"/><rect y="3.08" width="32" height="1.54"/><rect y="6.16" width="32" height="1.54"/><rect y="9.24" width="32" height="1.54"/><rect y="12.32" width="32" height="1.54"/><rect y="15.4" width="32" height="1.54"/><rect y="18.46" width="32" height="1.54"/></g><rect width="13.2" height="10.78" fill="#3C3B6E"/></svg>',
+    il:'<svg class="si-flag" viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" fill="#fff"/><rect y="2.6" width="32" height="2.6" fill="#0038B8"/><rect y="14.8" width="32" height="2.6" fill="#0038B8"/><path d="M16 6.6l3.1 5.4h-6.2z" fill="none" stroke="#0038B8" stroke-width="1"/><path d="M16 13.4l-3.1-5.4h6.2z" fill="none" stroke="#0038B8" stroke-width="1"/></svg>',
+    gb:'<svg class="si-flag" viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" fill="#012169"/><path d="M0,0 L32,20 M32,0 L0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 L32,20 M32,0 L0,20" stroke="#C8102E" stroke-width="2"/><path d="M16,0 V20 M0,10 H32" stroke="#fff" stroke-width="6"/><path d="M16,0 V20 M0,10 H32" stroke="#C8102E" stroke-width="3.5"/></svg>',
+    eu:'<svg class="si-flag" viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" fill="#003399"/><g fill="#FFCC00"><circle cx="16" cy="5" r="1"/><circle cx="20" cy="6.1" r="1"/><circle cx="22.9" cy="9" r="1"/><circle cx="24" cy="13" r="1"/><circle cx="22.9" cy="17" r="1"/><circle cx="12" cy="6.1" r="1"/><circle cx="9.1" cy="9" r="1"/><circle cx="8" cy="13" r="1"/><circle cx="9.1" cy="17" r="1"/></g></svg>'
+  };
+
+  // isFr is a local inside other modules, not a global - read the language the
+  // same way the rest of the site does.
+  const L = () => document.documentElement.classList.contains('lang-fr') ? 'fr' : 'en';
+  const T = (o, base) => o[base + '_' + L()] || o[base + '_en'] || '';
+
+  let selectedCountry = null, selectedItem = null;
+
+  function resourceLink(slug){
+    for(const cat of (typeof categories !== 'undefined' ? categories : [])){
+      for(const g of (cat.groups || [])){
+        for(const it of (g.items || [])){
+          if(it.slug === slug) return it;
+        }
+      }
+    }
+    return null;
+  }
+
+  function renderChips(container, list, selected, onPick){
+    container.innerHTML = '';
+    list.forEach(entry=>{
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'si-chip';
+      b.setAttribute('role','radio');
+      b.setAttribute('aria-checked', String(selected === entry.id));
+      if(entry.flag && FLAGS[entry.flag]) b.innerHTML = FLAGS[entry.flag];
+      const span = document.createElement('span');
+      span.textContent = T(entry, 'name');
+      b.appendChild(span);
+      b.addEventListener('click', ()=> onPick(entry.id));
+      container.appendChild(b);
+    });
+  }
+
+  function verifyLine(entry){
+    const d = document.createElement('div');
+    const v = (entry.lastVerified || '').trim();
+    d.className = 'si-verify' + (v ? '' : ' unverified');
+    d.textContent = v
+      ? (L()==='fr' ? 'Dernière vérification : ' + v + ' · Vérifié par CJHQ'
+                    : 'Last verified: ' + v + ' · Information checked by CJHQ')
+      : (L()==='fr' ? 'Non vérifié récemment — consultez la source officielle avant de vous y fier.'
+                    : 'Not recently verified — check the official source before relying on this.');
+    return d;
+  }
+
+  function renderCountry(){
+    const box = $s('siCountryDetail');
+    box.innerHTML = '';
+    if(!selectedCountry) return;
+    const c = SPECIAL_INFO_COUNTRIES.find(x=>x.id===selectedCountry);
+    if(!c) return;
+
+    const card = document.createElement('div');
+    card.className = 'si-card';
+
+    const h = document.createElement('h3');
+    h.textContent = T(c,'name');
+    card.appendChild(h);
+
+    const intro = document.createElement('p');
+    intro.textContent = T(c,'intro');
+    card.appendChild(intro);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'si-label';
+    lbl.textContent = L()==='fr' ? 'Avant de voyager' : 'Before travelling';
+    card.appendChild(lbl);
+
+    const ul = document.createElement('ul');
+    (T(c,'before') || []).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+    card.appendChild(ul);
+
+    if(c['warning_' + L()] || c.warning_en){
+      const w = document.createElement('div');
+      w.className = 'si-warn';
+      w.textContent = T(c,'warning');
+      card.appendChild(w);
+    }
+
+    const ol = document.createElement('div');
+    ol.className = 'si-label';
+    ol.textContent = L()==='fr' ? 'Information officielle' : 'Official information';
+    card.appendChild(ol);
+
+    if(c.official && c.official.length){
+      const links = document.createElement('div');
+      links.className = 'si-links';
+      links.style.marginTop = '8px';
+      c.official.forEach(o=>{
+        const safe = cjhqSafeUrl(o.url);
+        if(!safe) return;
+        const a = document.createElement('a');
+        a.className = 'si-link'; a.href = safe;
+        a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.textContent = T(o,'label');
+        links.appendChild(a);
+      });
+      card.appendChild(links);
+    }else{
+      // No verified government URL. Naming the authority is useful; inventing a
+      // deep link to it is not.
+      const pend = document.createElement('p');
+      pend.className = 'si-pending';
+      pend.textContent = T(c,'officialPending') +
+        (L()==='fr' ? ' — lien officiel à confirmer par CJHQ.' : ' — official link pending CJHQ verification.');
+      card.appendChild(pend);
+    }
+
+    const rel = (c.related || []).map(resourceLink).filter(Boolean);
+    if(rel.length){
+      const rl = document.createElement('div');
+      rl.className = 'si-label';
+      rl.textContent = L()==='fr' ? 'Ressources CJHQ connexes' : 'Related CJHQ resources';
+      card.appendChild(rl);
+      const links = document.createElement('div');
+      links.className = 'si-links';
+      links.style.marginTop = '8px';
+      rel.forEach(it=>{
+        const a = document.createElement('a');
+        a.className = 'si-link';
+        a.href = '/resources/' + it.slug;
+        a.setAttribute('data-href-page','resources');
+        a.textContent = (L()==='fr' && it.fr) ? it.fr : it.en;
+        a.addEventListener('click', (e)=>{
+          if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0) return;
+          e.preventDefault(); goPage('resources');
+          setTimeout(()=> openResourcePopup(it.slug), 160);
+        });
+        links.appendChild(a);
+      });
+      card.appendChild(links);
+    }
+
+    card.appendChild(verifyLine(c));
+    box.appendChild(card);
+  }
+
+  function renderItem(){
+    const box = $s('siItemDetail');
+    box.innerHTML = '';
+    if(!selectedItem) return;
+    const it = SPECIAL_INFO_ITEMS.find(x=>x.id===selectedItem);
+    if(!it) return;
+
+    const card = document.createElement('div');
+    card.className = 'si-card';
+    const h = document.createElement('h3'); h.textContent = T(it,'name'); card.appendChild(h);
+    const b = document.createElement('p'); b.textContent = T(it,'body'); card.appendChild(b);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'si-label';
+    lbl.textContent = L()==='fr' ? 'À vérifier' : 'What to check';
+    card.appendChild(lbl);
+    const ul = document.createElement('ul');
+    (T(it,'checks') || []).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+    card.appendChild(ul);
+
+    if(it.warning_en){
+      const w = document.createElement('div'); w.className='si-warn'; w.textContent = T(it,'warning');
+      card.appendChild(w);
+    }
+    box.appendChild(card);
+  }
+
+  function renderStaticLinks(){
+    const docs = [
+      { slug:'adult-passport-application', en:'Passports & Travel Documents', fr:'Passeports et documents de voyage' },
+      { slug:'children-travelling',        en:'Children Travelling',          fr:'Enfants qui voyagent' },
+      { slug:'child-travel-consent-letter',en:'Child Travel Consent Letter',  fr:'Lettre de consentement au voyage' },
+      { slug:'apply-for-nexus',            en:'NEXUS',                        fr:'NEXUS' }
+    ];
+    const local = [
+      { slug:'local-borough-services', en:'Municipal Services', fr:'Services municipaux' }
+    ];
+    [['siDocLinks',docs],['siLocalLinks',local]].forEach(([id,list])=>{
+      const box = $s(id); if(!box) return;
+      box.innerHTML = '';
+      list.forEach(d=>{
+        const it = resourceLink(d.slug); if(!it) return;
+        const a = document.createElement('a');
+        a.className = 'si-link';
+        a.href = it.internalPage ? ('/' + it.internalPage) : ('/resources/' + it.slug);
+        a.textContent = (L()==='fr' ? d.fr : d.en);
+        a.addEventListener('click', (e)=>{
+          if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0) return;
+          e.preventDefault();
+          if(it.internalPage){ goPage(it.internalPage); }
+          else { goPage('resources'); setTimeout(()=> openResourcePopup(it.slug), 160); }
+        });
+        box.appendChild(a);
+      });
+    });
+  }
+
+  // Rebuilds both pickers and both detail panes after any selection.
+  function bind(){
+    renderChips($s('siCountries'), SPECIAL_INFO_COUNTRIES, selectedCountry, (id)=>{ selectedCountry=id; bind(); });
+    renderChips($s('siItems'), SPECIAL_INFO_ITEMS, selectedItem, (id)=>{ selectedItem=id; bind(); });
+    renderCountry(); renderItem(); renderStaticLinks();
+  }
+
+  window.__siRender = bind;
+  bind();
+})();
+
 checkCurrentPath({deferUnknown:true});
 
 (async function initBackend(){
@@ -5992,6 +7580,16 @@ checkCurrentPath({deferUnknown:true});
   }catch(e){
     console.warn('Backend init step failed, continuing with routing regardless:', e);
   }finally{
+    // Visibility is loaded in finally, never inside the try: if Firebase is
+    // unreachable the flag stays at its default - hidden - and the gate still
+    // runs. Putting this in the try meant one network failure left an
+    // unpublished section on screen.
+    try{
+      await loadSectionVisibility();
+    }catch(err){
+      __sectionVisibility = {};       // fail closed
+    }
+
     // Routing must never be blocked by a backend hiccup — the visitor
     // should always land on the right page even if Firestore is slow,
     // unreachable, or a single step above throws. The first pass above
@@ -6002,6 +7600,10 @@ checkCurrentPath({deferUnknown:true});
       window.__routeDeferred = false;
       checkCurrentPath({skipHistory:true});
     }
+
+    // Enforced LAST, after routing has settled. Running it earlier meant the
+    // re-route above resolved /special-information again and undid the gate.
+    applySectionVisibility();
   }
 })();
 </script>
