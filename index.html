@@ -515,6 +515,9 @@
   .ask-act:hover{border-color:var(--bronze-soft); background:var(--bg-alt);}
   .ask-srcbox{margin-top:9px; border:1px dashed var(--line); border-radius:4px; padding:9px 12px; font-size:.78rem; color:var(--muted);}
   .ask-srcbox b{color:var(--ink);}
+  .ask-metabox{margin-top:9px; border:1px dashed var(--line); border-radius:4px; padding:9px 12px;
+    font-size:.78rem; color:var(--muted); background:var(--bg-alt);}
+  .ask-metabox b{color:var(--ink);}
   /* Muted text at opacity .7 measured 2.8:1 against white. Use the palette's
      muted colour at full opacity instead, which clears 4.5:1. */
   .ask-srcbox .ask-dim, .ask-src-row .ask-dim{color:var(--muted); opacity:1;}
@@ -4756,6 +4759,12 @@ if(contactForm){
    turning it on. Flipping it to true is the only code change a launch needs.  */
 const ASK_CJHQ_PUBLIC = false;
 
+/* reCAPTCHA Enterprise site key for App Check. Public by design - it identifies
+   the site to reCAPTCHA and appears in page source on every site that uses it.
+   Score-based key, registered to cjhq.org. This is NOT an AI credential. */
+const RECAPTCHA_SITE_KEY = '6LcEW6ItAAAAAFgOxyQ5ldk7cMe3FydlGRiwQrOQ';
+let appCheckReady = false;
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDPzTFbsiOtJ4LOKiFjL0aVtSKhl21zwuc",
   authDomain: "cjhqinfo.firebaseapp.com",
@@ -4786,6 +4795,26 @@ async function initFirebase(){
     window.__fbApp = app;
     fbAuth = authMod.getAuth(app);
     firebaseReady = true;
+
+    // ---- App Check ----
+    // Firebase AI Logic enforces App Check, so without this every Gemini call
+    // returns 401. The site key is public by design - it identifies the site to
+    // reCAPTCHA and is not a secret. Registered for cjhq.org in the console.
+    //
+    // Failure here must NOT break the site: Firestore and Auth are Unenforced,
+    // so a missing App Check token only affects Ask CJHQ. Anything else would
+    // be a self-inflicted outage on a live community site.
+    try{
+      const acMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app-check.js');
+      window.__fbAppCheck = acMod.initializeAppCheck(app, {
+        provider: new acMod.ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
+        isTokenAutoRefreshEnabled: true
+      });
+      appCheckReady = true;
+    }catch(err){
+      console.warn('[CJHQ] App Check unavailable - Ask CJHQ will be disabled, the rest of the site is unaffected:', err && err.message);
+      appCheckReady = false;
+    }
 
     // Firestore rules require request.auth != null for every write. Drive the
     // admin panel from the real auth state rather than a client-side flag, so
@@ -5541,43 +5570,92 @@ const ASK_ASSISTANT_SUB  = 'Your Jewish Community Assistant';
    Because every candidate model is served behind an OpenAI-compatible API,
    moving between Qwen, Gemma, Mistral, DeepSeek, or a self-hosted Ollama box
    is a value change here plus one variable in the gateway. No code rewrite. */
+/* Firebase AI Logic, Gemini Developer API, on the Spark plan.
+
+   There is NO API key here and none is needed: with the Developer API the key
+   lives in Google's proxy, and the browser authenticates via App Check. Do not
+   add a Gemini key to this file - it would be public within one deploy.
+
+   Model choice: gemini-3.5-flash-lite gives 15 RPM / 500 RPD on the free tier,
+   against 5 RPM / 20 RPD for the full Flash models. Twenty requests a day is
+   not enough to test with, let alone serve the community - that limit, not the
+   free tier itself, is what produced the earlier 429s. */
 const ASK_AI_CONFIG = {
-  gatewayUrl: '',                 // e.g. 'https://ask.cjhq.org/v1/chat' - empty = not connected
-  model:      'qwen3-27b',        // provider-side model id
-  temperature: 0.2,               // low: this assistant should not be creative
-  maxTokens:  700,
-  timeoutMs:  20000
+  model:       'gemini-3.5-flash-lite',
+  temperature: 0.2,     // low: this assistant reports facts, it does not invent
+  maxTokens:   700,
+  timeoutMs:   30000,
+  minGapMs:    4500     // client-side throttle: 15 RPM ceiling = 1 per 4s
 };
 
-/* Phase 2 plugs a real gateway in here. Deliberately null so nothing can
-   silently pretend an AI answered. Implementing this one function is the whole
-   integration - askCommunityAssistant() already routes through it. */
-const ASK_BACKEND = ASK_AI_CONFIG.gatewayUrl ? {
-  async ask(question, context){
-    const ctrl = new AbortController();
-    const t = setTimeout(()=> ctrl.abort(), ASK_AI_CONFIG.timeoutMs);
-    try{
-      const idToken = (fbAuth && fbAuth.currentUser) ? await fbAuth.currentUser.getIdToken() : null;
-      const res = await fetch(ASK_AI_CONFIG.gatewayUrl, {
-        method:'POST',
-        headers: Object.assign({ 'Content-Type':'application/json' },
-                               idToken ? { 'Authorization':'Bearer ' + idToken } : {}),
-        body: JSON.stringify({
-          model: ASK_AI_CONFIG.model,
-          temperature: ASK_AI_CONFIG.temperature,
-          max_tokens: ASK_AI_CONFIG.maxTokens,
-          question,
-          context: context || null
-        }),
-        signal: ctrl.signal
-      });
-      if(!res.ok) throw new Error('gateway ' + res.status);
-      return await res.json();
-    }finally{
-      clearTimeout(t);
+/* ---- Gemini via Firebase AI Logic ----
+   The model never decides facts. askCommunityAssistant() runs the deterministic
+   layer first; only if that produces verified CJHQ information does this run,
+   and it receives that information as context. Its job is to phrase it in the
+   user's language.
+
+   Throttled client-side to protect the 15 RPM free-tier ceiling, and it does
+   NOT retry: a retry storm against a 500/day quota is how a free tier gets
+   burned in an afternoon. */
+let __askModel = null;
+let __askLastCall = 0;
+
+async function askGetModel(){
+  if(__askModel) return __askModel;
+  if(!firebaseReady || !window.__fbApp) throw new Error('firebase-not-ready');
+  if(!appCheckReady) throw new Error('appcheck-not-ready');
+  const aiMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-ai.js');
+  const ai = aiMod.getAI(window.__fbApp, { backend: new aiMod.GoogleAIBackend() });
+  __askModel = aiMod.getGenerativeModel(ai, {
+    model: ASK_AI_CONFIG.model,
+    systemInstruction: ASK_SYSTEM_PROMPT,
+    generationConfig: {
+      temperature: ASK_AI_CONFIG.temperature,
+      maxOutputTokens: ASK_AI_CONFIG.maxTokens
     }
+  });
+  return __askModel;
+}
+
+const ASK_SYSTEM_PROMPT = [
+  'You are the CJHQ community information assistant for the Jewish Hasidic Council of Quebec.',
+  '',
+  'ABSOLUTE RULES:',
+  '1. Answer ONLY from the CJHQ INFORMATION provided in the message. It is the sole source of truth.',
+  '2. Never invent phone numbers, addresses, times, dates, prices, eruv status, zmanim,',
+  '   holiday dates, customs or immigration rules, parking rules, organisations or links.',
+  '3. If the CJHQ INFORMATION does not answer the question, say plainly that CJHQ does not',
+  '   have verified information, and point to any official source that was provided.',
+  '4. Never contradict or "correct" the CJHQ INFORMATION from your own knowledge.',
+  '5. Reproduce links exactly as given. Do not shorten, alter or invent URLs.',
+  '6. Do not give halachic or religious rulings. Practical and government information only.',
+  '',
+  'LANGUAGE: reply in the same language as the question - English, French or Hebrew.',
+  'Transliterated Hebrew terms inside an English or French sentence mean the user is writing',
+  'English or French; reply in that language. Keep names, addresses and links unchanged.',
+  '',
+  'STYLE: brief, warm, practical. Lead with the answer. No preamble.'
+].join('\n');
+
+const ASK_BACKEND = {
+  async ask(question, context){
+    // Throttle rather than retry.
+    const since = Date.now() - __askLastCall;
+    if(since < ASK_AI_CONFIG.minGapMs){
+      await new Promise(r => setTimeout(r, ASK_AI_CONFIG.minGapMs - since));
+    }
+    __askLastCall = Date.now();
+
+    const model = await askGetModel();
+    const prompt = 'CJHQ INFORMATION:\n' + (context || '(none supplied)')
+                 + '\n\nUSER QUESTION: ' + question;
+
+    const timeout = new Promise((_, rej) =>
+      setTimeout(() => rej(new Error('timeout')), ASK_AI_CONFIG.timeoutMs));
+    const res = await Promise.race([ model.generateContent(prompt), timeout ]);
+    return res.response.text().trim();
   }
-} : null;
+};
 
 /* Default source registry. Seeded into Firestore on request so CJHQ can edit
    it without a code change; used read-only if Firestore is unavailable. */
@@ -6002,35 +6080,82 @@ function askCjhqResources(q){
 /* ---------- provider-independent entry point ----------
    The UI only ever calls this. Swapping in a real AI gateway means implementing
    ASK_BACKEND.ask() - no other part of the app changes. */
-async function askCommunityAssistant(question){
+/* Build the context Gemini is allowed to use. Only verified material from the
+   deterministic layer goes in - never the raw question, never model memory. */
+function askBuildContext(res){
+  const parts = [];
+  if(res.answer) parts.push('Verified CJHQ answer: ' + res.answer);
+  if(res.location) parts.push('Location: ' + res.location);
+  if(res.timeSensitive) parts.push('NOTE: this information is time-sensitive. Do not state a specific time, date or status.');
+  (res.sources || []).forEach(src=>{
+    parts.push('Source: ' + src.name + (src.url ? ' <' + src.url + '>' : '')
+      + (src.authoritative ? ' [authoritative]' : '')
+      + (src.timeSensitive ? ' [time-sensitive]' : ''));
+  });
+  (res.actions || []).forEach(a=>{
+    parts.push('Link offered to the user: ' + a.label + ' <' + a.url + '>');
+  });
+  return parts.join('\n');
+}
+
+async function askCommunityAssistant(question, opts){
   const q = String(question || '').trim();
   if(!q) return null;
+  const useAI = !(opts && opts.useAI === false);
 
   // Structured and CJHQ answers first: they are verifiable and need no AI.
   // Order matters: the directory guard runs before the resource matcher so a
   // community question cannot be answered with an unrelated CJHQ resource.
   const handlers = [askEruv, askEmergency, askZmanim, askCalendar,
                     askCommunityDirectory, askCjhqResources];
+  let res = null;
   for(const h of handlers){
-    const res = h(q);
-    if(res) return res;
+    const out = h(q);
+    if(out){ res = out; break; }
   }
 
-  if(ASK_BACKEND && typeof ASK_BACKEND.ask === 'function'){
-    return await ASK_BACKEND.ask(q);
+  if(!res){
+    // Nothing verified to ground on. Gemini is NOT called here - a model asked
+    // to answer with no context is exactly how invented facts appear.
+    const r = askAnswerShape();
+    const L = askDetectLanguage(q); r.lang = L;
+    r.handled = false; r.handler = 'none';
+    r.answer = askT({
+      en:'I could not match that to a CJHQ resource or a structured source, so I am not going to guess. Try the Resource Centre, or rephrase using a keyword such as passport, NEXUS, RAMQ, eruv, zmanim or Hatzolah.',
+      fr:'Je n\u2019ai pas pu rattacher cela \u00e0 une ressource CJHQ ni \u00e0 une source structur\u00e9e; je ne vais donc pas deviner. Essayez le Centre de ressources, ou reformulez avec un mot-cl\u00e9 comme passeport, NEXUS, RAMQ, \u00e9rouv, zmanim ou Hatzolah.',
+      he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05d0\u05ea \u05d6\u05d4 \u05dc\u05de\u05e9\u05d0\u05d1 \u05e9\u05dc CJHQ \u05d0\u05d5 \u05dc\u05de\u05e7\u05d5\u05e8 \u05de\u05d5\u05d1\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e0\u05d7\u05e9. \u05e0\u05e1\u05d5 \u05d0\u05ea \u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd.'
+    }, L);
+    r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd'}, L), url:'/resources', kind:'internal' }];
+    return r;
   }
 
-  // No handler matched and no gateway exists. Say so rather than inventing.
-  const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
-  r.handled = false; r.handler = 'none';
-  r.answer = askT({
-    en:'I could not match that to a CJHQ resource or a structured source, and the AI backend is not connected yet, so I am not going to guess. Try the Resource Centre, or rephrase using a keyword such as passport, NEXUS, RAMQ, eruv, zmanim or Hatzolah.',
-    fr:'Je n\u2019ai pas pu rattacher cela \u00e0 une ressource CJHQ ni \u00e0 une source structur\u00e9e, et le moteur d\u2019IA n\u2019est pas encore branch\u00e9; je ne vais donc pas deviner. Essayez le Centre de ressources, ou reformulez avec un mot-cl\u00e9 comme passeport, NEXUS, RAMQ, \u00e9rouv, zmanim ou Hatzolah.',
-    he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05d0\u05ea \u05d6\u05d4 \u05dc\u05de\u05e9\u05d0\u05d1 \u05e9\u05dc CJHQ \u05d0\u05d5 \u05dc\u05de\u05e7\u05d5\u05e8 \u05de\u05d5\u05d1\u05e0\u05d4, \u05d5\u05de\u05e0\u05d5\u05e2 \u05d4-AI \u05d8\u05e8\u05dd \u05d7\u05d5\u05d1\u05e8, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e0\u05d7\u05e9. \u05e0\u05e1\u05d5 \u05d0\u05ea \u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd.'
-  }, L);
-  r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd'}, L), url:'/resources', kind:'internal' }];
-  return r;
+  // A handler matched. Its answer is already correct and safe, so AI is a
+  // presentation layer on top: if Gemini is unavailable, slow, throttled or
+  // returns nothing usable, the deterministic answer is what the user sees.
+  res.aiUsed = false;
+  if(useAI && ASK_BACKEND && firebaseReady && appCheckReady){
+    const context = askBuildContext(res);
+    if(context){
+      try{
+        const t0 = Date.now();
+        const phrased = await ASK_BACKEND.ask(q, context);
+        res.aiLatencyMs = Date.now() - t0;
+        if(phrased && phrased.length > 10){
+          res.deterministicAnswer = res.answer;  // kept for admin comparison
+          res.answer = phrased;
+          res.aiUsed = true;
+          res.aiModel = ASK_AI_CONFIG.model;
+        }
+      }catch(err){
+        // Never surface provider detail to a user. Quota, rate limits and
+        // billing errors all look the same from outside: the assistant simply
+        // answers from CJHQ's own information.
+        res.aiError = String((err && err.message) || err).slice(0, 120);
+        console.warn('[CJHQ] Ask CJHQ AI unavailable, using verified answer:', res.aiError);
+      }
+    }
+  }
+  return res;
 }
 
 const SITE_PAGES = [
@@ -7266,11 +7391,21 @@ async function publishChangeNotice(slug){
 ;
 
   function backendStatus(){
-    const connected = (typeof ASK_BACKEND !== 'undefined') && ASK_BACKEND && typeof ASK_BACKEND.ask === 'function';
-    $a('askBackendStatus').innerHTML = connected
-      ? 'AI backend: <b>connected</b>.'
-      : 'AI backend: <b>not connected</b> (Phase 1). Structured sources and the CJHQ resource matcher answer directly; '
-        + 'anything else says so rather than guessing. Public flag: <b>' + (ASK_CJHQ_PUBLIC ? 'ON' : 'OFF') + '</b>.';
+    const wired = (typeof ASK_BACKEND !== 'undefined') && ASK_BACKEND && typeof ASK_BACKEND.ask === 'function';
+    const ready = wired && firebaseReady && appCheckReady;
+    let msg;
+    if(ready){
+      msg = 'AI: <b>connected</b> \u00b7 model <b>' + ASK_AI_CONFIG.model + '</b> '
+          + '(free tier 15 req/min, 500/day) \u00b7 App Check <b>active</b>.';
+    }else if(wired && !appCheckReady){
+      msg = 'AI: <b>App Check not ready</b> \u2014 Gemini calls will be refused. '
+          + 'Answers still come from CJHQ\u2019s verified information.';
+    }else if(wired && !firebaseReady){
+      msg = 'AI: <b>Firebase not ready</b>. Answers come from CJHQ\u2019s verified information.';
+    }else{
+      msg = 'AI: <b>not connected</b>. Structured sources and the resource matcher answer directly.';
+    }
+    $a('askBackendStatus').innerHTML = msg + ' Public flag: <b>' + (ASK_CJHQ_PUBLIC ? 'ON' : 'OFF') + '</b>.';
   }
 
   function renderPrompts(){
@@ -7320,6 +7455,21 @@ async function publishChangeNotice(slug){
         });
         if(acts.children.length) wrap.appendChild(acts);
       }
+
+      // Admin diagnostics: which layer answered, how long it took, and what the
+      // deterministic answer was, so AI phrasing can be compared against it.
+      const meta = document.createElement('div');
+      meta.className = 'ask-metabox';   // distinct from ask-srcbox: "Hide Sources" must not hide diagnostics
+      let m = '<b>Answered by:</b> ' + (t.res.aiUsed ? ('Gemini \u2014 ' + cjhqEscapeHtml(t.res.aiModel || '')) : 'CJHQ deterministic layer');
+      if(t.res.handler) m += ' \u00b7 handler: ' + cjhqEscapeHtml(t.res.handler);
+      if(t.res.lang) m += ' \u00b7 detected language: ' + cjhqEscapeHtml(t.res.lang);
+      if(typeof t.res.aiLatencyMs === 'number') m += ' \u00b7 ' + t.res.aiLatencyMs + ' ms';
+      if(t.res.aiError) m += '<br><span style="color:#8A3B12">AI unavailable: ' + cjhqEscapeHtml(t.res.aiError) + '</span>';
+      if(t.res.deterministicAnswer){
+        m += '<br><br><b>CJHQ verified answer (before phrasing):</b><br>' + cjhqEscapeHtml(t.res.deterministicAnswer);
+      }
+      meta.innerHTML = m;
+      wrap.appendChild(meta);
 
       if(showSources && t.res.sources && t.res.sources.length){
         const box = document.createElement('div');
