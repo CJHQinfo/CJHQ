@@ -5175,10 +5175,20 @@ async function renderPublicNotices(){
       const title = isFr ? popup.title_fr : popup.title_en;
       const msg = isFr ? popup.body_fr : popup.body_en;
       const sp2 = cjhqSanitizeHtml;
+      // Same fix as the banner: the title and body pass through the sanitiser,
+      // but popup.id did not - it went straight into an inline onclick, where a
+      // document id carrying a quote and a parenthesis escaped the attribute
+      // and ran when the visitor clicked to dismiss. The id is now set with
+      // setAttribute and read by a listener, so it is never parsed as markup.
       body.innerHTML = `
         <div class="site-modal-head"><h2 style="margin:2px 0;">${sp2(title)||''}</h2>
-          <button class="site-modal-close" onclick="closeSitePopup('${popup.id}')">&times;</button></div>
+          <button class="site-modal-close" type="button" aria-label="Close">&times;</button></div>
         <div class="site-modal-body"><div class="site-modal-section"><p>${sp2(msg)||''}</p></div></div>`;
+      const popupClose = body.querySelector('.site-modal-close');
+      if(popupClose){
+        popupClose.setAttribute('data-popup-id', String(popup.id == null ? '' : popup.id));
+        popupClose.addEventListener('click', () => closeSitePopup(popupClose.getAttribute('data-popup-id')));
+      }
       overlay.classList.add('open');
     }
   }
@@ -7139,6 +7149,18 @@ async function renderLinkAuditList(){
     </div>`).join('');
 }
 
+/* error_reports is written by ANY visitor - the Firestore rules allow
+   anonymous create so the 404 page's "Report This Broken Link" button works
+   without a sign-in. That is deliberate and stays. It does mean every field
+   below is attacker-controlled, and so is the document id: an anonymous
+   create may choose its own id via setDoc.
+
+   Before this, attemptedUrl / message / referrer went into innerHTML raw and
+   the id went into an inline onclick. A report containing
+   <img src="/missing.png" onerror="..."> executed inside the authenticated
+   staff session - the one session that can write every collection. Escaped
+   throughout now, and the id is carried in a data attribute read by a
+   delegated listener, never parsed as JavaScript. */
 async function renderErrorReportsList(){
   const reports = await fetchCollection('error_reports');
   const sorted = reports.slice().sort((a,b) => (b.reportedAt||'').localeCompare(a.reportedAt||'')).slice(0, 30);
@@ -7147,18 +7169,32 @@ async function renderErrorReportsList(){
     list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No issues reported yet.</p>`;
     return;
   }
+  const esc = cjhqEscapeHtml;
+  // Dates are rebuilt from a parsed timestamp rather than echoed, so a
+  // reportedAt of "<img ...>" renders as nothing instead of as markup.
+  const when = (v) => {
+    const d = v ? new Date(v) : null;
+    return (d && !isNaN(d.getTime())) ? esc(d.toLocaleString()) : '';
+  };
   list.innerHTML = sorted.map(r => `
     <div class="card admin-row" style="margin-bottom:8px;">
       <div>
         <span class="pill" style="font-size:.68rem;">${r.type === 'broken_link' ? '🔗 broken link' : '⚠️ js error'}</span>
-        <p style="margin:4px 0 0; font-size:.85rem; font-family:monospace; word-break:break-all;">${r.attemptedUrl || r.message || ''}</p>
-        ${r.message && r.type==='broken_link' ? '' : (r.message ? `<p style="margin:2px 0 0; font-size:.78rem; color:var(--muted);">${r.message}</p>` : '')}
-        <p style="margin:4px 0 0; font-size:.72rem; color:var(--muted);">${r.reportedAt ? new Date(r.reportedAt).toLocaleString() : ''}${r.referrer ? ' · from: '+r.referrer : ''}</p>
+        <p style="margin:4px 0 0; font-size:.85rem; font-family:monospace; word-break:break-all;">${esc(r.attemptedUrl || r.message || '')}</p>
+        ${r.message && r.type==='broken_link' ? '' : (r.message ? `<p style="margin:2px 0 0; font-size:.78rem; color:var(--muted);">${esc(r.message)}</p>` : '')}
+        <p style="margin:4px 0 0; font-size:.72rem; color:var(--muted);">${when(r.reportedAt)}${r.referrer ? ' · from: '+esc(r.referrer) : ''}</p>
       </div>
-      <button class="admin-small-btn" onclick="deleteFromCollection('error_reports','${r.id}').then(renderErrorReportsList)">Dismiss</button>
+      <button class="admin-small-btn" type="button" data-del-report="${esc(r.id == null ? '' : r.id)}">Dismiss</button>
     </div>`).join('');
 }
 
+/* contact_submissions is the same shape of risk as error_reports: the rules
+   allow anonymous create so the contact form works without a sign-in, which
+   means a submitter controls the field VALUES, the field KEYS, and the
+   document id. Nothing here may be trusted because it "comes from the contact
+   form" - a caller can write any document they like straight to the
+   collection. Keys, values, the derived title and the id are all escaped or
+   kept out of executable positions. */
 async function renderMessagesList(){
   const messages = await fetchCollection('contact_submissions');
   const query = (document.getElementById('messagesSearch').value || '').toLowerCase();
@@ -7171,6 +7207,11 @@ async function renderMessagesList(){
     list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No messages yet.</p>`;
     return;
   }
+  const esc = cjhqEscapeHtml;
+  const when = (v) => {
+    const d = v ? new Date(v) : null;
+    return (d && !isNaN(d.getTime())) ? esc(d.toLocaleString()) : '';
+  };
   const skipKeys = new Set(['id','submittedAt','lang']);
   list.innerHTML = filtered.map(m => {
     const fields = Object.entries(m).filter(([k,v]) => !skipKeys.has(k) && v);
@@ -7179,16 +7220,33 @@ async function renderMessagesList(){
     return `
     <div class="card admin-row" style="margin-bottom:8px; align-items:flex-start;">
       <div>
-        <p style="margin:0; font-weight:600;">${title} <span class="pill" style="font-size:.65rem; margin-left:6px;">${m.lang==='fr'?'FR':'EN'}</span></p>
+        <p style="margin:0; font-weight:600;">${esc(title)} <span class="pill" style="font-size:.65rem; margin-left:6px;">${m.lang==='fr'?'FR':'EN'}</span></p>
         <div style="margin:6px 0 0; font-size:.82rem; color:var(--ink-soft); line-height:1.6;">
-          ${fields.map(([k,v]) => `<div><strong>${k.replace(/_/g,' ')}:</strong> ${v}</div>`).join('')}
+          ${fields.map(([k,v]) => `<div><strong>${esc(String(k).replace(/_/g,' '))}:</strong> ${esc(v)}</div>`).join('')}
         </div>
-        <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">${m.submittedAt ? new Date(m.submittedAt).toLocaleString() : ''}</p>
+        <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">${when(m.submittedAt)}</p>
       </div>
-      <button class="admin-small-btn" onclick="deleteFromCollection('contact_submissions','${m.id}').then(renderMessagesList)">Delete</button>
+      <button class="admin-small-btn" type="button" data-del-message="${esc(m.id == null ? '' : m.id)}">Delete</button>
     </div>`;
   }).join('');
 }
+
+/* One delegated listener for both inboxes. The document id is read back from
+   the attribute at click time, so it is never parsed as JavaScript no matter
+   what an anonymous submitter chose to call their document. */
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  if(!t || !t.closest) return;
+  const del = t.closest('[data-del-report], [data-del-message]');
+  if(!del) return;
+  if(del.hasAttribute('data-del-report')){
+    deleteFromCollection('error_reports', del.getAttribute('data-del-report'))
+      .then(renderErrorReportsList);
+  } else {
+    deleteFromCollection('contact_submissions', del.getAttribute('data-del-message'))
+      .then(renderMessagesList);
+  }
+});
 
 async function markResourceReviewed(slug){
   const today = new Date().toLocaleDateString('en-US', { month:'long', year:'numeric' });
