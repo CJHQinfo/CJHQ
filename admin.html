@@ -520,10 +520,6 @@
     padding:2px 6px; border-radius:3px; margin-left:6px;}
   .ask-flag.auth{background:#E4EEFB; color:#20456F;}
   .ask-flag.time{background:#FBECE4; color:#8A3B12;}
-  .ask-prompts{display:flex; flex-wrap:wrap; gap:7px; padding:0 16px 12px;}
-  .ask-chip{border:1px solid var(--line); background:var(--paper); border-radius:20px; padding:6px 12px;
-    font-size:.79rem; color:var(--ink); cursor:pointer;}
-  .ask-chip:hover{border-color:var(--bronze-soft); background:var(--bg-alt);}
   .ask-input-row{display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); background:var(--bg-alt);}
   .ask-input-row .admin-input{flex:1; margin:0;}
   .ask-actions{display:flex; flex-wrap:wrap; gap:8px; padding:12px 16px; border-top:1px solid var(--line);}
@@ -2587,8 +2583,7 @@
           <div class="ask-shell">
             <div class="ask-log" id="askLog" role="log" aria-live="polite" aria-label="Conversation"></div>
 
-            <div class="ask-prompts" id="askPrompts"></div>
-
+  
             <form class="ask-input-row" id="askForm">
               <label class="visually-hidden" for="askInput">What can I help you with?</label>
               <input type="text" id="askInput" class="admin-input" autocomplete="off"
@@ -6047,13 +6042,21 @@ const SPECIAL_INFO_ITEMS = [
    language here, not a variant of Hebrew, and is never answered in Hebrew.
 
    Architecture:
-     askCommunityAssistant(question)  - provider-independent entry point
-       -> structured handlers (calendar, zmanim, eruv, emergency)
-       -> CJHQ resource matcher
-       -> ASK_BACKEND (null in Phase 1) for anything open-ended
+     askRun(question, opts, aiAdapter)  - the shared engine
+       -> askHalachic (first, and authoritative)
+       -> askEruv, askEmergency, askZmanim, askCalendar,
+          askCommunityDirectory, askCjhqResources
+       -> the injected AI adapter, only to phrase an answer that already exists
+     askAnswer({ text })                - public entry point for a non-browser
+                                          caller; returns the user-facing fields
+                                          only, no diagnostics
+     askCommunityAssistant(question, opts) - the browser wrapper, which supplies
+                                          ASK_BROWSER_AI
 
-   When a server-side gateway exists, implement ASK_BACKEND.ask() and the rest
-   of the system keeps working unchanged. Nothing here needs a rewrite.        */
+   The AI layer is injected rather than read from file scope, so this code runs
+   unchanged in a browser and in Node. tools/sync-ask-core.mjs generates
+   ask-core.mjs from this region for the external WhatsApp bridge; run its
+   --check after every edit here or the two will drift.                        */
 
 const ASK_ASSISTANT_NAME = 'Ask CJHQ';
 const ASK_ASSISTANT_SUB  = 'Your Jewish Community Assistant';
@@ -6077,6 +6080,12 @@ const ASK_ASSISTANT_SUB  = 'Your Jewish Community Assistant';
    against 5 RPM / 20 RPD for the full Flash models. Twenty requests a day is
    not enough to test with, let alone serve the community - that limit, not the
    free tier itself, is what produced the earlier 429s. */
+/* ===== BROWSER AI ADAPTER: BEGIN =====================================
+   Everything between these two fences is browser-only: it needs window.__fbApp,
+   App Check attestation and a dynamic import from gstatic. tools/sync-ask-core.mjs
+   strips this span when it generates ask-core.mjs, so the shared core carries no
+   Firebase, gstatic or App Check dependency. Do not put deterministic logic here
+   and do not reference anything from here inside a handler.                  */
 const ASK_AI_CONFIG = {
   model:       'gemini-3.5-flash-lite',
   temperature: 0.2,     // low: this assistant reports facts, it does not invent
@@ -6158,6 +6167,7 @@ const ASK_BACKEND = {
     return res.response.text().trim();
   }
 };
+/* ===== BROWSER AI ADAPTER: END ======================================= */
 
 /* Default source registry. Seeded into Firestore on request so CJHQ can edit
    it without a code change; used read-only if Firestore is unavailable. */
@@ -6886,7 +6896,18 @@ function askBuildContext(res){
   return parts.join('\n');
 }
 
-async function askCommunityAssistant(question, opts){
+/* askRun is the shared engine. It takes the AI layer as an argument rather
+   than reaching for ASK_BACKEND / firebaseReady / appCheckReady in file scope,
+   which is what previously tied the whole orchestrator to a browser.
+
+   aiAdapter is optional and duck-typed: { ready(): boolean,
+   ask(question, context): Promise<string> }. Omit it - as the WhatsApp bridge
+   does - and the deterministic path runs alone, which is the same path the
+   site already falls back to whenever Gemini is unavailable.
+
+   The handler order, the halachic guard's primacy and every answer string are
+   untouched by this change. */
+async function askRun(question, opts, aiAdapter){
   const q = String(question || '').trim();
   if(!q) return null;
   const useAI = !(opts && opts.useAI === false);
@@ -6924,18 +6945,20 @@ async function askCommunityAssistant(question, opts){
   // presentation layer on top: if Gemini is unavailable, slow, throttled or
   // returns nothing usable, the deterministic answer is what the user sees.
   res.aiUsed = false;
-  if(useAI && ASK_BACKEND && firebaseReady && appCheckReady){
+  const aiReady = !!(aiAdapter && typeof aiAdapter.ask === 'function'
+                     && (typeof aiAdapter.ready !== 'function' || aiAdapter.ready()));
+  if(useAI && aiReady){
     const context = askBuildContext(res);
     if(context){
       try{
         const t0 = Date.now();
-        const phrased = await ASK_BACKEND.ask(q, context);
+        const phrased = await aiAdapter.ask(q, context);
         res.aiLatencyMs = Date.now() - t0;
         if(phrased && phrased.length > 10){
           res.deterministicAnswer = res.answer;  // kept for admin comparison
           res.answer = phrased;
           res.aiUsed = true;
-          res.aiModel = ASK_AI_CONFIG.model;
+          res.aiModel = (aiAdapter && aiAdapter.model) || '';
         }
       }catch(err){
         // Never surface provider detail to a user. Quota, rate limits and
@@ -6947,6 +6970,46 @@ async function askCommunityAssistant(question, opts){
     }
   }
   return res;
+}
+
+/* Public entry point for a non-browser caller (the WhatsApp bridge). Returns
+   only the fields that belong in a user-facing answer: the diagnostic fields
+   askRun also sets - deterministicAnswer, aiError, aiModel, aiLatencyMs - are
+   admin material and are deliberately not included. */
+async function askAnswer(input){
+  const opts = (input && typeof input === 'object') ? input : { text: String(input || '') };
+  const text = String(opts.text || '');
+  const res  = await askRun(text, { useAI: opts.useAI === true }, opts.aiAdapter);
+  if(!res){
+    return { answer:'', sources:[], actions:[], timeSensitive:false,
+             handled:false, handler:'', lang:'en', location:'', halachic:false };
+  }
+  return {
+    answer:        res.answer || '',
+    sources:       (res.sources || []).map(s => ({ name: s.name, url: s.url || '' })),
+    actions:       (res.actions || []).map(a => ({ label: a.label, url: a.url, kind: a.kind || 'link' })),
+    timeSensitive: !!res.timeSensitive,
+    handled:       !!res.handled,
+    handler:       res.handler || '',
+    lang:          res.lang || 'en',
+    location:      res.location || '',
+    halachic:      !!res.halachic
+  };
+}
+/* ===== SHARED ASK CORE: END ========================================== */
+
+/* The browser's AI adapter. Wraps the existing Firebase AI Logic path with no
+   change to model, temperature, token limit, timeout, throttle or App Check -
+   it only presents them through the interface askRun now expects. */
+const ASK_BROWSER_AI = {
+  model: ASK_AI_CONFIG.model,
+  ready(){ return !!(ASK_BACKEND && firebaseReady && appCheckReady); },
+  ask(question, context){ return ASK_BACKEND.ask(question, context); }
+};
+
+/* Kept so every existing call site in the admin panel works unchanged. */
+async function askCommunityAssistant(question, opts){
+  return askRun(question, opts, ASK_BROWSER_AI);
 }
 
 const SITE_PAGES = [
@@ -8217,29 +8280,6 @@ async function publishChangeNotice(slug){
   let showSources = true;
   let lastAnswer = '';
 
-  // Spec section 20 - grouped test prompts. Deliberately includes questions the
-  // assistant should DECLINE (kosher food, mikvah, davening), so an admin can
-  // verify it refuses rather than invents.
-  const PROMPTS = [
-    'Where do I apply for NEXUS?',
-    'I need a child travel consent letter.',
-    'Where can I find passport information?',
-    'I need RAMQ information.',
-    'When is Rosh Hashana this year?',
-    'When is Yom Kippur?',
-    'What time is shkia today in Montreal?',
-    'What time is shkia today in Brooklyn?',
-    'When is candle lighting tonight?',
-    'Is the Montreal Eruv up?',
-    'Send me the Eruv map.',
-    'How do I contact Hatzolah?',
-    'Where can I daven in Hampstead?',
-    'Where can I find kosher food?',
-    'Where can I find a mikvah?',
-    'What Jewish community resources are available in Montreal?'
-  ];
-;
-
   function backendStatus(){
     const wired = (typeof ASK_BACKEND !== 'undefined') && ASK_BACKEND && typeof ASK_BACKEND.ask === 'function';
     const ready = wired && firebaseReady && appCheckReady;
@@ -8258,20 +8298,11 @@ async function publishChangeNotice(slug){
     $a('askBackendStatus').innerHTML = msg + ' Public flag: <b>' + (ASK_CJHQ_PUBLIC ? 'ON' : 'OFF') + '</b>.';
   }
 
-  function renderPrompts(){
-    $a('askPrompts').innerHTML = '';
-    PROMPTS.forEach(p=>{
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'ask-chip'; b.textContent = p;
-      b.addEventListener('click', ()=>{ $a('askInput').value = p; send(); });
-      $a('askPrompts').appendChild(b);
-    });
-  }
 
   function renderLog(){
     const log = $a('askLog');
     if(!askTurns.length){
-      log.innerHTML = '<p class="ask-empty">No messages yet. Ask a question or pick one of the test prompts below.</p>';
+      log.innerHTML = '<p class="ask-empty">No messages yet.</p>';
       return;
     }
     log.innerHTML = '';
@@ -8615,10 +8646,10 @@ async function publishChangeNotice(slug){
   // Populate when the tab is opened, so nothing is fetched until an admin looks.
   document.querySelectorAll('.admin-tab-btn').forEach(b=>{
     if(b.dataset.tab === 'askcjhq'){
-      b.addEventListener('click', ()=>{ backendStatus(); renderPrompts(); renderLog(); loadSources(); });
+      b.addEventListener('click', ()=>{ backendStatus(); renderLog(); loadSources(); });
     }
   });
-  backendStatus(); renderPrompts(); renderLog();
+  backendStatus(); renderLog();
 })();
 
   document.getElementById('noticeForm').addEventListener('submit', async (e)=>{
