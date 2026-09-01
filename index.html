@@ -583,6 +583,11 @@
     .si-link{width:100%;}
   }
 
+  .si-preview-exit{position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; align-items:center;
+    justify-content:center; gap:14px; flex-wrap:wrap; padding:12px 16px;
+    background:#FBF3DD; border-top:1px solid #B4881A; color:#5A4407; font-size:.88rem; font-weight:600;}
+  .si-preview-exit .btn{padding:8px 16px; font-size:.82rem;}
+  @media print{ .si-preview-exit{display:none !important;} }
   .vis-dot.draft{background:#8A6D1F;}
   .vis-dot.sched{background:#20456F;}
   .vis-kind{display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
@@ -6248,6 +6253,9 @@ async function editNotice(id){
   document.getElementById('noticeBodyEn').value = n.body_en||'';
   document.getElementById('noticeBodyFr').value = n.body_fr||'';
   document.getElementById('noticeActive').checked = !!n.active;
+  document.getElementById('noticeDraft').checked = !!n.draft;
+  document.getElementById('noticeStartsOn').value = n.startsOn || '';
+  document.getElementById('noticeEndsOn').value = n.endsOn || '';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function removeNotice(id){
@@ -6981,22 +6989,13 @@ async function publishChangeNotice(slug){
       const prev = document.createElement('button');
       prev.type = 'button'; prev.className = 'btn admin-btn-outline';
       prev.textContent = 'Preview';
-      prev.addEventListener('click', ()=>{
-        window.__sectionPreview = sec.key;
-        goPage(sec.routeId);
-        closeAdminPanelIfOpen();
-      });
+      prev.addEventListener('click', ()=> openPreview(sec, false));
 
       // Edit: same view, scrolled to the content, admin banner visible.
       const edit = document.createElement('button');
       edit.type = 'button'; edit.className = 'btn admin-btn-outline';
       edit.textContent = 'Preview & edit content';
-      edit.addEventListener('click', ()=>{
-        window.__sectionPreview = sec.key;
-        goPage(sec.routeId);
-        closeAdminPanelIfOpen();
-        setTimeout(()=>{ const t=document.getElementById('siCountries'); if(t) t.scrollIntoView({behavior:'smooth', block:'center'}); }, 500);
-      });
+      edit.addEventListener('click', ()=> openPreview(sec, true));
 
       // Save dates without changing published/hidden.
       const saveOnly = document.createElement('button');
@@ -7046,10 +7045,51 @@ async function publishChangeNotice(slug){
     });
   }
 
-  function closeAdminPanelIfOpen(){
-    // Preview shows the real page, so step out of the admin view.
-    const p = document.getElementById('page-admin');
-    if(p && p.classList.contains('active')) { /* goPage already switched */ }
+  /* Open a hidden section for this admin only.
+     The earlier version set the preview flag and navigated, but never re-ran
+     applySectionVisibility() - which only executes once during init - so the
+     section's hidden attribute was still set and the page appeared blank or
+     fell through to the 404. Re-applying visibility after setting the flag is
+     what actually reveals it. */
+  function openPreview(sec, scrollToContent){
+    window.__sectionPreview = sec.key;
+    applySectionVisibility();          // <- the missing step
+    goPage(sec.routeId);
+    // Show the admin banner so it is never mistaken for the live page.
+    const banner = document.getElementById('siPreviewBanner');
+    if(banner) banner.hidden = false;
+    // Give the admin a way back, and a way to end the preview.
+    showPreviewExitBar(sec);
+    if(scrollToContent){
+      setTimeout(()=>{
+        const t = document.getElementById('siCountries');
+        if(t) t.scrollIntoView({ behavior:'smooth', block:'center' });
+      }, 400);
+    }
+  }
+
+  function showPreviewExitBar(sec){
+    let bar = document.getElementById('siPreviewExit');
+    if(!bar){
+      bar = document.createElement('div');
+      bar.id = 'siPreviewExit';
+      bar.className = 'si-preview-exit';
+      const txt = document.createElement('span');
+      txt.textContent = 'Previewing a hidden section \u2014 only you can see this.';
+      const back = document.createElement('button');
+      back.type = 'button'; back.className = 'btn dark';
+      back.textContent = 'Exit preview';
+      back.addEventListener('click', ()=>{
+        window.__sectionPreview = null;
+        applySectionVisibility();
+        bar.remove();
+        goPage('admin');
+        setTimeout(()=>{ const t=document.querySelector('.admin-tab-btn[data-tab="visibility"]'); if(t) t.click(); }, 300);
+      });
+      bar.appendChild(txt); bar.appendChild(back);
+      document.body.appendChild(bar);
+    }
+    bar.hidden = false;
   }
 
   /* ---- notices and popups ---- */
@@ -7073,7 +7113,6 @@ async function publishChangeNotice(slug){
 
     noticeCache.forEach(n=>{
       const state = scheduleState(n);
-      const pending = { startsOn: n.startsOn || '', endsOn: n.endsOn || '' };
       const row = document.createElement('div');
       row.className = 'vis-row';
 
@@ -7099,15 +7138,30 @@ async function publishChangeNotice(slug){
         row.appendChild(body);
       }
 
-      row.appendChild(dateRow('n-' + n.id, n.startsOn, n.endsOn, (k,v)=>{ pending[k] = v; }));
+      // Dates are edited in the Notices tab, alongside the notice itself.
+      // Publishing shows them read-only so this stays an overview, not a second
+      // place to edit the same thing.
+      if(n.startsOn || n.endsOn){
+        const win = document.createElement('div');
+        win.className = 'vis-audit';
+        win.textContent = 'Shows ' + (n.startsOn ? 'from ' + n.startsOn : 'immediately')
+                        + (n.endsOn ? ' until ' + n.endsOn : ' with no end date');
+        row.appendChild(win);
+      }
 
       const bar = document.createElement('div');
       bar.className = 'vis-actions';
 
-      const saveDates = document.createElement('button');
-      saveDates.type='button'; saveDates.className='btn admin-btn-outline';
-      saveDates.textContent = 'Save dates only';
-      saveDates.addEventListener('click', ()=> persist(n, { startsOn:pending.startsOn, endsOn:pending.endsOn }, saveDates));
+      // Send the admin to the real editor rather than duplicating the form.
+      const editBtn = document.createElement('button');
+      editBtn.type='button'; editBtn.className='btn admin-btn-outline';
+      editBtn.textContent = 'Edit / set dates';
+      editBtn.addEventListener('click', ()=>{
+        const tab = document.querySelector('.admin-tab-btn[data-tab="notices"]');
+        if(tab) tab.click();
+        if(typeof editNotice === 'function'){ try{ editNotice(n.id); }catch(e){} }
+        setTimeout(()=>{ const f=document.getElementById('noticeForm'); if(f) f.scrollIntoView({behavior:'smooth', block:'center'}); }, 250);
+      });
 
       const draftBtn = document.createElement('button');
       draftBtn.type='button'; draftBtn.className='btn admin-btn-outline';
@@ -7122,12 +7176,12 @@ async function publishChangeNotice(slug){
         const msg = n.active
           ? 'Deactivate this item?\n\nIt will stop showing on the website. The content is kept.'
           : 'Activate this item?\n\nIt will show on the website'
-            + (pending.startsOn || pending.endsOn ? ' according to the dates set.' : ' immediately.');
+            + ((n.startsOn || n.endsOn) ? ' according to the dates set on it.' : ' immediately.');
         if(!confirm(msg)) return;
-        persist(n, { active: !n.active, startsOn:pending.startsOn, endsOn:pending.endsOn }, act);
+        persist(n, { active: !n.active }, act);
       });
 
-      [saveDates, draftBtn, act].forEach(b=> bar.appendChild(b));
+      [editBtn, draftBtn, act].forEach(b=> bar.appendChild(b));
       row.appendChild(bar);
       target.appendChild(row);
     });
@@ -7444,7 +7498,14 @@ async function publishChangeNotice(slug){
       body_en: document.getElementById('noticeBodyEn').value,
       body_fr: document.getElementById('noticeBodyFr').value,
       active: document.getElementById('noticeActive').checked,
+      draft: document.getElementById('noticeDraft').checked,
+      startsOn: document.getElementById('noticeStartsOn').value || '',
+      endsOn: document.getElementById('noticeEndsOn').value || '',
     };
+    if(notice.startsOn && notice.endsOn && notice.endsOn < notice.startsOn){
+      alert('The end date cannot be earlier than the start date.');
+      return;
+    }
     if(!notice.id) delete notice.id;
     await saveToCollection('notices', notice);
     document.getElementById('noticeForm').reset();
