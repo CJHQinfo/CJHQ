@@ -2249,6 +2249,11 @@
         <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
         <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
         <a href="/about" data-page="about"><span data-en>About</span><span data-fr>À propos</span></a>
+        <!-- The Child Travel Consent Letter already had a card in the Resource
+             Centre, but that was its only entry point: no nav item and no footer
+             link, so a finished CJHQ tool was one level deeper than it needed to
+             be. This gives it a one-click path from every page. -->
+        <a href="/child-travel-consent" data-page="child-travel-consent"><span data-en>Child Travel Consent Letter</span><span data-fr>Lettre de consentement au voyage</span></a>
       </nav>
 
       <div>
@@ -3403,18 +3408,36 @@ function handleSearch(q, targetId){
     return true;
   }).slice(0, 8);
 
+  // Everything interpolated below is escaped with cjhqEscapeHtml. The search
+  // query is user input and was executing as markup: typing
+  // <img src=x onerror=...> into the box ran the handler. Titles and bodies come
+  // from in-page data today, but they share this template, so they are escaped
+  // too rather than relying on where they happen to come from right now.
+  //
+  // The result buttons no longer carry an inline onclick with an interpolated
+  // page name. The page is held in a data attribute and a single delegated
+  // listener reads it, so no dynamic value is ever parsed as JavaScript.
+  const esc = cjhqEscapeHtml;
   if(matches.length === 0){
-    box.innerHTML = `<div class="search-result-empty">${isFr ? 'Aucun résultat pour "' + q + '"' : 'No results for "' + q + '"'}</div>`;
+    box.innerHTML = `<div class="search-result-empty">${isFr ? 'Aucun résultat pour "' + esc(q) + '"' : 'No results for "' + esc(q) + '"'}</div>`;
   } else {
     box.innerHTML = matches.map(m => `
-      <button class="search-result-item" onclick="goToSearchResult('${m.page}')">
-        <span class="search-cat">${(isFr ? pageLabels[m.page].fr : pageLabels[m.page].en)}</span>
-        <strong>${m.title}</strong>
-        <span>${m.body}</span>
+      <button class="search-result-item" data-search-page="${esc(m.page)}">
+        <span class="search-cat">${esc(isFr ? pageLabels[m.page].fr : pageLabels[m.page].en)}</span>
+        <strong>${esc(m.title)}</strong>
+        <span>${esc(m.body)}</span>
       </button>`).join('');
   }
   box.style.display = 'block';
 }
+
+/* One delegated listener for every search result, present and future. Replaces
+   the per-button inline onclick so no interpolated value is ever executed. */
+document.addEventListener('click', (e) => {
+  const btn = e.target && e.target.closest && e.target.closest('[data-search-page]');
+  if(!btn) return;
+  goToSearchResult(btn.getAttribute('data-search-page'));
+});
 
 function goToSearchResult(page){
   goPage(page);
@@ -3688,8 +3711,8 @@ const PAGE_META = {
   // canonical - telling search engines an error page was a real one.
   'special-information': { en:'Special Information — Holidays, Travel & Local Information — CJHQ',
     fr:'Information spéciale — Fêtes, voyage et information locale — CJHQ',
-    d_en:'Practical CJHQ information for travelling around Yomim Tovim: what to check before crossing a border with holiday items, and links to the official government sources.',
-    d_fr:'Information pratique de CJHQ pour voyager autour des Yomim Tovim : quoi vérifier avant de traverser une frontière avec des articles de fête, et liens vers les sources gouvernementales officielles.' },
+    desc_en:'Practical CJHQ information for travelling around Yomim Tovim: what to check before crossing a border with holiday items, and links to the official government sources.',
+    desc_fr:'Information pratique de CJHQ pour voyager autour des Yomim Tovim : quoi vérifier avant de traverser une frontière avec des articles de fête, et liens vers les sources gouvernementales officielles.' },
   'child-travel-consent': { en:'Child Travel Consent Letter — CJHQ', fr:'Lettre de consentement au voyage d\'un enfant — CJHQ',
                   desc_en:'Create a simple consent letter for your child\'s Canada-U.S. travel. Complete the form, generate your letter, then print and sign it.',
                   desc_fr:'Créez une lettre de consentement simple pour le voyage Canada-États-Unis de votre enfant. Remplissez le formulaire, générez la lettre, puis imprimez-la et signez-la.' },
@@ -4748,10 +4771,28 @@ if(contactForm){
    expects this shape.
    ================================================================ */
 /* ================= FEATURE FLAGS =================
-   ASK_CJHQ_PUBLIC controls whether Ask CJHQ is offered to visitors. It is OFF
-   and must stay OFF until CJHQ approves the launch. Admins reach the tool
-   through the admin panel regardless of this flag, so testing does not require
-   turning it on. Flipping it to true is the only code change a launch needs.  */
+   ASK_CJHQ_PUBLIC records whether Ask CJHQ is offered to visitors. It is OFF
+   and must stay OFF until CJHQ approves the launch.
+
+   WHAT ACTUALLY KEEPS IT PRIVATE, and it is not this flag alone: the entire
+   Ask CJHQ interface lives in tools/admin-panel.html, which the route
+   generator injects into admin.html and no other file. The public route files
+   contain the ask* functions but no element that calls them, so there is
+   nothing for a visitor to reach. Flipping this flag to true would therefore
+   NOT launch anything on its own - the earlier comment here claimed it would,
+   which was wrong and would have sent someone hunting.
+
+   A real launch needs, at minimum:
+     1. an entry point in the public markup (a launcher, not just the panel),
+     2. Firestore rules reviewed for public reads of ask_sources,
+     3. App Check confirmed enforced, since Gemini quota becomes visitor-facing,
+     4. a decision on abuse handling for an unauthenticated free-tier endpoint.
+
+   The flag is still load-bearing as a second lock: initAskCjhq() refuses to
+   mount the panel when the flag is false and the markup is somewhere other
+   than the admin page. Structural gating plus an explicit check, so neither
+   one silently becomes the only thing standing between a visitor and the
+   assistant.                                                                 */
 const ASK_CJHQ_PUBLIC = false;
 
 /* reCAPTCHA Enterprise site key for App Check. Public by design - it identifies
@@ -5110,7 +5151,17 @@ async function renderPublicNotices(){
       const title = isFr ? banner.title_fr : banner.title_en;
       const body = isFr ? banner.body_fr : banner.body_en;
       const sp = cjhqSanitizeHtml;
-      bannerEl.innerHTML = `${title?`<b>${sp(title)}</b>`:''}${sp(body)}<button class="notice-close" onclick="dismissBanner('${banner.id}')">&times;</button>`;
+      // The close button used to carry onclick="dismissBanner('<id>')". The id
+      // is a Firestore document id and was the one value here NOT passing
+      // through the sanitiser, so a crafted id escaped the attribute and ran.
+      // It is now set with setAttribute (never parsed as markup) and read by a
+      // listener, so the id can contain anything at all without effect.
+      bannerEl.innerHTML = `${title?`<b>${sp(title)}</b>`:''}${sp(body)}<button class="notice-close" type="button" aria-label="Dismiss">&times;</button>`;
+      const closeBtn = bannerEl.querySelector('.notice-close');
+      if(closeBtn){
+        closeBtn.setAttribute('data-notice-id', String(banner.id == null ? '' : banner.id));
+        closeBtn.addEventListener('click', () => dismissBanner(closeBtn.getAttribute('data-notice-id')));
+      }
     } else {
       bannerEl.style.display = 'none';
     }
@@ -5540,9 +5591,16 @@ const SPECIAL_INFO_ITEMS = [
 
 
 /* ================= ASK CJHQ =================
-   Admin-only assistant. Phase 1: no AI provider is connected and no credential
-   exists anywhere in this file. Everything below answers from structured data
-   or from the CJHQ resource index, or says plainly that it cannot answer yet.
+   Admin-only assistant. Not public: this code ships in every route file, but
+   the interface that calls it exists only in tools/admin-panel.html, which is
+   injected into admin.html alone. No credential exists anywhere in this file.
+
+   Gemini (Firebase AI Logic, Developer API) is wired as a PHRASING layer only.
+   Facts always come from the structured handlers or the CJHQ resource index
+   first; if the model is unavailable the deterministic answer is what shows.
+
+   Languages: English, French, Hebrew and Yiddish. Yiddish is a first-class
+   language here, not a variant of Hebrew, and is never answered in Hebrew.
 
    Architecture:
      askCommunityAssistant(question)  - provider-independent entry point
@@ -5625,9 +5683,14 @@ const ASK_SYSTEM_PROMPT = [
   '5. Reproduce links exactly as given. Do not shorten, alter or invent URLs.',
   '6. Do not give halachic or religious rulings. Practical and government information only.',
   '',
-  'LANGUAGE: reply in the same language as the question - English, French or Hebrew.',
-  'Transliterated Hebrew terms inside an English or French sentence mean the user is writing',
-  'English or French; reply in that language. Keep names, addresses and links unchanged.',
+  'LANGUAGE: Respond in the same language as the user\'s question: English, French, Hebrew, or',
+  'Yiddish. Do not translate the user\'s question into another language unless necessary to',
+  'understand it. For Yiddish, use simple, natural community-friendly Yiddish rather than',
+  'literal Hebrew translation.',
+  'Yiddish is not Hebrew. Never answer a Yiddish question in Hebrew.',
+  'Transliterated community terms (shabbos, shkia, daven, yom tov) inside an English or French',
+  'sentence mean the user is writing English or French; reply in that language.',
+  'Keep names, addresses and links unchanged.',
   '',
   'STYLE: brief, warm, practical. Lead with the answer. No preamble.'
 ].join('\n');
@@ -5740,7 +5803,7 @@ function askSortSources(list){
    actual position is requested, derived or stored - only what they typed.     */
 const ASK_DEFAULT_LOCATION = { name:'Montreal', geonameid:6077243 };
 const ASK_KNOWN_LOCATIONS = [
-  { match:/\bmontr[e\u00e9]al\b/i,                 name:'Montreal',  geonameid:6077243 },
+  { match:/\bmontr[e\u00e9]al\b|\u05de\u05d0[\u0591-\u05C7]?\u05e0\u05d8\u05e8\u05e2\u05d0[\u0591-\u05C7]?\u05dc|\u05de\u05d0\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc|\u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05d5\u05dc/i, name:'Montreal',  geonameid:6077243 },
   { match:/\bbrooklyn\b/i,                         name:'Brooklyn',  geonameid:5110302 },
   { match:/\b(new york|nyc|manhattan)\b/i,          name:'New York',  geonameid:5128581 },
   { match:/\bmonsey\b/i,                            name:'Monsey',    geonameid:5128238 },
@@ -5794,8 +5857,42 @@ function askTitleFrequency(word){
   return __askTitleFreq[word] || 0;
 }
 
+/* ---------- Hebrew/Yiddish term bridge ----------
+   The resource matcher scores on [a-z0-9] only, so a question written in
+   Hebrew or Yiddish script produced no words at all and matched nothing - the
+   same passport question answered in English and failed in Hebrew.
+
+   This maps script and transliterated terms onto the English keyword the
+   resource index already uses. It adds no resources and no facts: it only lets
+   a Yiddish or Hebrew question reach the SAME CJHQ resource an English one
+   reaches, which is what section 11 requires. */
+const ASK_TERM_BRIDGE = [
+  [/\u05e4\u05d0\u05e1\u05e4\u05d0\u05e8\u05d8|\u05e4\u05e2\u05e1\u05e4\u05d0\u05e8\u05d8|\u05d3\u05e8\u05db\u05d5\u05df|paspart/i, 'passport'],
+  [/\u05e0\u05e2\u05e7\u05e1\u05d5\u05e1/i,                                   'nexus'],
+  [/\u05d5\u05d5\u05d9\u05d6\u05e2|\u05d5\u05d9\u05d6\u05d4/i,                                 'visa'],
+  [/\u05e8\u05d9\u05d9\u05d6|\u05e8\u05d9\u05d9\u05d6\u05df|\u05e0\u05e1\u05d9\u05e2\u05d4|\u05e0\u05e1\u05d9\u05e2\u05d5\u05ea|\u05d2\u05e8\u05e2\u05e0\u05d9\u05e5/i,                'travel border'],
+  [/\u05e4\u05d0\u05e8\u05e7\u05df|\u05e4\u05d0\u05e8\u05e7\u05d9\u05e0\u05d2|\u05d7\u05e0\u05d9\u05d4/i,                          'parking permit'],
+  [/\u05e9\u05e0\u05d9\u05d9|\u05e9\u05e0\u05d9\u05d9\u05e2\u05df|\u05e9\u05dc\u05d2/i,                                'snow removal'],
+  [/\u05e7\u05d9\u05e0\u05d3|\u05e7\u05d9\u05e0\u05d3\u05e2\u05e8|\u05d9\u05dc\u05d3|\u05d9\u05dc\u05d3\u05d9\u05dd/i,                            'child'],
+  [/\u05d2\u05e2\u05d1\u05d5\u05e8\u05d8\u05e1|\u05dc\u05d9\u05d3\u05d4/i,                                 'birth certificate'],
+  [/\u05e8\u05d0\u05de\u05e7|\u05e8\u05e2\u05d2\u05d9\u05e2|\u05e7\u05e8\u05d0\u05e0\u05e7\u05df|\u05d1\u05e8\u05d9\u05d0\u05d5\u05ea/i,                        'ramq health insurance'],
+  [/\u05d3\u05e8\u05d9\u05d9\u05d5\u05d5\u05e2\u05e8|\u05e4\u05d9\u05e8\u05e2\u05e8\u05e9\u05d9\u05d9\u05df|\u05e0\u05d4\u05d9\u05d2\u05d4/i,                        'driver license'],
+  [/\u05d1\u05d9\u05e8\u05d2\u05e2\u05e8\u05e9\u05d0\u05e4\u05d8|\u05d0\u05d6\u05e8\u05d7\u05d5\u05ea/i,                           'citizenship'],
+  [/\u05d0\u05d9\u05de\u05d9\u05d2\u05e8\u05d0\u05e6\u05d9\u05e2|\u05d4\u05d2\u05d9\u05e8\u05d4/i,                             'immigration'],
+  [/\u05e9\u05d8\u05d9\u05d9\u05e2\u05e8\u05df|\u05de\u05e1\u05d9\u05dd/i,                                 'taxes']
+];
+function askBridgeTerms(question){
+  const s = String(question || '');
+  const add = [];
+  ASK_TERM_BRIDGE.forEach(pair => { if(pair[0].test(s)) add.push(pair[1]); });
+  return add.join(' ');
+}
+
 function askMatchResources(question, limit){
-  const q = cjhqNormalizeSearch(String(question || '').toLowerCase());
+  // The bridge only ever appends English keywords; the original question is
+  // left intact, so English and French matching is byte-for-byte unchanged.
+  const bridged = String(question || '') + ' ' + askBridgeTerms(question);
+  const q = cjhqNormalizeSearch(bridged.toLowerCase());
   if(q.length < 2) return [];
   // Common words appear in nearly every description, so two of them together
   // were enough to fake a match - "what is the capital of Peru" scored on
@@ -5810,13 +5907,28 @@ function askMatchResources(question, limit){
     'peux','peut','vous','nous','mon','mes','mon','notre','avoir','faire','besoin','trouver','obtenir',
     'demander','cette','cet','ceci','cela','plus','tout','tous','toute','ainsi','aussi','renseignement',
     'renseignements','aide','ou']);
+  // Transliterated Yiddish function words, for the same reason as the English
+  // and French entries above: "vu ken ikh find passport information?" is a
+  // passport question, but "ken" and "ikh" inflated the word count and pushed
+  // coverage below the threshold, so it matched nothing.
+  //
+  // Applied ONLY when the question is actually Yiddish. Folding these into the
+  // shared list changed an English answer - "How far is the airport from
+  // Outremont?" stopped being a refusal and started matching a parking
+  // resource, because "far" was no longer counted. English and French matching
+  // has to stay exactly as it was.
+  const YI_STOP = new Set(['ken','ikh','vu','vos','ver','ven','darf','vil','visn','wissen',
+    'nisht','azoy','haynt','morgn','farvos','vifl','rufn','rufen','bakumen','betn','zukhn',
+    'iz','zenen','zayn','kenen','oykh','epes','shoyn','undz','aykh','gefinen','far','mit',
+    'dos','der','mir','tsu','ober','nit','veln']);
+  const isYi = askDetectLanguage(question) === 'yi';
   // French elides constantly - "j'ai", "d'information", "l'enfant". Stripping the
   // apostrophe glued them into "jai" and "dinformation", which no stopword list
   // catches, so they inflated the word count and pushed real matches below the
   // coverage threshold. Split on the apostrophe first.
   const words = q.replace(/[\u2019']/g, ' ').split(/\s+/)
     .map(w => w.replace(/[^a-z0-9]/g,''))
-    .filter(w => w.length > 2 && !STOP.has(w));
+    .filter(w => w.length > 2 && !STOP.has(w) && !(isYi && YI_STOP.has(w)));
   if(!words.length) return [];
   const out = [];
   (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
@@ -5864,10 +5976,137 @@ function askMatchResources(question, limit){
    Decides the language of the QUESTION, which is not the same as the site
    toggle: a French-speaking visitor may still type in English, and Hebrew
    speakers frequently type transliterated Hebrew inside an English sentence.
-   Order matters - Hebrew script is unambiguous, so it is checked first. */
+
+   Four languages: en, fr, he, yi. Hebrew and Yiddish share the same Unicode
+   block, so script alone cannot separate them - a scored comparison does.
+   Yiddish is NOT a dialect of Hebrew here and is never answered in Hebrew.
+
+   Deliberately conservative: on a tie the answer is Hebrew, because Hebrew was
+   the previous behaviour for all Hebrew-script input and a wrong switch to
+   Yiddish is more jarring to a Hebrew speaker than the reverse.              */
+
+/* Words that are Yiddish and not Hebrew. Weight 2 unless noted. Kept as a
+   plain list so a Yiddish speaker can extend it without reading the code. */
+const ASK_YI_WORDS = [
+  // question words and pronouns
+  '\u05d5\u05d5\u05d0\u05e1','\u05d5\u05d5\u05d0\u05b8\u05e1','\u05d5\u05d5\u05e2\u05e8','\u05d5\u05d5\u05d9','\u05d5\u05d5\u05d0\u05d5','\u05d5\u05d5\u05e2\u05df','\u05e4\u05d0\u05e8\u05d5\u05d5\u05d0\u05e1','\u05e4\u05d0\u05e8\u05d5\u05d5\u05d0\u05b8\u05e1','\u05d5\u05d5\u05d9\u05e4\u05dc',
+  '\u05d0\u05d9\u05e8','\u05de\u05d9\u05e8','\u05d0\u05d5\u05e0\u05d6','\u05d0\u05d5\u05e0\u05d3\u05d6','\u05d6\u05d9\u05d9','\u05de\u05d9\u05d9\u05df','\u05de\u05d9\u05d9\u05e0\u05e2','\u05d0\u05d9\u05d9\u05e2\u05e8','\u05d6\u05d9\u05d9\u05df','\u05de\u05e2\u05df',
+  // verbs and modals
+  '\u05e7\u05e2\u05df','\u05e7\u05e2\u05e0\u05e2\u05df','\u05d5\u05d5\u05d9\u05dc','\u05d5\u05d5\u05e2\u05dc','\u05d3\u05d0\u05e8\u05e3','\u05d3\u05d0\u05b7\u05e8\u05e3','\u05d4\u05d0\u05d1','\u05d4\u05d0\u05d1\u05df','\u05d0\u05d9\u05d6','\u05d6\u05e2\u05e0\u05e2\u05df','\u05d6\u05d0\u05dc',
+  '\u05d5\u05d5\u05d9\u05e1\u05df','\u05d5\u05d5\u05d9\u05e1\u05e0\u05d9\u05e7','\u05e8\u05d5\u05e4\u05df','\u05e8\u05d5\u05e4\u05e2\u05df','\u05d1\u05d0\u05e7\u05d5\u05de\u05e2\u05df','\u05d1\u05e2\u05d8\u05df','\u05d2\u05e2\u05e4\u05d9\u05e0\u05e2\u05df','\u05d6\u05d5\u05db\u05df','\u05e7\u05d5\u05de\u05e2\u05df','\u05d2\u05d9\u05d9\u05df',
+  // adverbs, particles, articles
+  '\u05d0\u05d6\u05d5\u05d9','\u05e0\u05d9\u05e9\u05d8','\u05e7\u05d9\u05d9\u05df','\u05d3\u05e2\u05e8','\u05d3\u05d0\u05e1','\u05d3\u05d9','\u05e4\u05d5\u05e0\u05e2\u05dd','\u05d0\u05d5\u05d9\u05da','\u05d0\u05d5\u05d9\u05d1','\u05d0\u05d1\u05e2\u05e8','\u05d0\u05d3\u05e2\u05e8',
+  '\u05d4\u05d9\u05d9\u05e0\u05d8','\u05de\u05d0\u05e8\u05d2\u05df','\u05de\u05d0\u05e8\u05d2\u05e2\u05df','\u05d9\u05e2\u05e6\u05d8','\u05d3\u05d0\u05e8\u05d8','\u05e2\u05e4\u05e2\u05e1','\u05e9\u05d5\u05d9\u05df','\u05d2\u05d5\u05d8','\u05d1\u05d9\u05d8\u05e2','\u05d3\u05d0\u05e0\u05e7','\u05d3\u05d0\u05e0\u05e7\u05e2\u05df',
+  // nouns that are Yiddish rather than Hebrew
+  '\u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2','\u05e7\u05d9\u05e0\u05d3','\u05e7\u05d9\u05e0\u05d3\u05e2\u05e8','\u05de\u05e2\u05e0\u05d8\u05e9','\u05de\u05e2\u05e0\u05d8\u05e9\u05df','\u05d5\u05d5\u05e2\u05d2\u05df','\u05e8\u05d9\u05d9\u05d6\u05df','\u05e0\u05d5\u05d9\u05d8\u05e4\u05d0\u05dc',
+  // Added after a Yiddish halachic question ("\u05d8\u05d0\u05e8 \u05d0\u05d9\u05da \u05de\u05d9\u05d8\u05e0\u05e2\u05de\u05e2\u05df \u05d0\u05df \u05d0\u05ea\u05e8\u05d5\u05d2 \u05dc\u05d5\u05d9\u05d8 \u05d4\u05dc\u05db\u05d4?")
+  // scored 0-0 and fell to the Hebrew tie-break. None of these is a Hebrew
+  // word and none is religious vocabulary - they are ordinary Yiddish verbs
+  // and particles, which is the evidence this classifier is meant to run on.
+  '\u05d8\u05d0\u05e8','\u05d8\u05d0\u05e8\u05df','\u05de\u05d9\u05d8\u05e0\u05e2\u05de\u05e2\u05df','\u05dc\u05d5\u05d9\u05d8','\u05d8\u05e8\u05d0\u05d2\u05df','\u05d0\u05e4\u05e2\u05df','\u05d0\u05d5\u05e4\u05df','\u05d8\u05d0\u05df','\u05d1\u05e8\u05e2\u05e0\u05d2\u05e2\u05df',
+  '\u05e4\u05e8\u05e2\u05d2\u05d8','\u05e4\u05e8\u05e2\u05d2\u05df','\u05d0\u05e0\u05d3\u05e2\u05e8\u05e2','\u05e2\u05de\u05e2\u05e6\u05e2\u05e8','\u05d6\u05d0\u05dc\u05df','\u05de\u05e2\u05d2\u05dc\u05d9\u05da','\u05e9\u05d9\u05e7\u05df'
+];
+/* Weight 1: real Yiddish, but each also occurs incidentally elsewhere, so on
+   its own it is a hint rather than evidence. */
+const ASK_YI_WEAK = ['\u05e4\u05d0\u05e8','\u05de\u05d9\u05d8','\u05d3\u05d0','\u05d0\u05dc\u05e2','\u05e0\u05d0\u05da','\u05d0\u05d5\u05d9\u05e3','\u05d0\u05df','\u05e6\u05d5'];
+/* Hebrew function words and question words. */
+const ASK_HE_WORDS = [
+  '\u05de\u05d4','\u05d0\u05d9\u05e4\u05d4','\u05de\u05ea\u05d9','\u05d4\u05d0\u05dd','\u05db\u05de\u05d4','\u05dc\u05de\u05d4','\u05de\u05d3\u05d5\u05e2','\u05d0\u05d9\u05d6\u05d4','\u05d4\u05d9\u05d5\u05dd','\u05de\u05d7\u05e8','\u05e2\u05db\u05e9\u05d9\u05d5',
+  '\u05ea\u05d5\u05d3\u05d4','\u05e9\u05dc\u05d5\u05dd','\u05e6\u05e8\u05d9\u05da','\u05e6\u05e8\u05d9\u05db\u05d9\u05dd','\u05e6\u05e8\u05d9\u05db\u05d4','\u05d0\u05e0\u05d9','\u05d0\u05e0\u05d7\u05e0\u05d5','\u05d0\u05ea\u05dd','\u05d4\u05dd','\u05d4\u05d5\u05d0','\u05d4\u05d9\u05d0',
+  '\u05d9\u05e9','\u05e9\u05dc','\u05d0\u05ea','\u05d6\u05d4','\u05d6\u05d0\u05ea','\u05e2\u05dd','\u05e2\u05dc','\u05d2\u05dd','\u05e8\u05e7','\u05db\u05dc','\u05dc\u05d0','\u05db\u05df','\u05d8\u05d5\u05d1','\u05d9\u05db\u05d5\u05dc','\u05d9\u05db\u05d5\u05dc\u05d4',
+  '\u05dc\u05d3\u05e2\u05ea','\u05dc\u05d7\u05d3\u05e9','\u05dc\u05d4\u05d2\u05d9\u05e9','\u05dc\u05d9\u05e6\u05d5\u05e8','\u05dc\u05e7\u05d1\u05dc','\u05dc\u05de\u05e6\u05d5\u05d0','\u05d1\u05e7\u05e9\u05d4','\u05dc\u05d2\u05d1\u05d9','\u05d0\u05e4\u05e9\u05e8\u05d5\u05ea'
+];
+/* Genuinely shared - counted for neither side. \u05d0\u05e4\u05e9\u05e8 is ordinary Hebrew
+   ("is it possible") and ordinary Yiddish ("maybe"); \u05d0\u05d9\u05da is Hebrew "how" and
+   Yiddish "I"; \u05d0\u05d9\u05df is Hebrew "there is no" and Yiddish "in". Scoring any of
+   them would decide the sentence on the weakest available evidence. */
+const ASK_SHARED_SCRIPT_WORDS = ['\u05d0\u05e4\u05e9\u05e8','\u05d0\u05d9\u05da','\u05d0\u05d9\u05df','\u05d0'];
+
+/* Latin-script Yiddish. Weight 2 = structural Yiddish with no ordinary English
+   or French reading. Weight 1 = plausible but collides with other languages. */
+const ASK_YI_LATIN_STRONG = ['ikh','vu','ven','ver','vos','darf','vil','visn','wissen',
+  'nisht','azoy','haynt','morgn','farvos','vifl','rufn','rufen','bakumen','betn','zukhn',
+  'iz','zenen','zayn','zayne','kenen','oykh','epes','shoyn','undz','aykh','gefinen','noytfal',
+  // Section 5 of the brief lists both spellings; "morgn" alone assumed a
+  // single orthography, which the brief explicitly warns against.
+  'aroys','arois','morgen','vemen','velkhe','tor','toren','loyt'];
+const ASK_YI_LATIN_WEAK = ['far','mit','dos','der','ken','mir','tsu','ober','nit','veln'];
+/* Community vocabulary is shared across all four languages. Section 6 of the
+   brief is explicit: these must never decide the language on their own, so
+   they carry no weight at all. "Where can I find Shabbos information?" is an
+   English sentence and has to stay one. */
+const ASK_COMMUNITY_TERMS = ['shabbos','shabbes','shabbat','yom tov','yontif','yomtov',
+  'daven','davening','shkia','chatzos','mincha','maariv','hatzolah','eruv','mikvah',
+  'kosher','frum','heimish','simcha','tznius','pesach','sukkos','purim','chanukah',
+  'rosh hashana','zmanim','etrog','lulav','matzah','shul','minyan'];
+
+function askScriptTokens(s){
+  return String(s || '').split(/[^\u0590-\u05ffa-zA-Z0-9\u2019']+/).filter(Boolean);
+}
+
+/* Hebrew-block input: decide Hebrew vs Yiddish on accumulated evidence. */
+function askScoreHebrewScript(s){
+  const toks = askScriptTokens(s).filter(t => /[\u0590-\u05ff]/.test(t));
+  let yi = 0, he = 0;
+  const seen = new Set();
+  toks.forEach(t=>{
+    // Strip nikkud/cantillation before the lookup: pointed Yiddish
+    // (\u05de\u05d0\u05b8\u05e0\u05d8\u05e8\u05e2\u05d0\u05b7\u05dc) otherwise matches no lexicon entry at all. The
+    // pointed-alef orthography check below still runs on the raw string,
+    // so the evidence the pointing itself provides is not lost.
+    const w = t.replace(/[\u0591-\u05C7]/g,'').replace(/[^\u0590-\u05FF]/g,'');
+    if(!w || seen.has(w)) return;
+    seen.add(w);
+    if(ASK_SHARED_SCRIPT_WORDS.indexOf(w) >= 0) return;
+    if(ASK_YI_WORDS.indexOf(w) >= 0) yi += 2;
+    else if(ASK_YI_WEAK.indexOf(w) >= 0) yi += 1;
+    else if(ASK_HE_WORDS.indexOf(w) >= 0) he += 2;
+  });
+  // Orthography. Yiddish writes the digraphs \u05d5\u05d5 and \u05d9\u05d9 constantly and Hebrew
+  // rarely; the precomposed ligatures and pointed alef occur in no Hebrew text.
+  if(/[\u05f0\u05f1\u05f2]/.test(s))       yi += 3;
+  if(/[\u05d0][\u05b7\u05b8]/.test(s))     yi += 3;
+  if(/\u05d5\u05d5/.test(s))               yi += 3;
+  if(/\u05d9\u05d9/.test(s))               yi += 2;
+  // Hebrew plural endings are a nudge only: Yiddish borrows plenty of Hebrew
+  // nouns (\u05d6\u05de\u05e0\u05d9\u05dd, \u05e1\u05e4\u05e8\u05d9\u05dd) and would otherwise be penalised for it.
+  if(/[\u05d0-\u05ea]{3,}(\u05d9\u05dd|\u05d5\u05ea)(\s|$|[?!.,])/.test(s)) he += 1;
+  return { yi, he };
+}
+
+/* Latin-script input: does this look like transliterated Yiddish? */
+function askScoreLatinYiddish(s){
+  const toks = String(s || '').toLowerCase().split(/[^a-z']+/).filter(Boolean);
+  const low = ' ' + String(s || '').toLowerCase() + ' ';
+  let score = 0, strong = 0;
+  const seen = new Set();
+  toks.forEach(t=>{
+    if(seen.has(t)) return;
+    seen.add(t);
+    if(ASK_COMMUNITY_TERMS.indexOf(t) >= 0) return;   // never decisive
+    if(ASK_YI_LATIN_STRONG.indexOf(t) >= 0){ score += 2; strong++; }
+    else if(ASK_YI_LATIN_WEAK.indexOf(t) >= 0){ score += 1; }
+  });
+  ASK_COMMUNITY_TERMS.forEach(t=>{ if(t.indexOf(' ') > 0 && low.indexOf(' '+t+' ') >= 0){ /* no weight */ } });
+  return { score, strong };
+}
+
 function askDetectLanguage(q){
   const s = String(q || '');
-  if(/[\u0590-\u05FF]/.test(s)) return 'he';          // any Hebrew character
+
+  if(/[\u0590-\u05ff]/.test(s)){
+    // Mixed input: a single Hebrew-script word inside an otherwise English
+    // sentence does not make the sentence Hebrew or Yiddish. Section 6 asks for
+    // the dominant conversational language, so measure it before scoring.
+    const toks = askScriptTokens(s);
+    const heb  = toks.filter(t => /[\u0590-\u05ff]/.test(t)).length;
+    const dominant = toks.length ? (heb / toks.length) : 1;
+    if(dominant >= 0.34){
+      const sc = askScoreHebrewScript(s);
+      return sc.yi > sc.he ? 'yi' : 'he';   // tie -> Hebrew, the safer default
+    }
+    // Otherwise fall through and classify the Latin majority.
+  }
 
   // French markers: accents, elisions, and common question words. Checked as
   // whole words so "est" does not fire on "interest".
@@ -5876,9 +6115,15 @@ function askDetectLanguage(q){
   // Some words are decisive on their own: no English question begins with
   // "Comment", "Quand", "Pourquoi" or "Est-ce que". Without this, short French
   // questions with no accent - "Comment contacter Hatzolah?" - were read as
-  // English and answered in English.
+  // English and answered in English. Checked before Yiddish so that French
+  // "vos" ("vos documents") cannot be read as Yiddish "vos" ("what").
   const frStrong = /\b(comment|quand|pourquoi|o\u00f9|quelle?s?|est-ce que|puis-je|peut-on|combien|qu'est-ce)\b/i;
   if(frStrong.test(s)) return 'fr';
+
+  // Transliterated Yiddish. Requires one structural word AND corroboration:
+  // a single "far" or "ken" in an English sentence is not evidence.
+  const yl = askScoreLatinYiddish(s);
+  if(yl.strong >= 1 && yl.score >= 3) return 'yi';
 
   const hits = (s.match(frWords) || []).length;
   // Otherwise: two French function words, or one plus an accent. A single "le"
@@ -5887,35 +6132,125 @@ function askDetectLanguage(q){
   return 'en';
 }
 
-/* Pick the right string from a {en, fr, he} object, falling back to English so
-   a missing translation degrades to something readable rather than blank. */
+/* Pick the right string from a {en, fr, he, yi} object.
+
+   A missing translation still degrades to English rather than to blank, but it
+   is recorded rather than swallowed: __askMissingYi is what the admin test
+   panel and the test suite read to prove no user-facing string is silently
+   answering a Yiddish question in English. */
+const __askMissingYi = new Set();
 function askT(obj, lang){
   if(typeof obj === 'string') return obj;
-  return (obj && (obj[lang] || obj.en)) || '';
+  if(!obj) return '';
+  if(obj[lang]) return obj[lang];
+  if(lang === 'yi' && !obj.yi) __askMissingYi.add(String(obj.en || '').slice(0, 120));
+  return obj.en || '';
 }
 
 function askAnswerShape(){
-  return { answer:'', sources:[], actions:[], timeSensitive:false, handled:false, handler:'', lang:'en', location:'' };
+  return { answer:'', sources:[], actions:[], timeSensitive:false, handled:false, handler:'', lang:'en', location:'', halachic:false };
+}
+
+/* ---------- halachic-question guard ----------
+   CJHQ is not a religious authority. Before this existed, "Can I carry in the
+   eruv on Shabbos according to halacha?" reached askEruv and came back with
+   the eruv STATUS answer - silently answering a halachic question with a
+   practical one. That is the failure this guard prevents.
+
+   It does not refuse. It runs the practical handlers, presents whatever CJHQ
+   actually knows under a clear label, and adds a referral for the ruling
+   itself. No rabbi, organisation, phone number or directory is named: CJHQ has
+   no verified rabbinic directory, and inventing one is the same failure mode
+   as an invented emergency number.
+
+   Deliberately narrow. Mentioning Shabbos, eruv, mikvah, kosher, tefillin,
+   mezuzah, an etrog or a yom tov is NOT halachic framing - those are the
+   ordinary subjects of practical questions. The trigger requires the user to
+   be asking for the ruling: an explicit halachic adjective, "according to
+   halacha" and its equivalents, or mutar / assur / \u05d8\u05d0\u05e8 \u05de\u05e2\u05df.                  */
+const ASK_HALACHIC_RE = new RegExp([
+  // English - adjective forms, explicit "according to" framing, and loanwords
+  // that are only ever used to ask for a ruling.
+  'halach(?:ic|ically|ik)\\b', 'halakh(?:ic|ically)\\b',
+  'according to (?:the )?halach', 'according to (?:the )?halakh',
+  'according to jewish law', 'under jewish law', 'per halach',
+  '\\bmutar\\b', '\\bassur\\b', '\\bpsak\\b', '\\bposek\\b', '\\bshaila\\b', '\\bsheilah\\b',
+  // French
+  'selon la halach', 'selon la halakh', 'halakhique', 'halachique',
+  'selon la loi juive', 'apr\u00e8s la halach', 'apres la halach',
+  // Hebrew - the framing only. Never the bare word \u05d4\u05dc\u05db\u05d4 and never bare
+  // \u05de\u05d5\u05ea\u05e8, because "\u05d4\u05d0\u05dd \u05de\u05d5\u05ea\u05e8 \u05dc\u05d7\u05e0\u05d5\u05ea \u05db\u05d0\u05df?" is a parking question.
+  '\u05e2\u05dc \u05e4\u05d9 \u05d4\u05d4\u05dc\u05db\u05d4', '\u05e2\u05dc \u05e4\u05d9 \u05d4\u05dc\u05db\u05d4', '\u05dc\u05e4\u05d9 \u05d4\u05d4\u05dc\u05db\u05d4', '\u05dc\u05e4\u05d9 \u05d4\u05dc\u05db\u05d4',
+  '\u05de\u05d4 \u05d4\u05d4\u05dc\u05db\u05d4', '\u05e4\u05e1\u05e7 \u05d4\u05dc\u05db\u05d4', '\u05d4\u05dc\u05db\u05ea\u05d9\u05ea', '\u05e9\u05d0\u05dc\u05d4 \u05d4\u05dc\u05db\u05ea\u05d9\u05ea',
+  // Yiddish
+  '\u05dc\u05d5\u05d9\u05d8 \u05d4\u05dc\u05db\u05d4', '\u05dc\u05d5\u05d9\u05d8 \u05d3\u05e2\u05e8 \u05d4\u05dc\u05db\u05d4', '\u05dc\u05d5\u05d9\u05d8 \u05d3\u05d9 \u05d4\u05dc\u05db\u05d4',
+  '\u05d8\u05d0\u05e8 \u05de\u05e2\u05df', '\u05d8\u05d0\u05e8 \u05d0\u05d9\u05da', '\u05d8\u05d0\u05e8 \u05d0\u05d9\u05e8', '\u05d0\u05d9\u05d6 \u05d3\u05d0\u05e1 \u05de\u05d5\u05ea\u05e8', '\u05d4\u05dc\u05db\u05ea\u05d9\u05e9\u05e2'
+].join('|'), 'i');
+
+/* The practical chain, named once so the guard and the entry point cannot
+   drift apart. askHalachic is NOT in it - it runs ahead of it. */
+function askPracticalHandlers(){
+  return [askEruv, askEmergency, askZmanim, askCalendar,
+          askCommunityDirectory, askCjhqResources];
+}
+
+function askHalachic(q){
+  if(!ASK_HALACHIC_RE.test(String(q || ''))) return null;
+  const L = askDetectLanguage(q);
+
+  // Still give the person what CJHQ genuinely knows. The practical handlers
+  // run exactly as they normally would; only the presentation changes.
+  let practical = null;
+  for(const h of askPracticalHandlers()){
+    const out = h(q);
+    if(out){ practical = out; break; }
+  }
+
+  const r = practical || askAnswerShape();
+  r.lang = L;
+  r.halachic = true;
+  r.handled = true;
+  r.handler = practical ? ('Halachic + ' + (practical.handler || 'none')) : 'Halachic';
+
+  const referral = askT({
+    en:'CJHQ can provide practical, travel and government information, but does not provide halachic rulings. For the halachic ruling on this question, please consult your rov.',
+    fr:'Le CJHQ peut fournir des renseignements pratiques, de voyage et gouvernementaux, mais ne donne pas de d\u00e9cisions halakhiques. Pour la d\u00e9cision halakhique concernant cette question, veuillez consulter votre rav.',
+    he:'CJHQ \u05d9\u05db\u05d5\u05dc \u05dc\u05e1\u05e4\u05e7 \u05de\u05d9\u05d3\u05e2 \u05de\u05e2\u05e9\u05d9, \u05de\u05d9\u05d3\u05e2 \u05d1\u05e0\u05d5\u05e9\u05d0\u05d9 \u05e0\u05e1\u05d9\u05e2\u05d5\u05ea \u05d5\u05de\u05d9\u05d3\u05e2 \u05de\u05de\u05e9\u05dc\u05ea\u05d9, \u05d0\u05da \u05d0\u05d9\u05e0\u05d5 \u05e0\u05d5\u05ea\u05df \u05e4\u05e1\u05e7\u05d9 \u05d4\u05dc\u05db\u05d4. \u05dc\u05e7\u05d1\u05dc\u05ea \u05d4\u05db\u05e8\u05e2\u05d4 \u05d4\u05dc\u05db\u05ea\u05d9\u05ea \u05d1\u05e9\u05d0\u05dc\u05d4 \u05d6\u05d5, \u05d9\u05e9 \u05dc\u05d4\u05ea\u05d9\u05d9\u05e2\u05e5 \u05e2\u05dd \u05d4\u05e8\u05d1 \u05e9\u05dc\u05db\u05dd.',
+    yi:'CJHQ \u05e7\u05e2\u05df \u05e6\u05d5\u05e9\u05d8\u05e2\u05dc\u05df \u05e4\u05e8\u05d0\u05e7\u05d8\u05d9\u05e9\u05e2, \u05e8\u05d9\u05d9\u05d6\u05e2 \u05d0\u05d5\u05df \u05e8\u05e2\u05d2\u05d9\u05e8\u05d5\u05e0\u05d2\u05e1\u05be\u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2, \u05d0\u05d1\u05e2\u05e8 \u05d2\u05d9\u05d8 \u05e0\u05d9\u05e9\u05d8 \u05e7\u05d9\u05d9\u05df \u05d4\u05dc\u05db\u05ea\u05d9\u05e9\u05e2 \u05e4\u05e1\u05e7\u05d9 \u05d3\u05d9\u05df. \u05e4\u05d0\u05e8 \u05d3\u05e2\u05e8 \u05d4\u05dc\u05db\u05ea\u05d9\u05e9\u05e2\u05e8 \u05d4\u05db\u05e8\u05e2\u05d4 \u05d0\u05d9\u05df \u05d3\u05e2\u05e8 \u05e9\u05d0\u05dc\u05d4, \u05d1\u05d9\u05d8\u05e2 \u05e4\u05e8\u05e2\u05d2\u05d8 \u05d0\u05d9\u05d9\u05e2\u05e8 \u05e8\u05d1.'
+  }, L);
+
+  const label = askT({
+    en:'Practical information from CJHQ:',
+    fr:'Renseignements pratiques du CJHQ :',
+    he:'\u05de\u05d9\u05d3\u05e2 \u05de\u05e2\u05e9\u05d9 \u05de-CJHQ:',
+    yi:'\u05e4\u05e8\u05d0\u05e7\u05d8\u05d9\u05e9\u05e2 \u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2 \u05e4\u05d5\u05df CJHQ:'
+  }, L);
+
+  r.answer = (practical && practical.answer)
+    ? (label + '\n' + practical.answer + '\n\n' + referral)
+    : referral;
+  return r;
 }
 
 function askEruv(q){
   // English, French (erouv/érouv) and Hebrew script.
-  if(!/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1/i.test(q)) return null;
+  if(!/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1|\u05e2\u05d9\u05e8\u05d5\u05d5/i.test(q)) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
   r.handled = true; r.handler = 'Eruv'; r.timeSensitive = true;
   r.answer = askT({
     en:'Eruv status changes week to week, so I will not state whether it is up. Check the official Montreal Eruv page, which is updated by the people who inspect it.',
     fr:'Le statut de l\u2019\u00e9rouv change d\u2019une semaine \u00e0 l\u2019autre. Je n\u2019affirmerai donc pas s\u2019il est en fonction. Consultez la page officielle de l\u2019\u00c9rouv de Montr\u00e9al, mise \u00e0 jour par ceux qui l\u2019inspectent.',
-    he:'\u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05e9\u05ea\u05e0\u05d4 \u05de\u05e9\u05d1\u05d5\u05e2 \u05dc\u05e9\u05d1\u05d5\u05e2, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05d0\u05dd \u05d4\u05d5\u05d0 \u05ea\u05e7\u05d9\u05df. \u05d9\u05e9 \u05dc\u05d1\u05d3\u05d5\u05e7 \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 \u05e9\u05dc \u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc.'
+    he:'\u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05e9\u05ea\u05e0\u05d4 \u05de\u05e9\u05d1\u05d5\u05e2 \u05dc\u05e9\u05d1\u05d5\u05e2, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05d0\u05dd \u05d4\u05d5\u05d0 \u05ea\u05e7\u05d9\u05df. \u05d9\u05e9 \u05dc\u05d1\u05d3\u05d5\u05e7 \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 \u05e9\u05dc \u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc.',
+    yi:'\u05d3\u05e2\u05e8 \u05de\u05e6\u05d1 \u05e4\u05d5\u05e0\u05e2\u05dd \u05e2\u05d9\u05e8\u05d5\u05d1 \u05e2\u05e0\u05d3\u05e2\u05e8\u05d8 \u05d6\u05d9\u05da \u05d9\u05e2\u05d3\u05e2 \u05d5\u05d5\u05d0\u05da, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05d6\u05d0\u05d2 \u05d0\u05d9\u05da \u05e0\u05d9\u05e9\u05d8 \u05e6\u05d9 \u05e2\u05e8 \u05d0\u05d9\u05d6 \u05d2\u05d5\u05d8 \u05d0\u05d3\u05e2\u05e8 \u05e0\u05d9\u05e9\u05d8. \u05e7\u05d5\u05e7\u05d8 \u05e0\u05d0\u05da \u05d0\u05d5\u05d9\u05e3 \u05d3\u05e2\u05e8 \u05d0\u05e4\u05d9\u05e6\u05d9\u05e2\u05dc\u05e2\u05e8 \u05de\u05d0\u05e0\u05d8\u05e8\u05e2\u05d0\u05dc \u05e2\u05d9\u05e8\u05d5\u05d1 \u05d1\u05dc\u05d0\u05d8 \u2014 \u05d6\u05d9\u05d9 \u05e4\u05e8\u05d9\u05e9\u05df \u05e2\u05e1 \u05d0\u05d5\u05d9\u05e3.'
   }, L);
   // Actions come from the structured record, so changing the official URL is a
   // one-line edit rather than a hunt through the handlers.
   const E = ASK_ERUV_RECORD;
   r.actions = [
-    { label: askT({en:'Check Eruv Status', fr:'V\u00e9rifier le statut de l\u2019\u00e9rouv', he:'\u05d1\u05d3\u05d9\u05e7\u05ea \u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1'}, L), url:E.statusPage, kind:'link' },
-    { label: askT({en:'View Eruv Map', fr:'Voir la carte de l\u2019\u00e9rouv', he:'\u05de\u05e4\u05ea \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1'}, L), url:E.mapUrl, kind:'map' },
-    { label: askT({en:'Eruv Website', fr:'Site de l\u2019\u00e9rouv', he:'\u05d0\u05ea\u05e8 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1'}, L), url:E.website, kind:'link' }
+    { label: askT({en:'Check Eruv Status', fr:'V\u00e9rifier le statut de l\u2019\u00e9rouv', he:'\u05d1\u05d3\u05d9\u05e7\u05ea \u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1', yi:'\u05d6\u05e2\u05d8 \u05d3\u05e2\u05dd \u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05e6\u05d1'}, L), url:E.statusPage, kind:'link' },
+    { label: askT({en:'View Eruv Map', fr:'Voir la carte de l\u2019\u00e9rouv', he:'\u05de\u05e4\u05ea \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1', yi:'\u05d6\u05e2\u05d8 \u05d3\u05d9 \u05e2\u05d9\u05e8\u05d5\u05d1 \u05de\u05d0\u05e4\u05e2'}, L), url:E.mapUrl, kind:'map' },
+    { label: askT({en:'Eruv Website', fr:'Site de l\u2019\u00e9rouv', he:'\u05d0\u05ea\u05e8 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1', yi:'\u05e2\u05d9\u05e8\u05d5\u05d1 \u05d5\u05d5\u05e2\u05d1\u05d6\u05d9\u05d9\u05d8\u05dc'}, L), url:E.website, kind:'link' }
   ];
   r.sources = askSortSources([{ name:E.organization, url:E.website, type:'Eruv',
                                 authoritative:true, timeSensitive:true, lastVerified:E.lastVerified }]);
@@ -5923,14 +6258,15 @@ function askEruv(q){
 }
 
 function askEmergency(q){
-  if(!/hatzol|hatzalah|ambulance|emergency|paramedic|urgence|ambulancier|\u05d4\u05e6\u05dc\u05d4/i.test(q)) return null;
+  if(!/hatzol|hatzalah|ambulance|emergency|paramedic|urgence|ambulancier|noytfal|\u05d4\u05e6\u05dc\u05d4|\u05e0\u05d5\u05d9\u05d8\u05e4\u05d0\u05dc|\u05d0\u05de\u05d1\u05d5\u05dc\u05d0\u05e0\u05e1/i.test(q)) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
   r.handled = true; r.handler = 'Emergency';
   r.answer = askT({
     en:'If this is a life-threatening emergency, call 911 first.\n\nHatzolah Montreal is the community volunteer emergency medical service. I will not quote a phone number from memory. Use the official site so you get the current one.',
     fr:'S\u2019il s\u2019agit d\u2019une urgence vitale, composez d\u2019abord le 911.\n\nHatzolah Montr\u00e9al est le service m\u00e9dical d\u2019urgence b\u00e9n\u00e9vole de la communaut\u00e9. Je ne citerai pas un num\u00e9ro de m\u00e9moire. Consultez le site officiel pour le num\u00e9ro \u00e0 jour.',
-    he:'\u05d1\u05de\u05e7\u05e8\u05d4 \u05e9\u05dc \u05e1\u05db\u05e0\u05ea \u05d7\u05d9\u05d9\u05dd \u05d9\u05e9 \u05dc\u05d4\u05ea\u05e7\u05e9\u05e8 \u05ea\u05d7\u05d9\u05dc\u05d4 \u05dc-911.\n\n\u05d4\u05e6\u05dc\u05d4 \u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc \u05d4\u05d5\u05d0 \u05e9\u05d9\u05e8\u05d5\u05ea \u05d4\u05d7\u05d9\u05e8\u05d5\u05dd \u05d4\u05e7\u05d4\u05d9\u05dc\u05ea\u05d9. \u05dc\u05d0 \u05d0\u05e6\u05d8\u05d8 \u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. \u05d9\u05e9 \u05dc\u05d4\u05e9\u05ea\u05de\u05e9 \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9.'
+    he:'\u05d1\u05de\u05e7\u05e8\u05d4 \u05e9\u05dc \u05e1\u05db\u05e0\u05ea \u05d7\u05d9\u05d9\u05dd \u05d9\u05e9 \u05dc\u05d4\u05ea\u05e7\u05e9\u05e8 \u05ea\u05d7\u05d9\u05dc\u05d4 \u05dc-911.\n\n\u05d4\u05e6\u05dc\u05d4 \u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05dc \u05d4\u05d5\u05d0 \u05e9\u05d9\u05e8\u05d5\u05ea \u05d4\u05d7\u05d9\u05e8\u05d5\u05dd \u05d4\u05e7\u05d4\u05d9\u05dc\u05ea\u05d9. \u05dc\u05d0 \u05d0\u05e6\u05d8\u05d8 \u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. \u05d9\u05e9 \u05dc\u05d4\u05e9\u05ea\u05de\u05e9 \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9.',
+    yi:'\u05d0\u05d5\u05d9\u05d1 \u05e2\u05e1 \u05d0\u05d9\u05d6 \u05d0 \u05dc\u05e2\u05d1\u05e0\u05e1\u05be\u05d2\u05e2\u05e4\u05d0\u05e8, \u05e8\u05d5\u05e4\u05d8 \u05e2\u05e8\u05e9\u05d8 911.\n\n\u05d4\u05e6\u05dc\u05d4 \u05de\u05d0\u05e0\u05d8\u05e8\u05e2\u05d0\u05dc \u05d0\u05d9\u05d6 \u05d3\u05e2\u05e8 \u05e7\u05d4\u05d9\u05dc\u05d4\u05be\u05e1\u05e2\u05e8\u05d5\u05d5\u05d9\u05e1 \u05e4\u05d0\u05e8 \u05de\u05e2\u05d3\u05d9\u05e6\u05d9\u05e0\u05d9\u05e9\u05e2 \u05e0\u05d5\u05d9\u05d8\u05e4\u05d0\u05dc\u05df. \u05d0\u05d9\u05da \u05d5\u05d5\u05e2\u05dc \u05e0\u05d9\u05e9\u05d8 \u05d6\u05d0\u05d2\u05df \u05e7\u05d9\u05d9\u05df \u05d8\u05e2\u05dc\u05e2\u05e4\u05d0\u05df \u05e0\u05d5\u05de\u05e2\u05e8 \u05e4\u05d5\u05df \u05d6\u05db\u05e8\u05d5\u05df. \u05e0\u05d5\u05e6\u05d8 \u05d3\u05d9 \u05d0\u05e4\u05d9\u05e6\u05d9\u05e2\u05dc\u05e2 \u05d5\u05d5\u05e2\u05d1\u05d6\u05d9\u05d9\u05d8\u05dc \u05e6\u05d5 \u05d1\u05d0\u05e7\u05d5\u05de\u05e2\u05df \u05d3\u05e2\u05dd \u05e8\u05d9\u05db\u05d8\u05d9\u05d2\u05df \u05e0\u05d5\u05de\u05e2\u05e8.'
   }, L);
   // A "Call" button appears only if an admin has entered a verified number.
   // emergencyNumbers is empty by design, so today there is no call action -
@@ -5939,12 +6275,14 @@ function askEmergency(q){
   r.actions = [];
   (H.emergencyNumbers || []).forEach(n=>{
     r.actions.push({ label: askT({en:'Call ' + H.organization, fr:'Appeler ' + H.organization,
-                                  he:'\u05d4\u05ea\u05e7\u05e9\u05e8\u05d5 \u05dc' + H.organization}, L),
+                                  he:'\u05d4\u05ea\u05e7\u05e9\u05e8\u05d5 \u05dc' + H.organization,
+                                  yi:'\u05e8\u05d5\u05e4\u05d8 ' + H.organization}, L),
                      url:'tel:' + String(n).replace(/[^0-9+]/g,''), kind:'phone' });
   });
   r.actions.push({ label: askT({en:H.organization + ' Website', fr:'Site de ' + H.organization,
-                                he:'\u05d0\u05ea\u05e8 ' + H.organization}, L), url:H.website, kind:'link' });
-  if(H.mapUrl) r.actions.push({ label: askT({en:'View Map', fr:'Voir la carte', he:'\u05de\u05e4\u05d4'}, L), url:H.mapUrl, kind:'map' });
+                                he:'\u05d0\u05ea\u05e8 ' + H.organization,
+                                yi:H.organization + ' \u05d5\u05d5\u05e2\u05d1\u05d6\u05d9\u05d9\u05d8\u05dc'}, L), url:H.website, kind:'link' });
+  if(H.mapUrl) r.actions.push({ label: askT({en:'View Map', fr:'Voir la carte', he:'\u05de\u05e4\u05d4', yi:'\u05d6\u05e2\u05d8 \u05d3\u05d9 \u05de\u05d0\u05e4\u05e2'}, L), url:H.mapUrl, kind:'map' });
   r.sources = askSortSources([{ name:H.organization, url:H.website, type:'Emergency',
                                 authoritative:true, timeSensitive:false,
                                 serviceArea:H.serviceArea, lastVerified:H.lastVerified }]);
@@ -5954,7 +6292,7 @@ function askEmergency(q){
 function askZmanim(q){
   if(!/zman|shkia|shkiah|sunset|sunrise|candle.?light|hadlak|tzeis|tzais|havdal|neitz|alos|alot|coucher du soleil|bougies|allumage/i.test(q)
      && !/(shabbo?s|shabbat|chabbat|\u05e9\u05d1\u05ea).{0,20}(end|finish|out|over|termine|fini)/i.test(q)
-     && !/\u05e9\u05e7\u05d9\u05e2\u05d4|\u05d6\u05de\u05df|\u05d4\u05d3\u05dc\u05e7\u05ea \u05e0\u05e8\u05d5\u05ea|\u05e0\u05e8\u05d5\u05ea/i.test(q)) return null;
+     && !/\u05e9\u05e7\u05d9\u05e2\u05d4|\u05d6\u05de\u05df|\u05d6\u05de\u05e0\u05d9\u05dd|\u05d4\u05d3\u05dc\u05e7\u05ea \u05e0\u05e8\u05d5\u05ea|\u05e0\u05e8\u05d5\u05ea|\u05dc\u05d9\u05db\u05d8|\u05d1\u05e0\u05d7\u05df/i.test(q)) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
   const loc = askDetectLocation(q);
@@ -5964,11 +6302,13 @@ function askZmanim(q){
   r.answer = askT({
     en:'Zmanim change daily, so these are never answered from memory. The live lookup is not connected yet. Today\u2019s times for ' + loc.name + ' are on Hebcal.',
     fr:'Les zmanim changent chaque jour; ils ne sont donc jamais donn\u00e9s de m\u00e9moire. La consultation en direct n\u2019est pas encore branch\u00e9e. Les heures du jour pour ' + loc.name + ' se trouvent sur Hebcal.',
-    he:'\u05d4\u05d6\u05de\u05e0\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05de\u05d3\u05d9 \u05d9\u05d5\u05dd, \u05dc\u05db\u05df \u05d4\u05dd \u05dc\u05e2\u05d5\u05dc\u05dd \u05dc\u05d0 \u05e0\u05de\u05e1\u05e8\u05d9\u05dd \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. \u05d4\u05d6\u05de\u05e0\u05d9\u05dd \u05e2\u05d1\u05d5\u05e8 ' + loc.name + ' \u05e0\u05de\u05e6\u05d0\u05d9\u05dd \u05d1-Hebcal.'
+    he:'\u05d4\u05d6\u05de\u05e0\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05de\u05d3\u05d9 \u05d9\u05d5\u05dd, \u05dc\u05db\u05df \u05d4\u05dd \u05dc\u05e2\u05d5\u05dc\u05dd \u05dc\u05d0 \u05e0\u05de\u05e1\u05e8\u05d9\u05dd \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. \u05d4\u05d6\u05de\u05e0\u05d9\u05dd \u05e2\u05d1\u05d5\u05e8 ' + loc.name + ' \u05e0\u05de\u05e6\u05d0\u05d9\u05dd \u05d1-Hebcal.',
+    yi:'\u05d6\u05de\u05e0\u05d9\u05dd \u05e2\u05e0\u05d3\u05e2\u05e8\u05df \u05d6\u05d9\u05da \u05d9\u05e2\u05d3\u05df \u05d8\u05d0\u05d2, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05d6\u05d0\u05d2 \u05d0\u05d9\u05da \u05d6\u05d9\u05d9 \u05e7\u05d9\u05d9\u05e0\u05de\u05d0\u05dc \u05e0\u05d9\u05e9\u05d8 \u05e4\u05d5\u05df \u05d6\u05db\u05e8\u05d5\u05df. \u05d3\u05d9 \u05dc\u05e2\u05d1\u05e2\u05d3\u05d9\u05d2\u05e2 \u05e0\u05d0\u05db\u05e4\u05e8\u05e2\u05d2 \u05d0\u05d9\u05d6 \u05e0\u05d0\u05da \u05e0\u05d9\u05e9\u05d8 \u05d0\u05e0\u05d2\u05e2\u05e9\u05dc\u05d0\u05e1\u05df. \u05d4\u05d9\u05d9\u05e0\u05d8\u05d9\u05d2\u05e2 \u05d6\u05de\u05e0\u05d9\u05dd \u05e4\u05d0\u05e8 ' + loc.name + ' \u05d2\u05e2\u05e4\u05d9\u05e0\u05d8 \u05de\u05e2\u05df \u05d0\u05d5\u05d9\u05e3 Hebcal.'
   }, L);
   r.actions = [{ label: askT({en:'Today\u2019s ' + loc.name + ' Zmanim',
                               fr:'Zmanim du jour \u2014 ' + loc.name,
-                              he:'\u05d6\u05de\u05e0\u05d9 \u05d4\u05d9\u05d5\u05dd \u2014 ' + loc.name}, L),
+                              he:'\u05d6\u05de\u05e0\u05d9 \u05d4\u05d9\u05d5\u05dd \u2014 ' + loc.name,
+                              yi:'\u05d4\u05d9\u05d9\u05e0\u05d8\u05d9\u05d2\u05e2 \u05d6\u05de\u05e0\u05d9\u05dd \u2014 ' + loc.name}, L),
                  url:url, kind:'link' }];
   r.sources = askSortSources([{ name:'Hebcal \u2014 ' + loc.name + ' Zmanim', url:url,
                                 type:'Zmanim', authoritative:true, timeSensitive:true }]);
@@ -5977,16 +6317,17 @@ function askZmanim(q){
 
 function askCalendar(q){
   if(!/rosh hashan|roch hachana|yom kippur|kippour|sukkot|succos|souccot|pesach|passover|p\u00e2que|shavuot|shavuos|chavouot|purim|pourim|chanuk|hanukk|hanouca|tisha|hebrew date|jewish calendar|calendrier juif|yom tov|f\u00eate juive|fast day|je\u00fbne/i.test(q)
-     && !/\u05e8\u05d0\u05e9 \u05d4\u05e9\u05e0\u05d4|\u05d9\u05d5\u05dd \u05db\u05d9\u05e4\u05d5\u05e8|\u05e1\u05d5\u05db\u05d5\u05ea|\u05e4\u05e1\u05d7|\u05e9\u05d1\u05d5\u05e2\u05d5\u05ea|\u05e4\u05d5\u05e8\u05d9\u05dd|\u05d7\u05e0\u05d5\u05db\u05d4|\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4/i.test(q)) return null;
+     && !/\u05e8\u05d0\u05e9 \u05d4\u05e9\u05e0\u05d4|\u05d9\u05d5\u05dd \u05db\u05d9\u05e4\u05d5\u05e8|\u05e1\u05d5\u05db\u05d5\u05ea|\u05e1\u05d5\u05db\u05d5\u05e1|\u05e4\u05e1\u05d7|\u05e9\u05d1\u05d5\u05e2\u05d5\u05ea|\u05e4\u05d5\u05e8\u05d9\u05dd|\u05d7\u05e0\u05d5\u05db\u05d4|\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4|\u05d9\u05d5\u05dd \u05d8\u05d5\u05d1|\u05d9\u05d5\u05dd\u05d8\u05d5\u05d1/i.test(q)) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
   r.handled = true; r.handler = 'Calendar';
   r.answer = askT({
     en:'Holiday dates move every year, so I will not state one until the calendar lookup is connected. Hebcal has the current dates and can add them to your calendar.',
     fr:'Les dates des f\u00eates changent chaque ann\u00e9e; je n\u2019en indiquerai donc aucune tant que la consultation du calendrier n\u2019est pas branch\u00e9e. Hebcal a les dates \u00e0 jour et peut les ajouter \u00e0 votre calendrier.',
-    he:'\u05ea\u05d0\u05e8\u05d9\u05db\u05d9 \u05d4\u05d7\u05d2\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05de\u05d3\u05d9 \u05e9\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05ea\u05d0\u05e8\u05d9\u05da \u05e2\u05d3 \u05e9\u05d9\u05d7\u05d5\u05d1\u05e8 \u05dc\u05d5\u05d7 \u05d4\u05e9\u05e0\u05d4. \u05d1-Hebcal \u05d9\u05e9 \u05d0\u05ea \u05d4\u05ea\u05d0\u05e8\u05d9\u05db\u05d9\u05dd \u05d4\u05e2\u05d3\u05db\u05e0\u05d9\u05d9\u05dd.'
+    he:'\u05ea\u05d0\u05e8\u05d9\u05db\u05d9 \u05d4\u05d7\u05d2\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05de\u05d3\u05d9 \u05e9\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05ea\u05d0\u05e8\u05d9\u05da \u05e2\u05d3 \u05e9\u05d9\u05d7\u05d5\u05d1\u05e8 \u05dc\u05d5\u05d7 \u05d4\u05e9\u05e0\u05d4. \u05d1-Hebcal \u05d9\u05e9 \u05d0\u05ea \u05d4\u05ea\u05d0\u05e8\u05d9\u05db\u05d9\u05dd \u05d4\u05e2\u05d3\u05db\u05e0\u05d9\u05d9\u05dd.',
+    yi:'\u05d9\u05d5\u05dd \u05d8\u05d5\u05d1 \u05d3\u05d0\u05d8\u05d5\u05de\u05e1 \u05e2\u05e0\u05d3\u05e2\u05e8\u05df \u05d6\u05d9\u05da \u05d9\u05e2\u05d3\u05e2\u05e1 \u05d9\u05d0\u05e8, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05d5\u05d5\u05e2\u05dc \u05d0\u05d9\u05da \u05e0\u05d9\u05e9\u05d8 \u05d6\u05d0\u05d2\u05df \u05e7\u05d9\u05d9\u05df \u05d3\u05d0\u05d8\u05d5\u05dd \u05d1\u05d9\u05d6 \u05d3\u05e2\u05e8 \u05dc\u05d5\u05d7 \u05d0\u05d9\u05d6 \u05d0\u05e0\u05d2\u05e2\u05e9\u05dc\u05d0\u05e1\u05df. Hebcal \u05d4\u05d0\u05d8 \u05d3\u05d9 \u05d9\u05e2\u05e6\u05d8\u05d9\u05d2\u05e2 \u05d3\u05d0\u05d8\u05d5\u05de\u05e1.'
   }, L);
-  r.actions = [{ label: askT({en:'Jewish Calendar (Hebcal)', fr:'Calendrier juif (Hebcal)', he:'\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d9 (Hebcal)'}, L),
+  r.actions = [{ label: askT({en:'Jewish Calendar (Hebcal)', fr:'Calendrier juif (Hebcal)', he:'\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4 \u05e2\u05d1\u05e8\u05d9 (Hebcal)', yi:'\u05d0\u05d9\u05d3\u05d9\u05e9\u05e2\u05e8 \u05dc\u05d5\u05d7 (Hebcal)'}, L),
                  url:'https://www.hebcal.com/', kind:'link' }];
   r.sources = [{ name:'Hebcal \u2014 Jewish Calendar', url:'https://www.hebcal.com/', type:'Calendar', authoritative:true, timeSensitive:false }];
   return r;
@@ -5999,7 +6340,7 @@ function askCalendar(q){
    because CJHQ's own address is on Van Horne. Answering a mikvah question with
    a passport page is worse than saying we do not have it. */
 function askCommunityDirectory(q){
-  const isDirectory = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4|minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df|shul|schul|synagogue|\u05d1\u05d9\u05ea \u05db\u05e0\u05e1\u05ea|daven|davening|pray|prier|\u05dc\u05d4\u05ea\u05e4\u05dc\u05dc|kosher|casher|kashrut|cacher|\u05db\u05e9\u05e8/i.test(q);
+  const isDirectory = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4|\u05de\u05d9\u05e7\u05d5\u05d5\u05d4|minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df|shul|schul|synagogue|\u05e9\u05d5\u05dc|\u05d1\u05d9\u05ea \u05db\u05e0\u05e1\u05ea|daven|davening|davenen|pray|prier|\u05d3\u05d0\u05d5\u05d5\u05e0\u05e2\u05df|\u05dc\u05d4\u05ea\u05e4\u05dc\u05dc|kosher|casher|kashrut|cacher|\u05db\u05e9\u05e8/i.test(q);
   if(!isDirectory) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
@@ -6019,7 +6360,8 @@ function askCommunityDirectory(q){
     r.answer = askT({
       en:'CJHQ has ' + hits.length + ' verified listing' + (hits.length===1?'':'s') + ' for this. Details and hours can change, so confirm before relying on them.',
       fr:'CJHQ a ' + hits.length + ' inscription' + (hits.length===1?'':'s') + ' v\u00e9rifi\u00e9e' + (hits.length===1?'':'s') + '. Les d\u00e9tails et les heures peuvent changer; confirmez avant de vous y fier.',
-      he:'\u05dc-CJHQ \u05d9\u05e9 ' + hits.length + ' \u05e8\u05e9\u05d5\u05de\u05d5\u05ea \u05de\u05d0\u05d5\u05de\u05ea\u05d5\u05ea. \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05d5\u05d4\u05e9\u05e2\u05d5\u05ea \u05e2\u05e9\u05d5\u05d9\u05d9\u05dd \u05dc\u05d4\u05e9\u05ea\u05e0\u05d5\u05ea; \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e1\u05ea\u05de\u05db\u05d5\u05ea.'
+      he:'\u05dc-CJHQ \u05d9\u05e9 ' + hits.length + ' \u05e8\u05e9\u05d5\u05de\u05d5\u05ea \u05de\u05d0\u05d5\u05de\u05ea\u05d5\u05ea. \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05d5\u05d4\u05e9\u05e2\u05d5\u05ea \u05e2\u05e9\u05d5\u05d9\u05d9\u05dd \u05dc\u05d4\u05e9\u05ea\u05e0\u05d5\u05ea; \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e1\u05ea\u05de\u05db\u05d5\u05ea.',
+      yi:'CJHQ \u05d4\u05d0\u05d8 ' + hits.length + ' \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8\u05e2 \u05d0\u05d9\u05d9\u05e0\u05d8\u05e8\u05d0\u05d2\u05df \u05d3\u05e2\u05e8\u05d5\u05d9\u05e3. \u05e4\u05e8\u05d8\u05d9\u05dd \u05d0\u05d5\u05df \u05e9\u05e2\u05d4\u05df \u05e7\u05e2\u05e0\u05e2\u05df \u05d6\u05d9\u05da \u05e2\u05e0\u05d3\u05e2\u05e8\u05df, \u05e4\u05d0\u05e8\u05d6\u05d9\u05db\u05e2\u05e8\u05d8 \u05d6\u05d9\u05da \u05e4\u05d0\u05e8 \u05d0\u05d9\u05e8 \u05e4\u05d0\u05e8\u05dc\u05d0\u05d6\u05d8 \u05d6\u05d9\u05da \u05d3\u05e2\u05e8\u05d5\u05d9\u05e3.'
     }, L);
     r.actions = hits.slice(0,4).map(e => ({ label:e.name, url:e.url || '/resources', kind:e.url ? 'link' : 'internal' }));
     r.sources = hits.slice(0,4).map(e => ({
@@ -6034,9 +6376,10 @@ function askCommunityDirectory(q){
   r.answer = askT({
     en:'CJHQ does not yet maintain a verified directory of shuls, mikvaot, minyanim or kosher food, so I cannot answer that reliably. A community directory is the right source for it, and connecting one is still pending.',
     fr:'CJHQ ne tient pas encore un r\u00e9pertoire v\u00e9rifi\u00e9 des synagogues, mikv\u00e9s, minyanim ou commerces cachers; je ne peux donc pas r\u00e9pondre de fa\u00e7on fiable. Un r\u00e9pertoire communautaire serait la bonne source, et son int\u00e9gration est encore \u00e0 venir.',
-    he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05e2\u05d3\u05d9\u05d9\u05df \u05de\u05d0\u05d2\u05e8 \u05de\u05d0\u05d5\u05de\u05ea \u05e9\u05dc \u05d1\u05ea\u05d9 \u05db\u05e0\u05e1\u05ea, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d5 \u05de\u05d6\u05d5\u05df \u05db\u05e9\u05e8, \u05dc\u05db\u05df \u05d0\u05d9\u05e0\u05e0\u05d9 \u05d9\u05db\u05d5\u05dc \u05dc\u05e2\u05e0\u05d5\u05ea \u05d1\u05d0\u05d5\u05e4\u05df \u05d0\u05de\u05d9\u05df.'
+    he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05e2\u05d3\u05d9\u05d9\u05df \u05de\u05d0\u05d2\u05e8 \u05de\u05d0\u05d5\u05de\u05ea \u05e9\u05dc \u05d1\u05ea\u05d9 \u05db\u05e0\u05e1\u05ea, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d5 \u05de\u05d6\u05d5\u05df \u05db\u05e9\u05e8, \u05dc\u05db\u05df \u05d0\u05d9\u05e0\u05e0\u05d9 \u05d9\u05db\u05d5\u05dc \u05dc\u05e2\u05e0\u05d5\u05ea \u05d1\u05d0\u05d5\u05e4\u05df \u05d0\u05de\u05d9\u05df.',
+    yi:'CJHQ \u05d4\u05d0\u05dc\u05d8 \u05e0\u05d0\u05da \u05e0\u05d9\u05e9\u05d8 \u05e7\u05d9\u05d9\u05df \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8\u05e2 \u05e8\u05e9\u05d9\u05de\u05d4 \u05e4\u05d5\u05df \u05e9\u05d5\u05dc\u05df, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d3\u05e2\u05e8 \u05db\u05e9\u05e8 \u05e2\u05e1\u05df, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05e7\u05e2\u05df \u05d0\u05d9\u05da \u05d3\u05d0\u05e1 \u05e0\u05d9\u05e9\u05d8 \u05e2\u05e0\u05d8\u05e4\u05e2\u05e8\u05df \u05d0\u05d5\u05d9\u05e3 \u05d0 \u05e4\u05d0\u05e8\u05dc\u05d0\u05d6\u05dc\u05e2\u05db\u05df \u05d0\u05d5\u05e4\u05df. \u05d0 \u05e7\u05d4\u05d9\u05dc\u05d4 \u05d3\u05d9\u05e8\u05e2\u05e7\u05d8\u05d0\u05e8\u05d9\u05e2 \u05d0\u05d9\u05d6 \u05d3\u05e2\u05e8 \u05e8\u05d9\u05db\u05d8\u05d9\u05d2\u05e2\u05e8 \u05de\u05e7\u05d5\u05e8 \u05d3\u05e2\u05e8\u05e4\u05d0\u05e8, \u05d0\u05d5\u05df \u05d3\u05d0\u05e1 \u05d0\u05e0\u05e6\u05d5\u05e9\u05dc\u05d9\u05e1\u05df \u05e7\u05d5\u05de\u05d8 \u05e0\u05d0\u05da.'
   }, L);
-  r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd'}, L), url:'/resources', kind:'internal' }];
+  r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd', yi:'CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8'}, L), url:'/resources', kind:'internal' }];
   return r;
 }
 
@@ -6057,7 +6400,10 @@ function askCjhqResources(q){
       : `CJHQ a ${hits.length} ressources pertinentes. La plus proche est ${topName}.`,
     he: hits.length === 1
       ? `\u05dc-CJHQ \u05d9\u05e9 \u05de\u05e9\u05d0\u05d1 \u05dc\u05db\u05da: ${topName}.`
-      : `\u05dc-CJHQ \u05d9\u05e9 ${hits.length} \u05de\u05e9\u05d0\u05d1\u05d9\u05dd \u05e8\u05dc\u05d5\u05d5\u05e0\u05d8\u05d9\u05d9\u05dd. \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8: ${topName}.`
+      : `\u05dc-CJHQ \u05d9\u05e9 ${hits.length} \u05de\u05e9\u05d0\u05d1\u05d9\u05dd \u05e8\u05dc\u05d5\u05d5\u05e0\u05d8\u05d9\u05d9\u05dd. \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8: ${topName}.`,
+    yi: hits.length === 1
+      ? `CJHQ \u05d4\u05d0\u05d8 \u05d0 \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05d3\u05e2\u05e8\u05e4\u05d0\u05e8: ${topName}.`
+      : `CJHQ \u05d4\u05d0\u05d8 ${hits.length} \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1\u05df \u05d5\u05d5\u05d0\u05e1 \u05d6\u05e2\u05e2\u05df \u05d0\u05d5\u05d9\u05e1 \u05e4\u05d0\u05e1\u05d9\u05d2. \u05d3\u05d9 \u05e0\u05d0\u05e2\u05e0\u05d8\u05e1\u05d8\u05e2 \u05d0\u05d9\u05d6 ${topName}.`
   }, L);
   r.actions = hits.map(h => {
     const nm = (L === 'fr' && h.item.fr) ? h.item.fr : h.item.en;
@@ -6082,6 +6428,9 @@ function askBuildContext(res){
   if(res.answer) parts.push('Verified CJHQ answer: ' + res.answer);
   if(res.location) parts.push('Location: ' + res.location);
   if(res.timeSensitive) parts.push('NOTE: this information is time-sensitive. Do not state a specific time, date or status.');
+  if(res.halachic) parts.push('NOTE: the user is asking for a halachic ruling. Do NOT give one, do not '
+    + 'reason towards one, and do not present the practical information as if it settled the question. '
+    + 'Keep the referral to their rov. Do not name any rabbi, organisation or phone number.');
   (res.sources || []).forEach(src=>{
     parts.push('Source: ' + src.name + (src.url ? ' <' + src.url + '>' : '')
       + (src.authoritative ? ' [authoritative]' : '')
@@ -6101,8 +6450,10 @@ async function askCommunityAssistant(question, opts){
   // Structured and CJHQ answers first: they are verifiable and need no AI.
   // Order matters: the directory guard runs before the resource matcher so a
   // community question cannot be answered with an unrelated CJHQ resource.
-  const handlers = [askEruv, askEmergency, askZmanim, askCalendar,
-                    askCommunityDirectory, askCjhqResources];
+  // askHalachic runs FIRST. Without that, an explicitly halachic question is
+  // answered by whichever practical handler matches a keyword in it, and the
+  // answer reads as a ruling.
+  const handlers = [askHalachic].concat(askPracticalHandlers());
   let res = null;
   for(const h of handlers){
     const out = h(q);
@@ -6118,9 +6469,10 @@ async function askCommunityAssistant(question, opts){
     r.answer = askT({
       en:'I could not match that to a CJHQ resource or a structured source, so I am not going to guess. Try the Resource Centre, or rephrase using a keyword such as passport, NEXUS, RAMQ, eruv, zmanim or Hatzolah.',
       fr:'Je n\u2019ai pas pu rattacher cela \u00e0 une ressource CJHQ ni \u00e0 une source structur\u00e9e; je ne vais donc pas deviner. Essayez le Centre de ressources, ou reformulez avec un mot-cl\u00e9 comme passeport, NEXUS, RAMQ, \u00e9rouv, zmanim ou Hatzolah.',
-      he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05d0\u05ea \u05d6\u05d4 \u05dc\u05de\u05e9\u05d0\u05d1 \u05e9\u05dc CJHQ \u05d0\u05d5 \u05dc\u05de\u05e7\u05d5\u05e8 \u05de\u05d5\u05d1\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e0\u05d7\u05e9. \u05e0\u05e1\u05d5 \u05d0\u05ea \u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd.'
+      he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05d0\u05ea \u05d6\u05d4 \u05dc\u05de\u05e9\u05d0\u05d1 \u05e9\u05dc CJHQ \u05d0\u05d5 \u05dc\u05de\u05e7\u05d5\u05e8 \u05de\u05d5\u05d1\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e0\u05d7\u05e9. \u05e0\u05e1\u05d5 \u05d0\u05ea \u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd.',
+      yi:'\u05d0\u05d9\u05da \u05d4\u05d0\u05d1 \u05d3\u05d0\u05e1 \u05e0\u05d9\u05e9\u05d8 \u05d2\u05e2\u05e7\u05e2\u05e0\u05d8 \u05e6\u05d5\u05e4\u05d0\u05e1\u05df \u05e6\u05d5 \u05e7\u05d9\u05d9\u05df CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05d0\u05d3\u05e2\u05e8 \u05e1\u05d8\u05e8\u05d5\u05e7\u05d8\u05d5\u05e8\u05d9\u05e8\u05d8\u05df \u05de\u05e7\u05d5\u05e8, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05d5\u05d5\u05e2\u05dc \u05d0\u05d9\u05da \u05e0\u05d9\u05e9\u05d8 \u05d8\u05e8\u05e2\u05e4\u05df. \u05e4\u05e8\u05d5\u05d1\u05d9\u05e8\u05d8 \u05d3\u05e2\u05dd \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8, \u05d0\u05d3\u05e2\u05e8 \u05e9\u05e8\u05d9\u05d9\u05d1\u05d8 \u05e2\u05e1 \u05d0\u05d9\u05d1\u05e2\u05e8 \u05de\u05d9\u05d8 \u05d0 \u05d5\u05d5\u05d0\u05e8\u05d8 \u05d5\u05d5\u05d9 \u05e4\u05d0\u05e1\u05e4\u05d0\u05e8\u05d8, NEXUS, RAMQ, \u05e2\u05d9\u05e8\u05d5\u05d1, \u05d6\u05de\u05e0\u05d9\u05dd \u05d0\u05d3\u05e2\u05e8 \u05d4\u05e6\u05dc\u05d4.'
     }, L);
-    r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd'}, L), url:'/resources', kind:'internal' }];
+    r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd', yi:'CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8'}, L), url:'/resources', kind:'internal' }];
     return r;
   }
 
@@ -7358,6 +7710,17 @@ async function publishChangeNotice(slug){
   const $a = (id) => document.getElementById(id);
   if(!$a('askLog')) return;   // public pages have no Ask CJHQ markup at all
 
+  // Second lock, so the feature flag is not decorative. The markup only ships
+  // inside admin.html today, but if it ever appeared anywhere else - a copied
+  // partial, a generator change, a hand edit - this refuses to wire it up
+  // while ASK_CJHQ_PUBLIC is false. It never blocks the admin panel, which is
+  // what the ask UI is inside of.
+  const inAdminPage = !!($a('askLog').closest && $a('askLog').closest('#page-admin'));
+  if(!ASK_CJHQ_PUBLIC && !inAdminPage){
+    console.warn('[CJHQ] Ask CJHQ markup found outside the admin page while the public flag is off - not initialising.');
+    return;
+  }
+
   let askTurns = [];          // in-memory only
   let showSources = true;
   let lastAnswer = '';
@@ -7621,6 +7984,140 @@ async function publishChangeNotice(slug){
       updateFrequency:'as needed', integration:'pending', notes:''
     };
     await saveSource(src);
+  });
+
+
+  /* ---------- Language Review bench (brief section 17) ----------
+     Deterministic layer by default: useAI:false, so a review reads the CJHQ
+     wording itself rather than Gemini's paraphrase of it. "Run with AI
+     phrasing" is the separate button, because that is a different thing to
+     review and it consumes free-tier quota.
+
+     Nothing is written to Firestore and nothing is logged. */
+  const LANG_BENCH = [
+    { lang:'English',  q:'Where do I apply for a passport?' },
+    { lang:'English',  q:'Where is the eruv?' },
+    { lang:'English',  q:'When is shkia?' },
+    { lang:'English',  q:'How do I contact Hatzolah?' },
+    { lang:'English',  q:'Where can I find Shabbos information?' },
+    { lang:'French',   q:'O\u00f9 puis-je demander un passeport canadien?' },
+    { lang:'French',   q:'Comment contacter Hatzolah?' },
+    { lang:'French',   q:'Quand est le coucher du soleil?' },
+    { lang:'French',   q:'Est-ce que l\u2019erouv est ouvert?' },
+    { lang:'Hebrew',   q:'\u05d0\u05d9\u05e4\u05d4 \u05d0\u05e4\u05e9\u05e8 \u05dc\u05d7\u05d3\u05e9 \u05d3\u05e8\u05db\u05d5\u05df?' },
+    { lang:'Hebrew',   q:'\u05de\u05d4 \u05de\u05e6\u05d1 \u05d4\u05e2\u05d9\u05e8\u05d5\u05d1 \u05d4\u05d9\u05d5\u05dd?' },
+    { lang:'Hebrew',   q:'\u05de\u05ea\u05d9 \u05d4\u05e9\u05e7\u05d9\u05e2\u05d4 \u05d4\u05d9\u05d5\u05dd \u05d1\u05de\u05d5\u05e0\u05d8\u05e8\u05d9\u05d0\u05d5\u05dc?' },
+    { lang:'Hebrew',   q:'\u05d0\u05d9\u05da \u05d0\u05e0\u05d9 \u05d9\u05db\u05d5\u05dc \u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05e2\u05dd \u05d4\u05e6\u05dc\u05d4?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05d0\u05d5 \u05e7\u05e2\u05df \u05d0\u05d9\u05da \u05d1\u05e2\u05d8\u05df \u05d0 \u05e7\u05d0\u05e0\u05d0\u05d3\u05d9\u05e9\u05df \u05e4\u05d0\u05e1\u05e4\u05d0\u05e8\u05d8?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05d0\u05e1 \u05d0\u05d9\u05d6 \u05d3\u05e2\u05e8 \u05de\u05e6\u05d1 \u05e4\u05d5\u05e0\u05e2\u05dd \u05e2\u05d9\u05e8\u05d5\u05d1?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05e2\u05df \u05d0\u05d9\u05d6 \u05e9\u05e7\u05d9\u05e2\u05d4 \u05d0\u05d9\u05df \u05de\u05d0\u05e0\u05d8\u05e8\u05e2\u05d0\u05dc \u05d4\u05d9\u05d9\u05e0\u05d8?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05d9 \u05d0\u05d6\u05d5\u05d9 \u05e7\u05e2\u05df \u05d0\u05d9\u05da \u05e8\u05d5\u05e4\u05df \u05d4\u05e6\u05dc\u05d4?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05e2\u05df \u05d0\u05d9\u05d6 \u05e8\u05d0\u05e9 \u05d4\u05e9\u05e0\u05d4 \u05d4\u05d9\u05d9 \u05d9\u05d0\u05e8?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05d0\u05e1 \u05d3\u05d0\u05e8\u05e3 \u05d0\u05d9\u05da \u05d5\u05d5\u05d9\u05e1\u05df \u05d5\u05d5\u05e2\u05d2\u05df \u05e8\u05d9\u05d9\u05d6\u05df \u05e7\u05d9\u05d9\u05df \u05e7\u05d0\u05e0\u05d0\u05d3\u05e2?' },
+    { lang:'Yiddish',  q:'\u05d5\u05d5\u05d0\u05d5 \u05e7\u05e2\u05df \u05d0\u05d9\u05da \u05e4\u05d0\u05e8\u05e7\u05df \u05d3\u05d0 \u05d0\u05d9\u05df \u05d0\u05d5\u05d8\u05e8\u05de\u05d0\u05e0\u05d8?' },
+    { lang:'Yiddish (Latin)', q:'vu ken ikh find passport information?' },
+    { lang:'Yiddish (Latin)', q:'ven iz shkia in Montreal?' },
+    { lang:'Yiddish (Latin)', q:'ver ken ikh rufen Hatzolah?' },
+    { lang:'Yiddish (Latin)', q:'vos darf ikh wissen far travel?' },
+    { lang:'Mixed',    q:'\u05d5\u05d5\u05d0\u05e1 \u05d3\u05d0\u05e8\u05e3 \u05d0\u05d9\u05da \u05d5\u05d5\u05d9\u05e1\u05df \u05d5\u05d5\u05e2\u05d2\u05df my passport?' },
+    { lang:'Mixed',    q:'Can you tell me \u05d5\u05d5\u05e2\u05df is shkia?' }
+  ];
+  const LANG_NAME = { en:'English', fr:'French', he:'Hebrew', yi:'Yiddish' };
+  let __benchRows = [];
+
+  async function runLangBench(useAI){
+    const out = document.getElementById('langBenchResults');
+    const st  = document.getElementById('langBenchStatus');
+    if(!out || !st) return;
+    __benchRows = [];
+    out.innerHTML = '';
+    st.textContent = 'Running ' + LANG_BENCH.length + ' questions'
+                   + (useAI ? ' with AI phrasing (throttled, this takes a while)' : '') + '\u2026';
+    for(let i = 0; i < LANG_BENCH.length; i++){
+      const c = LANG_BENCH[i];
+      const t0 = Date.now();
+      let res = null, err = '';
+      try{
+        res = await askCommunityAssistant(c.q, { useAI: !!useAI });
+      }catch(e){ err = String((e && e.message) || e); }
+      const ms = Date.now() - t0;
+      const detected = res ? res.lang : '';
+      const row = {
+        expected: c.lang, question: c.q,
+        detected: LANG_NAME[detected] || detected || '\u2014',
+        detectedCode: detected,
+        handler: res ? (res.handled ? res.handler : (res.handler || 'none')) : 'error',
+        answer: err ? ('ERROR: ' + err) : (res ? res.answer : ''),
+        sources: res ? (res.sources || []).map(s => s.name) : [],
+        actions: res ? (res.actions || []).map(a => a.label + ' \u2014 ' + a.url) : [],
+        ms: ms, ai: !!(res && res.aiUsed), aiError: (res && res.aiError) || ''
+      };
+      __benchRows.push(row);
+      out.appendChild(benchRowEl(row));
+      st.textContent = 'Ran ' + (i + 1) + ' of ' + LANG_BENCH.length + '\u2026';
+    }
+    const missing = (typeof __askMissingYi !== 'undefined') ? Array.from(__askMissingYi) : [];
+    st.innerHTML = 'Done \u2014 ' + LANG_BENCH.length + ' questions.'
+      + (missing.length
+          ? ' <b style="color:#A23B3B;">' + missing.length + ' string(s) had no Yiddish and fell back to English.</b>'
+          : ' <b>No string fell back out of Yiddish.</b>');
+  }
+
+  function benchRowEl(r){
+    const d = document.createElement('div');
+    d.className = 'card admin-row';
+    d.style.cssText = 'display:block; margin-bottom:10px;';
+    const mismatch = (r.expected.indexOf(r.detected) < 0 && r.expected !== 'Mixed');
+    const isRtl = (r.detectedCode === 'he' || r.detectedCode === 'yi');
+    const esc = (t) => String(t == null ? '' : t)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    d.innerHTML =
+      '<div style="font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);">'
+        + esc(r.expected) + ' \u00b7 detected <b style="' + (mismatch ? 'color:#A23B3B;' : '') + '">'
+        + esc(r.detected) + '</b> \u00b7 handler <b>' + esc(r.handler) + '</b> \u00b7 '
+        + r.ms + ' ms' + (r.ai ? ' \u00b7 AI phrasing' : '')
+        + (r.aiError ? ' \u00b7 AI error: ' + esc(r.aiError) : '') + '</div>'
+      + '<p style="margin:6px 0 4px 0; font-weight:600;'
+        + (isRtl ? ' direction:rtl; text-align:right;' : '') + '">' + esc(r.question) + '</p>'
+      + '<p style="margin:0 0 6px 0; white-space:pre-wrap;'
+        + (isRtl ? ' direction:rtl; text-align:right;' : '') + '">' + esc(r.answer) + '</p>'
+      + (r.actions.length
+          ? '<div style="font-size:.8rem; color:var(--muted);">Links: ' + esc(r.actions.join(' \u00b7 ')) + '</div>' : '')
+      + (r.sources.length
+          ? '<div style="font-size:.8rem; color:var(--muted);">Sources: ' + esc(r.sources.join(', ')) + '</div>' : '');
+    return d;
+  }
+
+  const _bRun   = document.getElementById('langBenchRun');
+  const _bRunAI = document.getElementById('langBenchRunAI');
+  const _bCopy  = document.getElementById('langBenchCopy');
+  const _bClear = document.getElementById('langBenchClear');
+  if(_bRun)   _bRun.addEventListener('click',   ()=> runLangBench(false));
+  if(_bRunAI) _bRunAI.addEventListener('click', ()=> runLangBench(true));
+  if(_bClear) _bClear.addEventListener('click', ()=>{
+    __benchRows = [];
+    document.getElementById('langBenchResults').innerHTML = '';
+    document.getElementById('langBenchStatus').textContent = 'Cleared.';
+  });
+  if(_bCopy) _bCopy.addEventListener('click', ()=>{
+    if(!__benchRows.length){ alert('Run the review first.'); return; }
+    const txt = __benchRows
+      .filter(r => r.expected.indexOf('Yiddish') === 0 || r.expected === 'Mixed')
+      .map(r => 'QUESTION: ' + r.question
+              + '\nDETECTED: ' + r.detected
+              + '\nANSWER:   ' + r.answer
+              + '\nHANDLER:  ' + r.handler + '  (' + r.ms + ' ms)')
+      .join('\n\n----------------\n\n');
+    const header = 'CJHQ \u2014 Ask CJHQ Yiddish review sheet\n'
+      + 'Please read the ANSWER lines. They were written by a developer, not a native\n'
+      + 'Yiddish speaker. Mark anything that sounds wrong, stiff, or too literary.\n\n';
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(header + txt)
+        .then(()=> alert('Copied. Paste it into an email for the reviewer.'))
+        .catch(()=> alert('Could not copy automatically.'));
+    }else{
+      alert('Clipboard not available in this browser.');
+    }
   });
 
   // Populate when the tab is opened, so nothing is fetched until an admin looks.
@@ -8105,11 +8602,74 @@ checkCurrentPath({deferUnknown:true});
 <script id="signupScript" src="//static.ctctcdn.com/js/signup-form-widget/current/signup-form-widget.min.js" async defer></script>
 <!-- End Constant Contact Active Forms -->
 
-<!-- Facebook Page Plugin loader (renders the .fb-page embed) -->
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"></script>
+<!-- Social embed loaders - deferred until the embeds are actually needed.
+     Previously both SDKs loaded on every view of every route, including on
+     mobile, where #socialEmbedGrid is display:none below 860px - so mobile
+     visitors downloaded and executed two third-party tracking SDKs to render
+     markup they could never see.
 
-<!-- X (Twitter) hashtag button loader (renders the .twitter-hashtag-button) -->
-<script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
+     Now they load only when the embed grid is genuinely on screen. If the grid
+     is hidden or absent (every route except the one carrying it, and every
+     viewport under 860px) neither SDK is requested at all. Nothing about the
+     embeds changes: when the grid appears, the same scripts load with the same
+     parameters and render the same way.
+
+     Performance and third-party-exposure only. No functionality removed, no
+     consent mechanism added - that decision is documented separately. -->
+<script>
+(function deferSocialEmbeds(){
+  var LOADERS = [
+    { id:'cjhq-fb-sdk',    src:'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0',
+      attrs:{ crossOrigin:'anonymous' } },
+    { id:'cjhq-x-widgets', src:'https://platform.x.com/widgets.js',
+      attrs:{ charset:'utf-8' } }
+  ];
+  var loaded = false;
+  function load(){
+    if(loaded) return;
+    loaded = true;
+    LOADERS.forEach(function(l){
+      if(document.getElementById(l.id)) return;
+      var el = document.createElement('script');
+      el.id = l.id; el.async = true; el.defer = true;
+      Object.keys(l.attrs).forEach(function(k){ el[k] = l.attrs[k]; });
+      el.src = l.src;
+      document.body.appendChild(el);
+    });
+  }
+  var observing = false;
+  function watch(){
+    var grid = document.getElementById('socialEmbedGrid');
+    if(!grid) return;                        // route carries no embeds
+    if(!('IntersectionObserver' in window)){
+      // No observer support: fall back to a visibility check. getClientRects()
+      // is empty for a display:none element, which is exactly the mobile case.
+      if(grid.getClientRects().length) load();
+      return;
+    }
+    if(observing) return;
+    observing = true;
+    // Observe unconditionally rather than pre-checking visibility. A
+    // display:none element is never "intersecting", so the mobile case is
+    // still covered - and an early check was checking too soon: on a route
+    // where this script runs before the router marks the page active, the
+    // grid had no client rects yet and the SDKs never loaded at all.
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ load(); io.disconnect(); } });
+    }, { rootMargin:'300px' });
+    io.observe(grid);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', watch);
+  }else{
+    watch();
+  }
+  // The grid lives on one route of a single-page app, so re-check when a
+  // client-side navigation reveals it.
+  window.addEventListener('popstate', function(){ setTimeout(watch, 60); });
+  window.__cjhqWatchSocialEmbeds = watch;
+})();
+</script>
 
 </body>
 </html>
