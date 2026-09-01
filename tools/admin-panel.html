@@ -128,8 +128,24 @@
             <textarea id="noticeBodyEn" rows="2" class="admin-input"></textarea>
             <label class="admin-label">Message — French</label>
             <textarea id="noticeBodyFr" rows="2" class="admin-input"></textarea>
+            <!-- Scheduling lives here, with the notice itself, rather than in the
+                 Publishing tab: the dates are part of the notice you are writing. -->
+            <div class="vis-dates" style="margin-top:14px;">
+              <div>
+                <label for="noticeStartsOn">Start date</label>
+                <input type="date" id="noticeStartsOn" class="admin-input">
+              </div>
+              <div>
+                <label for="noticeEndsOn">End date</label>
+                <input type="date" id="noticeEndsOn" class="admin-input">
+              </div>
+              <p>Leave blank for no limit. Dates are inclusive: an end date of 5 September stays visible all day on the 5th.</p>
+            </div>
             <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:.88rem;">
               <input type="checkbox" id="noticeActive" checked> Active (visible on site)
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:.88rem;">
+              <input type="checkbox" id="noticeDraft"> Save as draft (keep working on it — never shows publicly)
             </label>
             <div style="margin-top:14px; display:flex; gap:10px;">
               <button type="submit" class="btn dark" id="noticeSaveBtn">Save Notice</button>
