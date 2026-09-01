@@ -50,8 +50,15 @@ jobs:
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The generator writes ten files: eight ROUTES plus the two extras
+          # (admin.html and fr/index.html). Only seven were staged, so
+          # child-travel-consent.html, admin.html and fr/index.html were
+          # regenerated on every run and never committed - they happened to be
+          # in sync, but a future index.html push would have left them stale
+          # with no signal that anything had drifted.
           git add resources.html stay-informed.html contact.html about.html \
-                  privacy.html terms.html accessibility.html
+                  privacy.html terms.html accessibility.html \
+                  child-travel-consent.html admin.html fr/index.html
           if git diff --staged --quiet; then
             echo "Route files already up to date - nothing to commit."
           else
