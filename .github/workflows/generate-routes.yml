@@ -41,7 +41,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
+      # Fails the run before anything is regenerated or committed. ask-core.mjs
+      # and ask-data.mjs are generated from index.html and are imported by the
+      # external WhatsApp bridge, so if an index.html edit leaves them stale the
+      # bridge would answer from a different engine than the website. Failing
+      # here is the point: a red run is recoverable, silent drift between the
+      # two callers is not.
+      #
+      # To fix a failure: run `node tools/sync-ask-core.mjs` locally and commit
+      # the regenerated modules alongside the index.html change.
+      - name: Verify the shared Ask CJHQ core is in sync with index.html
+        run: node tools/sync-ask-core.mjs --check
       - name: Generate route files from index.html
         run: node tools/generate-routes.mjs
 
