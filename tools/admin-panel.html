@@ -383,6 +383,26 @@
             </div>
           </div>
 
+          <!-- ============ Language Review bench ============
+               Runs a fixed set of questions across English, French, Hebrew and
+               Yiddish and lays the results out for a human reviewer. Nothing
+               here is stored: results live in the page for the session only,
+               the same as the conversation above. -->
+          <h3 class="ask-h3">Language Review</h3>
+          <p class="ask-help">
+            Runs the standard question set in all four languages and shows what the assistant
+            actually answers. The Yiddish has not been checked by a native speaker &mdash; this is
+            where to read it. Use <b>Copy for reviewer</b> to send the Yiddish rows to someone fluent.
+          </p>
+          <div class="ask-actions" style="margin-bottom:10px;">
+            <button type="button" class="btn dark" id="langBenchRun">Run Language Review</button>
+            <button type="button" class="btn admin-btn-outline" id="langBenchRunAI">Run with AI phrasing</button>
+            <button type="button" class="btn admin-btn-outline" id="langBenchCopy">Copy for reviewer</button>
+            <button type="button" class="btn admin-btn-outline" id="langBenchClear">Clear</button>
+          </div>
+          <div class="ask-status" id="langBenchStatus">Not run yet.</div>
+          <div id="langBenchResults"></div>
+
           <h3 class="ask-h3">Knowledge Sources</h3>
           <p class="ask-help">
             The registry the assistant draws on. Stored in Firestore and editable here, so sources can be
