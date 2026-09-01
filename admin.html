@@ -578,6 +578,17 @@
     .si-link{width:100%;}
   }
 
+  .vis-dot.draft{background:#8A6D1F;}
+  .vis-dot.sched{background:#20456F;}
+  .vis-kind{display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    background:var(--bg-alt); border:1px solid var(--line); color:var(--muted); padding:2px 7px; border-radius:3px; margin-left:8px;}
+  .vis-dates{display:flex; flex-wrap:wrap; gap:14px; margin:10px 0 4px;}
+  .vis-dates label{display:block; font-size:.78rem; font-weight:600; color:var(--muted); margin-bottom:3px;}
+  .vis-dates .admin-input{margin:0; max-width:190px;}
+  .vis-dates p{flex:1 1 100%; margin:2px 0 0;}
+  .vis-actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+  .vis-actions .btn{font-size:.82rem;}
+  @media (max-width:600px){ .vis-actions .btn{flex:1 1 46%;} .vis-dates .admin-input{max-width:100%;} }
   .vis-preview-flag{display:inline-block; background:#FBF3DD; border:1px solid #B4881A; color:#5A4407;
     font-size:.72rem; font-weight:700; letter-spacing:.05em; padding:3px 8px; border-radius:3px; margin-left:8px;}
   @media (max-width:600px){
@@ -5280,7 +5291,11 @@ async function fetchSettingsDoc(){
    section is never rendered even momentarily. */
 function applySectionVisibility(){
   SECTION_KEYS.forEach(key=>{
-    const published = isSectionPublished(key);
+    // Admin preview reveals a hidden section for the current admin only. It is
+    // held in a page variable, never written to Firestore and never shared, so
+    // it cannot leak the section to a visitor. Requires a signed-in staff user.
+    const previewing = (window.__sectionPreview === key) && !!adminUser;
+    const published = isSectionPublished(key) || previewing;
     document.querySelectorAll('[data-section="' + key + '"]').forEach(el=>{
       el.hidden = !published;
       if(!published) el.setAttribute('aria-hidden','true'); else el.removeAttribute('aria-hidden');
@@ -5299,10 +5314,14 @@ function applySectionVisibility(){
    404, not a glimpse of unreviewed content. */
 const SECTION_ROUTES = { 'special-information': 'yomim-tovim-travel' };
 function isSectionRouteBlocked(routeId){
+  // A signed-in admin previewing a section must be able to reach its URL.
+  // The preview flag lives only in this page's memory - it is never written to
+  // Firestore and never shared, so it cannot expose the section to a visitor.
+  const previewing = (k) => window.__sectionPreview === k && !!adminUser;
   const key = SECTION_ROUTES[routeId];
-  if(key && !isSectionPublished(key)) return true;
+  if(key && !isSectionPublished(key) && !previewing(key)) return true;
   for(const k of SECTION_KEYS){
-    if(routeId === k && !isSectionPublished(k)) return true;
+    if(routeId === k && !isSectionPublished(k) && !previewing(k)) return true;
   }
   return false;
 }
@@ -5325,11 +5344,26 @@ let __sectionVisibility = {};   // populated from Firestore on load
 
 function isSectionPublished(key){
   const v = __sectionVisibility[key];
-  return !!(v && v.status === 'published');
+  if(!v || v.status !== 'published') return false;
+  // A published section can still be scheduled. Same conservative rule as
+  // notices: outside its window it is not public.
+  return isWithinSchedule(v);
+}
+/* Admin-facing: why is this section not public right now. */
+function sectionState(key){
+  const v = __sectionVisibility[key] || {};
+  if(v.status !== 'published') return 'hidden';
+  const today = cjhqTodayISO();
+  const s = (v.startsOn||'').trim(), e = (v.endsOn||'').trim();
+  if(s && today < s) return 'scheduled';
+  if(e && today > e) return 'expired';
+  return 'live';
 }
 function sectionAudit(key){
   const v = __sectionVisibility[key] || {};
   return { status: v.status === 'published' ? 'published' : 'hidden',
+           startsOn: v.startsOn || '', endsOn: v.endsOn || '',
+           state: sectionState(key),
            changedAt: v.changedAt || '', changedBy: v.changedBy || '' };
 }
 async function loadSectionVisibility(){
@@ -5341,6 +5375,7 @@ async function loadSectionVisibility(){
       const v = raw[k];
       // Anything other than an explicit "published" is hidden.
       out[k] = { status: (v && v.status === 'published') ? 'published' : 'hidden',
+                 startsOn: (v && v.startsOn) || '', endsOn: (v && v.endsOn) || '',
                  changedAt: (v && v.changedAt) || '', changedBy: (v && v.changedBy) || '' };
     });
     __sectionVisibility = out;
@@ -5354,9 +5389,14 @@ async function loadSectionVisibility(){
 /* Only ever called from the admin panel, where the caller is already
    authenticated and on the staff allowlist. Firestore rules enforce the same
    condition server-side, so this cannot be driven from a public page. */
-async function setSectionVisibility(key, published, adminEmail){
+async function setSectionVisibility(key, published, adminEmail, schedule){
+  const prev = __sectionVisibility[key] || {};
   const entry = {
     status: published ? 'published' : 'hidden',
+    // Dates survive a hide/publish cycle so an admin does not have to re-enter
+    // them, but they are only consulted while status is 'published'.
+    startsOn: (schedule && 'startsOn' in schedule) ? (schedule.startsOn || '') : (prev.startsOn || ''),
+    endsOn:   (schedule && 'endsOn'   in schedule) ? (schedule.endsOn   || '') : (prev.endsOn   || ''),
     changedAt: new Date().toISOString(),
     changedBy: adminEmail || (adminUser && adminUser.email) || 'unknown'
   };
@@ -5378,9 +5418,51 @@ async function saveSettingsDoc(data){
 }
 
 /* ---------- Public-facing: Notices & Popups ---------- */
+/* ---------- scheduling ----------
+   A notice or popup can now be saved without going live, and can carry a start
+   and/or end date. Publishing is deliberately conservative: an item shows ONLY
+   if it is active, not a draft, and inside its window. Anything malformed or
+   missing fails closed (hidden) rather than open, because an announcement that
+   appears when it should not is worse than one that appears late.
+
+   Dates are plain YYYY-MM-DD. startsOn is inclusive from 00:00 local; endsOn is
+   inclusive to 23:59 local, so "ends 5 Sept" means it is still visible all day
+   on the 5th - which is what an admin means when they type that date. */
+function cjhqTodayISO(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function isWithinSchedule(item, todayISO){
+  const today = todayISO || cjhqTodayISO();
+  const s = (item && item.startsOn || '').trim();
+  const e = (item && item.endsOn || '').trim();
+  // A malformed date must not silently widen the window.
+  const valid = (v)=> /^\d{4}-\d{2}-\d{2}$/.test(v);
+  if(s){ if(!valid(s)) return false; if(today < s) return false; }
+  if(e){ if(!valid(e)) return false; if(today > e) return false; }
+  return true;
+}
+/* The single test for "should the public see this right now". */
+function isLiveNow(item){
+  if(!item || !item.active) return false;
+  if(item.draft === true) return false;
+  return isWithinSchedule(item);
+}
+/* Why an item is not showing - used by the admin Publishing list. */
+function scheduleState(item){
+  if(!item) return 'unknown';
+  if(item.draft === true) return 'draft';
+  if(!item.active) return 'inactive';
+  const today = cjhqTodayISO();
+  const s = (item.startsOn||'').trim(), e = (item.endsOn||'').trim();
+  if(s && today < s) return 'scheduled';
+  if(e && today > e) return 'expired';
+  return 'live';
+}
+
 async function renderPublicNotices(){
   const notices = await fetchCollection('notices');
-  const active = notices.filter(n => n.active);
+  const active = notices.filter(isLiveNow);
   const isFr = document.documentElement.classList.contains('lang-fr');
 
   const banner = active.find(n => n.type === 'banner');
@@ -7198,46 +7280,85 @@ async function publishChangeNotice(slug){
   });
 
 
-/* ---------- Publishing admin UI ---------- */
+/* ---------- Publishing admin UI ----------
+   One place to see everything that is built but not currently visible to the
+   public - sections, notices and popups - with preview, edit, scheduling and a
+   save-without-activating option. */
 (function initVisibilityAdmin(){
   const box = document.getElementById('visibilityList');
-  if(!box) return;   // public pages carry no admin markup at all
+  if(!box) return;
 
   const SECTIONS = [
-    { key:'yomim-tovim-travel',
+    { key:'yomim-tovim-travel', routeId:'special-information',
       name:'Special Information for Yomim Tovim & Travel',
-      note:'Seasonal travel and Yom Tov guidance. Content is managed in this panel; publishing is separate.' }
+      note:'Seasonal travel and Yom Tov guidance. Content and visibility are separate.' }
   ];
 
-  function render(){
-    box.innerHTML = '';
+  const STATE_LABEL = {
+    live:      { dot:'published', text:'Live \u2014 visible to the public' },
+    hidden:    { dot:'hidden',    text:'Hidden' },
+    draft:     { dot:'draft',     text:'Draft \u2014 saved, not activated' },
+    inactive:  { dot:'hidden',    text:'Inactive' },
+    scheduled: { dot:'sched',     text:'Scheduled \u2014 not yet started' },
+    expired:   { dot:'hidden',    text:'Expired \u2014 end date passed' }
+  };
+
+  function stateChip(state){
+    const cfg = STATE_LABEL[state] || STATE_LABEL.hidden;
+    const el = document.createElement('div');
+    el.className = 'vis-status';
+    // Keep the "Status:" prefix the original specification asked for.
+    el.innerHTML = '<span class="vis-dot ' + cfg.dot + '"></span>Status: ' + cfg.text;
+    return el;
+  }
+
+  function dateRow(a, startVal, endVal, onChange){
+    const wrap = document.createElement('div');
+    wrap.className = 'vis-dates';
+    [['Start date', startVal, 'startsOn'], ['End date', endVal, 'endsOn']].forEach(([lbl, val, key])=>{
+      const g = document.createElement('div');
+      const id = 'vis-' + key + '-' + a;
+      const l = document.createElement('label'); l.setAttribute('for', id); l.textContent = lbl;
+      const inp = document.createElement('input');
+      inp.type = 'date'; inp.id = id; inp.className = 'admin-input'; inp.value = val || '';
+      inp.addEventListener('change', ()=> onChange(key, inp.value));
+      g.appendChild(l); g.appendChild(inp); wrap.appendChild(g);
+    });
+    const hint = document.createElement('p');
+    hint.className = 'vis-audit';
+    hint.textContent = 'Leave blank for no limit. Dates are inclusive: an end date of 5 September stays visible all day on the 5th.';
+    wrap.appendChild(hint);
+    return wrap;
+  }
+
+  /* ---- sections ---- */
+  function renderSections(target){
     SECTIONS.forEach(sec=>{
       const a = sectionAudit(sec.key);
       const published = a.status === 'published';
+      const state = a.state;
+      const pending = { startsOn: a.startsOn, endsOn: a.endsOn };
+
       const row = document.createElement('div');
       row.className = 'vis-row';
 
       const head = document.createElement('div');
       head.className = 'vis-name';
       head.textContent = sec.name;
-      if(!published){
+      if(state !== 'live'){
         const flag = document.createElement('span');
         flag.className = 'vis-preview-flag';
-        flag.textContent = 'ADMIN PREVIEW \u2014 NOT PUBLIC';
+        flag.textContent = 'NOT PUBLIC';
         head.appendChild(flag);
       }
       row.appendChild(head);
-
-      const st = document.createElement('div');
-      st.className = 'vis-status';
-      st.innerHTML = '<span class="vis-dot ' + (published ? 'published' : 'hidden') + '"></span>'
-                   + 'Status: ' + (published ? 'Published' : 'Hidden');
-      row.appendChild(st);
+      row.appendChild(stateChip(state));
 
       const note = document.createElement('div');
-      note.className = 'vis-audit';
-      note.textContent = sec.note;
+      note.className = 'vis-audit'; note.textContent = sec.note;
       row.appendChild(note);
+
+      row.appendChild(dateRow(sec.key, a.startsOn, a.endsOn, (k,v)=>{ pending[k] = v; }));
 
       const audit = document.createElement('div');
       audit.className = 'vis-audit';
@@ -7246,39 +7367,203 @@ async function publishChangeNotice(slug){
         : 'Never changed \u2014 default is Hidden.';
       row.appendChild(audit);
 
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = published ? 'btn admin-btn-outline' : 'btn dark';
-      btn.style.marginTop = '12px';
-      btn.textContent = published ? 'Hide from Website' : 'Publish to Website';
-      btn.addEventListener('click', async ()=>{
-        // Deliberate confirmation, with the consequence spelled out. There is
-        // no code path where saving content flips this.
+      const bar = document.createElement('div');
+      bar.className = 'vis-actions';
+
+      // Preview: opens the real section with the admin banner, without publishing.
+      const prev = document.createElement('button');
+      prev.type = 'button'; prev.className = 'btn admin-btn-outline';
+      prev.textContent = 'Preview';
+      prev.addEventListener('click', ()=>{
+        window.__sectionPreview = sec.key;
+        goPage(sec.routeId);
+        closeAdminPanelIfOpen();
+      });
+
+      // Edit: same view, scrolled to the content, admin banner visible.
+      const edit = document.createElement('button');
+      edit.type = 'button'; edit.className = 'btn admin-btn-outline';
+      edit.textContent = 'Preview & edit content';
+      edit.addEventListener('click', ()=>{
+        window.__sectionPreview = sec.key;
+        goPage(sec.routeId);
+        closeAdminPanelIfOpen();
+        setTimeout(()=>{ const t=document.getElementById('siCountries'); if(t) t.scrollIntoView({behavior:'smooth', block:'center'}); }, 500);
+      });
+
+      // Save dates without changing published/hidden.
+      const saveOnly = document.createElement('button');
+      saveOnly.type = 'button'; saveOnly.className = 'btn admin-btn-outline';
+      saveOnly.textContent = 'Save dates only';
+      saveOnly.addEventListener('click', async ()=>{
+        if(pending.startsOn && pending.endsOn && pending.endsOn < pending.startsOn){
+          alert('The end date cannot be earlier than the start date.'); return;
+        }
+        saveOnly.disabled = true;
+        try{
+          await setSectionVisibility(sec.key, published, adminUser && adminUser.email, pending);
+          render();
+        }catch(err){ alert('Could not save the dates.'); }
+        finally{ saveOnly.disabled = false; }
+      });
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = published ? 'btn admin-btn-outline' : 'btn dark';
+      toggle.textContent = published ? 'Hide from Website' : 'Publish to Website';
+      toggle.addEventListener('click', async ()=>{
+        if(!published && pending.startsOn && pending.endsOn && pending.endsOn < pending.startsOn){
+          alert('The end date cannot be earlier than the start date.'); return;
+        }
         const msg = published
           ? 'Hide this resource?\n\nThis will remove the ' + sec.name + ' section from public view. '
             + 'The content will remain available in the admin panel.'
           : 'Publish this resource?\n\nThis will make the ' + sec.name + ' section visible to the public '
-            + 'on the CJHQ website.';
+            + 'on the CJHQ website'
+            + (pending.startsOn ? ', starting ' + pending.startsOn : '')
+            + (pending.endsOn ? ' and ending after ' + pending.endsOn : '') + '.';
         if(!confirm(msg)) return;
-        btn.disabled = true;
+        toggle.disabled = true;
         try{
-          await setSectionVisibility(sec.key, !published, adminUser && adminUser.email);
+          await setSectionVisibility(sec.key, !published, adminUser && adminUser.email, pending);
           render();
         }catch(err){
           console.warn('[CJHQ] visibility change failed:', (err && err.code) || err);
           alert('Could not change visibility. Check that you are still signed in and that the Firestore rules allow writing to settings.');
-        }finally{
-          btn.disabled = false;
-        }
+        }finally{ toggle.disabled = false; }
       });
-      row.appendChild(btn);
-      box.appendChild(row);
+
+      [prev, edit, saveOnly, toggle].forEach(b=> bar.appendChild(b));
+      row.appendChild(bar);
+      target.appendChild(row);
     });
+  }
+
+  function closeAdminPanelIfOpen(){
+    // Preview shows the real page, so step out of the admin view.
+    const p = document.getElementById('page-admin');
+    if(p && p.classList.contains('active')) { /* goPage already switched */ }
+  }
+
+  /* ---- notices and popups ---- */
+  let noticeCache = [];
+
+  async function loadNotices(){
+    try{ noticeCache = await fetchCollection('notices'); }
+    catch(err){ noticeCache = []; }
+  }
+
+  function renderNotices(target){
+    const hidden = noticeCache.filter(n => scheduleState(n) !== 'live');
+    const live   = noticeCache.filter(n => scheduleState(n) === 'live');
+
+    const summary = document.createElement('p');
+    summary.className = 'ask-help';
+    summary.textContent = noticeCache.length
+      ? (live.length + ' live \u00b7 ' + hidden.length + ' not currently showing')
+      : 'No notices or popups have been created yet.';
+    target.appendChild(summary);
+
+    noticeCache.forEach(n=>{
+      const state = scheduleState(n);
+      const pending = { startsOn: n.startsOn || '', endsOn: n.endsOn || '' };
+      const row = document.createElement('div');
+      row.className = 'vis-row';
+
+      const head = document.createElement('div');
+      head.className = 'vis-name';
+      head.textContent = (n.title_en || n.body_en || '(untitled)').slice(0, 70);
+      const kind = document.createElement('span');
+      kind.className = 'vis-kind';
+      kind.textContent = n.type === 'banner' ? 'Banner' : (n.type === 'popup' ? 'Popup' : (n.type || 'Notice'));
+      head.appendChild(kind);
+      if(state !== 'live'){
+        const flag = document.createElement('span');
+        flag.className = 'vis-preview-flag'; flag.textContent = 'NOT SHOWING';
+        head.appendChild(flag);
+      }
+      row.appendChild(head);
+      row.appendChild(stateChip(state));
+
+      if(n.body_en){
+        const body = document.createElement('div');
+        body.className = 'vis-audit';
+        body.textContent = String(n.body_en).replace(/<[^>]+>/g,'').slice(0, 160);
+        row.appendChild(body);
+      }
+
+      row.appendChild(dateRow('n-' + n.id, n.startsOn, n.endsOn, (k,v)=>{ pending[k] = v; }));
+
+      const bar = document.createElement('div');
+      bar.className = 'vis-actions';
+
+      const saveDates = document.createElement('button');
+      saveDates.type='button'; saveDates.className='btn admin-btn-outline';
+      saveDates.textContent = 'Save dates only';
+      saveDates.addEventListener('click', ()=> persist(n, { startsOn:pending.startsOn, endsOn:pending.endsOn }, saveDates));
+
+      const draftBtn = document.createElement('button');
+      draftBtn.type='button'; draftBtn.className='btn admin-btn-outline';
+      draftBtn.textContent = n.draft ? 'Mark ready' : 'Save as draft';
+      draftBtn.addEventListener('click', ()=> persist(n, { draft: !n.draft }, draftBtn));
+
+      const act = document.createElement('button');
+      act.type='button';
+      act.className = n.active ? 'btn admin-btn-outline' : 'btn dark';
+      act.textContent = n.active ? 'Deactivate' : 'Activate';
+      act.addEventListener('click', ()=>{
+        const msg = n.active
+          ? 'Deactivate this item?\n\nIt will stop showing on the website. The content is kept.'
+          : 'Activate this item?\n\nIt will show on the website'
+            + (pending.startsOn || pending.endsOn ? ' according to the dates set.' : ' immediately.');
+        if(!confirm(msg)) return;
+        persist(n, { active: !n.active, startsOn:pending.startsOn, endsOn:pending.endsOn }, act);
+      });
+
+      [saveDates, draftBtn, act].forEach(b=> bar.appendChild(b));
+      row.appendChild(bar);
+      target.appendChild(row);
+    });
+  }
+
+  async function persist(notice, changes, btn){
+    if(changes.startsOn && changes.endsOn && changes.endsOn < changes.startsOn){
+      alert('The end date cannot be earlier than the start date.'); return;
+    }
+    if(btn) btn.disabled = true;
+    try{
+      const updated = Object.assign({}, notice, changes);
+      await saveToCollection('notices', updated);
+      await loadNotices();
+      render();
+    }catch(err){
+      console.warn('[CJHQ] notice save failed:', (err && err.code) || err);
+      alert('Could not save. Check that you are still signed in.');
+    }finally{ if(btn) btn.disabled = false; }
+  }
+
+  function render(){
+    box.innerHTML = '';
+    const h1 = document.createElement('h3');
+    h1.className = 'ask-h3'; h1.style.marginTop = '0';
+    h1.textContent = 'Sections';
+    box.appendChild(h1);
+    renderSections(box);
+
+    const h2 = document.createElement('h3');
+    h2.className = 'ask-h3';
+    h2.textContent = 'Notices & popups';
+    box.appendChild(h2);
+    renderNotices(box);
   }
 
   document.querySelectorAll('.admin-tab-btn').forEach(b=>{
     if(b.dataset.tab === 'visibility'){
-      b.addEventListener('click', async ()=>{ await loadSectionVisibility(); render(); });
+      b.addEventListener('click', async ()=>{
+        await loadSectionVisibility();
+        await loadNotices();
+        render();
+      });
     }
   });
   render();
