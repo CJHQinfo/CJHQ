@@ -6387,6 +6387,43 @@ function askBridgeTerms(question){
   return add.join(' ');
 }
 
+/* ---------- light stemming for intent words ----------
+   "How do I apply for a passport?" used to reduce to the single token
+   "passport", which is in three resource titles - Adult Passport Application,
+   Passport Renewal, Urgent & Express Passport Service - so all three tied
+   exactly and the assistant had to ask which one. The distinguishing word,
+   "apply", was in the question AND in "Application", but an exact token
+   comparison cannot see that they are the same word.
+
+   Stemming both sides fixes it generally, without a list of special cases:
+   apply/applying/application -> "appl", renew/renewal/renewing -> "renew",
+   replace/replacement -> "replac", require/requirements -> "requir". The same
+   mechanism separates urgent/express, lost/stolen, fee/fees, appointment,
+   register/registration and the rest, because those words are already in the
+   resource titles - they just were not matchable before.
+
+   Deliberately conservative. Only well-known English suffixes are stripped,
+   and only from words of 5+ characters, so short words are never mangled.
+   French words are left alone: the French titles are matched separately and
+   over-stemming them would create matches, not clarity.                      */
+function askStem(w){
+  const x = String(w || '');
+  if(x.length < 5) return x;
+  const suf = ['ations','ational','ation','ements','ement','ments','ment','ings','ing',
+               'ers','ies','ied','ed','al','s'];
+  // apply -> appli, so it lines up with Application -> applic. Without this the
+  // flagship case stays tied: "apply" and "applic" differ at the fifth letter.
+  if(x.endsWith('y')) return x.slice(0, -1) + 'i';
+  for(const sf of suf){
+    if(x.length - sf.length >= 4 && x.endsWith(sf)){
+      let base = x.slice(0, x.length - sf.length);
+      if(sf === 'ies') base += 'y';
+      return base;
+    }
+  }
+  return x;
+}
+
 function askMatchResources(question, limit){
   // The bridge only ever appends English keywords; the original question is
   // left intact, so English and French matching is byte-for-byte unchanged.
@@ -6442,10 +6479,28 @@ function askMatchResources(question, limit){
         // question ("Ou puis-je demander un passeport?") scored a single body hit
         // and fell below the relevance threshold - it matched nothing at all.
         const title = cjhqNormalizeSearch((String(it.en || '') + ' ' + String(it.fr || '')).toLowerCase());
+        // Stemmed title tokens, so an intent word in the question can match the
+        // form that appears in the title ("apply" -> "Application").
+        const titleStems = title.split(/\s+/).filter(Boolean).map(askStem);
         let score = 0, titleHits = 0, bodyHits = 0;
         words.forEach(w=>{
-          if(title.includes(w)){ score += 10; titleHits++; }
-          else if(hay.includes(w)){ score += 2; bodyHits++; }
+          if(title.includes(w)){ score += 10; titleHits++; return; }
+          // Worth slightly less than a literal title hit: it is the same word,
+          // but recovered rather than observed.
+          // Prefix comparison, not equality: "apply" stems to "appl" while
+          // "Application" stems to "applic", and they are plainly the same
+          // word. Bounded so it cannot drift - the shorter stem must be at
+          // least 4 characters and the two within 3 of each other, which
+          // matches appl/applic but never pass/passport.
+          const ws = askStem(w);
+          const stemHit = ws.length >= 4 && titleStems.some(ts => {
+            if(ts.length < 4) return false;
+            const short = ws.length <= ts.length ? ws : ts;
+            const long  = ws.length <= ts.length ? ts : ws;
+            return long.length - short.length <= 3 && long.indexOf(short) === 0;
+          });
+          if(stemHit){ score += 8; titleHits++; return; }
+          if(hay.includes(w)){ score += 2; bodyHits++; }
         });
         if(title === q) score += 40;
         // Frequency turned out to be the wrong signal: "passport" appears in 10
@@ -6458,7 +6513,9 @@ function askMatchResources(question, limit){
         const coverage = matched / words.length;
         const relevant = (titleHits > 0 && (words.length <= 2 || coverage >= 0.5))
                        || bodyHits >= 2;
-        if(relevant && score > 0) out.push({ score, item: it, category: cat.en });
+        // titleHits and coverage are carried out so the answer layer can judge
+        // specificity from real signals rather than a bare score ratio.
+        if(relevant && score > 0) out.push({ score, item: it, category: cat.en, titleHits, coverage });
       });
     });
   });
@@ -7316,6 +7373,101 @@ function askChildTravel(q){
    contacts is an optional map of { [organization name]: {...fields} }. The
    website passes the Firestore partner_overrides cache; the WhatsApp bridge
    passes the same records it fetched itself. The core stores nothing. */
+/* ---------- name normalization + fuzzy organization matching ----------
+   Two real failures this addresses, both found by testing rather than assumed:
+
+   1. "contact refua vchesed" returned nothing. The matcher was a raw substring
+      test, so a dropped 'h' and a missing space defeated it even though the
+      organization is in CJHQ's own data.
+
+   2. "passprt renewal" matched an ORGANIZATION. "renewal" is a whole word in
+      "Renewal Canada", and a substring test cannot tell a name from an ordinary
+      English word. That is the false positive section 9 warns about, and it was
+      live before this change.
+
+   The approach: normalize both sides, match on word sequences rather than raw
+   substrings, and only fall back to edit distance for candidates that look like
+   names. Fuzzy matching NEVER alters what is returned - it only decides WHICH
+   verified record to read. Every field still comes from that record.          */
+
+function askNormalizeName(v){
+  return String(v == null ? '' : v)
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u02bc\u0060\u00b4]/g, "'")   // curly/backtick -> straight
+    .replace(/['`]/g, '')                                 // then drop apostrophes entirely
+    .replace(/[^a-z0-9\u0590-\u05FF]+/g, ' ')             // punctuation/hyphens -> space
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/* MAINTAINED SAFETY LIST - REVIEW WHENEVER A PARTNER IS ADDED.
+
+   These are words that appear inside an organization's name but are also
+   ordinary vocabulary. A single-token match on one of them is not evidence of
+   anything: "renewal" is a word in "Renewal Canada" and also in "passport
+   renewal", and before this list existed the question "passprt renewal" was
+   answered with an organization record instead of the passport resource.
+
+   Multi-word matches are unaffected - "renewal canada" still resolves normally,
+   because only a lone token is rejected.
+
+   THIS LIST IS NOT DERIVED AUTOMATICALLY. When a new CJHQ partner or
+   organization is added to PARTNERS_DATA, check whether any single word of its
+   name is also a word someone might reasonably type in an unrelated question -
+   for example a name containing "Health", "Family", "Travel", "Centre" or
+   "Support". If so, add that word here. Skipping this step reintroduces the
+   false positive for the new organization only, which is exactly the kind of
+   bug that hides: everything else keeps working. */
+const ASK_ORG_GENERIC = new Set(['renewal','canada','montreal','tosh','lifeline',
+  'interstate','olam','centre','center','council','community','services','service']);
+
+function askLevenshtein(a, b){
+  if(a === b) return 0;
+  const m = a.length, n = b.length;
+  if(!m) return n;
+  if(!n) return m;
+  let prev = new Array(n + 1);
+  for(let j = 0; j <= n; j++) prev[j] = j;
+  for(let i = 1; i <= m; i++){
+    const cur = [i];
+    for(let j = 1; j <= n; j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+function askSimilarity(a, b){
+  const longest = Math.max(a.length, b.length);
+  if(!longest) return 0;
+  return 1 - (askLevenshtein(a, b) / longest);
+}
+
+/* Confidence tiers, chosen against the real 16-name dataset rather than picked
+   out of the air:
+     >= 0.86  one edit in a name of ~7+ characters. "refua vchesed" vs
+              "refuah vchesed" scores 0.93; "chaverim" vs "chavivim" - two
+              genuinely different organizations - scores 0.75 and must NOT
+              auto-resolve.
+     0.78-0.86 close enough to mean something, not close enough to act on.
+              Ask which one.
+     < 0.78   no match. The existing no-answer behaviour applies.              */
+const ASK_ORG_FUZZY_HIGH = 0.86;
+const ASK_ORG_FUZZY_ASK  = 0.78;
+
+/* Candidate name phrases from the question: every run of 1-4 consecutive
+   words. Fuzzy comparison is only ever done against these, never against the
+   whole sentence, so a typo in a common word cannot drift into a name match. */
+function askNameCandidates(norm){
+  const w = norm.split(' ').filter(Boolean);
+  const out = [];
+  for(let n = 4; n >= 1; n--){
+    for(let i = 0; i + n <= w.length; i++) out.push(w.slice(i, i + n).join(' '));
+  }
+  return out;
+}
+
 function askOrgRegistry(contacts){
   const raw = (typeof PARTNERS_DATA !== 'undefined') ? PARTNERS_DATA : [];
   const extra = contacts || (typeof PARTNER_OVERRIDES_CACHE !== 'undefined' ? PARTNER_OVERRIDES_CACHE : null) || {};
@@ -7351,16 +7503,57 @@ function askOrgContactState(o){
 }
 
 function askOrgMatch(q, contacts){
-  const s = String(q || '').toLowerCase();
+  const norm = askNormalizeName(q);
   const orgs = askOrgRegistry(contacts);
   const found = [];
+
+  // Pass 1 - exact, on normalized whole-word sequences. A single-token alias
+  // that is ordinary vocabulary ("renewal") is not accepted on its own.
   orgs.forEach(o => {
     const key = o.name.toLowerCase();
-    // Record-level aliases win alongside the built-in ones, so a future
-    // verified record can carry its own without editing this file.
-    const aliases = [key].concat(ASK_ORG_ALIASES[key] || []).concat(o.aliases || []);
-    if(aliases.some(a => a && s.indexOf(String(a).toLowerCase()) >= 0)) found.push(o);
+    const aliases = [o.name].concat(ASK_ORG_ALIASES[key] || []).concat(o.aliases || []);
+    const hit = aliases.some(a => {
+      const na = askNormalizeName(a);
+      if(!na) return false;
+      if(na.indexOf(' ') < 0 && ASK_ORG_GENERIC.has(na)) return false;
+      return (' ' + norm + ' ').indexOf(' ' + na + ' ') >= 0;
+    });
+    if(hit) found.push(o);
   });
+  if(found.length) return found;
+
+  // Pass 2 - fuzzy, and only against name-shaped candidates. Short candidates
+  // are excluded: edit distance on a 4-letter word matches almost anything.
+  const cands = askNameCandidates(norm).filter(c => c.length >= 6);
+  let best = null, bestScore = 0, second = 0;
+  orgs.forEach(o => {
+    const key = o.name.toLowerCase();
+    const aliases = [o.name].concat(ASK_ORG_ALIASES[key] || []).concat(o.aliases || []);
+    aliases.forEach(a => {
+      const na = askNormalizeName(a);
+      if(na.length < 6) return;                       // too short to fuzz safely
+      if(na.indexOf(' ') < 0 && ASK_ORG_GENERIC.has(na)) return;
+      cands.forEach(c => {
+        const sc = askSimilarity(c, na);
+        if(sc > bestScore){ second = bestScore; bestScore = sc; best = o; }
+        else if(sc > second && o !== best){ second = sc; }
+      });
+    });
+  });
+  if(best && bestScore >= ASK_ORG_FUZZY_HIGH && bestScore - second >= 0.05) return [best];
+  if(best && bestScore >= ASK_ORG_FUZZY_ASK){
+    // Medium confidence: hand back the candidates so the caller can ask rather
+    // than resolve. Marked so askOrganizations knows not to answer outright.
+    const near = orgs.filter(o => {
+      const key = o.name.toLowerCase();
+      const aliases = [o.name].concat(ASK_ORG_ALIASES[key] || []).concat(o.aliases || []);
+      return aliases.some(a => {
+        const na = askNormalizeName(a);
+        return na.length >= 6 && cands.some(c => askSimilarity(c, na) >= ASK_ORG_FUZZY_ASK);
+      });
+    });
+    if(near.length){ near.__uncertain = true; return near; }
+  }
   if(found.length) return found;
   // No name matched - try the service map, then resolve those names in the
   // real registry so a renamed or removed partner cannot linger here.
@@ -7380,6 +7573,22 @@ function askOrganizations(q, opts){
   const L = askDetectLanguage(q); r.lang = L;
   r.handler = 'Organizations';
   r.handled = true;
+
+  // Medium-confidence fuzzy match: name the candidates and ask, rather than
+  // answering confidently about whichever scored marginally higher. Contact
+  // details are exactly the wrong thing to guess at.
+  if(hits.__uncertain){
+    const names = hits.slice(0, 3).map(o => o.name);
+    r.handled = false;
+    r.answer = askT({
+      en:'Did you mean ' + names.join(' or ') + '? Tell me which one and I can give you what CJHQ has on file.',
+      fr:'Vouliez-vous dire ' + names.join(' ou ') + '\u00a0? Indiquez-moi lequel et je vous donnerai ce que le CJHQ a au dossier.',
+      he:'\u05d4\u05ea\u05db\u05d5\u05d5\u05e0\u05ea\u05dd \u05dc-' + names.join(' \u05d0\u05d5 ') + '? \u05e6\u05d9\u05d9\u05e0\u05d5 \u05d0\u05d9\u05d6\u05d4 \u05d5\u05d0\u05de\u05e1\u05d5\u05e8 \u05de\u05d4 \u05e9\u05d9\u05e9 \u05dc-CJHQ.',
+      yi:'\u05de\u05d9\u05d9\u05e0\u05d8 \u05d0\u05d9\u05e8 ' + names.join(' \u05d0\u05d3\u05e2\u05e8 ') + '? \u05d6\u05d0\u05d2\u05d8 \u05de\u05d9\u05e8 \u05d5\u05d5\u05e2\u05dc\u05db\u05e2\u05e8 \u05d0\u05d5\u05df \u05d0\u05d9\u05da \u05d5\u05d5\u05e2\u05dc \u05d6\u05d0\u05d2\u05df \u05d5\u05d5\u05d0\u05e1 CJHQ \u05d4\u05d0\u05d8.'
+    }, L);
+    r.actions = hits.slice(0, 3).filter(o => o.url).map(o => ({ label:o.name, url:o.url, kind:'link' }));
+    return r;
+  }
 
   const named = hits.slice(0, 3);
   const list = named.map(o => o.name).join(', ');
@@ -7605,38 +7814,162 @@ function askCommunityDirectory(q){
   return r;
 }
 
+/* ---------- CJHQ resource answers ----------
+   The resource records already contain the whole popup: what_*, the numbered
+   steps_list_*, the need_list_* of required documents, tips_list_*, a
+   question and answer pair, and official_links[0] - the actual action link.
+   This handler used to read four of those fields and answer "CJHQ has a
+   resource for that: X", attaching up to three links. The information needed
+   to answer the question was sitting unused in the same record.
+
+   Two rules govern what comes back:
+
+   SPECIFICITY, not a bare score ratio. A hit is specific when the question
+   actually names it - titleHits > 0, meaning a word from the resource title
+   appears in the question - AND it is clearly ahead of the runner-up. "Apply
+   for NEXUS" wins on "how do I apply for NEXUS" because NEXUS is in its title;
+   RAMQ scores on "apply" alone and is not named, so it loses. Where two
+   resources are genuinely close and neither is named, the honest response is
+   to ask which one, not to answer confidently about the wrong one.
+
+   QUESTION SHAPE. The record is structured, so the answer can match what was
+   asked: a process question gets the steps, a "what do I need" question gets
+   the document list, a "what is" question gets the description. Sending every
+   field for every question is the same failure as sending every link.
+
+   ONE source of truth: this reads the same array the website popup renders, so
+   editing a resource improves both. Nothing is duplicated here.              */
+
+/* Kept deliberately compact. ask-core.mjs is shared with the WhatsApp bridge,
+   where a wall of text is worse than useless - so steps are capped, tips only
+   appear when asked for, and the link goes last. */
+const ASK_RES_MAX_STEPS = 6;
+
+const ASK_RES_INTENT = {
+  steps: /\bhow (?:do|can|would) i\b|\bprocess\b|\bapply\b|\bapplication\b|\bsteps?\b|\brenew\b|\bregister\b|comment (?:faire|puis-je)|d[ée]marche|proc[ée]dure|demande|\u05d0\u05d9\u05da \u05de\u05d2\u05d9\u05e9|\u05ea\u05d4\u05dc\u05d9\u05da|\u05d5\u05d5\u05d9 \u05d0\u05d6\u05d5\u05d9/i,
+  needs: /what (?:do i |will i )?need|\brequired\b|\brequirements?\b|\bdocuments?\b|\bbring\b|\bqualif/i,
+  what:  /^\s*(?:what(?:'s| is)|c'est quoi|qu'est-ce que|\u05de\u05d4 \u05d6\u05d4|\u05d5\u05d5\u05d0\u05e1 \u05d0\u05d9\u05d6)\b/i,
+  right: /is this the right|am i eligible|do i qualify|est-ce la bonne/i
+};
+
+function askResourceIntent(q){
+  const s = String(q || '');
+  if(ASK_RES_INTENT.right.test(s)) return 'right';
+  if(ASK_RES_INTENT.needs.test(s)) return 'needs';
+  if(ASK_RES_INTENT.steps.test(s)) return 'steps';
+  if(ASK_RES_INTENT.what.test(s))  return 'what';
+  return 'general';
+}
+
+/* A hit is specific when the question named it and it is clearly ahead. */
+function askResourceIsSpecific(hits){
+  if(!hits.length) return false;
+  const top = hits[0];
+  if(!(top.titleHits > 0)) return false;
+  if(hits.length === 1) return true;
+  // More of the question's words in this title than in the runner-up's is the
+  // clearest signal there is: "how do I apply for a passport" hits two words of
+  // "Adult Passport Application" and one of "Passport Renewal", so the
+  // application wins and no clarification is needed. Falling back to the score
+  // ratio covers the case where titles tie but relevance does not.
+  if(top.titleHits > hits[1].titleHits) return true;
+  return top.score >= hits[1].score * 1.5 || hits[1].titleHits === 0;
+}
+
 function askCjhqResources(q){
   const hits = askMatchResources(q, 3);
   if(!hits.length) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
-  r.handled = true; r.handler = 'CJHQ Resources';
+  r.handler = 'CJHQ Resources';
+  const isFr = (L === 'fr');
+  const pick = (en, fr) => (isFr && fr) ? fr : en;
   const top = hits[0].item;
-  const topName = (L === 'fr' && top.fr) ? top.fr : top.en;
-  r.answer = askT({
-    en: hits.length === 1
-      ? `CJHQ has a resource for that: ${topName}.`
-      : `CJHQ has ${hits.length} resources that look relevant. The closest is ${topName}.`,
-    fr: hits.length === 1
-      ? `CJHQ a une ressource pour cela : ${topName}.`
-      : `CJHQ a ${hits.length} ressources pertinentes. La plus proche est ${topName}.`,
-    he: hits.length === 1
-      ? `\u05dc-CJHQ \u05d9\u05e9 \u05de\u05e9\u05d0\u05d1 \u05dc\u05db\u05da: ${topName}.`
-      : `\u05dc-CJHQ \u05d9\u05e9 ${hits.length} \u05de\u05e9\u05d0\u05d1\u05d9\u05dd \u05e8\u05dc\u05d5\u05d5\u05e0\u05d8\u05d9\u05d9\u05dd. \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8: ${topName}.`,
-    yi: hits.length === 1
-      ? `CJHQ \u05d4\u05d0\u05d8 \u05d0 \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05d3\u05e2\u05e8\u05e4\u05d0\u05e8: ${topName}.`
-      : `CJHQ \u05d4\u05d0\u05d8 ${hits.length} \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1\u05df \u05d5\u05d5\u05d0\u05e1 \u05d6\u05e2\u05e2\u05df \u05d0\u05d5\u05d9\u05e1 \u05e4\u05d0\u05e1\u05d9\u05d2. \u05d3\u05d9 \u05e0\u05d0\u05e2\u05e0\u05d8\u05e1\u05d8\u05e2 \u05d0\u05d9\u05d6 ${topName}.`
-  }, L);
-  r.actions = hits.map(h => {
-    const nm = (L === 'fr' && h.item.fr) ? h.item.fr : h.item.en;
-    return h.item.internalPage
-      ? { label:nm, url:'/' + h.item.internalPage, kind:'internal' }
-      : { label:nm, url:'/resources/' + h.item.slug, kind:'internal' };
-  });
-  r.sources = hits.map(h => ({
-    name:h.item.en, url:'https://cjhq.org/resources/' + h.item.slug,
-    type:'CJHQ', authoritative:true, timeSensitive:false, category:h.category, score:h.score
-  }));
+  const topName = pick(top.en, top.fr);
+
+  // Genuinely ambiguous: two close hits, neither named by the question. Ask
+  // rather than answer confidently about whichever scored marginally higher.
+  if(!askResourceIsSpecific(hits) && hits.length > 1 && hits[1].score >= hits[0].score * 0.85){
+    r.handled = false;
+    const names = hits.slice(0, 3).map(h => pick(h.item.en, h.item.fr));
+    r.answer = askT({
+      en:'That could be a few different CJHQ resources: ' + names.join(', ') + '. Which one do you mean?',
+      fr:'Cela pourrait correspondre \u00e0 plusieurs ressources du CJHQ\u00a0: ' + names.join(', ') + '. Laquelle vous int\u00e9resse\u00a0?',
+      he:'\u05d6\u05d4 \u05d9\u05db\u05d5\u05dc \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05dc\u05db\u05de\u05d4 \u05de\u05e9\u05d0\u05d1\u05d9\u05dd \u05e9\u05dc CJHQ: ' + names.join(', ') + '. \u05dc\u05d0\u05d9\u05d6\u05d4 \u05db\u05d5\u05d5\u05e0\u05ea\u05dd?',
+      yi:'\u05d3\u05d0\u05e1 \u05e7\u05e2\u05df \u05d6\u05d9\u05d9\u05df \u05e2\u05d8\u05dc\u05e2\u05db\u05e2 CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1\u05df: ' + names.join(', ') + '. \u05d5\u05d5\u05e2\u05dc\u05db\u05e2\u05e8 \u05de\u05d9\u05d9\u05e0\u05d8 \u05d0\u05d9\u05e8?'
+    }, L);
+    r.actions = hits.slice(0, 3).map(h => ({
+      label: pick(h.item.en, h.item.fr),
+      url: h.item.internalPage ? ('/' + h.item.internalPage) : ('/resources/' + h.item.slug),
+      kind:'internal'
+    }));
+    return r;
+  }
+
+  r.handled = true;
+  const intent = askResourceIntent(q);
+
+  // Hebrew and Yiddish: the record bodies exist in English and French only.
+  // Rather than paste English at someone who asked in Yiddish, name the
+  // resource in their language and hand over the link. The gap is recorded so
+  // it can be filled rather than quietly persisting.
+  if(L === 'he' || L === 'yi'){
+    if(L === 'yi' && typeof __askMissingYi !== 'undefined'){
+      __askMissingYi.add('resource body text (' + top.slug + ')');
+    }
+    r.answer = askT({
+      en:'', fr:'',
+      he:'\u05dc-CJHQ \u05d9\u05e9 \u05de\u05e9\u05d0\u05d1 \u05dc\u05db\u05da: ' + topName + '. \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05d4\u05de\u05dc\u05d0\u05d9\u05dd \u05d5\u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 \u05de\u05d5\u05e4\u05d9\u05e2\u05d9\u05dd \u05dc\u05d4\u05dc\u05df.',
+      yi:'CJHQ \u05d4\u05d0\u05d8 \u05d0 \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05d3\u05e2\u05e8\u05e4\u05d0\u05e8: ' + topName + '. \u05d3\u05d9 \u05e4\u05d5\u05dc\u05e2 \u05e4\u05e8\u05d8\u05d9\u05dd \u05d0\u05d5\u05df \u05d3\u05e2\u05e8 \u05d0\u05e4\u05d9\u05e6\u05d9\u05e2\u05dc\u05e2\u05e8 \u05dc\u05d9\u05e0\u05e7 \u05d6\u05e2\u05e0\u05e2\u05df \u05d3\u05d0 \u05d0\u05d5\u05e0\u05d8\u05df.'
+    }, L);
+  } else {
+    const parts = [];
+    const what = pick(top.what_en, top.what_fr) || pick(top.desc_en, top.desc_fr);
+    if(what) parts.push(what);
+
+    if(intent === 'right' && pick(top.answer_en, top.answer_fr)){
+      parts.push(pick(top.answer_en, top.answer_fr));
+    }
+
+    const needList = isFr ? top.need_list_fr : top.need_list_en;
+    if((intent === 'needs' || intent === 'general') && Array.isArray(needList) && needList.length){
+      const head = pick(top.need_heading_en, top.need_heading_fr);
+      parts.push((head ? head + '\n' : '') + needList.map(x => '- ' + x).join('\n'));
+    }
+
+    const stepList = isFr ? top.steps_list_fr : top.steps_list_en;
+    if((intent === 'steps' || intent === 'general') && Array.isArray(stepList) && stepList.length){
+      const head = pick(top.steps_heading_en, top.steps_heading_fr);
+      const shown = stepList.slice(0, ASK_RES_MAX_STEPS);
+      parts.push((head ? head + '\n' : '')
+        + shown.map((x, n) => (n + 1) + '. ' + x).join('\n')
+        + (stepList.length > shown.length ? '\n\u2026' : ''));
+    }
+
+    // Tips are caveats, not process. They earn their space only when the
+    // person is about to act, which is the steps and needs case.
+    const tipList = isFr ? top.tips_list_fr : top.tips_list_en;
+    if((intent === 'steps' || intent === 'needs') && Array.isArray(tipList) && tipList.length){
+      const head = pick(top.tips_heading_en, top.tips_heading_fr);
+      parts.push((head ? head + '\n' : '') + tipList.map(x => '- ' + x).join('\n'));
+    }
+
+    r.answer = parts.join('\n\n');
+  }
+
+  // One action link, from the resource itself, plus its CJHQ page. No siblings.
+  const official = Array.isArray(top.official_links) ? top.official_links[0] : null;
+  r.actions = [];
+  if(official && official.url){
+    r.actions.push({ label: pick(official.label_en, official.label_fr) || topName,
+                     url: official.url, kind:'link' });
+  }
+  r.actions.push({ label: topName,
+                   url: top.internalPage ? ('/' + top.internalPage) : ('/resources/' + top.slug),
+                   kind:'internal' });
+  r.sources = [{ name: top.en, url:'https://cjhq.org/resources/' + top.slug,
+                 type:'CJHQ', authoritative:true, timeSensitive:false,
+                 category: hits[0].category, score: hits[0].score }];
   return r;
 }
 
