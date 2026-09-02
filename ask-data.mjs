@@ -300,7 +300,7 @@ export const PARTNERS_DATA = [
   {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
   {type:'img', src:"/assets/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
   {type:'img', src:"/assets/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
-  {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:null},
+  {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:"https://www.ktshomrim.com/"},
   {type:'img', src:"/assets/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
   {type:'img', src:"/assets/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
   {type:'img', src:"/assets/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
