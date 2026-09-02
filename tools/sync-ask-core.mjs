@@ -115,7 +115,8 @@ const EXPORTS = [
   'askCalendar', 'askCommunityDirectory', 'askCjhqResources', 'cjhqNormalizeSearch',
   'askOrganizations', 'askOrgRegistry', 'askSpecialInfo', 'askFindMtl',
   'ASK_TEMPLATES', 'askSmallTalk', 'ASK_FINDMTL', 'askContactCjhq', 'askChildTravel',
-  'askOrgContactState', 'ASK_CJHQ_CONTACT'
+  'askOrgContactState', 'ASK_CJHQ_CONTACT',
+  'ASK_SESSION_POLICY', 'askSessionState', 'askSessionShouldClose'
 ];
 
 const coreOut = `/* GENERATED FILE - do not edit.
