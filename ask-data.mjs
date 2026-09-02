@@ -292,3 +292,22 @@ export const SPECIAL_INFO_COUNTRIES = [
     official:[]
   }
 ];
+
+export const PARTNERS_DATA = [
+  {type:'img', src:"/assets/renewal-canada.webp", w:320, h:111, alt:"Renewal Canada", url:"https://www.renewalcanada.org/"},
+  {type:'img', src:"/assets/yaldei.webp", w:320, h:213, alt:"Yaldei", url:"https://www.yaldei.org/"},
+  {type:'img', src:"/assets/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
+  {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
+  {type:'img', src:"/assets/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
+  {type:'img', src:"/assets/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
+  {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:null},
+  {type:'img', src:"/assets/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
+  {type:'img', src:"/assets/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
+  {type:'img', src:"/assets/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
+  {type:'img', src:"/assets/yad-ve-ezer.webp", w:320, h:164, alt:"Yad Ve'ezer", url:"https://www.yadvaezer.ca/"},
+  {type:'img', src:"/assets/tzum-gezunt.webp", w:562, h:158, alt:"Tzum Gezunt", url:"https://tzumgezunt.ca/"},
+  {type:'img', src:"/assets/chai-lifeline-montreal.webp", w:801, h:220, alt:"Chai Lifeline Montreal", url:"https://chailifelinecanada.org/"},
+  {type:'img', src:"/assets/misaskim-montreal.webp", w:396, h:220, alt:"Misaskim Montreal", url:"https://misaskimmtl.org/"},
+  {type:'img', src:"/assets/bonei-olam-montreal.webp", w:166, h:159, alt:"Bonei Olam Montreal", url:"https://www.boneiolam.org/"},
+  {type:'img', src:"/assets/interstate-chaverim.webp", w:220, h:210, alt:"Interstate Chaverim", url:"https://www.interstatechaverim.com/"}
+];

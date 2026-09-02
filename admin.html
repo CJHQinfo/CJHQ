@@ -6418,7 +6418,13 @@ function askMatchResources(question, limit){
     });
   });
   out.sort((a,b)=> b.score - a.score);
-  return out.slice(0, limit || 3);
+  // Relevance floor. Being the third-best match is not the same as being
+  // relevant: a NEXUS question was pulling in RAMQ, and a RAMQ question was
+  // pulling in NEXUS, because both are travel/identity vocabulary. Anything
+  // scoring under 55% of the best match is a weaker cousin, not an answer.
+  // The top hit is always kept, so no question loses the resource it had.
+  const floor = out.length ? out[0].score * 0.70 : 0;
+  return out.filter((h, i) => i === 0 || h.score >= floor).slice(0, limit || 3);
 }
 
 /* ---------- structured handlers ----------
@@ -6683,9 +6689,13 @@ function askPracticalHandlers(){
   // Priority order. CJHQ's own content and structured data first, then the
   // resource matcher, and only then the FindMTL hand-off - so CJHQ never sends
   // someone elsewhere for something it already answers.
+  // askOrganizations sits with the other structured CJHQ data, after the
+  // emergency handler (which already owns Hatzolah) and before the resource
+  // matcher, so "who do I call for X" is answered from CJHQ's own partner list
+  // rather than from whichever resource happens to share a word with it.
   return [askEruv, askEmergency, askZmanim, askCalendar,
-          askSpecialInfo, askCommunityDirectory, askCjhqResources,
-          askFindMtl];
+          askOrganizations, askSpecialInfo, askCommunityDirectory,
+          askCjhqResources, askFindMtl];
 }
 
 function askHalachic(q){
@@ -6762,6 +6772,83 @@ function askFindMtlAction(key, L){
 function askFindMtlSource(key){
   return { name:'FindMTL', url: ASK_FINDMTL[key] || ASK_FINDMTL.home,
            type:'Community directory', authoritative:false, timeSensitive:true, lastUpdated:'' };
+}
+
+
+/* ---------- Shared conversational templates ----------
+   One place for the wording that is not an answer: greetings, thanks, farewell,
+   the two failure cases, and the frame used when an answer came from outside
+   CJHQ. Exported through ask-core.mjs so the WhatsApp bridge uses these rather
+   than inventing its own strings, which is how mixed-language output starts.
+
+   The two failure templates are deliberately different and must not be merged:
+     noAnswer  - the system worked and found nothing verified
+     busy      - the AI or search service failed
+   Telling someone "there is no answer" because a provider returned 429 is a
+   lie, and it is the lie a user would act on. Nothing about the provider,
+   the quota, the status code or the stack ever reaches the person; that
+   belongs in the log.                                                        */
+const ASK_TEMPLATES = {
+  greeting: {
+    en:'Hello! You\u2019re chatting with the CJHQ WhatsApp Assistant. Please tell me what you need help with.',
+    fr:'Bonjour! Vous \u00eates en conversation avec l\u2019assistant WhatsApp du CJHQ. Dites-moi ce dont vous avez besoin.',
+    he:'\u05e9\u05dc\u05d5\u05dd! \u05d0\u05ea\u05dd \u05de\u05e9\u05d5\u05d7\u05d7\u05d9\u05dd \u05e2\u05dd \u05d4\u05e2\u05d5\u05d6\u05e8 \u05e9\u05dc CJHQ \u05d1\u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4. \u05db\u05ea\u05d1\u05d5 \u05d1\u05de\u05d4 \u05d0\u05ea\u05dd \u05d6\u05e7\u05d5\u05e7\u05d9\u05dd \u05dc\u05e2\u05d6\u05e8\u05d4.'
+  },
+  intro: {
+    en:'You\u2019re chatting with the CJHQ WhatsApp Assistant. Please explain what you need help with, and I\u2019ll do my best to point you to the right information or resource.',
+    fr:'Vous \u00eates en conversation avec l\u2019assistant WhatsApp du CJHQ. Expliquez-moi ce dont vous avez besoin et je ferai de mon mieux pour vous diriger vers la bonne information ou la bonne ressource.',
+    he:'\u05d0\u05ea\u05dd \u05de\u05e9\u05d5\u05d7\u05d7\u05d9\u05dd \u05e2\u05dd \u05d4\u05e2\u05d5\u05d6\u05e8 \u05e9\u05dc CJHQ \u05d1\u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4. \u05db\u05ea\u05d1\u05d5 \u05d1\u05de\u05d4 \u05d0\u05ea\u05dd \u05d6\u05e7\u05d5\u05e7\u05d9\u05dd \u05dc\u05e2\u05d6\u05e8\u05d4, \u05d5\u05d0\u05e0\u05e1\u05d4 \u05dc\u05d4\u05e4\u05e0\u05d5\u05ea \u05d0\u05ea\u05db\u05dd \u05dc\u05de\u05d9\u05d3\u05e2 \u05d0\u05d5 \u05dc\u05de\u05e9\u05d0\u05d1 \u05d4\u05de\u05ea\u05d0\u05d9\u05dd.'
+  },
+  clarify: {
+    en:'Thanks for contacting the CJHQ WhatsApp Assistant. Could you please explain a little more about what you need help with?',
+    fr:'Merci d\u2019avoir contact\u00e9 l\u2019assistant WhatsApp du CJHQ. Pourriez-vous pr\u00e9ciser un peu ce dont vous avez besoin?',
+    he:'\u05ea\u05d5\u05d3\u05d4 \u05e9\u05e4\u05e0\u05d9\u05ea\u05dd \u05dc\u05e2\u05d5\u05d6\u05e8 \u05d4\u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4 \u05e9\u05dc CJHQ. \u05ea\u05d5\u05db\u05dc\u05d5 \u05dc\u05e4\u05e8\u05d8 \u05e7\u05e6\u05ea \u05d9\u05d5\u05ea\u05e8 \u05d1\u05de\u05d4 \u05d0\u05ea\u05dd \u05d6\u05e7\u05d5\u05e7\u05d9\u05dd \u05dc\u05e2\u05d6\u05e8\u05d4?'
+  },
+  travelPrompt: {
+    en:'I can help with travel-related information. Please tell me what you\u2019re looking for \u2014 for example, travel documents, border information, holiday items, or local travel and parking.',
+    fr:'Je peux vous aider avec les informations li\u00e9es aux voyages. Dites-moi ce que vous recherchez \u2014 par exemple, les documents de voyage, les informations sur les fronti\u00e8res, les articles de f\u00eate ou les d\u00e9placements et le stationnement.',
+    he:'\u05d0\u05e0\u05d9 \u05d9\u05db\u05d5\u05dc \u05dc\u05e2\u05d6\u05d5\u05e8 \u05d1\u05de\u05d9\u05d3\u05e2 \u05d4\u05e7\u05e9\u05d5\u05e8 \u05dc\u05e0\u05e1\u05d9\u05e2\u05d5\u05ea. \u05db\u05ea\u05d1\u05d5 \u05d1\u05de\u05d4 \u05d0\u05ea\u05dd \u05d6\u05e7\u05d5\u05e7\u05d9\u05dd \u05dc\u05e2\u05d6\u05e8\u05d4 \u2014 \u05dc\u05de\u05e9\u05dc \u05de\u05e1\u05de\u05db\u05d9 \u05e0\u05e1\u05d9\u05e2\u05d4, \u05de\u05d9\u05d3\u05e2 \u05e2\u05dc \u05de\u05e2\u05d1\u05e8\u05d9 \u05d2\u05d1\u05d5\u05dc, \u05e4\u05e8\u05d9\u05d8\u05d9 \u05d7\u05d2, \u05d0\u05d5 \u05ea\u05d7\u05d1\u05d5\u05e8\u05d4 \u05d5\u05d7\u05e0\u05d9\u05d4.'
+  },
+  thanks: {
+    en:'You\u2019re welcome! We\u2019re happy to help.',
+    fr:'Avec plaisir! Nous sommes heureux de pouvoir vous aider.',
+    he:'\u05d1\u05e9\u05de\u05d7\u05d4! \u05d0\u05e0\u05d7\u05e0\u05d5 \u05db\u05d0\u05df \u05db\u05d3\u05d9 \u05dc\u05e2\u05d6\u05d5\u05e8.'
+  },
+  goodbye: {
+    en:'You\u2019re welcome. Have a great day!',
+    fr:'Avec plaisir. Bonne journ\u00e9e!',
+    he:'\u05d1\u05e9\u05de\u05d7\u05d4. \u05e9\u05d9\u05d4\u05d9\u05d4 \u05dc\u05db\u05dd \u05d9\u05d5\u05dd \u05e0\u05e2\u05d9\u05dd!'
+  },
+  noAnswer: {
+    en:'I couldn\u2019t find a verified answer for that. Please give me a little more detail about what you\u2019re trying to do, and I\u2019ll try to point you in the right direction.',
+    fr:'Je n\u2019ai pas trouv\u00e9 de r\u00e9ponse v\u00e9rifi\u00e9e \u00e0 cette question. Donnez-moi un peu plus de d\u00e9tails sur ce que vous essayez de faire et je tenterai de vous orienter dans la bonne direction.',
+    he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05de\u05e6\u05d5\u05d0 \u05ea\u05e9\u05d5\u05d1\u05d4 \u05de\u05d0\u05d5\u05de\u05ea\u05ea \u05dc\u05db\u05da. \u05db\u05ea\u05d1\u05d5 \u05dc\u05d9 \u05e7\u05e6\u05ea \u05d9\u05d5\u05ea\u05e8 \u05e4\u05e8\u05d8\u05d9\u05dd \u05e2\u05dc \u05de\u05d4 \u05e9\u05d0\u05ea\u05dd \u05de\u05e0\u05e1\u05d9\u05dd \u05dc\u05e2\u05e9\u05d5\u05ea, \u05d5\u05d0\u05e0\u05e1\u05d4 \u05dc\u05d4\u05e4\u05e0\u05d5\u05ea \u05d0\u05ea\u05db\u05dd \u05dc\u05db\u05d9\u05d5\u05d5\u05df \u05d4\u05de\u05ea\u05d0\u05d9\u05dd.'
+  },
+  busy: {
+    en:'Thanks for reaching out to the CJHQ WhatsApp Assistant. Our assistant is busy right now. Please try again in a little while.',
+    fr:'Merci d\u2019avoir contact\u00e9 l\u2019assistant WhatsApp du CJHQ. Notre assistant est pr\u00e9sentement tr\u00e8s occup\u00e9. Veuillez r\u00e9essayer dans quelques instants.',
+    he:'\u05ea\u05d5\u05d3\u05d4 \u05e9\u05e4\u05e0\u05d9\u05ea\u05dd \u05dc\u05e2\u05d5\u05d6\u05e8 \u05d4\u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4 \u05e9\u05dc CJHQ. \u05d4\u05e2\u05d5\u05d6\u05e8 \u05e9\u05dc\u05e0\u05d5 \u05e2\u05e1\u05d5\u05e7 \u05db\u05e8\u05d2\u05e2. \u05d0\u05e0\u05d0 \u05e0\u05e1\u05d5 \u05e9\u05d5\u05d1 \u05d1\u05e2\u05d5\u05d3 \u05d6\u05de\u05df \u05e7\u05e6\u05e8.'
+  },
+  externalFrame: {
+    en:'I couldn\u2019t find this information in our CJHQ resources, but I found the following current information from an official source:',
+    fr:'Je n\u2019ai pas trouv\u00e9 cette information dans les ressources du CJHQ, mais j\u2019ai trouv\u00e9 l\u2019information actuelle suivante aupr\u00e8s d\u2019une source officielle\u00a0:',
+    he:'\u05dc\u05d0 \u05de\u05e6\u05d0\u05ea\u05d9 \u05d0\u05ea \u05d4\u05de\u05d9\u05d3\u05e2 \u05d4\u05d6\u05d4 \u05d1\u05de\u05e9\u05d0\u05d1\u05d9 CJHQ, \u05d0\u05d1\u05dc \u05de\u05e6\u05d0\u05ea\u05d9 \u05d0\u05ea \u05d4\u05de\u05d9\u05d3\u05e2 \u05d4\u05e2\u05d3\u05db\u05e0\u05d9 \u05d4\u05d1\u05d0 \u05de\u05de\u05e7\u05d5\u05e8 \u05e8\u05e9\u05de\u05d9:'
+  },
+  externalSourceLabel: {
+    en:'Official source:', fr:'Source officielle\u00a0:', he:'\u05de\u05e7\u05d5\u05e8 \u05e8\u05e9\u05de\u05d9:'
+  }
+};
+
+/* Small-talk classifier, so the bridge does not run a greeting through the
+   whole retrieval chain. Returns a template key or null. */
+function askSmallTalk(q){
+  const s = String(q || '').trim().toLowerCase();
+  if(!s) return 'clarify';
+  if(s.length > 40) return null;
+  if(/^(hi|hello|hey|good (morning|afternoon|evening)|bonjour|salut|\u05e9\u05dc\u05d5\u05dd|\u05d4\u05d9\u05d9)[\s!.,]*$/i.test(s)) return 'greeting';
+  if(/^(thanks|thank you|thx|ty|merci|\u05ea\u05d5\u05d3\u05d4|\u05a0?\u05ea\u05d5\u05d3\u05d4 \u05e8\u05d1\u05d4)[\s!.,]*$/i.test(s)) return 'thanks';
+  if(/^(bye|goodbye|good ?night|see you|au revoir|bonne nuit|\u05dc\u05d4\u05ea\u05e8\u05d0\u05d5\u05ea|\u05d1\u05d9\u05d9)[\s!.,]*$/i.test(s)) return 'goodbye';
+  return null;
 }
 
 function askEruv(q){
@@ -6898,6 +6985,145 @@ const ASK_SPECIAL_COUNTRY = [
   { id:'united-kingdom', match:/united kingdom|\bu\.?k\.?\b|britain|england|royaume-uni|angleterre|\u05d0\u05e0\u05d2\u05dc\u05d9\u05d4|\u05d1\u05e8\u05d9\u05d8\u05e0\u05d9\u05d4/i },
   { id:'european-union', match:/european union|\be\.?u\.?\b|europe|union europ\u00e9enne|\u05d0\u05d9\u05e8\u05d5\u05e4\u05d4/i }
 ];
+
+
+/* ---------- CJHQ partner organizations ----------
+   Built from PARTNERS_DATA, the list CJHQ actually publishes. It is NOT a
+   second database: the names and websites are read from the same array the
+   partner marquee renders, so adding a partner to the site adds it here.
+
+   WHAT THIS DATA ACTUALLY CONTAINS, which matters more than what we might wish
+   it contained: a name, a logo and - for 14 of the 16 - a website. There are no
+   phone numbers, no emergency numbers, no emails, no descriptions, no service
+   categories, and the Firestore `partners` collection carries the same three
+   fields. So this handler can name an organization and hand over its official
+   site, and it will say plainly that CJHQ holds no verified phone number rather
+   than reaching for one from anywhere else. A wrong number for Hatzolah or
+   Chaverim is the single most damaging thing this assistant could produce.
+
+   The aliases below are spelling and abbreviation variants of names already in
+   the list. No organization, service or contact detail is invented here. */
+const ASK_ORG_ALIASES = {
+  'hatzolah montreal':   ['hatzolah', 'hatzoloh', 'hatzola', 'hatzalah', '\u05d4\u05e6\u05dc\u05d4'],
+  'hatzolah tosh':       ['hatzolah tosh', 'hatzoloh tosh', 'tosh hatzolah'],
+  'chaverim montreal':   ['chaverim', 'chavairim', '\u05d7\u05d1\u05e8\u05d9\u05dd'],
+  'interstate chaverim': ['interstate chaverim', 'interstate'],
+  'shomrim tosh':        ['shomrim', '\u05e9\u05d5\u05de\u05e8\u05d9\u05dd'],
+  'misaskim montreal':   ['misaskim', '\u05de\u05e2\u05e1\u05e7\u05d9\u05dd'],
+  'bikur cholim montreal': ['bikur cholim', 'bikkur cholim', '\u05d1\u05d9\u05e7\u05d5\u05e8 \u05d7\u05d5\u05dc\u05d9\u05dd'],
+  'chai lifeline montreal': ['chai lifeline', 'chailifeline'],
+  'bonei olam montreal': ['bonei olam', 'boneh olam'],
+  'refuah v\'chesed':    ['refuah vchesed', 'refuah v chesed', 'refuah', '\u05e8\u05e4\u05d5\u05d0\u05d4 \u05d5\u05d7\u05e1\u05d3'],
+  'yad ve\'ezer':        ['yad veezer', 'yad ve ezer', 'yad vaezer', '\u05d9\u05d3 \u05d5\u05e2\u05d6\u05e8'],
+  'tzum gezunt':         ['tzum gezunt', 'tsum gezunt', '\u05e6\u05d5\u05dd \u05d2\u05e2\u05d6\u05d5\u05e0\u05d8'],
+  'renewal canada':      ['renewal', 'renewal canada'],
+  'yaldei':              ['yaldei', 'yaldei foundation', '\u05d9\u05dc\u05d3\u05d9'],
+  'chavivim':            ['chavivim'],
+  'eruv montreal':       ['eruv montreal', 'montreal eruv']
+};
+
+/* Service words map to organizations ONLY where the organization's own public
+   name states the service. Nothing here asserts a service an organization has
+   not published: "transportation" maps to Chaverim because roadside assistance
+   is what Chaverim is, not because a category field said so - there is no
+   category field. Where CJHQ cannot honestly map a service, it stays unmapped
+   and the question falls through to the directory or to a plain decline. */
+const ASK_ORG_SERVICES = [
+  { match:/\bmedical emergenc|\bambulance|\bparamedic|first responder|\burgence m\u00e9dicale/i,
+    orgs:['Hatzolah Montreal','Hatzolah Tosh'] },
+  { match:/roadside|car trouble|locked out|jump ?start|flat tire|towing|d\u00e9pannage/i,
+    orgs:['Chaverim Montreal','Interstate Chaverim'] },
+  { match:/neighbourhood watch|neighborhood watch|patrol|security patrol|s\u00e9curit\u00e9 de quartier/i,
+    orgs:['Shomrim Tosh'] },
+  { match:/hospital visit|bikur cholim|sick visit|visite aux malades/i,
+    orgs:['Bikur Cholim Montreal'] },
+  { match:/child(ren)? with (special needs|disabilit)|special needs|besoins particuliers/i,
+    orgs:['Yaldei','Chai Lifeline Montreal'] },
+  { match:/serious illness|critically ill child|maladie grave/i,
+    orgs:['Chai Lifeline Montreal'] },
+  { match:/fertility|infertility|fertilit\u00e9/i,
+    orgs:['Bonei Olam Montreal'] },
+  { match:/bereave|funeral|after a death|deuil|fun\u00e9raille/i,
+    orgs:['Misaskim Montreal'] },
+  { match:/\beruv\b|\u05e2\u05d9\u05e8\u05d5\u05d1/i,
+    orgs:['Eruv Montreal'] }
+];
+
+function askOrgRegistry(){
+  const raw = (typeof PARTNERS_DATA !== 'undefined') ? PARTNERS_DATA : [];
+  return raw.map(p => ({ name: (p.alt || p.name || '').trim(), url: p.url || '' }))
+            .filter(o => o.name);
+}
+
+function askOrgMatch(q){
+  const s = String(q || '').toLowerCase();
+  const orgs = askOrgRegistry();
+  const found = [];
+  orgs.forEach(o => {
+    const key = o.name.toLowerCase();
+    const aliases = [key].concat(ASK_ORG_ALIASES[key] || []);
+    if(aliases.some(a => a && s.indexOf(String(a).toLowerCase()) >= 0)) found.push(o);
+  });
+  if(found.length) return found;
+  // No name matched - try the service map, then resolve those names in the
+  // real registry so a renamed or removed partner cannot linger here.
+  const svc = ASK_ORG_SERVICES.find(x => x.match.test(String(q || '')));
+  if(!svc) return [];
+  return svc.orgs
+    .map(n => orgs.find(o => o.name.toLowerCase() === n.toLowerCase()))
+    .filter(Boolean);
+}
+
+const ASK_ORG_PHONE_ASK = /phone|number|call|t\u00e9l\u00e9phone|num\u00e9ro|appeler|\u05d8\u05dc\u05e4\u05d5\u05df|\u05de\u05e1\u05e4\u05e8|\u05dc\u05d4\u05ea\u05e7\u05e9\u05e8|\u05e0\u05d5\u05de\u05e2\u05e8|\u05e8\u05d5\u05e4\u05df/i;
+
+function askOrganizations(q){
+  const hits = askOrgMatch(q);
+  if(!hits.length) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handler = 'Organizations';
+  r.handled = true;
+
+  const named = hits.slice(0, 3);
+  const list = named.map(o => o.name).join(', ');
+  const wantsPhone = ASK_ORG_PHONE_ASK.test(String(q || ''));
+
+  // CJHQ publishes the organization and its website. It does not publish
+  // contact numbers, so a phone question gets an honest answer and the
+  // official site, which is where the current number actually lives.
+  const phoneNote = wantsPhone ? askT({
+    en:' CJHQ does not hold a verified phone number for ' + (named.length === 1 ? 'it' : 'these') + ', and I will not quote one from anywhere else - numbers change and a wrong one costs someone time in an emergency. The official site below has the current contact details.',
+    fr:' Le CJHQ ne d\u00e9tient pas de num\u00e9ro de t\u00e9l\u00e9phone v\u00e9rifi\u00e9, et je n\u2019en citerai pas un provenant d\u2019ailleurs \u2014 les num\u00e9ros changent et un mauvais num\u00e9ro co\u00fbte du temps en situation d\u2019urgence. Le site officiel ci-dessous contient les coordonn\u00e9es \u00e0 jour.',
+    he:' \u05dc-CJHQ \u05d0\u05d9\u05df \u05de\u05e1\u05e4\u05e8 \u05d8\u05dc\u05e4\u05d5\u05df \u05de\u05d0\u05d5\u05de\u05ea, \u05d5\u05dc\u05d0 \u05d0\u05e6\u05d8\u05d8 \u05de\u05e1\u05e4\u05e8 \u05de\u05de\u05e7\u05d5\u05e8 \u05d0\u05d7\u05e8 \u2014 \u05de\u05e1\u05e4\u05e8\u05d9\u05dd \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05d5\u05de\u05e1\u05e4\u05e8 \u05e9\u05d2\u05d5\u05d9 \u05e2\u05d5\u05dc\u05d4 \u05d6\u05de\u05df \u05d1\u05e9\u05e2\u05ea \u05d7\u05d9\u05e8\u05d5\u05dd. \u05d1\u05d0\u05ea\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 \u05e9\u05dc\u05d4\u05dc\u05df \u05de\u05d5\u05e4\u05d9\u05e2\u05d9\u05dd \u05e4\u05e8\u05d8\u05d9 \u05d4\u05e7\u05e9\u05e8 \u05d4\u05e2\u05d3\u05db\u05e0\u05d9\u05d9\u05dd.',
+    yi:' CJHQ \u05d4\u05d0\u05d8 \u05e0\u05d9\u05e9\u05d8 \u05e7\u05d9\u05d9\u05df \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8\u05df \u05d8\u05e2\u05dc\u05e2\u05e4\u05d0\u05df \u05e0\u05d5\u05de\u05e2\u05e8, \u05d0\u05d5\u05df \u05d0\u05d9\u05da \u05d5\u05d5\u05e2\u05dc \u05e0\u05d9\u05e9\u05d8 \u05d6\u05d0\u05d2\u05df \u05d0\u05d9\u05d9\u05e0\u05e2\u05dd \u05e4\u05d5\u05df \u05d0\u05e0\u05d3\u05e2\u05e8\u05e9\u05d5\u05d5\u05d5. \u05d3\u05d9 \u05d0\u05e4\u05d9\u05e6\u05d9\u05e2\u05dc\u05e2 \u05d5\u05d5\u05e2\u05d1\u05d6\u05d9\u05d9\u05d8\u05dc \u05d3\u05d0 \u05d0\u05d5\u05e0\u05d8\u05df \u05d4\u05d0\u05d8 \u05d3\u05d9 \u05d9\u05e2\u05e6\u05d8\u05d9\u05d2\u05e2 \u05e4\u05e8\u05d8\u05d9\u05dd.'
+  }, L) : '';
+
+  r.answer = askT({
+    en:(named.length === 1
+        ? named[0].name + ' is one of the organizations CJHQ works with.'
+        : 'CJHQ works with ' + list + '.') + phoneNote,
+    fr:(named.length === 1
+        ? named[0].name + ' fait partie des organismes avec lesquels le CJHQ collabore.'
+        : 'Le CJHQ collabore avec ' + list + '.') + phoneNote,
+    he:(named.length === 1
+        ? named[0].name + ' \u05d4\u05d5\u05d0 \u05d0\u05d7\u05d3 \u05d4\u05d0\u05e8\u05d2\u05d5\u05e0\u05d9\u05dd \u05e9-CJHQ \u05e2\u05d5\u05d1\u05d3 \u05d0\u05d9\u05ea\u05dd.'
+        : 'CJHQ \u05e2\u05d5\u05d1\u05d3 \u05e2\u05dd ' + list + '.') + phoneNote,
+    yi:(named.length === 1
+        ? named[0].name + ' \u05d0\u05d9\u05d6 \u05d0\u05d9\u05d9\u05e0\u05e2\u05e8 \u05e4\u05d5\u05df \u05d3\u05d9 \u05d0\u05e8\u05d2\u05d0\u05e0\u05d9\u05d6\u05d0\u05e6\u05d9\u05e2\u05e1 \u05d5\u05d5\u05d0\u05e1 CJHQ \u05d0\u05e8\u05d1\u05e2\u05d8 \u05de\u05d9\u05d8.'
+        : 'CJHQ \u05d0\u05e8\u05d1\u05e2\u05d8 \u05de\u05d9\u05d8 ' + list + '.') + phoneNote
+  }, L);
+
+  r.actions = named.filter(o => o.url).map(o => ({ label:o.name, url:o.url, kind:'link' }));
+  r.sources = named.filter(o => o.url).map(o => ({
+    name:o.name, url:o.url, type:'Community organization',
+    authoritative:true, timeSensitive:false, lastUpdated:''
+  }));
+  // A partner with no published site (2 of the 16) gets named, not linked.
+  if(!r.actions.length){
+    r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd', yi:'CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8'}, L), url:'/resources', kind:'internal' }];
+  }
+  return r;
+}
 
 function askSpecialInfo(q){
   const s = String(q || '');
