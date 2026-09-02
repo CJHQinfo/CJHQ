@@ -7574,6 +7574,97 @@ function askBuildContext(res){
 
    The handler order, the halachic guard's primacy and every answer string are
    untouched by this change. */
+/* ---------- phrasing verification ----------
+   The old acceptance test was `phrased.length > 10`. This replaces it with
+   checks for problems that can actually be DETECTED, and nothing else.
+
+   Deliberately NOT grounds for rejection: being short, being worded
+   differently from the deterministic answer, or reordering the content. A
+   verifier that rejects good phrasing makes the assistant worse, because the
+   fallback is the terser deterministic text.
+
+   Every check below is mechanical. Nothing here asks a model to judge another
+   model - that would just add a third opinion with no more authority than the
+   first two. Returns null when the phrasing is acceptable, otherwise a short
+   machine-readable reason used to build the review prompt.                   */
+const ASK_PHRASE_REFUSAL = /\b(?:i (?:cannot|can't|am unable to|don't have (?:access|enough))|as an ai|i'?m (?:just )?an ai|unable to (?:help|assist|provide))\b/i;
+const ASK_PHRASE_RULING  = /\b(?:it is (?:permitted|forbidden|allowed|prohibited)|you may carry|is mutar|is assur|the halacha is|halachically (?:permitted|forbidden))\b/i;
+const ASK_PHRASE_CLOCK   = /\b\d{1,2}:\d{2}\b|\b\d{1,2}\s?(?:am|pm)\b/i;
+
+function askPhraseTokens(v){
+  return String(v || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3);
+}
+
+function askVerifyPhrasing(phrased, question, res, context){
+  const p = String(phrased || '').trim();
+  if(p.length < 10) return 'empty';
+
+  // 1. Invented links. Any URL in the answer must already appear in the
+  //    verified material or in the actions the deterministic layer chose.
+  const allowed = (context || '') + ' '
+    + (res.actions || []).map(a => a.url).join(' ') + ' '
+    + (res.sources || []).map(x => x.url || '').join(' ');
+  const urls = p.match(/https?:\/\/[^\s<>")']+/g) || [];
+  for(const u of urls){
+    const bare = u.replace(/[.,;:)]+$/, '');
+    if(allowed.indexOf(bare) < 0) return 'invented-link';
+  }
+
+  // 2. Invented phone numbers. The highest-consequence hallucination this
+  //    assistant could produce, so it is checked separately from links.
+  const nums = p.match(/\b(?:\+?1[-. ]?)?\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}\b/g) || [];
+  for(const n of nums){ if(allowed.indexOf(n) < 0) return 'invented-number'; }
+
+  // 3. Unnecessary refusal. CJHQ has a verified answer in hand; declining to
+  //    give it is a failure of the phrasing pass, not a safety behaviour.
+  if(ASK_PHRASE_REFUSAL.test(p)) return 'refused';
+
+  // A language check used to sit here and has been REMOVED, deliberately.
+  // askDetectLanguage() classifies QUESTIONS: French needs an interrogative
+  // marker or two weak hits. Answers are declarative, so a correct French
+  // answer to a French question classified as English and was rejected -
+  // costing French users a second call and usually the terser deterministic
+  // text. It is not being tuned or replaced with a script check: the review
+  // prompt already says "Answer in the same language as the question", and a
+  // wrong-language reply is a quality problem, not a safety one, unlike an
+  // invented phone number. Do not reintroduce it without an answer-language
+  // classifier that has been validated on real answers.
+
+  // 4. Time-sensitive contradiction. The deterministic layer deliberately
+  //    refuses to state a time or status; the model must not add one back.
+  if(res.timeSensitive && ASK_PHRASE_CLOCK.test(p)) return 'stated-time';
+
+  // 5. Halachic. The referral must survive and no ruling may appear.
+  if(res.halachic){
+    if(ASK_PHRASE_RULING.test(p)) return 'issued-ruling';
+    if(!/\brov\b|\brav\b|\u05d4\u05e8\u05d1|\u05e8\u05d1/i.test(p)) return 'dropped-referral';
+  }
+
+  // 6. Irrelevance. Shares no substantive word with the verified answer. This
+  //    is a blunt test on purpose: it catches an answer about a different
+  //    subject without penalising a rewrite that says the same thing.
+  const src = new Set(askPhraseTokens(res.answer).concat(askPhraseTokens(question)));
+  if(src.size){
+    const overlap = askPhraseTokens(p).filter(w => src.has(w));
+    if(!overlap.length) return 'irrelevant';
+  }
+  return null;
+}
+
+/* The review pass. Same model and settings - only the instruction differs.
+   It is given the question, the verified material and the first attempt, and
+   told what was wrong with it. */
+function askBuildReviewContext(context, first, reason){
+  return context
+    + '\n\nA previous draft answer was rejected. Reason: ' + reason + '.'
+    + '\nPrevious draft: ' + String(first || '').slice(0, 1200)
+    + '\nRewrite it. Use ONLY the verified CJHQ information above. Do not add any'
+    + ' URL, phone number, time, date or fact that does not appear there. Do not'
+    + ' refuse - the verified answer is present. Answer in the same language as'
+    + ' the question. Correct the omissions, unsupported claims and contradictions'
+    + ' in the previous draft.';
+}
+
 async function askRun(question, opts, aiAdapter){
   const q = String(question || '').trim();
   if(!q) return null;
@@ -7619,9 +7710,33 @@ async function askRun(question, opts, aiAdapter){
     if(context){
       try{
         const t0 = Date.now();
-        const phrased = await aiAdapter.ask(q, context);
+        // HARD CEILING: two calls. Attempt 2 runs only when attempt 1 has a
+        // concrete detectable problem, so a well-behaved answer costs one call
+        // exactly as before. On the free tier a second call also means a second
+        // throttle wait, so it is not spent speculatively.
+        let phrased = await aiAdapter.ask(q, context);
+        res.aiAttempts = 1;
+        let reason = askVerifyPhrasing(phrased, q, res, context);
+
+        if(reason){
+          res.aiRejected = reason;
+          res.aiRejectedDraft = String(phrased || '').slice(0, 400);
+          const phrased2 = await aiAdapter.ask(q, askBuildReviewContext(context, phrased, reason));
+          res.aiAttempts = 2;
+          const reason2 = askVerifyPhrasing(phrased2, q, res, context);
+          if(reason2){
+            // Both attempts failed verification. The verified CJHQ answer
+            // stands - it is correct, just plainer. Never noAnswer: CJHQ has
+            // the information, only the phrasing failed.
+            res.aiRejected2 = reason2;
+            phrased = null;
+          }else{
+            phrased = phrased2;
+          }
+        }
         res.aiLatencyMs = Date.now() - t0;
-        if(phrased && phrased.length > 10){
+
+        if(phrased){
           res.deterministicAnswer = res.answer;  // kept for admin comparison
           res.answer = phrased;
           res.aiUsed = true;
