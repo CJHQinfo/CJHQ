@@ -7506,9 +7506,13 @@ async function renderEmbeddedPartnersList(){
     return `
     <div class="card" style="margin-bottom:8px; ${isHidden?'opacity:.55;':''}">
       <div class="admin-row" style="align-items:flex-start;">
-        <p style="margin:0; font-weight:600; font-size:.9rem;">${name}${isHidden ? ' <span style="color:#A23B3B; font-weight:600; font-size:.75rem;">(hidden)</span>' : ''}</p>
+        <div>
+          <p style="margin:0; font-weight:600; font-size:.9rem;">${name}${isHidden ? ' <span style="color:#A23B3B; font-weight:600; font-size:.75rem;">(hidden)</span>' : ''}</p>
+          <p style="margin:3px 0 0; font-size:.75rem;">${partnerContactBadge(ov || {})}</p>
+        </div>
         <div style="display:flex; gap:6px; flex-shrink:0;">
           <button class="admin-small-btn" onclick="document.getElementById('editor-partner-${btoa(key).replace(/=/g,'')}').classList.toggle('open-editor')">Edit Link</button>
+          <button class="admin-small-btn" onclick="partnerContactEditor('${safeKey}')">Edit Contact Information</button>
           <button class="admin-small-btn" onclick="togglePartnerHidden('${safeKey}')">${isHidden ? 'Unhide' : 'Hide'}</button>
         </div>
       </div>
@@ -7520,6 +7524,138 @@ async function renderEmbeddedPartnersList(){
     </div>`;
   }).join('');
 }
+
+/* ---------- Partner contact directory (admin) ----------
+   Writes to the existing partner_overrides collection, keyed by the same
+   organization name the marquee already uses. PARTNERS_DATA, the logos and the
+   public marquee are untouched: this information is supplemental.
+
+   Verification is the point of this screen. Ask CJHQ speaks a number only when
+   contactVerified is true, so entering a number here does nothing until a
+   staff member has actually confirmed it against the organization. */
+
+function partnerContactBadge(ov){
+  const o = {
+    phone: ov.phone || '', emergencyPhone: ov.emergencyPhone || '',
+    nonEmergencyPhone: ov.nonEmergencyPhone || '', email: ov.email || '',
+    contactVerified: ov.contactVerified === true
+  };
+  const state = (typeof askOrgContactState === 'function')
+    ? askOrgContactState(o)
+    : (!(o.phone || o.emergencyPhone || o.nonEmergencyPhone || o.email) ? 'none'
+       : (o.contactVerified ? 'verified' : 'pending'));
+  if(state === 'verified'){
+    return '<span style="color:#2E6B4F; font-weight:600;">VERIFIED</span>'
+         + (ov.contactVerifiedDate ? ' <span style="color:var(--muted);">' + cjhqEscapeHtml(ov.contactVerifiedDate) + '</span>' : '');
+  }
+  if(state === 'pending'){
+    // Name what has been entered, so the reviewer knows what they are checking.
+    const have = [];
+    if(o.phone) have.push('phone');
+    if(o.nonEmergencyPhone) have.push('non-emergency');
+    if(o.emergencyPhone) have.push('emergency');
+    if(o.email) have.push('email');
+    return '<span style="color:#8A6A1F; font-weight:600;">PENDING REVIEW</span>'
+         + ' <span style="color:var(--muted);">' + have.join(' + ') + ' entered, not yet verified</span>';
+  }
+  // Deliberately NOT called "incomplete". Most of these organizations have no
+  // emergency line, and calling that a gap invites someone to fill it in.
+  return '<span style="color:var(--muted); font-weight:600;">NO CONTACT INFO</span>';
+}
+
+function partnerContactEditor(key){
+  const ov = PARTNER_OVERRIDES_CACHE[key] || {};
+  const box = document.getElementById('partnerContactEditorBox');
+  if(!box) return;
+  const v = (x) => cjhqEscapeHtml(x == null ? '' : String(x));
+  const field = (id, label, val, ph) =>
+    '<label class="admin-label">' + label + '</label>'
+    + '<input type="text" class="admin-input" id="pc-' + id + '" value="' + v(val) + '" placeholder="' + v(ph || '') + '">';
+
+  box.innerHTML =
+    '<h3 style="font-size:1rem; margin:0 0 4px;">Edit Contact Information &mdash; ' + v(key) + '</h3>'
+    + '<p style="font-size:.8rem; color:var(--muted); margin:0 0 12px;">Ask CJHQ will not give any of this to the public until <b>Contact verified</b> is ticked. Changing a field clears that tick.</p>'
+
+    + '<h4 style="font-size:.85rem; margin:14px 0 4px;">Organization</h4>'
+    + field('website', 'Website', ov.url !== undefined ? ov.url : '', 'https://...')
+    + field('address', 'Address', ov.address)
+    + field('description', 'Description', ov.description)
+    + field('services', 'Services (comma separated)', (ov.services || []).join(', '), 'roadside assistance, vehicle lockout')
+    + field('aliases', 'Aliases (comma separated)', (ov.aliases || []).join(', '))
+
+    + '<h4 style="font-size:.85rem; margin:16px 0 4px;">Phone</h4>'
+    + '<p style="font-size:.78rem; color:var(--muted); margin:0 0 8px;">These are three different things and the assistant answers them separately. Put a number under <b>Emergency</b> only if the organization itself calls it an emergency or urgent line. A general office line presented as an emergency number is the most damaging mistake this directory can make.</p>'
+    + field('phone', 'General phone &mdash; a published number whose purpose is not classified', ov.phone)
+    + field('emergencyPhone', 'Emergency phone &mdash; only if the organization says so', ov.emergencyPhone)
+    + field('nonEmergencyPhone', 'Non-emergency phone &mdash; only if the purpose is explicitly non-urgent', ov.nonEmergencyPhone)
+    + field('additionalPhone', 'Additional phone', ov.additionalPhone)
+
+    + '<h4 style="font-size:.85rem; margin:16px 0 4px;">Digital</h4>'
+    + field('email', 'Email', ov.email)
+    + field('hours', 'Hours (only if published)', ov.hours)
+    + field('languages', 'Languages (only if published)', ov.languages)
+
+    + '<h4 style="font-size:.85rem; margin:16px 0 4px;">Verification</h4>'
+    + field('contactSource', 'Contact source (where this came from)', ov.contactSource, 'https://organization.org/contact')
+    + '<label style="display:flex; gap:8px; align-items:center; margin:10px 0; font-size:.9rem;">'
+    + '<input type="checkbox" id="pc-contactVerified"' + (ov.contactVerified ? ' checked' : '') + '>'
+    + '<span>Contact verified &mdash; I have confirmed this against the organization</span></label>'
+    + field('contactVerifiedDate', 'Verification date', ov.contactVerifiedDate, 'YYYY-MM-DD')
+
+    + '<div style="margin-top:14px; display:flex; gap:8px;">'
+    + '<button type="button" class="btn dark" id="pcSave">Save Contact Information</button>'
+    + '<button type="button" class="btn admin-btn-outline" id="pcCancel">Cancel</button></div>';
+
+  box.style.display = 'block';
+  box.scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('pcCancel').addEventListener('click', () => { box.style.display = 'none'; });
+  document.getElementById('pcSave').addEventListener('click', () => savePartnerContact(key));
+}
+
+async function savePartnerContact(key){
+  const g = (id) => (document.getElementById('pc-' + id) || {}).value || '';
+  const existing = PARTNER_OVERRIDES_CACHE[key] || {};
+  const list = (x) => x.split(',').map(t => t.trim()).filter(Boolean);
+
+  const next = {
+    ...existing, id:key, key,
+    url:               g('website'),
+    address:           g('address'),
+    description:       g('description'),
+    services:          list(g('services')),
+    aliases:           list(g('aliases')),
+    phone:             g('phone'),
+    emergencyPhone:    g('emergencyPhone'),
+    nonEmergencyPhone: g('nonEmergencyPhone'),
+    additionalPhone:   g('additionalPhone'),
+    email:             g('email'),
+    hours:             g('hours'),
+    languages:         g('languages'),
+    contactSource:     g('contactSource'),
+    contactVerified:   !!(document.getElementById('pc-contactVerified') || {}).checked,
+    contactVerifiedDate: g('contactVerifiedDate'),
+    hidden:            existing.hidden || false
+  };
+
+  // Changed information requires re-verification. If any contact value differs
+  // from what was verified before, the tick is cleared even if the person left
+  // it checked - otherwise an edit silently inherits an old confirmation.
+  const watched = ['phone','emergencyPhone','nonEmergencyPhone','additionalPhone',
+                   'email','address','hours','languages'];
+  const changed = watched.some(f => (existing[f] || '') !== (next[f] || ''));
+  if(existing.contactVerified === true && changed){
+    next.contactVerified = false;
+    next.contactVerifiedDate = '';
+    alert('Contact details changed, so verification was reset. Please re-confirm against the organization, then tick Contact verified again.');
+  }
+
+  await saveToCollection('partner_overrides', next);
+  await applyPartnerOverrides();
+  await renderEmbeddedPartnersList();
+  const box = document.getElementById('partnerContactEditorBox');
+  if(box) box.style.display = 'none';
+}
+
 async function togglePartnerHidden(key){
   const existing = PARTNER_OVERRIDES_CACHE[key] || {};
   await saveToCollection('partner_overrides', { ...existing, id: key, key, hidden: !existing.hidden });
