@@ -2,6 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <!-- Present in the static file so a crawler that does not execute
+       JavaScript still sees the directive. noindex because this is not a
+       real URL; follow because its links are still worth crawling. -->
+  <meta name="robots" content="noindex, follow">
   <title>CJHQ</title>
   <!--
     GitHub Pages is a static host — it has no idea what "/contact" or

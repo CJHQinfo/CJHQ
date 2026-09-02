@@ -4202,10 +4202,23 @@ function updatePageMeta(name){
   setMeta('twitterDescription', desc);
   const canon = document.getElementById('canonicalTag');
   if(canon) canon.setAttribute('href', url);
-  // An error page must not claim to be a real URL, and must not be indexed.
-  // Every other route stays "index, follow" exactly as before.
+  // Three cases, deliberately distinct:
+  //   admin - noindex, nofollow. It ships that way in admin.html, but this
+  //           function used to overwrite it with "index, follow" on load, so a
+  //           JS-rendering crawler saw the opposite of what the file said.
+  //           robots.txt already disallows /admin, but robots.txt is a request,
+  //           not a control - the real protection is Firebase Auth and the
+  //           Firestore rules. This restores the meta tag as defence in depth.
+  //   404   - noindex, FOLLOW. Not a real URL, but its links are still worth
+  //           crawling, so nofollow would be wrong here.
+  //   everything else - index, follow, exactly as before.
   const robots = document.querySelector('meta[name="robots"]');
-  if(robots) robots.setAttribute('content', name === '404' ? 'noindex, follow' : 'index, follow');
+  if(robots){
+    robots.setAttribute('content',
+      name === 'admin' ? 'noindex, nofollow'
+      : name === '404' ? 'noindex, follow'
+      : 'index, follow');
+  }
   // Also update on lang switch
   document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', desc));
 }
