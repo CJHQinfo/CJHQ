@@ -5262,25 +5262,15 @@ async function initFirebase(){
     fbAuth = authMod.getAuth(app);
     firebaseReady = true;
 
-    // ---- App Check ----
-    // Firebase AI Logic enforces App Check, so without this every Gemini call
-    // returns 401. The site key is public by design - it identifies the site to
-    // reCAPTCHA and is not a secret. Registered for cjhq.org in the console.
+    // App Check is NOT initialized here. It used to be, which meant every
+    // visitor to every page loaded reCAPTCHA Enterprise for a feature only
+    // staff can reach. Firebase AI Logic is the only thing that needs it, so
+    // ensureAppCheck() now runs lazily from askGetModel(). See that function.
     //
-    // Failure here must NOT break the site: Firestore and Auth are Unenforced,
-    // so a missing App Check token only affects Ask CJHQ. Anything else would
-    // be a self-inflicted outage on a live community site.
-    try{
-      const acMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app-check.js');
-      window.__fbAppCheck = acMod.initializeAppCheck(app, {
-        provider: new acMod.ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
-        isTokenAutoRefreshEnabled: true
-      });
-      appCheckReady = true;
-    }catch(err){
-      console.warn('[CJHQ] App Check unavailable - Ask CJHQ will be disabled, the rest of the site is unaffected:', err && err.message);
-      appCheckReady = false;
-    }
+    // This is safe only while Firestore and Auth App Check enforcement are
+    // Unenforced in the Firebase console (verified 2026-09-02). If either is
+    // ever set to Enforced, public pages will need a token again and this
+    // decision must be revisited.
 
     // Firestore rules require request.auth != null for every write. Drive the
     // admin panel from the real auth state rather than a client-side flag, so
@@ -6104,13 +6094,54 @@ const ASK_AI_CONFIG = {
    Throttled client-side to protect the 15 RPM free-tier ceiling, and it does
    NOT retry: a retry storm against a 500/day quota is how a free tier gets
    burned in an afternoon. */
+/* App Check, initialized on first use rather than on every page load.
+
+   Firebase AI Logic enforces App Check, so a Gemini call without a token gets
+   401. Nothing else in the app needs one: Firestore and Auth are Unenforced,
+   and no public-page operation reads appCheckReady. Initializing it globally
+   therefore enrolled every visitor - including someone reading emergency or
+   border information on a phone - in reCAPTCHA Enterprise for a private,
+   unlaunched feature.
+
+   Memoised on the promise, not the flag, so concurrent callers share one
+   initialization and initializeAppCheck() can never run twice. A failure
+   resolves false rather than throwing, preserving the original behaviour:
+   Ask CJHQ is disabled, the rest of the site is unaffected. */
+let __appCheckPromise = null;
+function ensureAppCheck(){
+  if(__appCheckPromise) return __appCheckPromise;
+  __appCheckPromise = (async () => {
+    if(!firebaseReady || !window.__fbApp) return false;
+    if(window.__fbAppCheck){ appCheckReady = true; return true; }
+    try{
+      const acMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app-check.js');
+      window.__fbAppCheck = acMod.initializeAppCheck(window.__fbApp, {
+        provider: new acMod.ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),
+        isTokenAutoRefreshEnabled: true
+      });
+      appCheckReady = true;
+      return true;
+    }catch(err){
+      console.warn('[CJHQ] App Check unavailable - Ask CJHQ will be disabled, the rest of the site is unaffected:', err && err.message);
+      appCheckReady = false;
+      // Cleared so a later attempt can retry rather than being stuck on one
+      // transient network failure.
+      __appCheckPromise = null;
+      return false;
+    }
+  })();
+  return __appCheckPromise;
+}
+
 let __askModel = null;
 let __askLastCall = 0;
 
 async function askGetModel(){
   if(__askModel) return __askModel;
   if(!firebaseReady || !window.__fbApp) throw new Error('firebase-not-ready');
-  if(!appCheckReady) throw new Error('appcheck-not-ready');
+  // Initializes reCAPTCHA Enterprise on first use. Same provider, same site
+  // key, same auto-refresh as before - only the timing changed.
+  if(!(await ensureAppCheck())) throw new Error('appcheck-not-ready');
   const aiMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-ai.js');
   const ai = aiMod.getAI(window.__fbApp, { backend: new aiMod.GoogleAIBackend() });
   __askModel = aiMod.getGenerativeModel(ai, {
@@ -7735,7 +7766,11 @@ async function askAnswer(input){
    it only presents them through the interface askRun now expects. */
 const ASK_BROWSER_AI = {
   model: ASK_AI_CONFIG.model,
-  ready(){ return !!(ASK_BACKEND && firebaseReady && appCheckReady); },
+  // appCheckReady is deliberately NOT checked here: it is false until the
+  // first Gemini call initializes App Check. askGetModel() awaits
+  // ensureAppCheck() and still throws appcheck-not-ready on failure, so the
+  // guarantee is unchanged - it just moved to the moment it is needed.
+  ready(){ return !!(ASK_BACKEND && firebaseReady); },
   ask(question, context){ return ASK_BACKEND.ask(question, context); }
 };
 
@@ -9166,7 +9201,7 @@ async function publishChangeNotice(slug){
       msg = 'AI: <b>connected</b> \u00b7 model <b>' + ASK_AI_CONFIG.model + '</b> '
           + '(free tier 15 req/min, 500/day) \u00b7 App Check <b>active</b>.';
     }else if(wired && !appCheckReady){
-      msg = 'AI: <b>App Check not ready</b> \u2014 Gemini calls will be refused. '
+      msg = 'AI: <b>ready</b> \u2014 App Check initializes on the first question. '
           + 'Answers still come from CJHQ\u2019s verified information.';
     }else if(wired && !firebaseReady){
       msg = 'AI: <b>Firebase not ready</b>. Answers come from CJHQ\u2019s verified information.';
