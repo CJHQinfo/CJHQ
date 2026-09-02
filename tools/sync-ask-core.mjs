@@ -114,7 +114,8 @@ const EXPORTS = [
   'askPracticalHandlers', 'askHalachic', 'askEruv', 'askEmergency', 'askZmanim',
   'askCalendar', 'askCommunityDirectory', 'askCjhqResources', 'cjhqNormalizeSearch',
   'askOrganizations', 'askOrgRegistry', 'askSpecialInfo', 'askFindMtl',
-  'ASK_TEMPLATES', 'askSmallTalk', 'ASK_FINDMTL'
+  'ASK_TEMPLATES', 'askSmallTalk', 'ASK_FINDMTL', 'askContactCjhq', 'askChildTravel',
+  'askOrgContactState', 'ASK_CJHQ_CONTACT'
 ];
 
 const coreOut = `/* GENERATED FILE - do not edit.
