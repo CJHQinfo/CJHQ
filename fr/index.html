@@ -6215,9 +6215,49 @@ const ASK_HALACHIC_RE = new RegExp([
 
 /* The practical chain, named once so the guard and the entry point cannot
    drift apart. askHalachic is NOT in it - it runs ahead of it. */
+
+/* ---------- FindMTL fallback ----------
+   Runs LAST, after every CJHQ handler and after the resource matcher, so CJHQ's
+   own content always wins first. It only fires for the categories FindMTL
+   actually covers; anything else still reaches the plain decline, because "we
+   do not have that" is a better answer than a directory that will not have it
+   either.                                                                     */
+const ASK_FINDMTL_MATCH = [
+  { key:'border',        match:/border wait|wait time|wait at the border|temps d\u2019attente|attente \u00e0 la fronti\u00e8re|\u05d6\u05de\u05df \u05d4\u05de\u05ea\u05e0\u05d4|\u05d5\u05d5\u05d0\u05e8\u05d8\u05df \u05d1\u05d9\u05d9\u05dd \u05d2\u05e8\u05e2\u05e0\u05d9\u05e5/i },
+  { key:'organizations', match:/organi[sz]ation|organisme|\u05d0\u05e8\u05d2\u05d5\u05df|\u05d0\u05e8\u05d2\u05d5\u05e0\u05d9\u05dd|\u05d0\u05e8\u05d2\u05d0\u05e0\u05d9\u05d6\u05d0\u05e6\u05d9/i },
+  { key:'countries',     match:/\bcamp\b|\bcamps\b|out of town|out-of-town|out of country|colonie de vacances|\u05e7\u05e2\u05de\u05e4|\u05de\u05d7\u05e0\u05d4|\u05de\u05d7\u05e0\u05d5\u05ea/i },
+  { key:'travel',        match:/travel directory|community travel|\u05de\u05d3\u05e8\u05d9\u05da \u05e0\u05e1\u05d9\u05e2\u05d5\u05ea/i },
+  { key:'eruv',          match:/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1/i },
+  { key:'home',          match:/community directory|directory|listing|\u05de\u05d3\u05e8\u05d9\u05da \u05e7\u05d4\u05d9\u05dc\u05d4|\u05e8\u05e9\u05d9\u05de\u05d4|\u05d3\u05d9\u05e8\u05e2\u05e7\u05d8\u05d0\u05e8\u05d9\u05e2|r\u00e9pertoire/i }
+];
+
+function askFindMtl(q){
+  const s = String(q || '');
+  const hit = ASK_FINDMTL_MATCH.find(m => m.match.test(s));
+  if(!hit) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(s); r.lang = L;
+  r.handler = 'FindMTL';
+  r.handled = false;          // this is a hand-off, not a CJHQ answer
+  r.timeSensitive = true;
+  r.answer = askT({
+    en:'CJHQ does not have current information for that. FindMTL is the community directory that does - the link below goes to the right section. CJHQ does not maintain it, so check the details there.',
+    fr:'Le CJHQ n\u2019a pas de renseignements \u00e0 jour l\u00e0-dessus. FindMTL est le r\u00e9pertoire communautaire qui en a \u2014 le lien ci-dessous m\u00e8ne \u00e0 la bonne section. Le CJHQ ne le tient pas \u00e0 jour; v\u00e9rifiez les d\u00e9tails sur place.',
+    he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05de\u05d9\u05d3\u05e2 \u05e2\u05d3\u05db\u05e0\u05d9 \u05e2\u05dc \u05db\u05da. FindMTL \u05d4\u05d5\u05d0 \u05de\u05d3\u05e8\u05d9\u05da \u05d4\u05e7\u05d4\u05d9\u05dc\u05d4 \u05e9\u05d9\u05e9 \u05dc\u05d5 \u2014 \u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05e9\u05dc\u05d4\u05dc\u05df \u05de\u05d5\u05d1\u05d9\u05dc \u05dc\u05de\u05d3\u05d5\u05e8 \u05d4\u05de\u05ea\u05d0\u05d9\u05dd. CJHQ \u05d0\u05d9\u05e0\u05d5 \u05de\u05ea\u05d7\u05d6\u05e7 \u05d0\u05d5\u05ea\u05d5; \u05d9\u05e9 \u05dc\u05d1\u05d3\u05d5\u05e7 \u05e9\u05dd \u05d0\u05ea \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd.',
+    yi:'CJHQ \u05d4\u05d0\u05d8 \u05e0\u05d9\u05e9\u05d8 \u05e7\u05d9\u05d9\u05df \u05d9\u05e2\u05e6\u05d8\u05d9\u05d2\u05e2 \u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2 \u05d3\u05e2\u05e8\u05d5\u05d9\u05e3. FindMTL \u05d0\u05d9\u05d6 \u05d3\u05e2\u05e8 \u05e7\u05d4\u05d9\u05dc\u05d4 \u05d3\u05d9\u05e8\u05e2\u05e7\u05d8\u05d0\u05e8\u05d9\u05e2 \u05d5\u05d5\u05d0\u05e1 \u05d4\u05d0\u05d8 \u05e2\u05e1 \u2014 \u05d3\u05e2\u05e8 \u05dc\u05d9\u05e0\u05e7 \u05d3\u05d0 \u05d0\u05d5\u05e0\u05d8\u05df \u05e4\u05d9\u05e8\u05d8 \u05e6\u05d5\u05dd \u05e8\u05d9\u05db\u05d8\u05d9\u05d2\u05df \u05d0\u05e4\u05d8\u05d9\u05d9\u05dc. CJHQ \u05d4\u05d0\u05dc\u05d8 \u05e2\u05e1 \u05e0\u05d9\u05e9\u05d8; \u05e7\u05d5\u05e7\u05d8 \u05d3\u05d0\u05e8\u05d8 \u05e0\u05d0\u05da \u05d3\u05d9 \u05e4\u05e8\u05d8\u05d9\u05dd.'
+  }, L);
+  r.actions = [askFindMtlAction(hit.key, L)];
+  r.sources = [askFindMtlSource(hit.key)];
+  return r;
+}
+
 function askPracticalHandlers(){
+  // Priority order. CJHQ's own content and structured data first, then the
+  // resource matcher, and only then the FindMTL hand-off - so CJHQ never sends
+  // someone elsewhere for something it already answers.
   return [askEruv, askEmergency, askZmanim, askCalendar,
-          askCommunityDirectory, askCjhqResources];
+          askSpecialInfo, askCommunityDirectory, askCjhqResources,
+          askFindMtl];
 }
 
 function askHalachic(q){
@@ -6256,6 +6296,44 @@ function askHalachic(q){
     ? (label + '\n' + practical.answer + '\n\n' + referral)
     : referral;
   return r;
+}
+
+
+/* ---------- FindMTL: the community-directory fallback ----------
+   FindMTL is a DESTINATION, not a source. Nothing from it is copied into CJHQ
+   and nothing here summarises its listings - the assistant names the category
+   and hands over the link.
+
+   These eight URLs are the complete approved set. Do not add a ninth from
+   inference: an invented directory URL fails the same way an invented phone
+   number does, and this is the kind of question people act on immediately. */
+const ASK_FINDMTL = {
+  food:          'https://findmtl.ca/food',
+  shuls:         'https://findmtl.ca/shuls',
+  eruv:          'https://findmtl.ca/eruv',
+  border:        'https://findmtl.ca/border',
+  countries:     'https://findmtl.ca/countries',
+  organizations: 'https://findmtl.ca/organizations',
+  travel:        'https://findmtl.ca/travel',
+  home:          'https://findmtl.ca'
+};
+const ASK_FINDMTL_LABEL = {
+  food:          { en:'FindMTL - Kosher Food',        fr:'FindMTL \u2014 Alimentation cach\u00e8re', he:'FindMTL \u2014 \u05de\u05d6\u05d5\u05df \u05db\u05e9\u05e8',        yi:'FindMTL \u2014 \u05db\u05e9\u05e8 \u05e2\u05e1\u05df' },
+  shuls:         { en:'FindMTL - Shuls & Minyanim',   fr:'FindMTL \u2014 Synagogues et minyanim', he:'FindMTL \u2014 \u05d1\u05ea\u05d9 \u05db\u05e0\u05e1\u05ea \u05d5\u05de\u05e0\u05d9\u05d9\u05e0\u05d9\u05dd', yi:'FindMTL \u2014 \u05e9\u05d5\u05dc\u05df \u05d0\u05d5\u05df \u05de\u05e0\u05d9\u05e0\u05d9\u05dd' },
+  eruv:          { en:'FindMTL - Eruv',               fr:'FindMTL \u2014 \u00c9rouv',            he:'FindMTL \u2014 \u05e2\u05d9\u05e8\u05d5\u05d1',           yi:'FindMTL \u2014 \u05e2\u05d9\u05e8\u05d5\u05d1' },
+  border:        { en:'FindMTL - Border',             fr:'FindMTL \u2014 Fronti\u00e8re',        he:'FindMTL \u2014 \u05de\u05e2\u05d1\u05e8 \u05d4\u05d2\u05d1\u05d5\u05dc',      yi:'FindMTL \u2014 \u05d2\u05e8\u05e2\u05e0\u05e2\u05e5' },
+  countries:     { en:'FindMTL - Out of Town',        fr:'FindMTL \u2014 \u00c0 l\u2019ext\u00e9rieur', he:'FindMTL \u2014 \u05de\u05d7\u05d5\u05e5 \u05dc\u05e2\u05d9\u05e8',   yi:'FindMTL \u2014 \u05d0\u05d5\u05d9\u05e1\u05e2\u05e8 \u05e9\u05d8\u05d0\u05d8' },
+  organizations: { en:'FindMTL - Organizations',      fr:'FindMTL \u2014 Organismes',            he:'FindMTL \u2014 \u05d0\u05e8\u05d2\u05d5\u05e0\u05d9\u05dd',         yi:'FindMTL \u2014 \u05d0\u05e8\u05d2\u05d0\u05e0\u05d9\u05d6\u05d0\u05e6\u05d9\u05e2\u05e1' },
+  travel:        { en:'FindMTL - Travel',             fr:'FindMTL \u2014 Voyage',                he:'FindMTL \u2014 \u05e0\u05e1\u05d9\u05e2\u05d5\u05ea',          yi:'FindMTL \u2014 \u05e8\u05d9\u05d9\u05d6\u05df' },
+  home:          { en:'FindMTL Community Directory',  fr:'R\u00e9pertoire communautaire FindMTL', he:'\u05de\u05d3\u05e8\u05d9\u05da \u05d4\u05e7\u05d4\u05d9\u05dc\u05d4 FindMTL',        yi:'FindMTL \u05e7\u05d4\u05d9\u05dc\u05d4 \u05d3\u05d9\u05e8\u05e2\u05e7\u05d8\u05d0\u05e8\u05d9\u05e2' }
+};
+function askFindMtlAction(key, L){
+  return { label: askT(ASK_FINDMTL_LABEL[key] || ASK_FINDMTL_LABEL.home, L),
+           url: ASK_FINDMTL[key] || ASK_FINDMTL.home, kind:'link' };
+}
+function askFindMtlSource(key){
+  return { name:'FindMTL', url: ASK_FINDMTL[key] || ASK_FINDMTL.home,
+           type:'Community directory', authoritative:false, timeSensitive:true, lastUpdated:'' };
 }
 
 function askEruv(q){
@@ -6365,8 +6443,124 @@ function askCalendar(q){
    "What time does the mikvah on Van Horne close?" matched a CJHQ resource
    because CJHQ's own address is on Van Horne. Answering a mikvah question with
    a passport page is worse than saying we do not have it. */
+
+/* ---------- Special Information / Yomim Tovim travel ----------
+   CJHQ's own content, so it runs BEFORE the resource matcher: an etrog
+   question used to fall through to a generic CBSA resource, which is a worse
+   answer than the verified country content CJHQ already holds.
+
+   Practical travel information only. It states the PROCESS - what to check,
+   what to declare, what to expect - and never a rule, a permit, an exemption
+   or a date. It does not say an item is admissible because it is a holiday
+   item, and it never rules on anything religious: askHalachic runs ahead of
+   this and intercepts a question asking for a ruling.
+
+   Countries with no verified entry (Israel, the EU) say so plainly rather than
+   filling the gap from general knowledge. That silence is deliberate.
+
+   The section is not published yet, so no internal link to /special-information
+   is offered here - it would 404. Add it to the actions when the section goes
+   live.                                                                      */
+const ASK_SPECIAL_ITEMS = /etrog|esrog|etrogim|esrogim|lulav|loulav|lulavim|arba ?minim|dalet ?minim|daled ?minim|four species|quatre esp\u00e8ces|hadass|haddasim|arava|aravot|myrtle|willow|palm frond|schach|s\u2019chach|\u05d0\u05ea\u05e8\u05d5\u05d2|\u05d0\u05ea\u05e8\u05d5\u05d2\u05d9\u05dd|\u05dc\u05d5\u05dc\u05d1|\u05d0\u05e8\u05d1\u05e2\u05d4 \u05de\u05d9\u05e0\u05d9\u05dd|\u05d3\u05dc\u05ea \u05de\u05d9\u05e0\u05d9\u05dd|\u05d4\u05d3\u05e1|\u05e2\u05e8\u05d1\u05d4|\u05e1\u05db\u05da/i;
+const ASK_SPECIAL_TRAVEL = /bring|carry|travel|import|customs|declare|border|fly|flight|luggage|apporter|voyage|douane|d\u00e9clarer|fronti\u00e8re|importer|\u05dc\u05d4\u05d1\u05d9\u05d0|\u05dc\u05e0\u05e1\u05d5\u05e2|\u05de\u05db\u05e1|\u05d2\u05d1\u05d5\u05dc|\u05dc\u05d4\u05e6\u05d4\u05d9\u05e8|\u05de\u05d9\u05d8\u05e0\u05e2\u05de\u05e2\u05df|\u05e8\u05d9\u05d9\u05d6\u05df|\u05d2\u05e8\u05e2\u05e0\u05d9\u05e5/i;
+const ASK_SPECIAL_COUNTRY = [
+  { id:'canada',         match:/\bcanada\b|canadian|canadien|\u05e7\u05e0\u05d3\u05d4|\u05e7\u05d0\u05e0\u05d0\u05d3\u05e2/i },
+  { id:'united-states',  match:/united states|\bu\.?s\.?a?\b|america|\u00e9tats-unis|etats-unis|\u05d0\u05e8\u05d4"?\u05d1|\u05d0\u05de\u05e8\u05d9\u05e7\u05d4|\u05d0\u05de\u05e2\u05e8\u05d9\u05e7\u05e2/i },
+  { id:'israel',         match:/israel|isra\u00ebl|\u05d9\u05e9\u05e8\u05d0\u05dc|\u05d0\u05e8\u05e5 \u05d9\u05e9\u05e8\u05d0\u05dc/i },
+  { id:'united-kingdom', match:/united kingdom|\bu\.?k\.?\b|britain|england|royaume-uni|angleterre|\u05d0\u05e0\u05d2\u05dc\u05d9\u05d4|\u05d1\u05e8\u05d9\u05d8\u05e0\u05d9\u05d4/i },
+  { id:'european-union', match:/european union|\be\.?u\.?\b|europe|union europ\u00e9enne|\u05d0\u05d9\u05e8\u05d5\u05e4\u05d4/i }
+];
+
+function askSpecialInfo(q){
+  const s = String(q || '');
+  if(!ASK_SPECIAL_ITEMS.test(s) || !ASK_SPECIAL_TRAVEL.test(s)) return null;
+  if(typeof SPECIAL_INFO_COUNTRIES === 'undefined') return null;
+
+  const r = askAnswerShape();
+  const L = askDetectLanguage(s); r.lang = L;
+  r.handler = 'Special Information';
+  r.timeSensitive = true;
+
+  const hit = ASK_SPECIAL_COUNTRY.find(c => c.match.test(s));
+  const rec = hit ? SPECIAL_INFO_COUNTRIES.find(c => c.id === hit.id) : null;
+
+  // No country named: say which ones CJHQ actually covers rather than guessing.
+  if(!rec){
+    r.handled = false;
+    r.answer = askT({
+      en:'That depends on the country you are travelling to, and the requirements differ by item and time of year. CJHQ holds verified travel information for Canada, the United States and the United Kingdom. Tell me the destination and I can give you what CJHQ has.',
+      fr:'Cela d\u00e9pend du pays de destination, et les exigences varient selon l\u2019article et la p\u00e9riode de l\u2019ann\u00e9e. Le CJHQ dispose de renseignements v\u00e9rifi\u00e9s pour le Canada, les \u00c9tats-Unis et le Royaume-Uni. Indiquez la destination et je vous donnerai ce que le CJHQ a.',
+      he:'\u05d6\u05d4 \u05ea\u05dc\u05d5\u05d9 \u05d1\u05de\u05d3\u05d9\u05e0\u05ea \u05d4\u05d9\u05e2\u05d3, \u05d5\u05d4\u05d3\u05e8\u05d9\u05e9\u05d5\u05ea \u05de\u05e9\u05ea\u05e0\u05d5\u05ea \u05dc\u05e4\u05d9 \u05d4\u05e4\u05e8\u05d9\u05d8 \u05d5\u05ea\u05e7\u05d5\u05e4\u05ea \u05d4\u05e9\u05e0\u05d4. \u05dc-CJHQ \u05d9\u05e9 \u05de\u05d9\u05d3\u05e2 \u05de\u05d0\u05d5\u05de\u05ea \u05e2\u05d1\u05d5\u05e8 \u05e7\u05e0\u05d3\u05d4, \u05d0\u05e8\u05d4"\u05d1 \u05d5\u05d1\u05e8\u05d9\u05d8\u05e0\u05d9\u05d4. \u05e6\u05d9\u05d9\u05e0\u05d5 \u05d0\u05ea \u05d4\u05d9\u05e2\u05d3 \u05d5\u05d0\u05de\u05e1\u05d5\u05e8 \u05de\u05d4 \u05e9\u05d9\u05e9 \u05dc-CJHQ.',
+      yi:'\u05d3\u05d0\u05e1 \u05d4\u05e2\u05e0\u05d2\u05d8 \u05d0\u05e4\u05df \u05dc\u05d0\u05e0\u05d3 \u05d5\u05d5\u05d0\u05d5\u05d4\u05d9\u05df \u05d0\u05d9\u05e8 \u05e4\u05d0\u05e8\u05d8, \u05d0\u05d5\u05df \u05d3\u05d9 \u05d3\u05e8\u05d9\u05e9\u05d5\u05ea \u05e2\u05e0\u05d3\u05e2\u05e8\u05df \u05d6\u05d9\u05da \u05dc\u05d5\u05d9\u05d8\u05df \u05d0\u05e8\u05d8\u05d9\u05e7\u05dc \u05d0\u05d5\u05df \u05e6\u05f4\u05d8 \u05e4\u05d5\u05df \u05d9\u05d0\u05e8. CJHQ \u05d4\u05d0\u05d8 \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8\u05e2 \u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2 \u05e4\u05d0\u05e8 \u05e7\u05d0\u05e0\u05d0\u05d3\u05e2, \u05d0\u05de\u05e2\u05e8\u05d9\u05e7\u05e2 \u05d0\u05d5\u05df \u05d1\u05e8\u05d9\u05d8\u05d0\u05e0\u05d9\u05e2. \u05d6\u05d0\u05d2\u05d8 \u05de\u05d9\u05e8 \u05d3\u05e2\u05dd \u05dc\u05d0\u05e0\u05d3 \u05d0\u05d5\u05df \u05d0\u05d9\u05da \u05d5\u05d5\u05e2\u05dc \u05d0\u05d9\u05d9\u05da \u05d6\u05d0\u05d2\u05df \u05d5\u05d5\u05d0\u05e1 CJHQ \u05d4\u05d0\u05d8.'
+    }, L);
+    return r;
+  }
+
+  const isFr = (L === 'fr');
+  const name = isFr ? rec.name_fr : rec.name_en;
+  const intro = isFr ? rec.intro_fr : rec.intro_en;
+  const before = (isFr ? rec.before_fr : rec.before_en) || [];
+  const warning = isFr ? rec.warning_fr : rec.warning_en;
+  const links = (rec.official || []).filter(l => l && l.url);
+
+  // Verified-but-empty is a real state: Israel and the EU carry no link and no
+  // verification date. Saying so is the correct answer.
+  if(!links.length || !rec.lastVerified){
+    r.handled = false;
+    r.answer = askT({
+      en:'CJHQ does not currently have verified travel information for ' + name + ' on this. I am not going to describe an import rule that has not been checked against that country\u2019s own authority. Confirm the current requirement with the destination country\u2019s customs or agriculture authority before travelling.',
+      fr:'Le CJHQ n\u2019a pas actuellement de renseignements v\u00e9rifi\u00e9s pour ' + name + ' \u00e0 ce sujet. Je ne d\u00e9crirai pas une r\u00e8gle d\u2019importation qui n\u2019a pas \u00e9t\u00e9 v\u00e9rifi\u00e9e aupr\u00e8s de l\u2019autorit\u00e9 du pays. Confirmez l\u2019exigence en vigueur aupr\u00e8s des douanes ou de l\u2019autorit\u00e9 agricole du pays de destination avant de voyager.',
+      he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05db\u05e8\u05d2\u05e2 \u05de\u05d9\u05d3\u05e2 \u05de\u05d0\u05d5\u05de\u05ea \u05e2\u05d1\u05d5\u05e8 ' + name + ' \u05d1\u05e0\u05d5\u05e9\u05d0 \u05d6\u05d4. \u05dc\u05d0 \u05d0\u05ea\u05d0\u05e8 \u05db\u05dc\u05dc \u05d9\u05d1\u05d5\u05d0 \u05e9\u05dc\u05d0 \u05d0\u05d5\u05de\u05ea \u05de\u05d5\u05dc \u05d4\u05e8\u05e9\u05d5\u05ea \u05e9\u05dc \u05d0\u05d5\u05ea\u05d4 \u05de\u05d3\u05d9\u05e0\u05d4. \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05d0\u05ea \u05d4\u05d3\u05e8\u05d9\u05e9\u05d4 \u05d4\u05e0\u05d5\u05db\u05d7\u05d9\u05ea \u05de\u05d5\u05dc \u05d4\u05de\u05db\u05e1 \u05d0\u05d5 \u05e8\u05e9\u05d5\u05ea \u05d4\u05d7\u05e7\u05dc\u05d0\u05d5\u05ea \u05e9\u05dc \u05de\u05d3\u05d9\u05e0\u05ea \u05d4\u05d9\u05e2\u05d3 \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e0\u05e1\u05d9\u05e2\u05d4.',
+      yi:'CJHQ \u05d4\u05d0\u05d8 \u05d9\u05e2\u05e6\u05d8 \u05e0\u05d9\u05e9\u05d8 \u05e7\u05d9\u05d9\u05df \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8\u05e2 \u05e8\u05d9\u05d9\u05d6\u05be\u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2 \u05e4\u05d0\u05e8 ' + name + ' \u05d3\u05e2\u05e8\u05d5\u05d9\u05e3. \u05d0\u05d9\u05da \u05d5\u05d5\u05e2\u05dc \u05e0\u05d9\u05e9\u05d8 \u05d1\u05d0\u05e9\u05e8\u05d9\u05d9\u05d1\u05df \u05e7\u05d9\u05d9\u05df \u05d0\u05d9\u05de\u05e4\u05d0\u05e8\u05d8\u05be\u05e8\u05e2\u05d2\u05dc \u05d5\u05d5\u05d0\u05e1 \u05d0\u05d9\u05d6 \u05e0\u05d9\u05e9\u05d8 \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8 \u05d2\u05e2\u05d5\u05d5\u05d0\u05e8\u05df \u05d1\u05d9\u05d9 \u05d3\u05e2\u05e8 \u05de\u05d3\u05d9\u05e0\u05d4\u05f4\u05e1 \u05d0\u05d9\u05d9\u05d2\u05e2\u05e0\u05e2\u05e8 \u05e8\u05e9\u05d5\u05ea. \u05e4\u05d0\u05e8\u05d6\u05d9\u05db\u05e2\u05e8\u05d8 \u05d3\u05d9 \u05d9\u05e2\u05e6\u05d8\u05d9\u05d2\u05e2 \u05d3\u05e8\u05d9\u05e9\u05d4 \u05d1\u05d9\u05d9 \u05d3\u05e2\u05dd \u05dc\u05d0\u05e0\u05d3\u05e1 \u05de\u05db\u05e1 \u05d0\u05d3\u05e2\u05e8 \u05dc\u05d0\u05e0\u05d5\u05d5\u05d9\u05e8\u05d8\u05e9\u05d0\u05e4\u05d8\u05be\u05e8\u05e9\u05d5\u05ea \u05e4\u05d0\u05e8 \u05d3\u05e2\u05e8 \u05e8\u05d9\u05d9\u05d6\u05e2.'
+    }, L);
+    return r;
+  }
+
+  r.handled = true;
+  const lead = askT({
+    en:'CJHQ travel information for ' + name + ':',
+    fr:'Renseignements de voyage du CJHQ pour ' + name + '\u00a0:',
+    he:'\u05de\u05d9\u05d3\u05e2 \u05e0\u05e1\u05d9\u05e2\u05d5\u05ea \u05e9\u05dc CJHQ \u05e2\u05d1\u05d5\u05e8 ' + name + ':',
+    yi:'CJHQ \u05e8\u05d9\u05d9\u05d6\u05be\u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2 \u05e4\u05d0\u05e8 ' + name + ':'
+  }, L);
+  const checkNote = askT({
+    en:'Requirements change and are enforced by the destination country, not by CJHQ. Confirm the current requirement with the official source below shortly before you travel.',
+    fr:'Les exigences changent et sont appliqu\u00e9es par le pays de destination, non par le CJHQ. Confirmez l\u2019exigence en vigueur aupr\u00e8s de la source officielle ci-dessous peu avant votre d\u00e9part.',
+    he:'\u05d4\u05d3\u05e8\u05d9\u05e9\u05d5\u05ea \u05de\u05e9\u05ea\u05e0\u05d5\u05ea \u05d5\u05e0\u05d0\u05db\u05e4\u05d5\u05ea \u05e2\u05dc \u05d9\u05d3\u05d9 \u05de\u05d3\u05d9\u05e0\u05ea \u05d4\u05d9\u05e2\u05d3, \u05dc\u05d0 \u05e2\u05dc \u05d9\u05d3\u05d9 CJHQ. \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05d0\u05ea \u05d4\u05d3\u05e8\u05d9\u05e9\u05d4 \u05d4\u05e0\u05d5\u05db\u05d7\u05d9\u05ea \u05d1\u05de\u05e7\u05d5\u05e8 \u05d4\u05e8\u05e9\u05de\u05d9 \u05e9\u05dc\u05d4\u05dc\u05df \u05e1\u05de\u05d5\u05da \u05dc\u05e0\u05e1\u05d9\u05e2\u05d4.',
+    yi:'\u05d3\u05e8\u05d9\u05e9\u05d5\u05ea \u05e2\u05e0\u05d3\u05e2\u05e8\u05df \u05d6\u05d9\u05da \u05d0\u05d5\u05df \u05d5\u05d5\u05e2\u05e8\u05df \u05d0\u05d9\u05d9\u05e0\u05d2\u05e2\u05e4\u05d9\u05e8\u05d8 \u05d3\u05d5\u05e8\u05da \u05d3\u05e2\u05dd \u05dc\u05d0\u05e0\u05d3 \u05d5\u05d5\u05d0\u05d5\u05d4\u05d9\u05df \u05d0\u05d9\u05e8 \u05e4\u05d0\u05e8\u05d8, \u05e0\u05d9\u05e9\u05d8 \u05d3\u05d5\u05e8\u05da CJHQ. \u05e4\u05d0\u05e8\u05d6\u05d9\u05db\u05e2\u05e8\u05d8 \u05d3\u05d9 \u05d9\u05e2\u05e6\u05d8\u05d9\u05d2\u05e2 \u05d3\u05e8\u05d9\u05e9\u05d4 \u05d1\u05d9\u05d9\u05dd \u05d0\u05e4\u05d9\u05e6\u05d9\u05e2\u05dc\u05df \u05de\u05e7\u05d5\u05e8 \u05d3\u05d0 \u05d0\u05d5\u05e0\u05d8\u05df, \u05e0\u05d0\u05e0\u05d8 \u05e4\u05d0\u05e8 \u05d3\u05e2\u05e8 \u05e8\u05d9\u05d9\u05d6\u05e2.'
+  }, L);
+
+  // Hebrew and Yiddish: the country content itself exists in English and French
+  // only. Rather than paste English at someone who asked in Yiddish, answer in
+  // their language, name the country, and hand them the official source. The
+  // gap is recorded so it can be filled rather than quietly persisting.
+  if(L === 'he' || L === 'yi'){
+    if(typeof __askMissingYi !== 'undefined' && L === 'yi'){
+      __askMissingYi.add('SPECIAL_INFO_COUNTRIES body text (' + rec.id + ')');
+    }
+    r.answer = lead + '\n' + checkNote;
+  } else {
+    const bullets = before.length ? '\n- ' + before.join('\n- ') : '';
+    r.answer = lead + '\n' + (intro || '') + bullets
+             + (warning ? '\n\n' + warning : '')
+             + '\n\n' + checkNote
+             + (rec.lastVerified ? ' (CJHQ last verified: ' + rec.lastVerified + ')' : '');
+  }
+
+  r.actions = links.slice(0,3).map(l => ({
+    label: (isFr && l.label_fr) ? l.label_fr : (l.label_en || l.label_fr || 'Official source'),
+    url: l.url, kind:'link'
+  }));
+  r.sources = links.slice(0,3).map(l => ({
+    name: (isFr && l.label_fr) ? l.label_fr : (l.label_en || 'Official source'),
+    url: l.url, type:'Government', authoritative:true, timeSensitive:true,
+    lastUpdated: rec.lastVerified || ''
+  }));
+  return r;
+}
+
 function askCommunityDirectory(q){
-  const isDirectory = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4|\u05de\u05d9\u05e7\u05d5\u05d5\u05d4|minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df|shul|schul|synagogue|\u05e9\u05d5\u05dc|\u05d1\u05d9\u05ea \u05db\u05e0\u05e1\u05ea|daven|davening|davenen|pray|prier|\u05d3\u05d0\u05d5\u05d5\u05e0\u05e2\u05df|\u05dc\u05d4\u05ea\u05e4\u05dc\u05dc|kosher|casher|kashrut|cacher|\u05db\u05e9\u05e8/i.test(q);
+  const isDirectory = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4|\u05de\u05d9\u05e7\u05d5\u05d5\u05d4|minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df|shul|schul|synagogue|\u05e9\u05d5\u05dc|\u05d1\u05d9\u05ea \u05db\u05e0\u05e1\u05ea|daven|davening|davenen|pray|prier|\u05d3\u05d0\u05d5\u05d5\u05e0\u05e2\u05df|\u05dc\u05d4\u05ea\u05e4\u05dc\u05dc|kosher|casher|kashrut|cacher|cach\u00e8re|cach\u00e8res|\u05db\u05e9\u05e8/i.test(q);
   if(!isDirectory) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
@@ -6376,7 +6570,7 @@ function askCommunityDirectory(q){
   // EMPTY on purpose: no shul, mikvah or kosher listing is invented here, and
   // an unverified entry is worse than no entry for this kind of question.
   const type = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4/i.test(q) ? 'mikvah'
-             : /kosher|casher|kashrut|cacher|\u05db\u05e9\u05e8/i.test(q) ? 'kosher'
+             : /kosher|casher|kashrut|cacher|cach\u00e8re|cach\u00e8res|\u05db\u05e9\u05e8/i.test(q) ? 'kosher'
              : /minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df/i.test(q) ? 'minyan'
              : 'shul';
   const hits = (askDirectoryEntries || []).filter(e => e && e.active !== false && e.type === type);
@@ -6398,14 +6592,22 @@ function askCommunityDirectory(q){
     return r;
   }
 
+  // CJHQ has no verified listing. Rather than stop at "we don't have this",
+  // hand the person to the community directory that does - FindMTL - by
+  // category. Nothing from FindMTL is reproduced here.
+  const fmKey = (type === 'kosher') ? 'food' : 'shuls';
   r.handled = false;
+  r.actions = [askFindMtlAction(fmKey, L),
+               { label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd', yi:'CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8'}, L), url:'/resources', kind:'internal' }];
+  r.sources = [askFindMtlSource(fmKey)];
   r.answer = askT({
-    en:'CJHQ does not yet maintain a verified directory of shuls, mikvaot, minyanim or kosher food, so I cannot answer that reliably. A community directory is the right source for it, and connecting one is still pending.',
-    fr:'CJHQ ne tient pas encore un r\u00e9pertoire v\u00e9rifi\u00e9 des synagogues, mikv\u00e9s, minyanim ou commerces cachers; je ne peux donc pas r\u00e9pondre de fa\u00e7on fiable. Un r\u00e9pertoire communautaire serait la bonne source, et son int\u00e9gration est encore \u00e0 venir.',
-    he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05e2\u05d3\u05d9\u05d9\u05df \u05de\u05d0\u05d2\u05e8 \u05de\u05d0\u05d5\u05de\u05ea \u05e9\u05dc \u05d1\u05ea\u05d9 \u05db\u05e0\u05e1\u05ea, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d5 \u05de\u05d6\u05d5\u05df \u05db\u05e9\u05e8, \u05dc\u05db\u05df \u05d0\u05d9\u05e0\u05e0\u05d9 \u05d9\u05db\u05d5\u05dc \u05dc\u05e2\u05e0\u05d5\u05ea \u05d1\u05d0\u05d5\u05e4\u05df \u05d0\u05de\u05d9\u05df.',
+    en:'CJHQ does not maintain a verified directory of shuls, mikvaot, minyanim or kosher food, so I will not list any from memory. FindMTL is the community directory for this - check its '
+       + (fmKey === 'food' ? 'kosher food' : 'shul and minyan') + ' listings. Details and hours change, so confirm before relying on them.',
+    fr:'Le CJHQ ne tient pas de r\u00e9pertoire v\u00e9rifi\u00e9 des synagogues, mikv\u00e9s, minyanim ou commerces cachers; je n\u2019en citerai donc aucun de m\u00e9moire. FindMTL est le r\u00e9pertoire communautaire pour cela \u2014 consultez ses inscriptions '
+       + (fmKey === 'food' ? 'd\u2019alimentation cach\u00e8re' : 'de synagogues et minyanim') + '. Les d\u00e9tails et les heures changent; confirmez avant de vous y fier.',
+    he:'\u05dc-CJHQ \u05d0\u05d9\u05df \u05de\u05d0\u05d2\u05e8 \u05de\u05d0\u05d5\u05de\u05ea \u05e9\u05dc \u05d1\u05ea\u05d9 \u05db\u05e0\u05e1\u05ea, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d5 \u05de\u05d6\u05d5\u05df \u05db\u05e9\u05e8, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e6\u05d9\u05d9\u05df \u05e8\u05e9\u05d5\u05de\u05d5\u05ea \u05de\u05d4\u05d6\u05d9\u05db\u05e8\u05d5\u05df. FindMTL \u05d4\u05d5\u05d0 \u05de\u05d3\u05e8\u05d9\u05da \u05d4\u05e7\u05d4\u05d9\u05dc\u05d4 \u05dc\u05e2\u05e0\u05d9\u05d9\u05df \u05d6\u05d4. \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05d5\u05d4\u05e9\u05e2\u05d5\u05ea \u05de\u05e9\u05ea\u05e0\u05d9\u05dd; \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e1\u05ea\u05de\u05db\u05d5\u05ea.',
     yi:'CJHQ \u05d4\u05d0\u05dc\u05d8 \u05e0\u05d0\u05da \u05e0\u05d9\u05e9\u05d8 \u05e7\u05d9\u05d9\u05df \u05d1\u05d0\u05e9\u05d8\u05e2\u05d8\u05d9\u05d2\u05d8\u05e2 \u05e8\u05e9\u05d9\u05de\u05d4 \u05e4\u05d5\u05df \u05e9\u05d5\u05dc\u05df, \u05de\u05e7\u05d5\u05d5\u05d0\u05d5\u05ea, \u05de\u05e0\u05d9\u05e0\u05d9\u05dd \u05d0\u05d3\u05e2\u05e8 \u05db\u05e9\u05e8 \u05e2\u05e1\u05df, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05e7\u05e2\u05df \u05d0\u05d9\u05da \u05d3\u05d0\u05e1 \u05e0\u05d9\u05e9\u05d8 \u05e2\u05e0\u05d8\u05e4\u05e2\u05e8\u05df \u05d0\u05d5\u05d9\u05e3 \u05d0 \u05e4\u05d0\u05e8\u05dc\u05d0\u05d6\u05dc\u05e2\u05db\u05df \u05d0\u05d5\u05e4\u05df. \u05d0 \u05e7\u05d4\u05d9\u05dc\u05d4 \u05d3\u05d9\u05e8\u05e2\u05e7\u05d8\u05d0\u05e8\u05d9\u05e2 \u05d0\u05d9\u05d6 \u05d3\u05e2\u05e8 \u05e8\u05d9\u05db\u05d8\u05d9\u05d2\u05e2\u05e8 \u05de\u05e7\u05d5\u05e8 \u05d3\u05e2\u05e8\u05e4\u05d0\u05e8, \u05d0\u05d5\u05df \u05d3\u05d0\u05e1 \u05d0\u05e0\u05e6\u05d5\u05e9\u05dc\u05d9\u05e1\u05df \u05e7\u05d5\u05de\u05d8 \u05e0\u05d0\u05da.'
   }, L);
-  r.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd', yi:'CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8'}, L), url:'/resources', kind:'internal' }];
   return r;
 }
 
