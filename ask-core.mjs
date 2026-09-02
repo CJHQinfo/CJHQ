@@ -785,6 +785,73 @@ const ASK_TEMPLATES = {
   }
 };
 
+/* ---------- Session policy ----------
+   The core is stateless and stays that way: it holds no chat ids, no history
+   and no timers. What lives here is the DECISION - given a session record and
+   the current time, is this active, expired, or a first-ever contact - so the
+   rule is written and tested once instead of being re-derived in the bridge.
+
+   The bridge owns everything stateful: the chat id, the stored record, when it
+   is written, and when it is discarded. It calls askSessionState() and does
+   what it says.
+
+   Expiry is silent by design. Nothing here produces a message on expiry, and
+   there is deliberately no template for one: a person who walked away five
+   minutes ago should not get a notification telling them so. There is also no
+   "anything else?" prompt - if they have another question they will send it. */
+const ASK_SESSION_POLICY = {
+  inactivityMs: 5 * 60 * 1000,   // 5 minutes, the whole of the rule
+  contextTurns: 6,               // matches the window askAnswer already trims to
+  notifyOnExpiry: false          // never. Left explicit so it cannot drift.
+};
+
+/* session: { sessionStartedAt, lastActivityAt, context[], everContacted }
+   Anything missing is treated as absent rather than assumed, so a malformed or
+   partial record degrades to "new session", never to a stale one.
+
+   Returns:
+     status        'new' | 'active' | 'expired'
+     context       what to pass to askAnswer - ALWAYS empty unless active, so an
+                   expired session cannot leak its previous turns into the next
+                   message even if the bridge forgets to clear its own copy
+     sendOnboarding  true only for a first-ever contact, not for a new session
+     clearContext  the bridge should discard what it stored
+     nextLastActivityAt  what to write back after handling the message      */
+function askSessionState(session, now){
+  const t = (typeof now === 'number') ? now : Date.now();
+  const s = session || {};
+  const last = Number(s.lastActivityAt);
+  const everContacted = s.everContacted === true;
+  const hasSession = Number.isFinite(last) && last > 0;
+  const idle = hasSession ? (t - last) : Infinity;
+  // >=, not >: exactly five minutes is expired. A boundary that favours
+  // keeping context is the wrong way round for a privacy timeout.
+  const expired = !hasSession || idle >= ASK_SESSION_POLICY.inactivityMs;
+
+  const status = !hasSession ? 'new' : (expired ? 'expired' : 'active');
+  const context = (status === 'active' && Array.isArray(s.context))
+    ? s.context.slice(-ASK_SESSION_POLICY.contextTurns)
+    : [];
+
+  return {
+    status,
+    context,
+    // A returning user whose session expired is a NEW SESSION, not a new user.
+    // Onboarding is sent once, ever.
+    sendOnboarding: !everContacted,
+    clearContext: status !== 'active',
+    idleMs: hasSession ? idle : null,
+    nextLastActivityAt: t,
+    nextSessionStartedAt: (status === 'active' && Number(s.sessionStartedAt)) || t
+  };
+}
+
+/* An explicit goodbye may close the session immediately. It is optional
+   handling - not a requirement, and it sends no closure notice. */
+function askSessionShouldClose(message){
+  return askSmallTalk(message) === 'goodbye';
+}
+
 /* Small-talk classifier, so the bridge does not run a greeting through the
    whole retrieval chain. Returns a template key or null. */
 function askSmallTalk(q){
@@ -1613,6 +1680,9 @@ export {
   askContactCjhq,
   askChildTravel,
   askOrgContactState,
-  ASK_CJHQ_CONTACT
+  ASK_CJHQ_CONTACT,
+  ASK_SESSION_POLICY,
+  askSessionState,
+  askSessionShouldClose
 };
 export { categories, SPECIAL_INFO_COUNTRIES, PARTNERS_DATA };
