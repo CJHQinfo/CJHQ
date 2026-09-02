@@ -3498,7 +3498,7 @@ let PARTNERS_DATA = [
   {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
   {type:'img', src:"/assets/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
   {type:'img', src:"/assets/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
-  {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:null},
+  {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:"https://www.ktshomrim.com/"},
   {type:'img', src:"/assets/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
   {type:'img', src:"/assets/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
   {type:'img', src:"/assets/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
@@ -7583,7 +7583,7 @@ async function renderEmbeddedPartnersList(){
           <p style="margin:3px 0 0; font-size:.75rem;">${partnerContactBadge(ov || {})}</p>
         </div>
         <div style="display:flex; gap:6px; flex-shrink:0;">
-          <button class="admin-small-btn" onclick="document.getElementById('editor-partner-${btoa(key).replace(/=/g,'')}').classList.toggle('open-editor')">Edit Link</button>
+          <button class="admin-small-btn" onclick="togglePartnerLinkEditor('${btoa(key).replace(/=/g,'')}')">Edit Link</button>
           <button class="admin-small-btn" onclick="partnerContactEditor('${safeKey}')">Edit Contact Information</button>
           <button class="admin-small-btn" onclick="togglePartnerHidden('${safeKey}')">${isHidden ? 'Unhide' : 'Hide'}</button>
         </div>
@@ -7726,6 +7726,16 @@ async function savePartnerContact(key){
   await renderEmbeddedPartnersList();
   const box = document.getElementById('partnerContactEditorBox');
   if(box) box.style.display = 'none';
+}
+
+/* The Edit Link button toggled a class called "open-editor" that no CSS rule
+   anywhere ever matched, while the panel carries an inline style="display:none".
+   A class cannot override an inline style, so the button has never done
+   anything. Toggle the inline display directly instead. */
+function togglePartnerLinkEditor(domId){
+  const el = document.getElementById('editor-partner-' + domId);
+  if(!el) return;
+  el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
 }
 
 async function togglePartnerHidden(key){
