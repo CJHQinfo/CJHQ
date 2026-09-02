@@ -6693,9 +6693,13 @@ function askPracticalHandlers(){
   // emergency handler (which already owns Hatzolah) and before the resource
   // matcher, so "who do I call for X" is answered from CJHQ's own partner list
   // rather than from whichever resource happens to share a word with it.
-  return [askEruv, askEmergency, askZmanim, askCalendar,
-          askOrganizations, askSpecialInfo, askCommunityDirectory,
-          askCjhqResources, askFindMtl];
+  // askContactCjhq is first among the practical handlers: a question about
+  // reaching CJHQ is about CJHQ itself, not about a partner or a resource.
+  // askChildTravel sits ahead of the matcher because the words that carry its
+  // meaning are not resource keywords - the matcher saw only noise.
+  return [askContactCjhq, askEruv, askEmergency, askZmanim, askCalendar,
+          askOrganizations, askChildTravel, askSpecialInfo,
+          askCommunityDirectory, askCjhqResources, askFindMtl];
 }
 
 function askHalachic(q){
@@ -6789,6 +6793,27 @@ function askFindMtlSource(key){
    the quota, the status code or the stack ever reaches the person; that
    belongs in the log.                                                        */
 const ASK_TEMPLATES = {
+  /* Sent once, on first contact only. The bridge owns "have I seen this chat
+     before"; the core just supplies the wording. Exact text as specified -
+     do not pad it. */
+  onboarding: {
+    en:'Hello! You\u2019re chatting with the CJHQ WhatsApp Assistant.\n\nPlease send your question as a text message rather than a voice note so I can process it accurately.\n\nYou can also save the CJHQ contact to your phone to see our WhatsApp Status updates.',
+    fr:'Bonjour! Vous \u00eates en conversation avec l\u2019assistant WhatsApp du CJHQ.\n\nVeuillez envoyer votre question sous forme de message texte plut\u00f4t que par note vocale afin que je puisse la traiter correctement.\n\nVous pouvez aussi enregistrer le contact du CJHQ dans votre t\u00e9l\u00e9phone pour voir nos mises \u00e0 jour de statut WhatsApp.',
+    he:'\u05e9\u05dc\u05d5\u05dd! \u05d0\u05ea\u05dd \u05de\u05e9\u05d5\u05d7\u05d7\u05d9\u05dd \u05e2\u05dd \u05d4\u05e2\u05d5\u05d6\u05e8 \u05e9\u05dc CJHQ \u05d1\u05d5\u05d5\u05d0\u05d8\u05e1\u05d0\u05e4.\n\n\u05d0\u05e0\u05d0 \u05e9\u05dc\u05d7\u05d5 \u05d0\u05ea \u05d4\u05e9\u05d0\u05dc\u05d4 \u05d1\u05d4\u05d5\u05d3\u05e2\u05ea \u05d8\u05e7\u05e1\u05d8 \u05d5\u05dc\u05d0 \u05d1\u05d4\u05e7\u05dc\u05d8\u05d4 \u05e7\u05d5\u05dc\u05d9\u05ea, \u05db\u05d3\u05d9 \u05e9\u05d0\u05d5\u05db\u05dc \u05dc\u05e2\u05d1\u05d3 \u05d0\u05d5\u05ea\u05d4 \u05d1\u05e6\u05d5\u05e8\u05d4 \u05de\u05d3\u05d5\u05d9\u05e7\u05ea.\n\n\u05e0\u05d9\u05ea\u05df \u05d2\u05dd \u05dc\u05e9\u05de\u05d5\u05e8 \u05d0\u05ea \u05d0\u05d9\u05e9 \u05d4\u05e7\u05e9\u05e8 \u05e9\u05dc CJHQ \u05d1\u05d8\u05dc\u05e4\u05d5\u05df \u05db\u05d3\u05d9 \u05dc\u05e8\u05d0\u05d5\u05ea \u05d0\u05ea \u05e2\u05d3\u05db\u05d5\u05e0\u05d9 \u05d4\u05e1\u05d8\u05d8\u05d5\u05e1 \u05e9\u05dc\u05e0\u05d5.'
+  },
+  /* Returning user. Short, no onboarding repeat. */
+  greetingReturning: {
+    en:'Hello! How can I help you today?',
+    fr:'Bonjour! Comment puis-je vous aider aujourd\u2019hui?',
+    he:'\u05e9\u05dc\u05d5\u05dd! \u05d1\u05de\u05d4 \u05d0\u05d5\u05db\u05dc \u05dc\u05e2\u05d6\u05d5\u05e8 \u05d4\u05d9\u05d5\u05dd?'
+  },
+  /* Voice note the bridge could not transcribe. It never claims to have
+     understood audio it did not process. */
+  voiceNote: {
+    en:'Please send your question as a text message so I can process it accurately.',
+    fr:'Veuillez envoyer votre question sous forme de message texte afin que je puisse la traiter correctement.',
+    he:'\u05d0\u05e0\u05d0 \u05e9\u05dc\u05d7\u05d5 \u05d0\u05ea \u05d4\u05e9\u05d0\u05dc\u05d4 \u05d1\u05d4\u05d5\u05d3\u05e2\u05ea \u05d8\u05e7\u05e1\u05d8 \u05db\u05d3\u05d9 \u05e9\u05d0\u05d5\u05db\u05dc \u05dc\u05e2\u05d1\u05d3 \u05d0\u05d5\u05ea\u05d4 \u05d1\u05e6\u05d5\u05e8\u05d4 \u05de\u05d3\u05d5\u05d9\u05e7\u05ea.'
+  },
   greeting: {
     en:'Hello! You\u2019re chatting with the CJHQ WhatsApp Assistant. Please tell me what you need help with.',
     fr:'Bonjour! Vous \u00eates en conversation avec l\u2019assistant WhatsApp du CJHQ. Dites-moi ce dont vous avez besoin.',
@@ -7049,10 +7074,118 @@ const ASK_ORG_SERVICES = [
     orgs:['Eruv Montreal'] }
 ];
 
+
+/* ---------- CJHQ's own contact details ----------
+   Read from the values already published on the contact page. This is CJHQ's
+   OWN contact information and must never be confused with a partner
+   organization: askOrganizations answers about partners, this answers about
+   CJHQ. A partner's number is never CJHQ's number and vice versa. */
+const ASK_CJHQ_CONTACT = {
+  phone: '(514) 819-9440',
+  email: 'info@cjhq.org',
+  address: '1040 Van Horne Ave, Outremont, QC'
+};
+
+/* "How do I reach CJHQ" used to fall all the way through to a decline, which
+   is a poor answer from CJHQ's own assistant about CJHQ itself. */
+const ASK_CONTACT_RE = new RegExp([
+  'contact (?:the )?cjhq', 'reach (?:the )?cjhq', 'cjhq(?:\'s)? (?:phone|number|email|office|address)',
+  'contact (?:the )?office', 'reach (?:the )?office', 'where is (?:the )?(?:cjhq )?office',
+  'speak to someone', 'talk to someone', 'someone (?:to )?call me',
+  'question for cjhq', 'help from cjhq', 'someone help me at cjhq',
+  'who do i contact at cjhq', 'contacter (?:le )?cjhq', 'joindre (?:le )?cjhq',
+  'num\u00e9ro (?:du|de) cjhq', 'courriel (?:du|de) cjhq', 'parler \u00e0 quelqu\'un',
+  '\u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05e2\u05dd cjhq', '\u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05e9\u05dc cjhq', '\u05dc\u05d3\u05d1\u05e8 \u05e2\u05dd \u05de\u05d9\u05e9\u05d4\u05d5'
+].join('|'), 'i');
+
+function askContactCjhq(q){
+  if(!ASK_CONTACT_RE.test(String(q || ''))) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(q); r.lang = L;
+  r.handler = 'Contact CJHQ';
+  r.handled = true;
+  const C = ASK_CJHQ_CONTACT;
+  r.answer = askT({
+    en:'You can reach CJHQ at ' + C.phone + ' or ' + C.email + '. The office is at ' + C.address + '. The contact page has the full details and a message form.',
+    fr:'Vous pouvez joindre le CJHQ au ' + C.phone + ' ou \u00e0 ' + C.email + '. Le bureau est au ' + C.address + '. La page Contact contient tous les d\u00e9tails et un formulaire.',
+    he:'\u05e0\u05d9\u05ea\u05df \u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05e2\u05dd CJHQ \u05d1\u05d8\u05dc\u05e4\u05d5\u05df ' + C.phone + ' \u05d0\u05d5 \u05d1\u05d3\u05d5\u05d0\u05f4\u05dc ' + C.email + '. \u05d4\u05de\u05e9\u05e8\u05d3 \u05e0\u05de\u05e6\u05d0 \u05d1-' + C.address + '. \u05d1\u05d3\u05e3 \u05d4\u05e7\u05e9\u05e8 \u05d9\u05e9 \u05d0\u05ea \u05db\u05dc \u05d4\u05e4\u05e8\u05d8\u05d9\u05dd \u05d5\u05d8\u05d5\u05e4\u05e1 \u05e4\u05e0\u05d9\u05d9\u05d4.',
+    yi:'\u05d0\u05d9\u05e8 \u05e7\u05e2\u05e0\u05d8 \u05e0\u05d5\u05d7\u05df \u05de\u05d9\u05d8 CJHQ \u05d1\u05d9\u05d9\u05dd ' + C.phone + ' \u05d0\u05d3\u05e2\u05e8 ' + C.email + '. \u05d3\u05e2\u05e8 \u05d0\u05e4\u05d9\u05e1 \u05d0\u05d9\u05d6 \u05d1\u05d9\u05d9 ' + C.address + '. \u05d3\u05e2\u05e8 \u05e7\u05d0\u05e0\u05d8\u05d0\u05e7\u05d8 \u05d1\u05dc\u05d0\u05d8 \u05d4\u05d0\u05d8 \u05d3\u05d9 \u05e4\u05d5\u05dc\u05e2 \u05e4\u05e8\u05d8\u05d9\u05dd.'
+  }, L);
+  r.actions = [{ label: askT({en:'Contact CJHQ', fr:'Contacter le CJHQ', he:'\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8', yi:'\u05e7\u05d0\u05e0\u05d8\u05d0\u05e7\u05d8'}, L), url:'/contact', kind:'internal' }];
+  r.sources = [{ name:'CJHQ Contact', url:'https://cjhq.org/contact', type:'CJHQ',
+                 authoritative:true, timeSensitive:false, lastUpdated:'' }];
+  return r;
+}
+
+/* ---------- child / minor travel ----------
+   Compound intent. "What do I need to send my 12-year-old to New York alone?"
+   previously matched nothing at all - the words that carry the meaning (child,
+   alone, New York) are not resource keywords, so the matcher saw noise.
+
+   This does NOT answer the question from model knowledge. It names the separate
+   requirements so the person knows they are separate - travel document, parental
+   consent, border entry, and the airline's own unaccompanied-minor policy are
+   four different things and satisfying one does not satisfy the others - and
+   hands over the CJHQ resources that exist for each. Airline policy is
+   explicitly flagged as something CJHQ does not hold. */
+const ASK_CHILD_RE = /\b(child|children|kid|kids|minor|son|daughter|toddler|\d{1,2}[ -]?year[ -]?old|12 ?yo|13 ?yo)\b|\benfant\b|\bmineur\b|\bfils\b|\bfille\b|\u05d9\u05dc\u05d3|\u05d9\u05dc\u05d3\u05d4|\u05e7\u05d8\u05d9\u05df|\u05e7\u05d9\u05e0\u05d3/i;
+// Deliberately does NOT include a bare "travel": "Child travel consent
+// letter" is someone naming a resource, and that belongs to the matcher, not
+// to a four-part explainer. What fires this handler is a travel SITUATION -
+// alone, without a parent, crossing a border, flying, international.
+const ASK_CHILD_TRAVEL_RE = /fly|flying|flight|cross(?:ing)? the border|\bborder\b|abroad|international|\balone\b|without (?:me|both|a parent|parents)|unaccompanied|another family|by (?:him|her)self|voyage seul|fronti\u00e8re|\u05dc\u05d1\u05d3|\u05d2\u05d1\u05d5\u05dc|\u05d8\u05d9\u05e1\u05d4/i;
+
+function askChildTravel(q){
+  const s = String(q || '');
+  if(!ASK_CHILD_RE.test(s) || !ASK_CHILD_TRAVEL_RE.test(s)) return null;
+  const r = askAnswerShape();
+  const L = askDetectLanguage(s); r.lang = L;
+  r.handler = 'Child Travel';
+  r.handled = true;
+  r.timeSensitive = true;
+
+  r.answer = askT({
+    en:'A child travelling without both parents has four separate requirements, and meeting one does not cover the others:\n- Travel document: the child needs their own passport or accepted document.\n- Parental consent: a signed consent letter from the non-travelling parent(s).\n- Border entry: the destination country decides what it accepts at the border.\n- Airline policy: if the child flies, the airline sets its own unaccompanied-minor rules, which CJHQ does not hold - check directly with the airline.\nCJHQ has resources for the first two below. Confirm the border and airline requirements close to the travel date, since both change.',
+    fr:'Un enfant qui voyage sans ses deux parents doit satisfaire quatre exigences distinctes; en remplir une ne remplace pas les autres\u00a0:\n- Document de voyage\u00a0: l\u2019enfant a besoin de son propre passeport ou d\u2019un document accept\u00e9.\n- Consentement parental\u00a0: une lettre de consentement sign\u00e9e par le ou les parents qui ne voyagent pas.\n- Entr\u00e9e \u00e0 la fronti\u00e8re\u00a0: le pays de destination d\u00e9cide de ce qu\u2019il accepte.\n- Politique de la compagnie a\u00e9rienne\u00a0: si l\u2019enfant prend l\u2019avion, la compagnie fixe ses propres r\u00e8gles pour les mineurs non accompagn\u00e9s; le CJHQ ne les d\u00e9tient pas \u2014 v\u00e9rifiez directement aupr\u00e8s d\u2019elle.\nLe CJHQ a des ressources pour les deux premi\u00e8res ci-dessous. Confirmez les exigences de la fronti\u00e8re et de la compagnie peu avant le d\u00e9part, car elles changent.',
+    he:'\u05d9\u05dc\u05d3 \u05d4\u05e0\u05d5\u05e1\u05e2 \u05dc\u05dc\u05d0 \u05e9\u05e0\u05d9 \u05d4\u05d5\u05e8\u05d9\u05d5 \u05e6\u05e8\u05d9\u05da \u05dc\u05e2\u05de\u05d5\u05d3 \u05d1\u05d0\u05e8\u05d1\u05e2 \u05d3\u05e8\u05d9\u05e9\u05d5\u05ea \u05e0\u05e4\u05e8\u05d3\u05d5\u05ea:\n- \u05de\u05e1\u05de\u05da \u05e0\u05e1\u05d9\u05e2\u05d4: \u05d3\u05e8\u05db\u05d5\u05df \u05de\u05e9\u05dc\u05d5 \u05d0\u05d5 \u05de\u05e1\u05de\u05da \u05de\u05d0\u05d5\u05e9\u05e8.\n- \u05d4\u05e1\u05db\u05de\u05ea \u05d4\u05d5\u05e8\u05d9\u05dd: \u05de\u05db\u05ea\u05d1 \u05d4\u05e1\u05db\u05de\u05d4 \u05d7\u05ea\u05d5\u05dd.\n- \u05db\u05e0\u05d9\u05e1\u05d4 \u05d1\u05d2\u05d1\u05d5\u05dc: \u05de\u05d3\u05d9\u05e0\u05ea \u05d4\u05d9\u05e2\u05d3 \u05de\u05d7\u05dc\u05d9\u05d8\u05d4 \u05de\u05d4 \u05d4\u05d9\u05d0 \u05de\u05e7\u05d1\u05dc\u05ea.\n- \u05de\u05d3\u05d9\u05e0\u05d9\u05d5\u05ea \u05d7\u05d1\u05e8\u05ea \u05d4\u05ea\u05e2\u05d5\u05e4\u05d4: \u05dc-CJHQ \u05d0\u05d9\u05df \u05d0\u05ea \u05d4\u05de\u05d9\u05d3\u05e2 \u05d4\u05d6\u05d4 \u2014 \u05d9\u05e9 \u05dc\u05d1\u05d3\u05d5\u05e7 \u05de\u05d5\u05dc \u05d7\u05d1\u05e8\u05ea \u05d4\u05ea\u05e2\u05d5\u05e4\u05d4.\n\u05dc-CJHQ \u05d9\u05e9 \u05de\u05e9\u05d0\u05d1\u05d9\u05dd \u05dc\u05e9\u05ea\u05d9 \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d5\u05ea. \u05d9\u05e9 \u05dc\u05d0\u05de\u05ea \u05e1\u05de\u05d5\u05da \u05dc\u05e0\u05e1\u05d9\u05e2\u05d4.',
+    yi:'\u05d0 \u05e7\u05d9\u05e0\u05d3 \u05d5\u05d5\u05d0\u05e1 \u05e8\u05d9\u05d9\u05d6\u05d8 \u05d0\u05df \u05d1\u05d9\u05d9\u05d3\u05e2 \u05e2\u05dc\u05d8\u05e2\u05e8\u05df \u05d3\u05d0\u05e8\u05e3 \u05d4\u05d0\u05d1\u05df \u05e4\u05d9\u05e8 \u05d1\u05d0\u05d6\u05d5\u05e0\u05d3\u05e2\u05e8\u05e2 \u05d6\u05d0\u05db\u05df:\n- \u05e8\u05d9\u05d9\u05d6\u05be\u05d3\u05d0\u05e7\u05d5\u05de\u05e2\u05e0\u05d8: \u05d0\u05df \u05d0\u05d9\u05d9\u05d2\u05e2\u05e0\u05e2\u05dd \u05e4\u05d0\u05e1\u05e4\u05d0\u05e8\u05d8.\n- \u05e2\u05dc\u05d8\u05e2\u05e8\u05e0\u05e1 \u05d4\u05e1\u05db\u05de\u05d4: \u05d0 \u05d0\u05d5\u05e0\u05d8\u05e2\u05e8\u05d2\u05e2\u05e9\u05e8\u05d9\u05d1\u05df \u05d1\u05e8\u05d9\u05f4\u05e3.\n- \u05d2\u05e8\u05e2\u05e0\u05d9\u05e5: \u05d3\u05e2\u05e8 \u05dc\u05d0\u05e0\u05d3 \u05d1\u05d0\u05e9\u05dc\u05d9\u05e1\u05d8 \u05d5\u05d5\u05d0\u05e1 \u05e2\u05e8 \u05e0\u05e2\u05de\u05d8 \u05d0\u05df.\n- \u05e2\u05e8\u05dc\u05d0\u05d9\u05df \u05e8\u05e2\u05d2\u05dc\u05e2\u05df: CJHQ \u05d4\u05d0\u05d8 \u05d3\u05d0\u05e1 \u05e0\u05d9\u05e9\u05d8 \u2014 \u05e4\u05e8\u05e2\u05d2\u05d8 \u05d1\u05d9\u05d9 \u05d3\u05e2\u05e8 \u05e2\u05e8\u05dc\u05d0\u05d9\u05df.\nCJHQ \u05d4\u05d0\u05d8 \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1\u05df \u05e4\u05d0\u05e8 \u05d3\u05d9 \u05e2\u05e8\u05e9\u05d8\u05e2 \u05e6\u05d5\u05d5\u05d9\u05d9.'
+  }, L);
+
+  // Attach only the CJHQ resources that exist for these requirements.
+  const picks = [];
+  const consent = askMatchResources('child travel consent letter', 1);
+  const passport = askMatchResources('child passport application', 1);
+  if(consent.length)  picks.push(consent[0]);
+  if(passport.length) picks.push(passport[0]);
+  r.actions = picks.map(h => ({
+    label: (L === 'fr' && h.item.fr) ? h.item.fr : h.item.en,
+    url: h.item.internalPage ? ('/' + h.item.internalPage) : ('/resources/' + h.item.slug),
+    kind:'internal'
+  }));
+  r.sources = picks.map(h => ({
+    name: h.item.en, url:'https://cjhq.org/resources/' + h.item.slug,
+    type:'CJHQ Resource', authoritative:true, timeSensitive:false, lastUpdated:''
+  }));
+  return r;
+}
+
+/* Reads the optional verified fields WHEN they exist on a partner record. None
+   of them are populated today - PARTNERS_DATA carries name, logo, dimensions
+   and url, nothing more - and this deliberately populates none of them. The
+   point is that the day CJHQ adds a verified phone or email to a record, the
+   assistant starts using it with no code change and no second database. */
 function askOrgRegistry(){
   const raw = (typeof PARTNERS_DATA !== 'undefined') ? PARTNERS_DATA : [];
-  return raw.map(p => ({ name: (p.alt || p.name || '').trim(), url: p.url || '' }))
-            .filter(o => o.name);
+  return raw.map(p => ({
+    name:        (p.alt || p.name || '').trim(),
+    url:         p.url || '',
+    phone:       p.phone || '',
+    emergencyPhone: p.emergencyPhone || '',
+    email:       p.email || '',
+    description: p.description || '',
+    services:    Array.isArray(p.services) ? p.services : [],
+    aliases:     Array.isArray(p.aliases) ? p.aliases : []
+  })).filter(o => o.name);
 }
 
 function askOrgMatch(q){
@@ -7061,7 +7194,9 @@ function askOrgMatch(q){
   const found = [];
   orgs.forEach(o => {
     const key = o.name.toLowerCase();
-    const aliases = [key].concat(ASK_ORG_ALIASES[key] || []);
+    // Record-level aliases win alongside the built-in ones, so a future
+    // verified record can carry its own without editing this file.
+    const aliases = [key].concat(ASK_ORG_ALIASES[key] || []).concat(o.aliases || []);
     if(aliases.some(a => a && s.indexOf(String(a).toLowerCase()) >= 0)) found.push(o);
   });
   if(found.length) return found;
@@ -7087,6 +7222,19 @@ function askOrganizations(q){
   const named = hits.slice(0, 3);
   const list = named.map(o => o.name).join(', ');
   const wantsPhone = ASK_ORG_PHONE_ASK.test(String(q || ''));
+  // If CJHQ ever holds a verified number, it is used verbatim and the
+  // "we don't have one" wording disappears on its own.
+  const verified = named.filter(o => o.phone || o.emergencyPhone);
+  if(wantsPhone && verified.length){
+    r.answer = verified.map(o => o.name + ': '
+      + [o.emergencyPhone ? o.emergencyPhone + ' (emergency)' : '', o.phone]
+        .filter(Boolean).join(' / ')).join('\n');
+    r.actions = named.filter(o => o.url).map(o => ({ label:o.name, url:o.url, kind:'link' }));
+    r.sources = named.filter(o => o.url).map(o => ({
+      name:o.name, url:o.url, type:'Community organization',
+      authoritative:true, timeSensitive:false, lastUpdated:'' }));
+    return r;
+  }
 
   // CJHQ publishes the organization and its website. It does not publish
   // contact numbers, so a phone question gets an honest answer and the
@@ -7407,7 +7555,14 @@ async function askRun(question, opts, aiAdapter){
 async function askAnswer(input){
   const opts = (input && typeof input === 'object') ? input : { text: String(input || '') };
   const text = String(opts.text || '');
-  const res  = await askRun(text, { useAI: opts.useAI === true }, opts.aiAdapter);
+  // Optional conversation context, supplied per call by the caller and NEVER
+  // stored here. The core stays stateless, which is what guarantees one
+  // WhatsApp chat cannot leak into another: there is nothing to leak from.
+  // The bridge owns chat id, the recent-message window, expiry and isolation.
+  const res  = await askRun(text, {
+    useAI: opts.useAI === true,
+    context: Array.isArray(opts.context) ? opts.context.slice(-6) : null
+  }, opts.aiAdapter);
   if(!res){
     return { answer:'', sources:[], actions:[], timeSensitive:false,
              handled:false, handler:'', lang:'en', location:'', halachic:false };
