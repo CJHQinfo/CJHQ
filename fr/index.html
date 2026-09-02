@@ -6274,7 +6274,7 @@ function askPracticalHandlers(){
           askCommunityDirectory, askCjhqResources, askFindMtl];
 }
 
-function askHalachic(q){
+function askHalachic(q, opts){
   if(!ASK_HALACHIC_RE.test(String(q || ''))) return null;
   const L = askDetectLanguage(q);
 
@@ -6282,7 +6282,7 @@ function askHalachic(q){
   // run exactly as they normally would; only the presentation changes.
   let practical = null;
   for(const h of askPracticalHandlers()){
-    const out = h(q);
+    const out = h(q, opts);
     if(out){ practical = out; break; }
   }
 
@@ -6473,7 +6473,15 @@ function askEruv(q){
   return r;
 }
 
-function askEmergency(q){
+function askEmergency(q, opts){
+  // "What is the emergency number for Chaverim?" is a question about a named
+  // partner, not a medical emergency. Without this, the word "emergency" alone
+  // routed it here and the person got the Hatzolah answer for a roadside
+  // organization. Hatzolah itself still lands here, and so does any general
+  // emergency question, because that is where the 911-first wording belongs.
+  const namedOther = askOrgMatch(q, opts && opts.orgContacts)
+    .filter(o => !/hatzol/i.test(o.name));
+  if(namedOther.length && !/hatzol|\u05d4\u05e6\u05dc\u05d4/i.test(String(q || ''))) return null;
   if(!/hatzol|hatzalah|ambulance|emergency|paramedic|urgence|ambulancier|noytfal|\u05d4\u05e6\u05dc\u05d4|\u05e0\u05d5\u05d9\u05d8\u05e4\u05d0\u05dc|\u05d0\u05de\u05d1\u05d5\u05dc\u05d0\u05e0\u05e1/i.test(q)) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
@@ -6746,23 +6754,65 @@ function askChildTravel(q){
    and url, nothing more - and this deliberately populates none of them. The
    point is that the day CJHQ adds a verified phone or email to a record, the
    assistant starts using it with no code change and no second database. */
-function askOrgRegistry(){
+/* CONTACT SCHEMA - the fields a partner record may carry once staff have
+   entered them. Every one ships empty.
+
+     phone              a published general number, purpose not classified
+     emergencyPhone     ONLY where the organization itself calls it an
+                        emergency/urgent line
+     nonEmergencyPhone  ONLY where the purpose is explicitly non-urgent
+     additionalPhone    any further published line
+     email, address, website, description, services[], aliases[]
+     hours, languages   only where explicitly published
+     contactSource      where the information came from
+     contactVerified    false until a CJHQ staff member confirms it
+     contactVerifiedDate
+
+   phone is NEVER copied into emergencyPhone. A general office line presented
+   as an emergency number is the single most dangerous thing this directory
+   could contain: someone would call it during an emergency and get voicemail.
+   The three fields stay separate in the data, in the editor and in the answer.
+
+   contacts is an optional map of { [organization name]: {...fields} }. The
+   website passes the Firestore partner_overrides cache; the WhatsApp bridge
+   passes the same records it fetched itself. The core stores nothing. */
+function askOrgRegistry(contacts){
   const raw = (typeof PARTNERS_DATA !== 'undefined') ? PARTNERS_DATA : [];
-  return raw.map(p => ({
+  const extra = contacts || (typeof PARTNER_OVERRIDES_CACHE !== 'undefined' ? PARTNER_OVERRIDES_CACHE : null) || {};
+  return raw.map(p => Object.assign({}, p, extra[(p.alt || p.name || '').trim()] || {})).map(p => ({
     name:        (p.alt || p.name || '').trim(),
     url:         p.url || '',
     phone:       p.phone || '',
     emergencyPhone: p.emergencyPhone || '',
     email:       p.email || '',
     description: p.description || '',
+    nonEmergencyPhone: p.nonEmergencyPhone || '',
+    additionalPhone:   p.additionalPhone || '',
+    address:     p.address || '',
+    hours:       p.hours || '',
+    languages:   p.languages || '',
     services:    Array.isArray(p.services) ? p.services : [],
-    aliases:     Array.isArray(p.aliases) ? p.aliases : []
+    aliases:     Array.isArray(p.aliases) ? p.aliases : [],
+    contactSource:      p.contactSource || '',
+    contactVerified:    p.contactVerified === true,
+    contactVerifiedDate: p.contactVerifiedDate || ''
   })).filter(o => o.name);
+
 }
 
-function askOrgMatch(q){
+/* Completeness state for the admin list. Deliberately does NOT treat a missing
+   emergency number as incomplete - most organizations do not have one, and
+   flagging that as a gap would push someone toward inventing one. */
+function askOrgContactState(o){
+  const hasAny = !!(o.phone || o.emergencyPhone || o.nonEmergencyPhone || o.email);
+  if(!hasAny) return 'none';
+  if(o.contactVerified) return 'verified';
+  return 'pending';
+}
+
+function askOrgMatch(q, contacts){
   const s = String(q || '').toLowerCase();
-  const orgs = askOrgRegistry();
+  const orgs = askOrgRegistry(contacts);
   const found = [];
   orgs.forEach(o => {
     const key = o.name.toLowerCase();
@@ -6783,8 +6833,8 @@ function askOrgMatch(q){
 
 const ASK_ORG_PHONE_ASK = /phone|number|call|t\u00e9l\u00e9phone|num\u00e9ro|appeler|\u05d8\u05dc\u05e4\u05d5\u05df|\u05de\u05e1\u05e4\u05e8|\u05dc\u05d4\u05ea\u05e7\u05e9\u05e8|\u05e0\u05d5\u05de\u05e2\u05e8|\u05e8\u05d5\u05e4\u05df/i;
 
-function askOrganizations(q){
-  const hits = askOrgMatch(q);
+function askOrganizations(q, opts){
+  const hits = askOrgMatch(q, opts && opts.orgContacts);
   if(!hits.length) return null;
   const r = askAnswerShape();
   const L = askDetectLanguage(q); r.lang = L;
@@ -6794,13 +6844,40 @@ function askOrganizations(q){
   const named = hits.slice(0, 3);
   const list = named.map(o => o.name).join(', ');
   const wantsPhone = ASK_ORG_PHONE_ASK.test(String(q || ''));
-  // If CJHQ ever holds a verified number, it is used verbatim and the
-  // "we don't have one" wording disappears on its own.
-  const verified = named.filter(o => o.phone || o.emergencyPhone);
+  // ONLY verified data is ever spoken. A record that staff have entered but
+  // not confirmed is invisible to users - it exists so staff can review it,
+  // not so the assistant can hedge with it. Research status, sources and the
+  // pending flag never appear in an answer.
+  const wantsNonEmergencyFirst = /non[- ]?emergenc|not (?:an )?emergenc|regular (?:line|number)|non[- ]?urgent/i.test(String(q || ''));
+  const wantsEmergency = !wantsNonEmergencyFirst && /emergenc|urgent|urgence|\u05d7\u05d9\u05e8\u05d5\u05dd|\u05d3\u05d7\u05d5\u05e3/i.test(String(q || ''));
+  const wantsNonEmergency = /non[- ]?emergenc|not (?:an )?emergenc|regular (?:line|number)|non[- ]?urgent/i.test(String(q || ''));
+  const verified = named.filter(o => o.contactVerified &&
+    (o.phone || o.emergencyPhone || o.nonEmergencyPhone));
   if(wantsPhone && verified.length){
-    r.answer = verified.map(o => o.name + ': '
-      + [o.emergencyPhone ? o.emergencyPhone + ' (emergency)' : '', o.phone]
-        .filter(Boolean).join(' / ')).join('\n');
+    r.answer = verified.map(o => {
+      // Answer the line that was actually asked for. Never substitute one
+      // category for another: if someone asks for the emergency number and
+      // CJHQ only holds a general one, say so rather than handing over the
+      // general line as though it were the emergency line.
+      if(wantsEmergency){
+        return o.emergencyPhone
+          ? o.name + ' (emergency): ' + o.emergencyPhone
+          : o.name + ': CJHQ does not have a verified emergency number on file'
+            + (o.phone ? '. The verified general number is ' + o.phone + '.' : '.');
+      }
+      if(wantsNonEmergency){
+        return o.nonEmergencyPhone
+          ? o.name + ' (non-emergency): ' + o.nonEmergencyPhone
+          : o.name + ': CJHQ does not have a verified non-emergency number on file'
+            + (o.phone ? '. The verified general number is ' + o.phone + '.' : '.');
+      }
+      const lines = [];
+      if(o.phone) lines.push(o.phone);
+      if(o.nonEmergencyPhone) lines.push(o.nonEmergencyPhone + ' (non-emergency)');
+      if(o.emergencyPhone) lines.push(o.emergencyPhone + ' (emergency)');
+      if(o.email) lines.push(o.email);
+      return o.name + ': ' + lines.join(' / ');
+    }).join('\n');
     r.actions = named.filter(o => o.url).map(o => ({ label:o.name, url:o.url, kind:'link' }));
     r.sources = named.filter(o => o.url).map(o => ({
       name:o.name, url:o.url, type:'Community organization',
@@ -6811,6 +6888,9 @@ function askOrganizations(q){
   // CJHQ publishes the organization and its website. It does not publish
   // contact numbers, so a phone question gets an honest answer and the
   // official site, which is where the current number actually lives.
+  // Reached when there is no verified number. The claim is precise: CJHQ does
+  // not have one on file. It is NOT a claim that the organization has no
+  // phone number, and it is not "we couldn't find anything".
   const phoneNote = wantsPhone ? askT({
     en:' CJHQ does not hold a verified phone number for ' + (named.length === 1 ? 'it' : 'these') + ', and I will not quote one from anywhere else - numbers change and a wrong one costs someone time in an emergency. The official site below has the current contact details.',
     fr:' Le CJHQ ne d\u00e9tient pas de num\u00e9ro de t\u00e9l\u00e9phone v\u00e9rifi\u00e9, et je n\u2019en citerai pas un provenant d\u2019ailleurs \u2014 les num\u00e9ros changent et un mauvais num\u00e9ro co\u00fbte du temps en situation d\u2019urgence. Le site officiel ci-dessous contient les coordonn\u00e9es \u00e0 jour.',
@@ -7069,7 +7149,7 @@ async function askRun(question, opts, aiAdapter){
   const handlers = [askHalachic].concat(askPracticalHandlers());
   let res = null;
   for(const h of handlers){
-    const out = h(q);
+    const out = h(q, opts);
     if(out){ res = out; break; }
   }
 
@@ -7133,7 +7213,8 @@ async function askAnswer(input){
   // The bridge owns chat id, the recent-message window, expiry and isolation.
   const res  = await askRun(text, {
     useAI: opts.useAI === true,
-    context: Array.isArray(opts.context) ? opts.context.slice(-6) : null
+    context: Array.isArray(opts.context) ? opts.context.slice(-6) : null,
+    orgContacts: (opts.orgContacts && typeof opts.orgContacts === 'object') ? opts.orgContacts : null
   }, opts.aiAdapter);
   if(!res){
     return { answer:'', sources:[], actions:[], timeSensitive:false,
