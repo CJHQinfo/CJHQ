@@ -121,7 +121,10 @@ const EXPORTS = [
   // suites can drive the verifier and the retrieval-breadth decision directly,
   // rather than inferring them from a finished answer.
   'askVerifyPhrasing', 'askBuildReviewContext', 'askQuestionBreadth',
-  'askSameTopicSiblings', 'askContentUnits', 'askCoverageLoss', 'askResourceIndex'
+  'askSameTopicSiblings', 'askContentUnits', 'askCoverageLoss', 'askResourceIndex',
+  // Primary-resource context renderer. Exported so the context suite can assert
+  // on it directly instead of inferring it from the assembled context string.
+  'askContextPrimary'
 ];
 
 const coreOut = `/* GENERATED FILE - do not edit.
