@@ -300,6 +300,48 @@ function askStem(w){
   return x;
 }
 
+/* The question stopwords. Declared at module scope, unchanged in content,
+   so askQuestionBreadth can apply the SAME list rather than carrying a second
+   one that would drift. askMatchResources uses it exactly as before. */
+const ASK_QUERY_STOP = new Set(['the','and','for','you','your','can','how','where','when','with','from',
+  'are','this','that','need','get','find','about','does','any','has','have','what','who','why',
+  'was','were','will','would','should','could','there','their','they','been','into','than','then',
+  'them','some','more','most','also','just','like','want','looking','know','tell','please','info',
+  'information','help','question','anything','something',
+  // French equivalents - a French question deserves the same filtering.
+  'les','des','une','pour','dans','avec','sur','est','sont','que','qui','quoi','comment','puis',
+  'peux','peut','vous','nous','mon','mes','mon','notre','avoir','faire','besoin','trouver','obtenir',
+  'demander','cette','cet','ceci','cela','plus','tout','tous','toute','ainsi','aussi','renseignement',
+  'renseignements','aide','ou']);
+
+/* Are two words the same word, allowing for ordinary inflection?
+
+   The bounded stem-prefix rule askMatchResources already uses for titles,
+   lifted into a named function so the coverage check can apply the SAME
+   comparison rather than inventing a looser one. Both stems must be at least
+   4 characters, and the shorter must be a prefix of the longer.
+
+   The tolerance is ONE character, not the three askMatchResources allows
+   against titles. Three is right for recovering an intent word from a title
+   ("apply" -> "applic"); it is too loose for judging whether information
+   survived, where it let "travel" stand in for "traveller" and count an
+   unrelated requirement as preserved. One character covers what stemming
+   leaves behind and nothing else.
+
+   askStem alone is not sufficient: it turns "completed" into "complet" but
+   leaves "complete" alone, so a bare stem comparison misses the commonest
+   inflection of all. Stem equality still carries gather/gathered,
+   photo/photos and required/requirements. */
+function askStemAligned(a, b){
+  if(a === b) return true;
+  const as = askStem(a), bs = askStem(b);
+  if(as === bs) return true;
+  if(as.length < 4 || bs.length < 4) return false;
+  const short = as.length <= bs.length ? as : bs;
+  const long  = as.length <= bs.length ? bs : as;
+  return long.length - short.length <= 1 && long.indexOf(short) === 0;
+}
+
 function askMatchResources(question, limit){
   // The bridge only ever appends English keywords; the original question is
   // left intact, so English and French matching is byte-for-byte unchanged.
@@ -309,16 +351,7 @@ function askMatchResources(question, limit){
   // Common words appear in nearly every description, so two of them together
   // were enough to fake a match - "what is the capital of Peru" scored on
   // "what" and "the" alone. Strip them before scoring.
-  const STOP = new Set(['the','and','for','you','your','can','how','where','when','with','from',
-    'are','this','that','need','get','find','about','does','any','has','have','what','who','why',
-    'was','were','will','would','should','could','there','their','they','been','into','than','then',
-    'them','some','more','most','also','just','like','want','looking','know','tell','please','info',
-    'information','help','question','anything','something',
-    // French equivalents - a French question deserves the same filtering.
-    'les','des','une','pour','dans','avec','sur','est','sont','que','qui','quoi','comment','puis',
-    'peux','peut','vous','nous','mon','mes','mon','notre','avoir','faire','besoin','trouver','obtenir',
-    'demander','cette','cet','ceci','cela','plus','tout','tous','toute','ainsi','aussi','renseignement',
-    'renseignements','aide','ou']);
+  const STOP = ASK_QUERY_STOP;
   // Transliterated Yiddish function words, for the same reason as the English
   // and French entries above: "vu ken ikh find passport information?" is a
   // passport question, but "ken" and "ikh" inflated the word count and pushed
@@ -403,6 +436,161 @@ function askMatchResources(question, limit){
   // The top hit is always kept, so no question loses the resource it had.
   const floor = out.length ? out[0].score * 0.70 : 0;
   return out.filter((h, i) => i === 0 || h.score >= floor).slice(0, limit || 3);
+}
+
+/* ---------- same-topic siblings ----------
+   A broad question - "passport", "where do I apply for a passport" - names a
+   TOPIC, not a record. The relevance floor above exists to keep RAMQ out of a
+   NEXUS answer and has to stay; but it also means a broad question reaches the
+   answer layer holding one record out of a family of seven, and the answer then
+   describes the first-time adult application as though renewal, child passports
+   and urgent service did not exist.
+
+   The grouping is metadata CJHQ already maintains. Every resource carries a
+   curated `related` array of sibling slugs - hand-written, verified, and by
+   construction same-topic. Nothing here clusters keywords or invents a
+   taxonomy, and the resource data is not modified.
+
+   Retrieval breadth and displayed links are separate: siblings resolved here
+   become CONTEXT. The action links a user sees are unchanged.               */
+let __askResIndex = null;
+function askResourceIndex(){
+  if(__askResIndex) return __askResIndex;
+  const idx = new Map();
+  (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
+    (cat.groups || []).forEach(g=>{
+      (g.items || []).forEach(it=>{
+        if(it && it.slug && !idx.has(it.slug)){
+          idx.set(it.slug, { item: it, category: cat.en, group: g.heading_en || '' });
+        }
+      });
+    });
+  });
+  __askResIndex = idx;
+  return idx;
+}
+
+/* The verified siblings of one resource, in the order CJHQ listed them. */
+function askSameTopicSiblings(item, limit){
+  if(!item || !Array.isArray(item.related)) return [];
+  const idx = askResourceIndex();
+  const max = limit || 4;
+  const out = [];
+  for(const slug of item.related){
+    const hit = idx.get(slug);
+    if(hit && hit.item !== item) out.push(hit);
+    if(out.length >= max) break;
+  }
+  return out;
+}
+
+/* Does a question word appear in a title? Same bounded stem-prefix rule the
+   matcher uses, so "renew" finds "Renewal" and "child" finds "Children", but
+   "pass" never finds "Passport". Token-based, not substring: "for" must not
+   match "Form". */
+function askTitleHasWord(title, w){
+  if(!w) return false;
+  const toks = String(title || '').split(/\s+/).filter(Boolean);
+  if(toks.indexOf(w) >= 0) return true;
+  const ws = askStem(w);
+  if(ws.length < 4) return false;
+  return toks.some(t => {
+    const ts = askStem(t);
+    if(ts.length < 4) return false;
+    const short = ws.length <= ts.length ? ws : ts;
+    const long  = ws.length <= ts.length ? ts : ws;
+    return long.length - short.length <= 3 && long.indexOf(short) === 0;
+  });
+}
+
+/* ---------- jurisdiction guard ----------
+   Narrowly scoped to one demonstrated failure, and deliberately not a general
+   jurisdiction framework.
+
+   THE FAILURE. "How do I apply for U.S. Passport?" normalises to the tokens
+   ["how","apply","for","passport"] - byte-for-byte the same as "How do I apply
+   for a passport?" - because "u.s." becomes "us", which is two characters and is
+   dropped by the matcher's `w.length > 2` filter. The matcher therefore matches
+   the CANADIAN Adult Passport Application and reports coverage 1.00, believing
+   it explained the whole question. Nothing downstream can tell that a
+   jurisdiction was named.
+
+   That mis-match is pre-existing and is NOT fixed here - fixing it means giving
+   short tokens scoring weight, which is a change to askMatchResources and
+   belongs in its own round with its own differential.
+
+   What IS fixed here is the amplification this file introduced: without the
+   guard a U.S. question receives four or five additional CANADIAN passport
+   records as "RELATED VERIFIED RESOURCES", complete with steps and required
+   documents, which turns a thin wrong answer into a detailed, confident,
+   corroborated wrong one. Suppressing the related block returns the model to
+   the single-record context it had before this work.
+
+   BARE "us" IS MATCHED ONLY IN UPPERCASE, so the English pronoun cannot trigger
+   it: "Can you help us find a passport office?" is a Canadian question and must
+   keep its context. The dotted and spelled forms are case-insensitive because
+   they are unambiguous. A lowercase "us passport" is therefore missed - accepted
+   deliberately, because the guard only ever REMOVES context, so a miss costs
+   nothing that was not already the case.                                     */
+const ASK_US_MARK_ANY  = /\bu\.s\.?a?\b|\busa\b|\bamerican\b|\bunited states\b/i;
+const ASK_US_MARK_CASE = /\bUS\b/;
+const ASK_CA_MARK      = /\bcanad(a|ian|ien|ienne|iens)\b/i;
+
+/* True when the question names the United States, does not also name Canada,
+   and the resource being answered from is not one of CJHQ's U.S. records. */
+function askJurisdictionConflict(question, category){
+  const q = String(question || '');
+  if(!(ASK_US_MARK_ANY.test(q) || ASK_US_MARK_CASE.test(q))) return false;
+  if(ASK_CA_MARK.test(q)) return false;
+  return category !== 'United States Citizens';
+}
+
+/* Process vocabulary. Every one of these appears across the whole resource set
+   and none of them picks one sibling out of a family - everything CJHQ lists is
+   something you apply for, get or submit. Words that DO choose a route - renew,
+   child, adult, urgent, lost, newborn, office - are deliberately absent. */
+const ASK_GENERIC_TOKENS = new Set([
+  'apply','application','applications','applying','demande','demandes','demander',
+  'get','getting','obtain','obtaining','obtenir','submit','submitting','soumettre',
+  'service','services','canadian','canada','canadien','canadienne','canadiens',
+  'form','forms','formulaire','formulaires','process','processus','procedure']);
+
+/* Broad vs narrow, decided from evidence rather than a phrase list.
+
+   A question is NARROW when it carries a word that appears in the winning
+   resource's title but in at most half of its siblings' titles - "renew",
+   "child", "urgent". That word is the user choosing a route, and focused
+   retrieval is correct. A question whose only title words are shared across the
+   whole family - "passport", "NEXUS", "RAMQ" - has not chosen one, and its
+   siblings are legitimate context.
+
+   No classifier, no model call, and nothing is broad by default: a resource
+   with no siblings is always narrow.                                        */
+function askQuestionBreadth(question, item){
+  const sibs = askSameTopicSiblings(item, 6);
+  if(!sibs.length) return 'narrow';
+  const titleOf = x => cjhqNormalizeSearch((String(x.en || '') + ' ' + String(x.fr || '')).toLowerCase());
+  const primary = titleOf(item);
+  const sibTitles = sibs.map(s => titleOf(s.item));
+  // Stopwords first, from the matcher's own list. Three resource titles contain
+  // the word "for" ("Apply for NEXUS", "Apply for RAMQ", "First U.S. Passport
+  // for a Child") and three contain "find", so without this an ordinary English
+  // preposition counted as a route-choosing word: "What documents do I need for
+  // NEXUS?" was decided by "for", not by anything about NEXUS. The French
+  // entries matter more - "pour" appears in 4 titles, "des" in 5, "trouver" in
+  // 3. ASK_GENERIC_TOKENS still handles process vocabulary (apply, submit,
+  // service); the two lists do different jobs and both are applied.
+  const words = cjhqNormalizeSearch(String(question || '').toLowerCase())
+    .replace(/[\u2019']/g, ' ').split(/\s+/)
+    .map(w => w.replace(/[^a-z0-9]/g,''))
+    .filter(w => w.length > 2 && !ASK_QUERY_STOP.has(w));
+  for(const w of words){
+    if(ASK_GENERIC_TOKENS.has(w)) continue;
+    if(!askTitleHasWord(primary, w)) continue;
+    const shared = sibTitles.filter(t => askTitleHasWord(t, w)).length;
+    if(shared * 2 <= sibTitles.length) return 'narrow';
+  }
+  return 'broad';
 }
 
 /* ---------- structured handlers ----------
@@ -586,7 +774,7 @@ function askT(obj, lang){
 }
 
 function askAnswerShape(){
-  return { answer:'', sources:[], actions:[], timeSensitive:false, handled:false, handler:'', lang:'en', location:'', halachic:false };
+  return { answer:'', sources:[], actions:[], timeSensitive:false, handled:false, handler:'', lang:'en', location:'', halachic:false, breadth:'narrow', related:[], units:[], resourceTitle:'', resourceCategory:'' };
 }
 
 /* ---------- halachic-question guard ----------
@@ -1146,7 +1334,18 @@ const ASK_CONTACT_RE = new RegExp([
   'contact (?:the )?office', 'reach (?:the )?office', 'where is (?:the )?(?:cjhq )?office',
   'speak to someone', 'talk to someone', 'someone (?:to )?call me',
   'question for cjhq', 'help from cjhq', 'someone help me at cjhq',
-  'who do i contact at cjhq', 'contacter (?:le )?cjhq', 'joindre (?:le )?cjhq',
+  'who do i contact at cjhq',
+  // "What is the CJHQ contact information?" and "What is CJHQ's contact
+  // information?" reached nothing: the alternation above covers cjhq + phone,
+  // number, email, office or address, but not the word people actually use for
+  // all of them at once. "How do I get in touch with CJHQ?" missed for the same
+  // reason - it never says "contact". "What is the best way to contact CJHQ?"
+  // already matched, because these patterns are unanchored substrings.
+  'cjhq(?:\'s)? contact (?:information|info|details)',
+  'contact (?:information|info|details) for (?:the )?cjhq',
+  'get(?:ting)? in touch with (?:the )?cjhq',
+  'coordonn\u00e9es (?:du|de) (?:la )?cjhq',
+  'contacter (?:le )?cjhq', 'joindre (?:le )?cjhq',
   'num\u00e9ro (?:du|de) cjhq', 'courriel (?:du|de) cjhq', 'parler \u00e0 quelqu\'un',
   '\u05dc\u05d9\u05e6\u05d5\u05e8 \u05e7\u05e9\u05e8 \u05e2\u05dd cjhq', '\u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05e9\u05dc cjhq', '\u05dc\u05d3\u05d1\u05e8 \u05e2\u05dd \u05de\u05d9\u05e9\u05d4\u05d5'
 ].join('|'), 'i');
@@ -1781,11 +1980,73 @@ function askCjhqResources(q){
       url: h.item.internalPage ? ('/' + h.item.internalPage) : ('/resources/' + h.item.slug),
       kind:'internal'
     }));
+    // The clarification question stands, and so do its three links - this
+    // branch exists because guessing between genuinely close routes is worse
+    // than asking, and that has not changed.
+    //
+    // What was missing is the material to ask a USEFUL question with. The
+    // handler knew the candidates were Adult Application, Renewal and Child
+    // Passport and still had nothing to say about how they differ, because
+    // only the rendered clarification sentence reached the context. The
+    // candidates and their verified distinctions are attached here as context.
+    //
+    // Expansion beyond the retrieved hits is deliberately conditional. On
+    // "How do I renew my RAMQ?" the hits span three categories - "renew"
+    // scores on Passport Renewal and NEXUS Renewal too - and pulling the top
+    // hit's siblings in would inject passport records into a RAMQ question.
+    // Siblings are added only when every hit already agrees on the topic.
+    // No resourceTitle here on purpose: this branch has no primary resource.
+    // The answer IS the question, and every candidate is equal - naming one as
+    // primary and then repeating it in the related list would tell the model
+    // the opposite of what this branch means.
+    r.breadth = 'broad';
+    const oneTopic = hits.every(h => h.category === hits[0].category);
+    // A U.S. question that retrieved only Canadian candidates gets no related
+    // block at all. The three links it offers are unchanged.
+    if(askJurisdictionConflict(q, hits[0].category)){
+      r.related = []; r.units = [];
+      return r;
+    }
+    const cand = hits.map(h => ({ item: h.item, category: h.category, group:'' }))
+      .concat(oneTopic ? askSameTopicSiblings(top, 4) : []);
+    const cseen = new Set();
+    r.related = [];
+    cand.forEach(x=>{
+      if(x && x.item && x.item.slug && !cseen.has(x.item.slug)){
+        cseen.add(x.item.slug); r.related.push(x);
+      }
+    });
+    r.units = [];
     return r;
   }
 
   r.handled = true;
   const intent = askResourceIntent(q);
+
+  // Retrieval breadth. A broad question keeps the primary resource AND its
+  // verified same-topic siblings; a narrow one stays focused, exactly as
+  // before. Siblings are context for the answer, not extra links - r.actions
+  // below is unchanged either way.
+  r.breadth = askQuestionBreadth(q, top);
+  r.resourceTitle = top.en;
+  r.resourceCategory = hits[0].category;
+  const sameCat = hits.slice(1).filter(h => h.category === hits[0].category)
+                      .map(h => ({ item: h.item, category: h.category, group:'' }));
+  // Same guard on the answered path: the primary is already the wrong country,
+  // and four more records from that country make the answer worse, not better.
+  const jurisdictionConflict = askJurisdictionConflict(q, hits[0].category);
+  const sibs = (r.breadth === 'broad' && !jurisdictionConflict) ? askSameTopicSiblings(top, 4) : [];
+  const seen = new Set([top.slug]);
+  r.related = [];
+  (jurisdictionConflict ? [] : sameCat.concat(sibs)).forEach(x=>{
+    if(x && x.item && x.item.slug && !seen.has(x.item.slug)){
+      seen.add(x.item.slug); r.related.push(x);
+    }
+  });
+  // The substantive information units this answer is built from. The phrasing
+  // verifier uses them to detect material content loss, so they are recorded
+  // as the answer is assembled rather than parsed back out of prose.
+  const units = [];
 
   // Hebrew and Yiddish: the record bodies exist in English and French only.
   // Rather than paste English at someone who asked in Yiddish, name the
@@ -1809,19 +2070,33 @@ function askCjhqResources(q){
       parts.push(pick(top.answer_en, top.answer_fr));
     }
 
+    // Intent picks WHICH list answers the question, but a record does not
+    // always carry the list its question asked for. "How do I apply for
+    // Employment Insurance?" is a steps question against a record that has no
+    // steps and four required documents, and it was answering with the
+    // one-line description alone while the verified list sat unused - the same
+    // content loss Part A is about, arriving one layer earlier. When the
+    // list the intent chose is empty, the other one answers.
+    const stepsAvail = ((isFr ? top.steps_list_fr : top.steps_list_en) || []).length > 0;
+    const needsAvail = ((isFr ? top.need_list_fr : top.need_list_en) || []).length > 0;
+    const wantNeeds  = (intent === 'needs' || intent === 'general') || (intent === 'steps' && !stepsAvail);
+    const wantSteps  = (intent === 'steps' || intent === 'general') || (intent === 'needs' && !needsAvail);
+
     const needList = isFr ? top.need_list_fr : top.need_list_en;
-    if((intent === 'needs' || intent === 'general') && Array.isArray(needList) && needList.length){
+    if(wantNeeds && Array.isArray(needList) && needList.length){
       const head = pick(top.need_heading_en, top.need_heading_fr);
       parts.push((head ? head + '\n' : '') + needList.map(x => '- ' + x).join('\n'));
+      needList.forEach(x => units.push(String(x)));
     }
 
     const stepList = isFr ? top.steps_list_fr : top.steps_list_en;
-    if((intent === 'steps' || intent === 'general') && Array.isArray(stepList) && stepList.length){
+    if(wantSteps && Array.isArray(stepList) && stepList.length){
       const head = pick(top.steps_heading_en, top.steps_heading_fr);
       const shown = stepList.slice(0, ASK_RES_MAX_STEPS);
       parts.push((head ? head + '\n' : '')
         + shown.map((x, n) => (n + 1) + '. ' + x).join('\n')
         + (stepList.length > shown.length ? '\n\u2026' : ''));
+      shown.forEach(x => units.push(String(x)));
     }
 
     // Tips are caveats, not process. They earn their space only when the
@@ -1830,10 +2105,12 @@ function askCjhqResources(q){
     if((intent === 'steps' || intent === 'needs') && Array.isArray(tipList) && tipList.length){
       const head = pick(top.tips_heading_en, top.tips_heading_fr);
       parts.push((head ? head + '\n' : '') + tipList.map(x => '- ' + x).join('\n'));
+      tipList.forEach(x => units.push(String(x)));
     }
 
     r.answer = parts.join('\n\n');
   }
+  r.units = units;
 
   // One action link, from the resource itself, plus its CJHQ page. No siblings.
   const official = Array.isArray(top.official_links) ? top.official_links[0] : null;
@@ -1856,7 +2133,36 @@ function askCjhqResources(q){
    ASK_BACKEND.ask() - no other part of the app changes. */
 /* Build the context Gemini is allowed to use. Only verified material from the
    deterministic layer goes in - never the raw question, never model memory. */
+/* One verified sibling, rendered as supporting context.
+
+   NO URLS. A sibling's links are deliberately withheld: anything that reaches
+   this context becomes an allowed link in askVerifyPhrasing, so passing five
+   sibling URLs would licence exactly the source dump Part F forbids. The user
+   still sees the primary resource's links, chosen deterministically. If the
+   model emits a sibling URL anyway it is caught as an invented link.        */
+function askContextResource(entry, isFr, budget){
+  const it = entry && entry.item; if(!it) return '';
+  const pick = (en, fr) => (isFr && fr) ? fr : en;
+  const cap = (v, n) => { const t = String(v || '').replace(/\s+/g, ' ').trim();
+                          return t.length > n ? t.slice(0, n - 1) + '\u2026' : t; };
+  const name = pick(it.en, it.fr);
+  const lines = ['- ' + name + (entry.category ? ' (' + entry.category + ')' : '')];
+  const what = cap(pick(it.what_en, it.what_fr) || pick(it.desc_en, it.desc_fr), 220);
+  if(what) lines.push('  ' + what);
+  const ans = cap(pick(it.answer_en, it.answer_fr), 220);
+  if(ans) lines.push('  Which route applies: ' + ans);
+  const steps = (isFr ? it.steps_list_fr : it.steps_list_en) || [];
+  if(steps.length) lines.push('  Steps: ' + steps.slice(0, budget)
+    .map((x, n) => (n + 1) + ') ' + cap(x, 110)).join(' '));
+  const needs = (isFr ? it.need_list_fr : it.need_list_en) || [];
+  if(needs.length) lines.push('  Requires: ' + needs.slice(0, budget).map(x => cap(x, 90)).join('; '));
+  return lines.join('\n');
+}
+
 function askBuildContext(res){
+  // PRIMARY. Every line below is byte-for-byte what this function has always
+  // emitted - the verified answer, location, the two NOTE guards, the sources
+  // and the offered links. The structure added around them is additive.
   const parts = [];
   if(res.answer) parts.push('Verified CJHQ answer: ' + res.answer);
   if(res.location) parts.push('Location: ' + res.location);
@@ -1872,7 +2178,40 @@ function askBuildContext(res){
   (res.actions || []).forEach(a=>{
     parts.push('Link offered to the user: ' + a.label + ' <' + a.url + '>');
   });
-  return parts.join('\n');
+  // Nothing verified to ground on: return empty exactly as before, so askRun
+  // does not call the model with a bare instruction block.
+  if(!parts.length) return '';
+
+  const head = [];
+  head.push('PRIMARY RESOURCE:');
+  if(res.resourceTitle) head.push('Title: ' + res.resourceTitle);
+  if(res.resourceCategory) head.push('Category: ' + res.resourceCategory);
+  const out = [head.concat(parts).join('\n')];
+
+  // RELATED. Present only for a broad question, where the user named a topic
+  // rather than a route and the neighbouring records are part of the honest
+  // answer. Labelled as supporting context so the model does not read them as
+  // an instruction to describe everything.
+  const isFr = (res.lang === 'fr');
+  const rel = (res.related || []).map(e => askContextResource(e, isFr, 4)).filter(Boolean);
+  if(rel.length){
+    out.push('RELATED VERIFIED RESOURCES (supporting context - use only what helps '
+      + 'answer this question; do not list them all, and do not turn them into links):\n'
+      + rel.join('\n'));
+  }
+
+  // Role. Kept in the context rather than only in the browser system prompt,
+  // because the WhatsApp bridge supplies its own adapter and would otherwise
+  // never see it.
+  out.push('HOW TO USE THIS INFORMATION:\n'
+    + '- Answer the user\'s actual question. Do not assume the primary resource is the whole answer.\n'
+    + '- Preserve the substantive information above: the steps, the requirements, the options and the qualifications. Being concise means saying it in fewer words, NOT dropping most of it.\n'
+    + '- You may combine, reorder and rephrase. You may not omit a step, a requirement, a route or a warning that the user needs.\n'
+    + '- Where the question is broad, say briefly which route applies to whom, using the related resources above.\n'
+    + '- Invent nothing. No URL, phone number, address, time, date, price or rule that is not above.\n'
+    + '- Do not repeat the source list, do not add links of your own, and do not mention how this system works.');
+
+  return out.join('\n\n');
 }
 
 /* askRun is the shared engine. It takes the AI layer as an argument rather
@@ -1905,6 +2244,78 @@ const ASK_PHRASE_CLOCK   = /\b\d{1,2}:\d{2}\b|\b\d{1,2}\s?(?:am|pm)\b/i;
 
 function askPhraseTokens(v){
   return String(v || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3);
+}
+
+/* ---------- content coverage ----------
+   The failure this detects: the model is handed a complete verified answer -
+   five numbered steps and two caveats - and returns "You can submit your
+   application by mail or at a Passport Office." Nothing in it is false and
+   every check above passes it. It is still a worse answer than the one it
+   replaced, because most of what the person needed is gone.
+
+   THIS IS NOT A LENGTH RULE. There is no minimum word count, no sentence
+   count, no keyword quota and no requirement to preserve wording. A shorter
+   answer that folds the same information together is the outcome this whole
+   pass exists to produce, and it must pass. What is measured is whether the
+   substantive INFORMATION UNITS survived the rewrite.
+
+   Units come from the structured record - the steps, required documents and
+   tips that askCjhqResources actually put in the answer - rather than from
+   parsing arbitrary prose, so the signal is stable. Where a handler has no
+   structured units the check does not run at all: an answer that cannot be
+   measured confidently is passed, per Part G. */
+const ASK_UNIT_STOP = new Set(['your','have','with','from','that','this','they','them','will',
+  'must','need','needs','make','sure','been','into','when','then','than','their','there','here',
+  'what','which','while','also','only','more','most','some','each','both','other','before','after',
+  'about','over','under','once','been','being','does','done','take','takes','taken','give','gives',
+  'vous','avec','pour','dans','votre','vos','les','des','une','que','qui','sur','est','sont','plus',
+  'tout','tous','toute','toutes','ainsi','aussi','avant','apres','entre','leur','leurs','cette']);
+
+function askUnitTokens(v){
+  return Array.from(new Set(String(v || '').toLowerCase()
+    .split(/[^a-z0-9\u00e0-\u00ff]+/)
+    .filter(w => w.length > 3 && !ASK_UNIT_STOP.has(w))));
+}
+
+/* The substantive units of the verified answer. Structured fields first; the
+   bullet and numbered lines of the answer itself as a fallback. */
+function askContentUnits(res){
+  if(res && Array.isArray(res.units) && res.units.length) return res.units.map(String);
+  const lines = String((res && res.answer) || '').split('\n')
+    .map(l => l.trim())
+    .filter(l => /^(?:\d+[.)]|[-\u2022*])\s+/.test(l))
+    .map(l => l.replace(/^(?:\d+[.)]|[-\u2022*])\s+/, ''));
+  return lines;
+}
+
+/* True only on CLEAR material omission. Deliberately blunt in the permissive
+   direction at three separate points: fewer than three measurable units and it
+   does not run; a unit counts as preserved on half its content words, which is
+   what a legitimate rephrasing leaves behind; and the answer as a whole fails
+   only when most of its units are gone. A false rejection costs the user the
+   terser deterministic text, so the bar to reject is high. */
+function askCoverageLoss(phrased, res){
+  const units = askContentUnits(res);
+  if(units.length < 3) return false;
+  const judgeable = units.map(askUnitTokens).filter(t => t.length >= 2);
+  if(judgeable.length < 3) return false;
+  // Literal tokens first - an exact hit is the common case and costs one Set
+  // lookup. Inflected forms fall through to askStemAligned, which is the same
+  // comparison the matcher makes against titles. Without this the check
+  // rejected a correct answer for writing "completed the application" where
+  // the verified step says "Complete the passport application", and "gathered
+  // your documents" for "Gather your required documents" - grammar, not
+  // content loss.
+  const hayTokens = String(phrased || '').toLowerCase()
+    .split(/[^a-z0-9\u00e0-\u00ff]+/).filter(w => w.length > 3);
+  const haySet = new Set(hayTokens);
+  let kept = 0;
+  for(const toks of judgeable){
+    const hitCount = toks.filter(t =>
+      haySet.has(t) || hayTokens.some(h => askStemAligned(t, h))).length;
+    if(hitCount * 2 >= toks.length) kept++;
+  }
+  return kept * 2 < judgeable.length;
 }
 
 function askVerifyPhrasing(phrased, question, res, context){
@@ -1960,6 +2371,14 @@ function askVerifyPhrasing(phrased, question, res, context){
     const overlap = askPhraseTokens(p).filter(w => src.has(w));
     if(!overlap.length) return 'irrelevant';
   }
+
+  // 7. Material content loss. Last, because it is the only check whose subject
+  //    is the answer's usefulness rather than its safety, and it must never
+  //    pre-empt one of those. Skipped for halachic answers: there the referral
+  //    is the answer and the practical section is deliberately secondary, so
+  //    measuring its coverage would reject correct behaviour.
+  if(!res.halachic && askCoverageLoss(p, res)) return 'content-loss';
+
   return null;
 }
 
@@ -1967,9 +2386,21 @@ function askVerifyPhrasing(phrased, question, res, context){
    It is given the question, the verified material and the first attempt, and
    told what was wrong with it. */
 function askBuildReviewContext(context, first, reason){
+  // Content loss is the one rejection the generic instruction does not
+  // describe: telling a model that "omissions" were corrected, when what it
+  // actually did was compress five steps into one, invites the same answer
+  // again. The reason is named explicitly and the permission to be concise is
+  // restated, so the rewrite does not over-correct into a wall of text.
+  const specific = (reason === 'content-loss')
+    ? '\nThe previous draft omitted substantial verified information. Produce a'
+      + ' concise answer that preserves the important information needed to answer'
+      + ' the user\'s question. You may combine or rephrase information, but do not'
+      + ' omit substantive steps, requirements, options, or qualifications.'
+    : '';
   return context
     + '\n\nA previous draft answer was rejected. Reason: ' + reason + '.'
     + '\nPrevious draft: ' + String(first || '').slice(0, 1200)
+    + specific
     + '\nRewrite it. Use ONLY the verified CJHQ information above. Do not add any'
     + ' URL, phone number, time, date or fact that does not appear there. Do not'
     + ' refuse - the verified answer is present. Answer in the same language as'
@@ -2133,6 +2564,13 @@ export {
   ASK_CJHQ_CONTACT,
   ASK_SESSION_POLICY,
   askSessionState,
-  askSessionShouldClose
+  askSessionShouldClose,
+  askVerifyPhrasing,
+  askBuildReviewContext,
+  askQuestionBreadth,
+  askSameTopicSiblings,
+  askContentUnits,
+  askCoverageLoss,
+  askResourceIndex
 };
 export { categories, SPECIAL_INFO_COUNTRIES, PARTNERS_DATA };
