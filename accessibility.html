@@ -7734,6 +7734,10 @@ function askCjhqResources(q){
   r.breadth = askQuestionBreadth(q, top);
   r.resourceTitle = top.en;
   r.resourceCategory = hits[0].category;
+  // The primary record itself, shaped exactly like a related entry so the
+  // context builder can render it with the same conventions. The clarification
+  // branch above deliberately does NOT set this: it has no primary resource.
+  r.primary = { item: top, category: hits[0].category, group:'' };
   const sameCat = hits.slice(1).filter(h => h.category === hits[0].category)
                       .map(h => ({ item: h.item, category: h.category, group:'' }));
   // Same guard on the answered path: the primary is already the wrong country,
@@ -7863,6 +7867,68 @@ function askContextResource(entry, isFr, budget){
   return lines.join('\n');
 }
 
+/* The PRIMARY resource, rendered in full.
+
+   askContextResource above is deliberately lossy - a sibling is supporting
+   context and gets 220 characters. The primary record IS the answer, and the
+   deterministic answer built from it is selective by design: askResourceIntent
+   picks which list to render, tips appear only for a steps or needs question,
+   and answer_* is emitted only for intent 'right'. Everything it skips used to
+   be invisible to the model.
+
+   That is what produced the Hachnoses Sefer Torah failure. The record's
+   caution - CJHQ cannot say which permit category applies, the City lists a
+   religious ceremony among the events the standard permit does NOT cover,
+   confirm the event with the borough, the police station may be involved -
+   lives in answer_en. The question was not a 'which route' question, so
+   answer_en was never rendered, the model saw only what_en ("This covers a
+   festival, a community or neighbourhood gathering, and a parade, march or
+   procession"), and it concluded that a Hachnoses Sefer Torah needs a borough
+   permit. Nothing in this block is truncated, for that reason.
+
+   NO URLS, for the same reason as askContextResource: anything reaching this
+   context becomes an allowed link in askVerifyPhrasing. The primary's links
+   already reach the model through res.actions, chosen deterministically.    */
+function askContextPrimary(entry, isFr){
+  const it = entry && entry.item; if(!it) return '';
+  const pick = (en, fr) => (isFr && fr) ? fr : en;
+  const txt = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+  const lines = [];
+  const desc = txt(pick(it.desc_en, it.desc_fr));
+  if(desc) lines.push('Summary: ' + desc);
+  const what = txt(pick(it.what_en, it.what_fr));
+  if(what) lines.push('About: ' + what);
+  // The record's own question-and-answer pair, verbatim and ahead of the
+  // lists. This is the field in which a record states what it CANNOT settle,
+  // so it must not be capped and must not be buried.
+  const qa = txt(pick(it.answer_en, it.answer_fr));
+  if(qa){
+    const qq = txt(pick(it.question_en, it.question_fr));
+    lines.push('This resource also answers a specific question about itself:');
+    if(qq) lines.push('  Q: ' + qq);
+    lines.push('  A: ' + qa);
+  }
+  const list = (arr, head, fallback, numbered) => {
+    const a = Array.isArray(arr) ? arr.filter(x => txt(x)) : [];
+    if(!a.length) return;
+    lines.push((txt(head) || fallback) + ':');
+    a.forEach((x, n) => lines.push('  ' + (numbered ? (n + 1) + '. ' : '- ') + txt(x)));
+  };
+  list(isFr ? it.need_list_fr : it.need_list_en,
+       pick(it.need_heading_en, it.need_heading_fr), 'What is required', false);
+  list(isFr ? it.steps_list_fr : it.steps_list_en,
+       pick(it.steps_heading_en, it.steps_heading_fr), 'Steps', true);
+  list(isFr ? it.tips_list_fr : it.tips_list_en,
+       pick(it.tips_heading_en, it.tips_heading_fr), 'Good to know', false);
+  if(!lines.length) return '';
+  return 'PRIMARY RESOURCE DETAIL (the complete verified record behind the answer '
+    + 'above - use it to answer the question fully):\n'
+    + lines.join('\n')
+    + '\nIf this record states a limit, an uncertainty or a qualification, keep it. '
+    + 'Do not resolve an uncertainty the record leaves open, and do not tell the user '
+    + 'that something applies to them where the record says CJHQ cannot say so.';
+}
+
 function askBuildContext(res){
   // PRIMARY. Every line below is byte-for-byte what this function has always
   // emitted - the verified answer, location, the two NOTE guards, the sources
@@ -7880,7 +7946,11 @@ function askBuildContext(res){
       + (src.timeSensitive ? ' [time-sensitive]' : ''));
   });
   (res.actions || []).forEach(a=>{
-    parts.push('Link offered to the user: ' + a.label + ' <' + a.url + '>');
+    // Parentheses, not angle brackets. '</contact>' reads as a closing HTML
+    // tag and the model echoed it into prose verbatim; the URL itself and the
+    // rendered action are unchanged, and askVerifyPhrasing matches URLs with
+    // indexOf against this same string, so the delimiter is immaterial there.
+    parts.push('Link offered to the user: ' + a.label + ' (' + a.url + ')');
   });
   // Nothing verified to ground on: return empty exactly as before, so askRun
   // does not call the model with a bare instruction block.
@@ -7892,11 +7962,17 @@ function askBuildContext(res){
   if(res.resourceCategory) head.push('Category: ' + res.resourceCategory);
   const out = [head.concat(parts).join('\n')];
 
+  const isFr = (res.lang === 'fr');
+  // PRIMARY DETAIL. The complete verified record behind the answer above,
+  // including its own inline Q&A. Absent for every handler that has no
+  // resource record and for the clarification branch, which has no primary.
+  const primaryDetail = askContextPrimary(res.primary, isFr);
+  if(primaryDetail) out.push(primaryDetail);
+
   // RELATED. Present only for a broad question, where the user named a topic
   // rather than a route and the neighbouring records are part of the honest
   // answer. Labelled as supporting context so the model does not read them as
   // an instruction to describe everything.
-  const isFr = (res.lang === 'fr');
   const rel = (res.related || []).map(e => askContextResource(e, isFr, 4)).filter(Boolean);
   if(rel.length){
     out.push('RELATED VERIFIED RESOURCES (supporting context - use only what helps '
