@@ -116,7 +116,12 @@ const EXPORTS = [
   'askOrganizations', 'askOrgRegistry', 'askSpecialInfo', 'askFindMtl',
   'ASK_TEMPLATES', 'askSmallTalk', 'ASK_FINDMTL', 'askContactCjhq', 'askChildTravel',
   'askOrgContactState', 'ASK_CJHQ_CONTACT',
-  'ASK_SESSION_POLICY', 'askSessionState', 'askSessionShouldClose'
+  'ASK_SESSION_POLICY', 'askSessionState', 'askSessionShouldClose',
+  // Answer-quality surface. Exported so the answer-quality and content-loss
+  // suites can drive the verifier and the retrieval-breadth decision directly,
+  // rather than inferring them from a finished answer.
+  'askVerifyPhrasing', 'askBuildReviewContext', 'askQuestionBreadth',
+  'askSameTopicSiblings', 'askContentUnits', 'askCoverageLoss', 'askResourceIndex'
 ];
 
 const coreOut = `/* GENERATED FILE - do not edit.
