@@ -188,6 +188,18 @@ export default async function run(){
   t.check('a throwing adapter falls back silently', r2.aiUsed === false && !!r2.aiError && r2.answer.length > 10);
   t.check('provider detail never reaches the answer', r2.answer.indexOf('quota') < 0);
 
+  // ---- sections the popup would silently drop --------------------------------
+  // A heading or intro with no list and no text is dropped whole by the popup, so
+  // authored content disappears with no visible symptom. One record already did this.
+  const stranded = [];
+  for(const c of categories) for(const g of (c.groups||[])) for(const it of (g.items||[])){
+    const has = (list, text) => (Array.isArray(it[list]) && it[list].length) || it[text];
+    if((it.need_heading_en || it.need_intro_en) && !has('need_list_en','need_en')) stranded.push(it.slug+':need');
+    if(it.steps_heading_en && !has('steps_list_en','steps_en')) stranded.push(it.slug+':steps');
+    if(it.tips_heading_en && !has('tips_list_en','tips_en')) stranded.push(it.slug+':tips');
+  }
+  t.eq('no record has a section heading the popup will silently drop', stranded.length, 0, stranded.join(', '));
+
   // ---- structured tables must not drift from the text lists -----------------
   // The NEXUS credit-card record holds the same 15 cards twice on purpose: as
   // TABLES for the popup, where a table is the right layout, and as BULLET
