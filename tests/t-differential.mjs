@@ -82,7 +82,11 @@ export default async function run(opts){
   // just "anything that changed") is what keeps this from becoming a blanket
   // excuse: a new record can only explain a change to its own questions.
   const NEW_RECORD_SLUGS = ['report-a-problem-311', 'outremont-borough-services',
-                            'plateau-borough-services', 'outdoor-public-events-permits'];
+                            'plateau-borough-services', 'outdoor-public-events-permits',
+                            // The NEXUS credit-card reimbursement section became a real
+                            // resource record so it has a shareable /resources/<slug> link
+                            // like every other resource. Same facts, now matchable.
+                            'nexus-fee-credit-cards'];
   const newTitles = [];
   categories.forEach(c => (c.groups||[]).forEach(g => (g.items||[]).forEach(it => {
     if(NEW_RECORD_SLUGS.indexOf(it.slug) >= 0) newTitles.push(it.en);
@@ -106,7 +110,28 @@ export default async function run(opts){
   const manulifeFix = changed.filter(isManulifeHostFix);
   console.log('  of which are the approved Manulife host correction: ' + manulifeFix.length);
 
-  const preExisting = changed.filter(c => !namesNewRecord(c.q) && !isManulifeHostFix(c));
+  // APPROVED NEW RECORD, INSERTION ONLY. 'nexus-fee-credit-cards' carries the
+  // word NEXUS in its title, so questions that do not name it - plain "NEXUS",
+  // "How do I renew my NEXUS card?" - now list it as one more candidate in the
+  // clarification. Accepted only when removing that single candidate restores
+  // the previous actions AND the previous answer byte-for-byte: a dropped,
+  // reordered or re-pointed link, or any other wording change, still fails.
+  const NEXUS_CC_URL   = '/resources/nexus-fee-credit-cards';
+  const NEXUS_CC_TITLE = 'Credit Cards That Reimburse NEXUS Fees';
+  const isNexusCcInsertion = c => {
+    if(!c.before || !c.after) return false;
+    if(c.fields.some(f => f !== 'answer' && f !== 'actions')) return false;
+    const acts = c.after.actions.filter(x => x.indexOf('|' + NEXUS_CC_URL + '|') < 0);
+    if(JSON.stringify(acts) !== JSON.stringify(c.before.actions)) return false;
+    const ans = c.after.answer
+      .split(', ' + NEXUS_CC_TITLE).join('')
+      .split(NEXUS_CC_TITLE + ', ').join('');
+    return ans === c.before.answer;
+  };
+  const nexusCcInsert = changed.filter(isNexusCcInsertion);
+  console.log('  of which are the new NEXUS credit-card candidate: ' + nexusCcInsert.length);
+
+  const preExisting = changed.filter(c => !namesNewRecord(c.q) && !isManulifeHostFix(c) && !isNexusCcInsertion(c));
   const newRecordQs = changed.filter(c => namesNewRecord(c.q));
   console.log('  of which name a new record: ' + newRecordQs.length
             + '   pre-existing: ' + preExisting.length);

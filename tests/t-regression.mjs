@@ -117,13 +117,25 @@ export default async function run(){
   }
 
   // ---- RAMQ / NEXUS behaviour ------------------------------------------------
+  // APPROVED NEW RECORD. The NEXUS credit-card reimbursement section became a
+  // real resource so it has its own shareable link, and it carries "NEXUS" in
+  // its title - so an ambiguous NEXUS question now offers it as one more
+  // candidate to choose from. That is an INSERTION and nothing else: removing
+  // this one candidate has to restore the previous link list exactly, which is
+  // what the comparison below asserts. A dropped, reordered or re-pointed link
+  // still fails, and the same edit on any other record still fails.
+  const NEXUS_CC_URL = '/resources/nexus-fee-credit-cards';
+  const withoutNexusCC = acts => (acts || []).filter(x => x.url !== NEXUS_CC_URL);
   for(const q of ['How do I renew my RAMQ?', 'RAMQ', 'How do I apply for RAMQ?',
                   'NEXUS', 'How do I apply for NEXUS?', 'How do I renew my NEXUS card?',
                   'What documents do I need for NEXUS?']){
     const a = await OLD.askRun(q, { useAI:false }), b = await NEW.askRun(q, { useAI:false });
     t.check('handler unchanged: ' + q, a.handler === b.handler);
     t.check('clarify-vs-answer decision unchanged: ' + q, a.handled === b.handled);
-    t.check('links unchanged: ' + q, JSON.stringify(a.actions) === JSON.stringify(b.actions));
+    t.check('links unchanged apart from the new NEXUS credit-card candidate: ' + q,
+      JSON.stringify(a.actions) === JSON.stringify(withoutNexusCC(b.actions)),
+      'OLD ' + JSON.stringify((a.actions||[]).map(x=>x.url)) +
+      '\nNEW ' + JSON.stringify((b.actions||[]).map(x=>x.url)));
   }
   // "How do I renew my RAMQ?" retrieves across three categories - "renew"
   // scores on Passport Renewal and NEXUS Renewal too - and the approved
