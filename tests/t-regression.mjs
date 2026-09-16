@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import * as NEW from '../ask-core.mjs';
+import { categories } from '../ask-data.mjs';
 import { makeSuite } from './harness.mjs';
 // Baseline for the differential and the unchanged-vs-main assertions: a clean
 // copy of the DEPLOYED main branch. Not in this repo by design - committing it
@@ -186,6 +187,51 @@ export default async function run(){
   const r2 = await NEW.askRun('How do I apply for an adult passport?', { useAI:true }, thrower);
   t.check('a throwing adapter falls back silently', r2.aiUsed === false && !!r2.aiError && r2.answer.length > 10);
   t.check('provider detail never reaches the answer', r2.answer.indexOf('quota') < 0);
+
+  // ---- structured tables must not drift from the text lists -----------------
+  // The NEXUS credit-card record holds the same 15 cards twice on purpose: as
+  // TABLES for the popup, where a table is the right layout, and as BULLET
+  // LISTS for Ask CJHQ, which is text-only and reaches WhatsApp. Two copies is
+  // a drift hazard, so it is closed here rather than trusted: edit one and this
+  // fails. The bullet form is "<card> \u2014 <credit>, <frequency>", with the
+  // credit lower-cased because it reads as prose in a sentence.
+  const findRecord = slug => {
+    for(const c of categories) for(const g of (c.groups||[])) for(const it of (g.items||[]))
+      if(it.slug === slug) return it;
+    return null;
+  };
+  const cc = findRecord('nexus-fee-credit-cards');
+  t.check('the NEXUS credit-card record exists', !!cc);
+  if(cc){
+    const lower1 = x => x.charAt(0).toLowerCase() + x.slice(1);
+    const fromRows = tb => (tb.rows||[]).map(r => r[0] + ' \u2014 ' + lower1(r[1]) + ', ' + lower1(r[2]));
+    for(const [lang, tables, lists] of [
+      ['EN', cc.tables_en, [cc.need_list_en, cc.tips_list_en]],
+      ['FR', cc.tables_fr, [cc.need_list_fr, cc.tips_list_fr]]
+    ]){
+      t.eq(lang + ': exactly two card tables', (tables||[]).length, 2);
+      (tables||[]).forEach((tb, i) => {
+        t.eq(lang + ' table ' + (i+1) + ': every row has 3 cells',
+          (tb.rows||[]).filter(r => (r||[]).length !== 3).length, 0);
+        t.eq(lang + ' table ' + (i+1) + ': header has 3 columns', (tb.cols||[]).length, 3);
+        t.check(lang + ' table ' + (i+1) + ': rows match the text list the assistant uses',
+          JSON.stringify(fromRows(tb)) === JSON.stringify(lists[i]),
+          'TABLE ' + JSON.stringify(fromRows(tb)) + '\nLIST  ' + JSON.stringify(lists[i]));
+      });
+    }
+    t.eq('6 Canadian cards', (cc.tables_en[0].rows||[]).length, 6);
+    t.eq('9 United States cards', (cc.tables_en[1].rows||[]).length, 9);
+    t.check('EN and FR list the same cards in the same order',
+      JSON.stringify(cc.tables_en.map(tb => tb.rows.map(r => r[0])))
+        === JSON.stringify(cc.tables_fr.map(tb => tb.rows.map(r => r[0]))));
+    // No cell may contain markup: the popup escapes everything, so a tag here
+    // would render as visible angle brackets rather than formatting.
+    const cells = [...cc.tables_en, ...cc.tables_fr]
+      .flatMap(tb => [...(tb.cols||[]), ...(tb.rows||[]).flat(), tb.heading])
+      .concat((cc.facts_en||[]).concat(cc.facts_fr||[]).flatMap(f => [f.label, f.value]));
+    t.eq('no table or fact cell contains markup', cells.filter(x => /[<>]/.test(String(x))).length, 0);
+    t.eq('two fact boxes in each language', (cc.facts_en||[]).length + (cc.facts_fr||[]).length, 4);
+  }
 
   return t.report();
 }
