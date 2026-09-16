@@ -90,7 +90,23 @@ export default async function run(opts){
   t.eq('every declared new record exists in the dataset', newTitles.length, NEW_RECORD_SLUGS.length);
   const namesNewRecord = q => newTitles.some(ti => q.indexOf(ti) >= 0);
 
-  const preExisting = changed.filter(c => !namesNewRecord(c.q));
+  // APPROVED LINK CORRECTION. The Manulife destination was missing its `www.`
+  // host and was corrected in the source of truth (owner-approved). That moves
+  // one action URL on one record, which the strict pre-existing rule below
+  // would otherwise read as a structural regression. Scoped deliberately: only
+  // the actions field, only this record, and only the exact host correction -
+  // anything else about the record, or the same edit on another record, still
+  // fails.
+  const MANULIFE_OLD = 'https://manulife-travel.ca/dist/home.html?as=wllebovits';
+  const MANULIFE_NEW = 'https://www.manulife-travel.ca/dist/home.html?as=wllebovits';
+  const isManulifeHostFix = c =>
+    c.fields.join() === 'actions'
+    && JSON.stringify(c.before.actions).split(MANULIFE_OLD).join(MANULIFE_NEW)
+       === JSON.stringify(c.after.actions);
+  const manulifeFix = changed.filter(isManulifeHostFix);
+  console.log('  of which are the approved Manulife host correction: ' + manulifeFix.length);
+
+  const preExisting = changed.filter(c => !namesNewRecord(c.q) && !isManulifeHostFix(c));
   const newRecordQs = changed.filter(c => namesNewRecord(c.q));
   console.log('  of which name a new record: ' + newRecordQs.length
             + '   pre-existing: ' + preExisting.length);
