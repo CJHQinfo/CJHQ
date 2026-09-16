@@ -819,8 +819,11 @@
   .ctc-dir-flag{display:flex; align-items:center; justify-content:center; gap:10px; line-height:1;}
   .ctc-flag{width:32px; height:20px; border:1px solid var(--line); border-radius:2px; display:block; flex-shrink:0;}
   .ctc-dir-arrow{font-size:1.05rem; color:var(--muted);}
-  .ctc-trip-type{margin-top:12px;}
-  .ctc-round-btn .ctc-dir-arrow{font-size:1.25rem;}
+  /* A yes/no choice, so a real checkbox - native keyboard and screen-reader
+     behaviour, and it does not read as a fourth travel direction. */
+  .ctc-checkline{display:flex; align-items:center; gap:10px; margin-top:16px;}
+  .ctc-checkline input[type="checkbox"]{width:18px; height:18px; flex:0 0 auto; margin:0; cursor:pointer; accent-color:var(--bronze);}
+  .ctc-checkline label{margin:0; font-weight:600; color:var(--ink); cursor:pointer; font-size:.95rem;}
   .ctc-child + .ctc-child{margin-top:6px; padding-top:16px; border-top:1px dashed var(--line);}
   .ctc-child-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;}
   .ctc-child-head[hidden]{display:none;}
@@ -2043,11 +2046,9 @@
                 <p class="ctc-err" id="err-ctcToCountry" hidden></p>
               </div>
             </div>
-            <div class="ctc-dir ctc-trip-type">
-              <button type="button" class="ctc-dir-btn ctc-round-btn" id="ctcRoundTrip" role="checkbox" aria-checked="false" aria-describedby="hint-ctcRoundTrip">
-                <span class="ctc-dir-flag" aria-hidden="true"><span class="ctc-dir-arrow">⇄</span></span>
-                <span class="ctc-dir-txt" data-en>Round Trip</span><span class="ctc-dir-txt" data-fr>Aller-retour</span>
-              </button>
+            <div class="ctc-checkline">
+              <input type="checkbox" id="ctcRoundTrip" aria-describedby="hint-ctcRoundTrip">
+              <label for="ctcRoundTrip"><span data-en>Round Trip</span><span data-fr>Aller-retour</span></label>
             </div>
             <p class="ctc-hint ctc-field-hint" id="hint-ctcRoundTrip"><span data-en>Select Round Trip if the child is returning. A return date is then required and the letter covers the return journey.</span><span data-fr>Sélectionnez Aller-retour si l'enfant revient. Une date de retour est alors requise et la lettre couvre le voyage de retour.</span></p>
             <p class="ctc-err" id="err-direction" hidden></p>
@@ -2096,7 +2097,7 @@
             <div class="form-group">
               <label for="ctcAdultName"><span data-en>Adult's Full Name</span><span data-fr>Nom complet de l'adulte</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcAdultName"><span data-en>Enter the full name of the adult travelling with the child</span><span data-fr>Entrez le nom complet de l'adulte qui voyage avec l'enfant</span></p>
-              <input type="text" id="ctcAdultName" aria-describedby="hint-ctcAdultName" autocomplete="off">
+              <input type="text" id="ctcAdultName" aria-describedby="hint-ctcAdultName" autocomplete="off" data-ph-en="First and Last Name" data-ph-fr="Prénom et nom">
               <p class="ctc-err" id="err-ctcAdultName" hidden></p>
             </div>
             <div class="form-group">
@@ -2114,7 +2115,7 @@
             <div class="form-group">
               <label for="ctcAdultEmail"><span data-en>Email</span><span data-fr>Courriel</span></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcAdultEmail"><span data-en>Enter the accompanying adult's email address</span><span data-fr>Entrez l'adresse courriel de l'adulte accompagnateur</span></p>
-              <input type="email" id="ctcAdultEmail" aria-describedby="hint-ctcAdultEmail" autocomplete="off">
+              <input type="email" id="ctcAdultEmail" aria-describedby="hint-ctcAdultEmail" autocomplete="off" data-ph-en="name@example.com" data-ph-fr="nom@exemple.com">
             </div>
           </fieldset>
 
@@ -2124,7 +2125,7 @@
             <div class="form-group">
               <label for="ctcParentName"><span data-en>Full Name</span><span data-fr>Nom complet</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcParentName"><span data-en>Enter the full legal name of the parent or guardian giving consent</span><span data-fr>Entrez le nom légal complet du parent ou du tuteur donnant son consentement</span></p>
-              <input type="text" id="ctcParentName" aria-describedby="hint-ctcParentName" autocomplete="off">
+              <input type="text" id="ctcParentName" aria-describedby="hint-ctcParentName" autocomplete="off" data-ph-en="First and Last Name" data-ph-fr="Prénom et nom">
               <p class="ctc-err" id="err-ctcParentName" hidden></p>
             </div>
             <div class="form-group">
@@ -2136,7 +2137,7 @@
             <div class="form-group" id="ctcParent2Wrap">
               <label for="ctcParent2Name"><span data-en>Second Parent / Guardian Full Name</span><span data-fr>Nom complet du second parent / tuteur</span> <abbr class="ctc-req" id="ctcParent2Req" title="required" hidden>*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcParent2Name"><span data-en>Enter the full legal name of the other parent or guardian</span><span data-fr>Entrez le nom légal complet de l'autre parent ou tuteur</span></p>
-              <input type="text" id="ctcParent2Name" aria-describedby="hint-ctcParent2Name" autocomplete="off">
+              <input type="text" id="ctcParent2Name" aria-describedby="hint-ctcParent2Name" autocomplete="off" data-ph-en="First and Last Name" data-ph-fr="Prénom et nom">
               <p class="ctc-err" id="err-ctcParent2Name" hidden></p>
             </div>
             <div class="form-group">
@@ -2148,7 +2149,7 @@
             <div class="form-group">
               <label for="ctcParentEmail"><span data-en>Email</span><span data-fr>Courriel</span></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcParentEmail"><span data-en>Enter this parent or guardian's email address</span><span data-fr>Entrez l'adresse courriel de ce parent ou tuteur</span></p>
-              <input type="email" id="ctcParentEmail" aria-describedby="hint-ctcParentEmail" autocomplete="off">
+              <input type="email" id="ctcParentEmail" aria-describedby="hint-ctcParentEmail" autocomplete="off" data-ph-en="name@example.com" data-ph-fr="nom@exemple.com">
             </div>
           </fieldset>
 
@@ -4279,10 +4280,9 @@ if(contactForm){
   // Round Trip is a separate yes/no choice, not a fourth direction: it says the
   // child is coming back, which makes the return date meaningful and required
   // and puts the return leg into the letter.
-  const roundBtn = $('ctcRoundTrip');
-  if(roundBtn) roundBtn.addEventListener('click', ()=>{
-    roundTrip = !roundTrip;
-    roundBtn.setAttribute('aria-checked', String(roundTrip));
+  const roundBox = $('ctcRoundTrip');
+  if(roundBox) roundBox.addEventListener('change', ()=>{
+    roundTrip = roundBox.checked;
     const req = $('ctcReturnReq');
     if(req) req.hidden = !roundTrip;
     if(!roundTrip) hideError('ctcReturn');
