@@ -555,6 +555,15 @@ const ASK_GENERIC_TOKENS = new Set([
   'service','services','canadian','canada','canadien','canadienne','canadiens',
   'form','forms','formulaire','formulaires','process','processus','procedure']);
 
+/* The ACTION words inside ASK_GENERIC_TOKENS - the ones that say what the user
+   wants to DO, as opposed to the ones that merely name a kind of thing
+   ("service", "form", "Canadian"). Strictly a subset of ASK_GENERIC_TOKENS, so
+   nothing new enters the vocabulary; it only marks which of those words carry
+   an intention. askQuestionBreadth uses it as a second, weaker pass. */
+const ASK_ACTION_TOKENS = new Set([
+  'apply','application','applications','applying','demande','demandes','demander',
+  'get','getting','obtain','obtaining','obtenir','submit','submitting','soumettre']);
+
 /* Broad vs narrow, decided from evidence rather than a phrase list.
 
    A question is NARROW when it carries a word that appears in the winning
@@ -584,11 +593,43 @@ function askQuestionBreadth(question, item){
     .replace(/[\u2019']/g, ' ').split(/\s+/)
     .map(w => w.replace(/[^a-z0-9]/g,''))
     .filter(w => w.length > 2 && !ASK_QUERY_STOP.has(w));
+  // One evidence rule, applied twice: does this word appear in the winning
+  // title but in at most half of its siblings' titles?
+  const choosesARoute = (w) => {
+    if(!askTitleHasWord(primary, w)) return false;
+    const shared = sibTitles.filter(t => askTitleHasWord(t, w)).length;
+    return shared * 2 <= sibTitles.length;
+  };
   for(const w of words){
     if(ASK_GENERIC_TOKENS.has(w)) continue;
+    if(choosesARoute(w)) return 'narrow';
+  }
+  // Second pass: the ACTION the question named. A topic word shared across the
+  // whole family - "NEXUS", "passport" - cannot choose a route, and the pass
+  // above is right to decline on it. But the user may still have said what they
+  // want to DO, and that can be a route choice.
+  //
+  // This pass deliberately does NOT reuse the title test. Titles are an
+  // unreliable guide to what a resource is FOR: "Child Passport" and "Urgent,
+  // Express..." are both passport applications and say so nowhere in their
+  // titles, so a title-only test would wrongly narrow "How do I apply for a
+  // passport?" - which must stay broad, because the passport family really does
+  // hold several application routes. The sibling's own body text says what it is
+  // for, so the action is measured there: a sibling that also talks about
+  // applying still shares the action, whatever its title is called. In the NEXUS
+  // family only one resource is an application, so "apply" chooses it; in the
+  // passport family several are, so "apply" chooses nothing and the question
+  // stays broad. Same evidence rule, judged against better evidence.
+  const bodyOf = x => cjhqNormalizeSearch([x.en, x.fr, x.desc_en, x.desc_fr,
+      x.what_en, x.what_fr, x.steps_en, x.steps_fr,
+      (x.steps_list_en||[]).join(' '), (x.steps_list_fr||[]).join(' ')]
+    .filter(Boolean).join(' ').toLowerCase());
+  const sibBodies = sibs.map(s2 => bodyOf(s2.item));
+  for(const w of words){
+    if(!ASK_ACTION_TOKENS.has(w)) continue;
     if(!askTitleHasWord(primary, w)) continue;
-    const shared = sibTitles.filter(t => askTitleHasWord(t, w)).length;
-    if(shared * 2 <= sibTitles.length) return 'narrow';
+    const shared = sibBodies.filter(t => askTitleHasWord(t, w)).length;
+    if(shared * 2 <= sibBodies.length) return 'narrow';
   }
   return 'broad';
 }
