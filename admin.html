@@ -814,6 +814,16 @@
   .ctc-dir-flag{display:flex; align-items:center; justify-content:center; gap:10px; line-height:1;}
   .ctc-flag{width:32px; height:20px; border:1px solid var(--line); border-radius:2px; display:block; flex-shrink:0;}
   .ctc-dir-arrow{font-size:1.05rem; color:var(--muted);}
+  .ctc-trip-type{margin-top:12px;}
+  .ctc-round-btn .ctc-dir-arrow{font-size:1.25rem;}
+  .ctc-child + .ctc-child{margin-top:6px; padding-top:16px; border-top:1px dashed var(--line);}
+  .ctc-child-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px;}
+  .ctc-child-head[hidden]{display:none;}
+  .ctc-child-num{font-family:'Inter',sans-serif; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);}
+  .ctc-child-remove{background:none; border:none; padding:0; cursor:pointer; font-family:'Inter',sans-serif; font-size:.75rem; color:var(--muted); text-decoration:underline;}
+  .ctc-child-remove:hover{color:var(--ink);}
+  .ctc-add-child{margin-top:14px; background:none; border:1px dashed var(--line); border-radius:var(--radius); padding:9px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-size:.82rem; color:var(--muted);}
+  .ctc-add-child:hover{border-color:var(--bronze-soft); color:var(--ink);}
   .ctc-hint{font-size:.86rem; color:var(--muted); margin-top:10px;}
   .ctc-back{margin-bottom:22px; padding:9px 16px; font-size:.9rem;}
   .ctc-flag-blank{border-style:dashed;}
@@ -1017,7 +1027,6 @@
       <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
       <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
       <a href="/about" data-page="about"><span data-en>About</span><span data-fr>À propos</span></a>
-      <a href="/stay-informed" data-href-page="stay-informed" id="navSubscribeLink" onclick="if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return true; goToSubscribeForm(); return false;"><span data-en>Subscribe</span><span data-fr>S’abonner</span></a>
     </nav>
 
     <div style="display:flex; align-items:center; gap:10px;">
@@ -2029,6 +2038,13 @@
                 <p class="ctc-err" id="err-ctcToCountry" hidden></p>
               </div>
             </div>
+            <div class="ctc-dir ctc-trip-type">
+              <button type="button" class="ctc-dir-btn ctc-round-btn" id="ctcRoundTrip" role="checkbox" aria-checked="false" aria-describedby="hint-ctcRoundTrip">
+                <span class="ctc-dir-flag" aria-hidden="true"><span class="ctc-dir-arrow">⇄</span></span>
+                <span class="ctc-dir-txt" data-en>Round Trip</span><span class="ctc-dir-txt" data-fr>Aller-retour</span>
+              </button>
+            </div>
+            <p class="ctc-hint ctc-field-hint" id="hint-ctcRoundTrip"><span data-en>Select Round Trip if the child is returning. A return date is then required and the letter covers the return journey.</span><span data-fr>Sélectionnez Aller-retour si l'enfant revient. Une date de retour est alors requise et la lettre couvre le voyage de retour.</span></p>
             <p class="ctc-err" id="err-direction" hidden></p>
           </fieldset>
 
@@ -2047,10 +2063,13 @@
 
           <fieldset class="ctc-block">
             <legend class="ctc-legend"><span data-en>Child Information</span><span data-fr>Renseignements sur l'enfant</span></legend>
+            <div id="ctcChildList">
+            <div class="ctc-child" data-child="0">
+            <div class="ctc-child-head" hidden><span class="ctc-child-num"></span></div>
             <div class="form-group">
-              <label for="ctcChildName"><span data-en>Child's Full Name</span><span data-fr>Nom complet de l'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcChildName"><span data-en>Child's First and Last Name</span><span data-fr>Prénom et nom de l'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcChildName"><span data-en>Enter the child's full legal name (first and last name)</span><span data-fr>Entrez le nom légal complet de l'enfant (prénom et nom de famille)</span></p>
-              <input type="text" id="ctcChildName" aria-describedby="hint-ctcChildName" autocomplete="off" placeholder="First and Last Name">
+              <input type="text" id="ctcChildName" aria-describedby="hint-ctcChildName" autocomplete="off" data-ph-en="First and Last Name" data-ph-fr="Prénom et nom">
               <p class="ctc-err" id="err-ctcChildName" hidden></p>
             </div>
             <div class="form-group">
@@ -2059,13 +2078,18 @@
               <input type="date" id="ctcChildDob" aria-describedby="hint-ctcChildDob">
               <p class="ctc-err" id="err-ctcChildDob" hidden></p>
             </div>
+            </div>
+            </div>
+            <button type="button" class="ctc-add-child" id="ctcAddChild">
+              <span data-en>+ Add another child</span><span data-fr>+ Ajouter un autre enfant</span>
+            </button>
           </fieldset>
 
           <fieldset class="ctc-block" id="ctcAdultBlock">
             <legend class="ctc-legend"><span data-en>Accompanying Adult</span><span data-fr>Adulte accompagnateur</span></legend>
             <p class="ctc-hint ctc-section-hint"><span data-en>Person travelling with the child</span><span data-fr>Personne qui voyage avec l'enfant</span></p>
             <div class="form-group">
-              <label for="ctcAdultName"><span data-en>Accompanying Adult's Full Name</span><span data-fr>Nom complet de l'adulte accompagnateur</span> <abbr class="ctc-req" title="required">*</abbr></label>
+              <label for="ctcAdultName"><span data-en>Adult's Full Name</span><span data-fr>Nom complet de l'adulte</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcAdultName"><span data-en>Enter the full name of the adult travelling with the child</span><span data-fr>Entrez le nom complet de l'adulte qui voyage avec l'enfant</span></p>
               <input type="text" id="ctcAdultName" aria-describedby="hint-ctcAdultName" autocomplete="off">
               <p class="ctc-err" id="err-ctcAdultName" hidden></p>
@@ -2073,13 +2097,13 @@
             <div class="form-group">
               <label for="ctcAdultRel"><span data-en>Relationship to Child</span><span data-fr>Lien avec l'enfant</span></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcAdultRel"><span data-en>Enter the adult's relationship to the child (e.g., parent, grandparent, relative)</span><span data-fr>Indiquez le lien entre l'adulte et l'enfant (p. ex. parent, grand-parent, membre de la famille)</span></p>
-              <input type="text" id="ctcAdultRel" aria-describedby="hint-ctcAdultRel" autocomplete="off" placeholder="Parent, Grandparent, Relative, etc.">
+              <input type="text" id="ctcAdultRel" aria-describedby="hint-ctcAdultRel" autocomplete="off" data-ph-en="Parent, Grandparent, Relative, etc." data-ph-fr="Parent, grand-parent, membre de la famille, etc.">
               <p class="ctc-err" id="err-ctcAdultRel" hidden></p>
             </div>
             <div class="form-group">
               <label for="ctcAdultPhone"><span data-en>Phone Number</span><span data-fr>Numéro de téléphone</span></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcAdultPhone"><span data-en>Enter a phone number where the accompanying adult can be reached</span><span data-fr>Entrez un numéro de téléphone où l'adulte accompagnateur peut être joint</span></p>
-              <input type="tel" id="ctcAdultPhone" aria-describedby="hint-ctcAdultPhone" autocomplete="off">
+              <input type="tel" id="ctcAdultPhone" aria-describedby="hint-ctcAdultPhone" autocomplete="off" data-ph-en="514-000-0000" data-ph-fr="514-000-0000">
               <p class="ctc-err" id="err-ctcAdultPhone" hidden></p>
             </div>
             <div class="form-group">
@@ -2101,7 +2125,7 @@
             <div class="form-group">
               <label for="ctcParentPhone"><span data-en>Phone</span><span data-fr>Téléphone</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcParentPhone"><span data-en>Enter a phone number where this parent or guardian can be reached</span><span data-fr>Entrez un numéro de téléphone où ce parent ou tuteur peut être joint</span></p>
-              <input type="tel" id="ctcParentPhone" aria-describedby="hint-ctcParentPhone" autocomplete="off">
+              <input type="tel" id="ctcParentPhone" aria-describedby="hint-ctcParentPhone" autocomplete="off" data-ph-en="514-000-0000" data-ph-fr="514-000-0000">
               <p class="ctc-err" id="err-ctcParentPhone" hidden></p>
             </div>
             <div class="form-group" id="ctcParent2Wrap">
@@ -2113,7 +2137,7 @@
             <div class="form-group">
               <label for="ctcParentAddress"><span data-en>Address</span><span data-fr>Adresse</span></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcParentAddress"><span data-en>Enter this parent or guardian's full current address</span><span data-fr>Entrez l'adresse complète actuelle de ce parent ou tuteur</span></p>
-              <textarea id="ctcParentAddress" aria-describedby="hint-ctcParentAddress" rows="3"></textarea>
+              <textarea id="ctcParentAddress" aria-describedby="hint-ctcParentAddress" rows="3" data-ph-en="1234 Main St. Montreal, Quebec, A1A 1A1" data-ph-fr="1234 rue Principale, Montréal, Québec, A1A 1A1"></textarea>
               <p class="ctc-err" id="err-ctcParentAddress" hidden></p>
             </div>
             <div class="form-group">
@@ -2132,7 +2156,7 @@
               <p class="ctc-err" id="err-ctcDeparture" hidden></p>
             </div>
             <div class="form-group">
-              <label for="ctcReturn"><span data-en>Return Date</span><span data-fr>Date de retour</span></label>
+              <label for="ctcReturn"><span data-en>Return Date</span><span data-fr>Date de retour</span> <abbr class="ctc-req" id="ctcReturnReq" title="required" hidden>*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcReturn"><span data-en>Enter the date the child is expected to return</span><span data-fr>Entrez la date prévue du retour de l'enfant</span></p>
               <input type="date" id="ctcReturn" aria-describedby="hint-ctcReturn">
               <p class="ctc-err" id="err-ctcReturn" hidden></p>
@@ -2140,7 +2164,7 @@
             <div class="form-group">
               <label for="ctcDestination"><span data-en>Destination</span><span data-fr>Destination</span> <abbr class="ctc-req" title="required">*</abbr></label>
               <p class="ctc-hint ctc-field-hint" id="hint-ctcDestination"><span data-en>Enter the destination city, state/province, and country</span><span data-fr>Entrez la ville, l'État ou la province et le pays de destination</span></p>
-              <input type="text" id="ctcDestination" aria-describedby="hint-ctcDestination" autocomplete="off" placeholder="City, State/Province, Country">
+              <input type="text" id="ctcDestination" aria-describedby="hint-ctcDestination" autocomplete="off" data-ph-en="City, State/Province, Country" data-ph-fr="Ville, État/province, pays">
               <p class="ctc-err" id="err-ctcDestination" hidden></p>
             </div>
           </fieldset>
@@ -2894,36 +2918,9 @@ const categories = [
         {en:'Apply for NEXUS', fr:'Faire une demande NEXUS', desc_en:'Apply for a new NEXUS membership.', desc_fr:'Faites une demande de nouvelle adhésion NEXUS.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-4-eng.html", what_en:'NEXUS allows pre-approved, low-risk travellers to cross the Canada–U.S. border more quickly at participating airports, land crossings, and marine locations.', what_fr:'NEXUS permet aux voyageurs pré-approuvés à faible risque de traverser la frontière Canada–États-Unis plus rapidement aux aéroports, postes frontaliers terrestres et emplacements maritimes participants.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Apply if you have never been a NEXUS member and would like faster border crossings between Canada and the United States.', answer_fr:'Faites une demande si vous n\'avez jamais été membre NEXUS et souhaitez traverser la frontière Canada–États-Unis plus rapidement.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'You\'ll need:', need_intro_fr:'Vous aurez besoin de :', need_list_en:['A Trusted Traveler Programs (TTP) account','Valid passport(s)','Driver\'s licence or other government-issued identification','Your address and travel history','Payment of the application fee'], need_list_fr:['Un compte Trusted Traveler Programs (TTP)','Passeport(s) valide(s)','Permis de conduire ou autre pièce d\'identité émise par le gouvernement','Votre adresse et historique de voyage','Le paiement des frais de demande'], steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_list_en:['Create a Trusted Traveler Programs account.','Complete the online application.','Pay the application fee.','Wait for conditional approval.','Book and attend your interview.'], steps_list_fr:['Créez un compte Trusted Traveler Programs.','Complétez la demande en ligne.','Payez les frais de demande.','Attendez l\'approbation conditionnelle.','Réservez et assistez à votre entrevue.'], tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Every applicant, including children, must have their own application.','Children may apply free of charge when eligibility requirements are met.','Approval is not automatic.'], tips_list_fr:['Chaque demandeur, incluant les enfants, doit avoir sa propre demande.','Les enfants peuvent faire une demande gratuitement lorsque les critères d\'admissibilité sont respectés.','L\'approbation n\'est pas automatique.'], official_links:[{label_en:'Apply for NEXUS', label_fr:'Faire une demande NEXUS', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-4-eng.html"}], related:['renew-or-replace-nexus','schedule-your-interview','find-an-enrolment-centre'], reviewed:'August 2026', slug:'apply-for-nexus'},
         {en:'Renew or Replace NEXUS', fr:'Renouveler ou remplacer NEXUS', desc_en:'Renew your NEXUS membership or replace a lost, stolen, or damaged card.', desc_fr:'Renouvelez votre adhésion NEXUS ou remplacez une carte perdue, volée ou endommagée.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-6-eng.html", what_en:'This covers renewing a NEXUS membership before it expires, or replacing a card that\'s lost or damaged.', what_fr:'Ceci concerne le renouvellement d\'une adhésion NEXUS avant son expiration, ou le remplacement d\'une carte perdue ou endommagée.', question_en:'Is this the right application?', question_fr:'Est-ce la bonne demande?', answer_en:'Use this service if your membership is expiring or your card has been lost, stolen, or damaged.', answer_fr:'Utilisez ce service si votre adhésion arrive à échéance ou si votre carte a été perdue, volée ou endommagée.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_en:'You\'ll need your Trusted Traveler Programs account and your membership information.', need_fr:'Vous aurez besoin de votre compte Trusted Traveler Programs et de vos renseignements d\'adhésion.', steps_heading_en:'How to Apply', steps_heading_fr:'Comment faire la demande', steps_en:'Sign in to your account and submit your renewal or replacement request online. You may be asked to attend another interview.', steps_fr:'Connectez-vous à votre compte et soumettez votre demande de renouvellement ou de remplacement en ligne. On pourrait vous demander d\'assister à une autre entrevue.', tips_heading_en:'Before You Apply', tips_heading_fr:'Avant de faire la demande', tips_list_en:['Renew your membership before it expires to avoid interruptions to your NEXUS benefits.'], tips_list_fr:['Renouvelez votre adhésion avant son expiration pour éviter toute interruption de vos avantages NEXUS.'], official_links:[{label_en:'Renew or Replace NEXUS', label_fr:'Renouveler ou remplacer NEXUS', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-6-eng.html"}], related:['apply-for-nexus','schedule-your-interview'], reviewed:'August 2026', slug:'renew-or-replace-nexus'},
         {en:'Schedule Your Interview', fr:'Planifier votre entrevue', desc_en:'Book your required NEXUS enrolment interview.', desc_fr:'Réservez votre entrevue d\'inscription NEXUS requise.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-5-eng.html", what_en:'After receiving conditional approval, you\'ll need to schedule an interview before your membership can be approved.', what_fr:'Après avoir reçu une approbation conditionnelle, vous devrez planifier une entrevue avant que votre adhésion puisse être approuvée.', need_heading_en:'Required Documents', need_heading_fr:'Documents requis', need_intro_en:'Bring:', need_intro_fr:'Apportez :', need_list_en:['Your passport(s)','Additional identification if requested','Any documents listed in your appointment confirmation'], need_list_fr:['Votre ou vos passeports','Pièces d\'identité supplémentaires si demandées','Tout document indiqué dans votre confirmation de rendez-vous'], steps_heading_en:'How to Schedule', steps_heading_fr:'Comment planifier', steps_en:'Log in to your Trusted Traveler Programs account and select an available interview location and appointment time.', steps_fr:'Connectez-vous à votre compte Trusted Traveler Programs et sélectionnez un lieu d\'entrevue et une heure de rendez-vous disponibles.', tips_heading_en:'Before Your Appointment', tips_heading_fr:'Avant votre rendez-vous', tips_list_en:['Arrive on time and bring all required documents.','Missing documents may require you to reschedule.'], tips_list_fr:['Arrivez à l\'heure et apportez tous les documents requis.','Des documents manquants pourraient vous obliger à reprendre rendez-vous.'], official_links:[{label_en:'Schedule Interview', label_fr:'Planifier une entrevue', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/nexus-5-eng.html"}], related:['apply-for-nexus','find-an-enrolment-centre'], reviewed:'August 2026', slug:'schedule-your-interview', label_en1:'Schedule Interview →', label_fr1:'Planifier une entrevue →'},
-        {en:'Find an Enrolment Centre', fr:'Trouver un centre d\'inscription', desc_en:'Find a NEXUS enrolment centre in Canada or the United States.', desc_fr:'Trouvez un centre d\'inscription NEXUS au Canada ou aux États-Unis.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/centres-eng.html", what_en:'Locate the nearest enrolment centre where you can complete your NEXUS interview.', what_fr:'Trouvez le centre d\'inscription le plus près où compléter votre entrevue NEXUS.', need_heading_en:'Before You Go', need_heading_fr:'Avant de vous déplacer', need_intro_en:'Check:', need_intro_fr:'Vérifiez :', need_list_en:['Appointment availability','Office hours','Services offered'], need_list_fr:['La disponibilité des rendez-vous','Les heures d\'ouverture','Les services offerts'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Search by location to see which centres are closest and what hours they operate.', steps_fr:'Recherchez par emplacement pour voir quels centres sont les plus près et leurs heures d\'ouverture.', official_links:[{label_en:'Find an Enrolment Centre', label_fr:'Trouver un centre d\'inscription', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/centres-eng.html"}], related:['apply-for-nexus','schedule-your-interview','renew-or-replace-nexus'], reviewed:'August 2026', slug:'find-an-enrolment-centre', label_en1:'Find a Centre →', label_fr1:'Trouver un centre →'}
-      ], extra_en:`<details class="res-details">
-  <summary>💳 Credit Cards That Reimburse NEXUS Fees</summary>
-  <div class="res-details-body">
-    <p>Many premium travel credit cards reimburse the NEXUS application or renewal fee as a statement credit.</p>
-    <div class="res-fee-grid">
-      <div class="res-fee-box"><b>Current NEXUS Membership Fee</b>US$120</div>
-      <div class="res-fee-box"><b>Membership Validity</b>5 Years</div>
-    </div>
-    <h5>Canadian Credit Cards</h5>
-    <table class="res-cc-table"><thead><tr><th>Card</th><th>Statement Credit</th><th>Benefit</th></tr></thead><tbody><tr><td>American Express Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>American Express Business Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>TD Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>TD Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr></tbody></table>
-    <h5>United States Credit Cards</h5>
-    <table class="res-cc-table"><thead><tr><th>Card</th><th>Statement Credit</th><th>Benefit</th></tr></thead><tbody><tr><td>Chase Sapphire Reserve®</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Sapphire Reserve Business℠</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Aeroplan® Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Club℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Quest℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Explorer℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Business Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Southwest Rapid Rewards® Performance Business Card</td><td>Up to US$120</td><td>Every 4 years</td></tr></tbody></table>
-    <p class="res-fee-note">Credit card benefits are subject to change. Please verify eligibility directly with the card issuer before applying or renewing.</p>
-  </div>
-</details>`, extra_fr:`<details class="res-details">
-  <summary>💳 Cartes de crédit qui remboursent les frais NEXUS</summary>
-  <div class="res-details-body">
-    <p>Plusieurs cartes de crédit voyage haut de gamme remboursent les frais de demande ou de renouvellement NEXUS sous forme de crédit sur relevé.</p>
-    <div class="res-fee-grid">
-      <div class="res-fee-box"><b>Frais d'adhésion NEXUS actuels</b>120 $ US</div>
-      <div class="res-fee-box"><b>Validité de l'adhésion</b>5 ans</div>
-    </div>
-    <h5>Cartes de crédit canadiennes</h5>
-    <table class="res-cc-table"><thead><tr><th>Carte</th><th>Crédit sur relevé</th><th>Avantage</th></tr></thead><tbody><tr><td>American Express Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>American Express Business Platinum Card</td><td>Up to $100 CAD</td><td>Once every 4 years</td></tr><tr><td>TD Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>TD Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Visa Infinite Privilege</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr><tr><td>CIBC Aeroplan Business Visa Infinite</td><td>Up to $100 CAD</td><td>Every 48 months</td></tr></tbody></table>
-    <h5>Cartes de crédit américaines</h5>
-    <table class="res-cc-table"><thead><tr><th>Carte</th><th>Crédit sur relevé</th><th>Avantage</th></tr></thead><tbody><tr><td>Chase Sapphire Reserve®</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Sapphire Reserve Business℠</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Chase Aeroplan® Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Club℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Quest℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>United Explorer℠ Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>IHG One Rewards Premier Business Credit Card</td><td>Up to US$120</td><td>Every 4 years</td></tr><tr><td>Southwest Rapid Rewards® Performance Business Card</td><td>Up to US$120</td><td>Every 4 years</td></tr></tbody></table>
-    <p class="res-fee-note">Les avantages des cartes de crédit peuvent changer. Veuillez vérifier votre admissibilité directement auprès de l'émetteur de la carte avant de faire une demande ou un renouvellement.</p>
-  </div>
-</details>` }
+        {en:'Find an Enrolment Centre', fr:'Trouver un centre d\'inscription', desc_en:'Find a NEXUS enrolment centre in Canada or the United States.', desc_fr:'Trouvez un centre d\'inscription NEXUS au Canada ou aux États-Unis.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/centres-eng.html", what_en:'Locate the nearest enrolment centre where you can complete your NEXUS interview.', what_fr:'Trouvez le centre d\'inscription le plus près où compléter votre entrevue NEXUS.', need_heading_en:'Before You Go', need_heading_fr:'Avant de vous déplacer', need_intro_en:'Check:', need_intro_fr:'Vérifiez :', need_list_en:['Appointment availability','Office hours','Services offered'], need_list_fr:['La disponibilité des rendez-vous','Les heures d\'ouverture','Les services offerts'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Search by location to see which centres are closest and what hours they operate.', steps_fr:'Recherchez par emplacement pour voir quels centres sont les plus près et leurs heures d\'ouverture.', official_links:[{label_en:'Find an Enrolment Centre', label_fr:'Trouver un centre d\'inscription', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/centres-eng.html"}], related:['apply-for-nexus','schedule-your-interview','renew-or-replace-nexus'], reviewed:'August 2026', slug:'find-an-enrolment-centre', label_en1:'Find a Centre →', label_fr1:'Trouver un centre →'},
+        {en:'Credit Cards That Reimburse NEXUS Fees', fr:'Cartes de crédit qui remboursent les frais NEXUS', desc_en:'See which travel credit cards cover the NEXUS application or renewal fee.', desc_fr:'Voyez quelles cartes de crédit voyage couvrent les frais de demande ou de renouvellement NEXUS.', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/menu-eng.html", what_en:'Many premium travel credit cards reimburse the NEXUS application or renewal fee as a statement credit. The NEXUS application processing fee is US$120 and is non-refundable, and a NEXUS membership is valid for 5 years.', what_fr:'Plusieurs cartes de crédit voyage haut de gamme remboursent les frais de demande ou de renouvellement NEXUS sous forme de crédit sur relevé. Les frais de traitement de la demande NEXUS sont de 120 $ US et ne sont pas remboursables, et l’adhésion NEXUS est valide 5 ans.', question_en:'How does the reimbursement work?', question_fr:'Comment fonctionne le remboursement?', answer_en:'You pay the NEXUS fee with an eligible card and the card issuer posts a statement credit. The credit comes from the card issuer, not from CBSA or CBP. Eligibility, the amount and how often it can be claimed are set by the issuer and can change at any time, so verify directly with your card issuer before applying or renewing.', answer_fr:'Vous payez les frais NEXUS avec une carte admissible et l’émetteur de la carte porte un crédit à votre relevé. Le crédit provient de l’émetteur de la carte, et non de l’ASFC ou du CBP. L’admissibilité, le montant et la fréquence sont fixés par l’émetteur et peuvent changer en tout temps; vérifiez donc directement auprès de votre émetteur avant de faire une demande ou un renouvellement.', need_heading_en:'Canadian Credit Cards', need_heading_fr:'Cartes de crédit canadiennes', need_intro_en:'Statement credit and how often it can be claimed:', need_intro_fr:'Crédit sur relevé et fréquence :', need_list_en:['American Express Platinum Card — up to $100 CAD, once every 4 years','American Express Business Platinum Card — up to $100 CAD, once every 4 years','TD Aeroplan Visa Infinite Privilege — up to $100 CAD, every 48 months','TD Aeroplan Business Visa Infinite — up to $100 CAD, every 48 months','CIBC Aeroplan Visa Infinite Privilege — up to $100 CAD, every 48 months','CIBC Aeroplan Business Visa Infinite — up to $100 CAD, every 48 months'], need_list_fr:['American Express Platinum Card — jusqu’à 100 $ CA, une fois tous les 4 ans','American Express Business Platinum Card — jusqu’à 100 $ CA, une fois tous les 4 ans','TD Aeroplan Visa Infinite Privilege — jusqu’à 100 $ CA, tous les 48 mois','TD Aeroplan Business Visa Infinite — jusqu’à 100 $ CA, tous les 48 mois','CIBC Aeroplan Visa Infinite Privilege — jusqu’à 100 $ CA, tous les 48 mois','CIBC Aeroplan Business Visa Infinite — jusqu’à 100 $ CA, tous les 48 mois'], tips_heading_en:'United States Credit Cards', tips_heading_fr:'Cartes de crédit américaines', tips_list_en:['Chase Sapphire Reserve® — up to US$120, every 4 years','Chase Sapphire Reserve Business℠ — up to US$120, every 4 years','Chase Aeroplan® Credit Card — up to US$120, every 4 years','United Club℠ Card — up to US$120, every 4 years','United Quest℠ Card — up to US$120, every 4 years','United Explorer℠ Card — up to US$120, every 4 years','IHG One Rewards Premier Credit Card — up to US$120, every 4 years','IHG One Rewards Premier Business Credit Card — up to US$120, every 4 years','Southwest Rapid Rewards® Performance Business Card — up to US$120, every 4 years'], tips_list_fr:['Chase Sapphire Reserve® — jusqu’à 120 $ US, tous les 4 ans','Chase Sapphire Reserve Business℠ — jusqu’à 120 $ US, tous les 4 ans','Chase Aeroplan® Credit Card — jusqu’à 120 $ US, tous les 4 ans','United Club℠ Card — jusqu’à 120 $ US, tous les 4 ans','United Quest℠ Card — jusqu’à 120 $ US, tous les 4 ans','United Explorer℠ Card — jusqu’à 120 $ US, tous les 4 ans','IHG One Rewards Premier Credit Card — jusqu’à 120 $ US, tous les 4 ans','IHG One Rewards Premier Business Credit Card — jusqu’à 120 $ US, tous les 4 ans','Southwest Rapid Rewards® Performance Business Card — jusqu’à 120 $ US, tous les 4 ans'], official_links:[{label_en:'NEXUS fees and membership (CBSA)', label_fr:'Frais et adhésion NEXUS (ASFC)', url:"https://www.cbsa-asfc.gc.ca/services/travel-voyage/prog/nexus/menu-eng.html"}], related:['apply-for-nexus','renew-or-replace-nexus'], slug:'nexus-fee-credit-cards', label_en1:'NEXUS Fees & Membership →', label_fr1:'Frais et adhésion NEXUS →'}
+      ] }
     ] },
   { icon:'globe', en:'Travel & Border Crossing', fr:'Voyage et passage frontalier',
     intro_en:'Wait times, duty-free limits, advisories, travel insurance, and documentation for crossing the Canada–U.S. border.',
@@ -4379,6 +4376,11 @@ function setLang(lang){
     const pageName = activePage.id.replace('page-','');
     if(typeof updatePageMeta === 'function') updatePageMeta(pageName);
   }
+  // Modules that hold rendered text of their own - the consent letter preview
+  // and its placeholders - listen for this. The listener existed but nothing
+  // ever fired the event, so a language switch left that text in the old
+  // language until the form was resubmitted.
+  document.dispatchEvent(new CustomEvent('cjhq:langchange', { detail:{ lang } }));
 }
 // Translates the Constant Contact signup form's labels/notice/button between
 // English and French. Stores each element's original English text in a
@@ -4593,7 +4595,13 @@ if(contactForm){
   const isFr = () => document.documentElement.classList.contains('lang-fr');
   let direction = null;      // 'ca-us' | 'us-ca' | 'custom'
   let travelWith = null;     // 'parent' | 'adult'
+  let roundTrip = false;     // return journey asserted, return date required
   let returnTouched = false; // don't clobber a return date the user chose
+  let childSeq = 0;          // suffix generator for additional child blocks
+  // Field ids of every child block, in the order they appear. The first child
+  // keeps the original unsuffixed ids so the existing hints, error elements and
+  // validation messages continue to address it unchanged.
+  const childIds = [{ name:'ctcChildName', dob:'ctcChildDob' }];
 
   /* ---------- dates ---------- */
   // Local date as yyyy-mm-dd. Built from the device clock every time the tool
@@ -4628,6 +4636,17 @@ if(contactForm){
   $('ctcDeparture').addEventListener('change', syncReturnMin);
   $('ctcReturn').addEventListener('change', ()=>{ returnTouched = true; });
 
+  /* ---------- placeholders ---------- */
+  // Every placeholder in this form is declared bilingually on the element, so
+  // one pass keeps them all in the current language - including fields added
+  // after load. Previously only the two country fields were handled, and only
+  // when a direction button was clicked, so a language switch left them stale.
+  function syncPlaceholders(root){
+    (root || form).querySelectorAll('[data-ph-en]').forEach(el=>{
+      el.placeholder = isFr() ? (el.dataset.phFr || el.dataset.phEn) : el.dataset.phEn;
+    });
+  }
+
   /* ---------- direction ---------- */
   // Who the child travels with: switches the exact letter wording, the
   // signature blocks and whether the accompanying-adult section applies.
@@ -4640,10 +4659,12 @@ if(contactForm){
     });
   });
 
-  document.querySelectorAll('.ctc-dir-btn:not(.ctc-with-btn)').forEach(btn=>{
+  // Selecting on [data-dir] rather than :not(.ctc-with-btn) keeps the Round
+  // Trip toggle - which is not a direction - out of this radio group.
+  document.querySelectorAll('.ctc-dir-btn[data-dir]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       direction = btn.dataset.dir;
-      document.querySelectorAll('.ctc-dir-btn:not(.ctc-with-btn)').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
+      document.querySelectorAll('.ctc-dir-btn[data-dir]').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
       hideError('direction');
       // "Other countries" reveals two free-text country fields. They are only
       // required while that option is selected.
@@ -4651,16 +4672,26 @@ if(contactForm){
       const custom = direction === 'custom';
       cd.hidden = !custom;
       if(custom){
-        ['ctcFromCountry','ctcToCountry'].forEach(id=>{
-          const el = $(id);
-          el.placeholder = isFr() ? el.dataset.phFr : el.dataset.phEn;
-        });
+        syncPlaceholders();
         $('ctcFromCountry').focus();
       }else{
         $('ctcFromCountry').value = ''; $('ctcToCountry').value = '';
         hideError('ctcFromCountry'); hideError('ctcToCountry');
       }
     });
+  });
+
+  /* ---------- round trip ---------- */
+  // Round Trip is a separate yes/no choice, not a fourth direction: it says the
+  // child is coming back, which makes the return date meaningful and required
+  // and puts the return leg into the letter.
+  const roundBtn = $('ctcRoundTrip');
+  if(roundBtn) roundBtn.addEventListener('click', ()=>{
+    roundTrip = !roundTrip;
+    roundBtn.setAttribute('aria-checked', String(roundTrip));
+    const req = $('ctcReturnReq');
+    if(req) req.hidden = !roundTrip;
+    if(!roundTrip) hideError('ctcReturn');
   });
 
 
@@ -4684,7 +4715,9 @@ if(contactForm){
     ctcToCountry:     ['Please enter the country you are travelling to.','Veuillez saisir le pays d\u2019arriv\u00e9e.'],
     returnBefore:     ['The return date cannot be earlier than the departure date.','La date de retour ne peut pas pr\u00e9c\u00e9der la date de d\u00e9part.']
   };
-  const t = (k) => MSG[k][isFr() ? 1 : 0];
+  // Additional child blocks carry a numeric suffix on their ids; they reuse the
+  // message of the base field rather than duplicating it per child.
+  const t = (k) => (MSG[k] || MSG[String(k).replace(/\d+$/,'')])[isFr() ? 1 : 0];
 
   function showError(key, msgKey){
     const el = $('err-' + key);
@@ -4700,19 +4733,23 @@ if(contactForm){
   }
   // Only these seven are mandatory. Everything else is genuinely optional and
   // is simply left unmarked - the form never uses the word "optional".
-  const REQUIRED = ['ctcChildName','ctcChildDob',
-    'ctcAdultName',
+  const REQUIRED = ['ctcAdultName',
     'ctcParentName','ctcParentPhone',
     'ctcDeparture','ctcDestination'];
+  // The child fields are required too, but there can be more than one child, so
+  // they are derived from the current blocks rather than listed here.
+  const childRequired = () => childIds.reduce((a,c)=> a.concat([c.name, c.dob]), []);
 
   function validate(){
     let firstBad = null;
     REQUIRED.forEach(hideError);
+    childRequired().forEach(hideError);
     hideError('direction');
+    hideError('ctcReturn');
     $('ctcSummaryErr').hidden = true;
 
     if(!travelWith){ showError('travelWith'); firstBad = firstBad || document.querySelector('.ctc-with-btn'); }
-    if(!direction){ showError('direction'); firstBad = firstBad || document.querySelector('.ctc-dir-btn:not(.ctc-with-btn)'); }
+    if(!direction){ showError('direction'); firstBad = firstBad || document.querySelector('.ctc-dir-btn[data-dir]'); }
     if(direction === 'custom'){
       ['ctcFromCountry','ctcToCountry'].forEach(id=>{
         hideError(id);
@@ -4721,12 +4758,15 @@ if(contactForm){
     }
     // Travelling alone hides the accompanying-adult section, so requiring that
     // name would produce an error against a field the user cannot see or fill.
-    REQUIRED.forEach(id=>{
+    REQUIRED.concat(childRequired()).forEach(id=>{
       const el = $(id);
-      if(!el.value.trim()){ showError(id); firstBad = firstBad || el; }
+      if(el && !el.value.trim()){ showError(id); firstBad = firstBad || el; }
     });
     const dep = $('ctcDeparture').value, ret = $('ctcReturn').value;
-    if(dep && ret && ret < dep){ showError('ctcReturn','returnBefore'); firstBad = firstBad || $('ctcReturn'); }
+    // Round Trip asserts a return journey in the letter, so the date it is
+    // built from has to be there.
+    if(roundTrip && !ret){ showError('ctcReturn'); firstBad = firstBad || $('ctcReturn'); }
+    else if(dep && ret && ret < dep){ showError('ctcReturn','returnBefore'); firstBad = firstBad || $('ctcReturn'); }
 
     if(firstBad){
       const s = $('ctcSummaryErr');
@@ -4741,14 +4781,75 @@ if(contactForm){
     return true;
   }
 
+  /* ---------- additional children ---------- */
+  // One consent letter can cover siblings travelling together. Each extra child
+  // is the same pair of fields with a numeric suffix on every id, so the hints,
+  // error elements and validation all work exactly as they do for the first.
+  const childList = $('ctcChildList');
+  const addChildBtn = $('ctcAddChild');
+
+  function renumberChildren(){
+    const blocks = childList ? [...childList.querySelectorAll('.ctc-child')] : [];
+    blocks.forEach((b, i)=>{
+      const num = b.querySelector('.ctc-child-num');
+      if(num){
+        num.innerHTML = '<span data-en>Child ' + (i+1) + '</span><span data-fr>Enfant ' + (i+1) + '</span>';
+      }
+    });
+    // The label on the only child block reads plainly; once there are siblings
+    // each block is numbered so an error points somewhere unambiguous.
+    blocks.forEach(b=>{ const h = b.querySelector('.ctc-child-head'); if(h) h.hidden = blocks.length < 2; });
+  }
+
+  function addChild(){
+    if(!childList) return;
+    childSeq += 1;
+    const n = childSeq;
+    const nameId = 'ctcChildName' + n, dobId = 'ctcChildDob' + n;
+    const wrap = document.createElement('div');
+    wrap.className = 'ctc-child';
+    wrap.dataset.child = String(n);
+    wrap.innerHTML =
+      '<div class="ctc-child-head">' +
+        '<span class="ctc-child-num"></span>' +
+        '<button type="button" class="ctc-child-remove"><span data-en>Remove</span><span data-fr>Retirer</span></button>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label for="' + nameId + '"><span data-en>Child\'s First and Last Name</span><span data-fr>Pr\u00e9nom et nom de l\'enfant</span> <abbr class="ctc-req" title="required">*</abbr></label>' +
+        '<p class="ctc-hint ctc-field-hint" id="hint-' + nameId + '"><span data-en>Enter the child\'s full legal name (first and last name)</span><span data-fr>Entrez le nom l\u00e9gal complet de l\'enfant (pr\u00e9nom et nom de famille)</span></p>' +
+        '<input type="text" id="' + nameId + '" aria-describedby="hint-' + nameId + '" autocomplete="off" data-ph-en="First and Last Name" data-ph-fr="Pr\u00e9nom et nom">' +
+        '<p class="ctc-err" id="err-' + nameId + '" hidden></p>' +
+      '</div>' +
+      '<div class="form-group">' +
+        '<label for="' + dobId + '"><span data-en>Date of Birth</span><span data-fr>Date de naissance</span> <abbr class="ctc-req" title="required">*</abbr></label>' +
+        '<p class="ctc-hint ctc-field-hint" id="hint-' + dobId + '"><span data-en>Enter the child\'s date of birth</span><span data-fr>Entrez la date de naissance de l\'enfant</span></p>' +
+        '<input type="date" id="' + dobId + '" aria-describedby="hint-' + dobId + '">' +
+        '<p class="ctc-err" id="err-' + dobId + '" hidden></p>' +
+      '</div>';
+    childList.appendChild(wrap);
+    childIds.push({ name:nameId, dob:dobId });
+    syncPlaceholders(wrap);
+    wrap.querySelector('.ctc-child-remove').addEventListener('click', ()=>{
+      const i = childIds.findIndex(c => c.name === nameId);
+      if(i >= 0) childIds.splice(i, 1);
+      wrap.remove();
+      renumberChildren();
+    });
+    renumberChildren();
+    $(nameId).focus();
+  }
+  if(addChildBtn) addChildBtn.addEventListener('click', addChild);
+  renumberChildren();
+
   /* ---------- gather ---------- */
   // A blank form is the same document with every value replaced by a rule to
   // write on. Reusing the real builder means the printed layout, wording and
   // page size can never drift from the filled-in version.
   const FILL = '\u00a0'.repeat(2) + '_'.repeat(26);
   function blankData(){
-    return { blank:true, dir:direction || '', travelWith: travelWith || 'adult', parent2Name:'',
+    return { blank:true, dir:direction || '', roundTrip:false, travelWith: travelWith || 'adult', parent2Name:'',
       fromCountry:'', toCountry:'',
+      children:[{name:'', dob:''}],
       childName:'', childDob:'',
       adultName:'', adultRel:'', adultPhone:'', adultEmail:'',
       parentName:'', parentAddress:'', parentPhone:'', parentEmail:'',
@@ -4757,10 +4858,19 @@ if(contactForm){
 
   function collect(){
     const v = (id) => $(id).value.trim();
+    // Blocks the user emptied and left behind are dropped, so a stray blank
+    // pair can never print an empty child on the letter.
+    const children = childIds
+      .map(c => ({ name: $(c.name) ? v(c.name) : '', dob: $(c.dob) ? v(c.dob) : '' }))
+      .filter(c => c.name || c.dob);
     return {
       dir: direction,
+      roundTrip,
       travelWith, parent2Name: v('ctcParent2Name'),
       fromCountry: v('ctcFromCountry'), toCountry: v('ctcToCountry'),
+      children,
+      // First child kept flat: the download file name and any older reader of
+      // this object keep working unchanged.
       childName: v('ctcChildName'), childDob: v('ctcChildDob'),
 
       adultName: v('ctcAdultName'), adultRel: v('ctcAdultRel'),
@@ -4794,6 +4904,9 @@ if(contactForm){
       : fr
         ? (d.dir==='ca-us' ? 'Sens du voyage : Canada \u2192 \u00c9tats-Unis' : 'Sens du voyage : \u00c9tats-Unis \u2192 Canada')
         : (d.dir==='ca-us' ? 'Travel Direction: Canada \u2192 United States' : 'Travel Direction: United States \u2192 Canada');
+    // Round Trip is stated on the direction line rather than replacing it: the
+    // countries are still the outbound leg, the return journey is the addition.
+    if(d.roundTrip) dirLine += fr ? ' (aller-retour)' : ' (Round Trip)';
     // Blank form with no direction chosen: print both so it can be ticked by hand.
     if(d.blank && !d.dir){
       // Square-box characters are not in WinAnsi and printed as "?" in the PDF.
@@ -4805,14 +4918,33 @@ if(contactForm){
     // Exact supplied wording. Only the bracketed values are substituted and the
     // correct variant chosen from: travel direction, who the child travels
     // with, whether a return date exists, and whether a relationship was given.
-    const hasReturn = d.blank ? true : !!d.ret;
+    const hasReturn = d.blank ? true : (!!d.ret || d.roundTrip);
     const retDate   = d.blank ? FILL : prettyDate(d.ret);
     const depDate   = d.blank ? FILL : prettyDate(d.departure);
-    const dob       = d.blank ? FILL : prettyDate(d.childDob);
     const origin    = fromTo[0];
     const destCtry  = fromTo[1];
     const who       = d.travelWith || 'adult';
     const rel       = (d.adultRel || '').trim();
+
+    // One letter can cover siblings travelling together. Every child is named
+    // with their own date of birth, and the surrounding wording moves to the
+    // plural - in both languages - once there is more than one.
+    const kids = (d.children && d.children.length) ? d.children : [{ name:d.childName, dob:d.childDob }];
+    const many = kids.length > 1;
+    // "A, born X, and B, born Y" / "A, ne(e) le X, et de B, ne(e) le Y"
+    const kidPhrase = kids.map(c => fr
+        ? `${B(c.name)}, n\u00e9(e) le ${d.blank ? FILL : prettyDate(c.dob)}`
+        : `${B(c.name)}, born ${d.blank ? FILL : prettyDate(c.dob)}`)
+      .reduce((acc, part, i, arr) => {
+        if(i === 0) return part;
+        const joiner = (i === arr.length - 1) ? (fr ? ' et de ' : ', and ') : (fr ? ', de ' : ', ');
+        return acc + joiner + part;
+      }, '');
+    const guardianOf = fr ? 'parent ou tuteur l\u00e9gal de ' : 'am the parent/legal guardian of ';
+    const consentEn   = many ? 'my children to travel' : 'my child to travel';
+    const consentFr   = many ? 'mes enfants voyagent' : 'mon enfant voyage';
+    const withChildEn = many ? 'the children' : 'the child';
+    const withChildFr = many ? 'les enfants' : 'l\u2019enfant';
 
     // Round-trip clause, appended only when a return date exists.
     const tripEn = hasReturn
@@ -4831,25 +4963,27 @@ if(contactForm){
       // "accompanying parent" when the child travels with a parent, otherwise
       // "accompanying adult" - and the relationship only appears if supplied.
       const authEn = who === 'parent'
-        ? `I authorize the accompanying parent to travel with the child${bothEn}.`
+        ? `I authorize the accompanying parent to travel with ${withChildEn}${bothEn}.`
         : (rel && !d.blank
-            ? `I authorize ${companion}, ${rel}, to travel with the child${bothEn}.`
-            : `I authorize the accompanying adult to travel with the child${bothEn}.`);
+            ? `I authorize ${companion}, ${rel}, to travel with ${withChildEn}${bothEn}.`
+            : `I authorize the accompanying adult to travel with ${withChildEn}${bothEn}.`);
       const authFr = who === 'parent'
-        ? `J\u2019autorise le parent accompagnateur \u00e0 voyager avec l\u2019enfant${bothFr}.`
+        ? `J\u2019autorise le parent accompagnateur \u00e0 voyager avec ${withChildFr}${bothFr}.`
         : (rel && !d.blank
-            ? `J\u2019autorise ${companion}, ${rel}, \u00e0 voyager avec l\u2019enfant${bothFr}.`
-            : `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec l\u2019enfant${bothFr}.`);
+            ? `J\u2019autorise ${companion}, ${rel}, \u00e0 voyager avec ${withChildFr}${bothFr}.`
+            : `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec ${withChildFr}${bothFr}.`);
       body = fr
-        ? [`Je soussign\u00e9(e), ${B(d.parentName)}, parent ou tuteur l\u00e9gal de ${B(d.childName)}, n\u00e9(e) le ${dob}, consens \u00e0 ce que mon enfant voyage de ${origin} \u00e0 ${destCtry} avec ${companion}${tripFr}.`,
+        ? [`Je soussign\u00e9(e), ${B(d.parentName)}, ${guardianOf}${kidPhrase}, consens \u00e0 ce que ${consentFr} de ${origin} \u00e0 ${destCtry} avec ${companion}${tripFr}.`,
            `La destination du voyage est ${B(d.destination)}.`,
            authFr]
-        : [`I, ${B(d.parentName)}, am the parent/legal guardian of ${B(d.childName)}, born ${dob}, and give my consent for my child to travel from ${origin} to ${destCtry} with ${companion}${tripEn}.`,
+        : [`I, ${B(d.parentName)}, ${guardianOf}${kidPhrase}, and give my consent for ${consentEn} from ${origin} to ${destCtry} with ${companion}${tripEn}.`,
            `The destination of travel is ${B(d.destination)}.`,
            authEn];    return {
       title: fr ? 'LETTRE DE CONSENTEMENT AU VOYAGE D\u2019UN ENFANT' : 'CHILD TRAVEL CONSENT LETTER',
       showAdult: true, salutation: fr ? '\u00c0 qui de droit :' : 'To Whom It May Concern:', body,
-      secChild:  fr ? 'RENSEIGNEMENTS SUR L\u2019ENFANT' : 'CHILD INFORMATION',
+      secChild:  many ? (fr ? 'RENSEIGNEMENTS SUR LES ENFANTS' : 'CHILDREN INFORMATION')
+                      : (fr ? 'RENSEIGNEMENTS SUR L\u2019ENFANT' : 'CHILD INFORMATION'),
+      children: kids,
       secAdult:  fr ? 'ADULTE ACCOMPAGNATEUR' : 'ACCOMPANYING ADULT',
       secParent: fr ? 'PARENT / TUTEUR DONNANT SON CONSENTEMENT' : 'PARENT / GUARDIAN PROVIDING CONSENT',
       secTravel: fr ? 'RENSEIGNEMENTS SUR LE VOYAGE' : 'TRAVEL INFORMATION',
@@ -4885,7 +5019,7 @@ if(contactForm){
       <p>${esc(x.salutation)}</p>
       ${x.body.filter(Boolean).map(pp=>`<p>${esc(pp)}</p>`).join('')}
       <h3>${esc(x.secChild)}</h3>
-      ${row(x.k.name,d.childName)}${row(x.k.dob,prettyDate(d.childDob))}
+      ${x.children.map(c => row(x.k.name,c.name) + row(x.k.dob,prettyDate(c.dob))).join('')}
       ${x.showAdult ? `<h3>${esc(x.secAdult)}</h3>
       ${row(x.k.name,d.adultName)}${row(x.k.rel,d.adultRel)}${row(x.k.phone,d.adultPhone)}${row(x.k.email,d.adultEmail)}` : ''}
       <h3>${esc(x.secParent)}</h3>
@@ -4991,7 +5125,7 @@ if(contactForm){
     x.body.filter(Boolean).forEach(pp => put(pp, 10.5, false, 0, 7));
 
     section(x.secChild);
-    kv(x.k.name, d.childName); kv(x.k.dob, prettyDate(d.childDob));
+    x.children.forEach(c => { kv(x.k.name, c.name); kv(x.k.dob, prettyDate(c.dob)); });
 
     if(x.showAdult){
       section(x.secAdult);
@@ -5203,6 +5337,8 @@ if(contactForm){
 
   // Re-render the preview if the language is switched while it is open.
   document.addEventListener('cjhq:langchange', ()=>{
+    syncPlaceholders();
+    renumberChildren();
     if(!$('ctcPreviewScreen').hidden) renderPreview(collect());
   });
 
@@ -5212,6 +5348,7 @@ if(contactForm){
     if(!$('ctcPreviewScreen').hidden) showForm();
   };
   setDepartureDefault();
+  syncPlaceholders();
 })();
 
 </script>
