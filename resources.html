@@ -836,6 +836,22 @@
   .ctc-back{margin-bottom:22px; padding:9px 16px; font-size:.9rem;}
   .ctc-flag-blank{border-style:dashed;}
   .ctc-custom-dir{margin-top:14px; padding-top:4px;}
+  /* Country picker. Built from the page's own markup - no third-party widget,
+     no CDN and no request - and it still reads as a labelled text field to a
+     screen reader or if the script never runs. */
+  .ctc-combo{position:relative;}
+  .ctc-combo-input[readonly]{background:var(--bg-alt); cursor:pointer;}
+  .ctc-combo-list{position:absolute; z-index:40; left:0; right:0; top:calc(100% + 4px);
+    margin:0; padding:4px; list-style:none; max-height:300px; overflow-y:auto;
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:0 10px 28px rgba(0,0,0,.14); -webkit-overflow-scrolling:touch;}
+  .ctc-combo-list[hidden]{display:none;}
+  .ctc-combo-opt{padding:10px 12px; border-radius:6px; cursor:pointer; font-size:.95rem;
+    color:var(--ink); min-height:44px; display:flex; align-items:center;}
+  .ctc-combo-opt:hover, .ctc-combo-opt[aria-selected="true"]{background:var(--bg-alt);}
+  .ctc-combo-opt-other{border-top:1px solid var(--line); margin-top:4px; color:var(--muted);}
+  .ctc-combo-other{margin-top:14px; padding-left:12px; border-left:2px solid var(--line);}
+  .ctc-combo-other[hidden]{display:none;}
   /* .btn.outline is designed for the dark hero: white text on transparent.
      On this white page that renders as an invisible button, so give the
      outline variant readable colours inside the tool only. */
@@ -1070,7 +1086,6 @@
     <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
     <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
     <a href="/about" data-page="about"><span data-en>About CJHQ</span><span data-fr>À propos du CJHQ</span></a>
-    <a href="/stay-informed" data-href-page="stay-informed" id="drawerSubscribeLink" onclick="if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0)return true; goToSubscribeForm(); return false;"><span data-en>Subscribe</span><span data-fr>S'abonner</span></a>
   </div>
   <div class="mobile-drawer-foot">
     <div class="lang-toggle">
@@ -2040,9 +2055,22 @@
                 <p class="ctc-err" id="err-ctcFromCountry" hidden></p>
               </div>
               <div class="form-group">
-                <label for="ctcToCountry"><span data-en>Travelling to</span><span data-fr>À destination de</span> <abbr class="ctc-req" title="required">*</abbr></label>
-                <p class="ctc-hint ctc-field-hint" id="hint-ctcToCountry"><span data-en>Enter the country or location the child is travelling to</span><span data-fr>Entrez le pays ou le lieu où l'enfant se rend</span></p>
-                <input type="text" id="ctcToCountry" aria-describedby="hint-ctcToCountry" autocomplete="off" data-ph-en="Country of arrival" data-ph-fr="Pays d'arrivée">
+                <label for="ctcToCountrySearch"><span data-en>Travelling to</span><span data-fr>À destination de</span> <abbr class="ctc-req" title="required">*</abbr></label>
+                <p class="ctc-hint ctc-field-hint" id="hint-ctcToCountry"><span data-en>Start typing to search the list of countries, then choose one</span><span data-fr>Commencez à taper pour rechercher dans la liste des pays, puis choisissez-en un</span></p>
+                <div class="ctc-combo">
+                  <input type="text" id="ctcToCountrySearch" class="ctc-combo-input" role="combobox"
+                         aria-expanded="false" aria-controls="ctcToCountryList" aria-autocomplete="list"
+                         aria-describedby="hint-ctcToCountry" autocomplete="off" autocapitalize="off"
+                         autocorrect="off" spellcheck="false" enterkeyhint="search"
+                         data-ph-en="Search countries — e.g. Uni, Fra, Mex" data-ph-fr="Rechercher un pays — p. ex. Roy, Fra, Mex">
+                  <ul class="ctc-combo-list" id="ctcToCountryList" role="listbox" hidden></ul>
+                </div>
+                <input type="hidden" id="ctcToCountry" data-focus-proxy="ctcToCountrySearch">
+                <div class="ctc-combo-other" id="ctcToCountryOtherWrap" hidden>
+                  <label for="ctcToCountryOther"><span data-en>Country name</span><span data-fr>Nom du pays</span></label>
+                  <p class="ctc-hint ctc-field-hint" id="hint-ctcToCountryOther"><span data-en>Enter the country the child is travelling to</span><span data-fr>Entrez le pays où l'enfant se rend</span></p>
+                  <input type="text" id="ctcToCountryOther" aria-describedby="hint-ctcToCountryOther" autocomplete="off" data-ph-en="Country name" data-ph-fr="Nom du pays">
+                </div>
                 <p class="ctc-err" id="err-ctcToCountry" hidden></p>
               </div>
             </div>
@@ -2166,12 +2194,6 @@
               <p class="ctc-hint ctc-field-hint" id="hint-ctcReturn"><span data-en>Enter the date the child is expected to return</span><span data-fr>Entrez la date prévue du retour de l'enfant</span></p>
               <input type="date" id="ctcReturn" aria-describedby="hint-ctcReturn">
               <p class="ctc-err" id="err-ctcReturn" hidden></p>
-            </div>
-            <div class="form-group">
-              <label for="ctcDestination"><span data-en>Destination</span><span data-fr>Destination</span> <abbr class="ctc-req" title="required">*</abbr></label>
-              <p class="ctc-hint ctc-field-hint" id="hint-ctcDestination"><span data-en>Enter the destination city, state/province, and country</span><span data-fr>Entrez la ville, l'État ou la province et le pays de destination</span></p>
-              <input type="text" id="ctcDestination" aria-describedby="hint-ctcDestination" autocomplete="off" data-ph-en="City, State/Province, Country" data-ph-fr="Ville, État/province, pays">
-              <p class="ctc-err" id="err-ctcDestination" hidden></p>
             </div>
           </fieldset>
 
@@ -2500,7 +2522,7 @@ const categories = [
         {en:'Duty-Free Allowances', fr:'Exemptions hors taxes', desc_en:'Understand what you can bring back to Canada without paying duty or taxes.', desc_fr:'Comprenez ce que vous pouvez rapporter au Canada sans payer de droits ou de taxes.', url:"https://travel.gc.ca/returning/customs/bringing-to-canada/personal-exemptions-mini-guide", what_en:'Review these exemptions before returning to Canada after travelling outside the country.', what_fr:'Consultez ces exemptions avant de revenir au Canada après un voyage à l\'extérieur du pays.', need_heading_en:'Duty-Free Exemptions', need_heading_fr:'Exemptions hors taxes', need_list_en:['Less than 24 hours: No personal exemption.','24 hours or more: Up to CAN\$200 worth of goods. Alcohol and tobacco products are not included in this exemption.','48 hours or more: Up to CAN\$800 worth of goods, plus an alcohol allowance — choose one of 1.5 litres of wine, or 1.14 litres of liquor, or 8.5 litres of beer/ale — and a tobacco allowance of all of the following: 200 cigarettes, 50 cigars, 200 g of manufactured tobacco, and 200 tobacco sticks.','7 days or more: The same CAN\$800 personal exemption. Goods other than alcohol and tobacco may follow you by mail or courier, but alcohol and tobacco must be in your possession when you enter Canada. Everything must still be declared on arrival.'], need_list_fr:['Moins de 24 heures : Aucune exemption personnelle.','24 heures ou plus : Jusqu\'à 200 \$ CA de biens. L\'alcool et le tabac ne sont pas inclus dans cette exemption.','48 heures ou plus : Jusqu\'à 800 \$ CA de biens, plus une quantité d\'alcool — au choix, 1,5 litre de vin, ou 1,14 litre de spiritueux, ou 8,5 litres de bière — et une quantité de tabac correspondant à la totalité de : 200 cigarettes, 50 cigares, 200 g de tabac manufacturé, et 200 bâtonnets de tabac.','7 jours ou plus : La même exemption personnelle de 800 \$ CA. Les biens autres que l\'alcool et le tabac peuvent vous suivre par la poste ou par messagerie, mais l\'alcool et le tabac doivent être en votre possession à votre entrée au Canada. Tout doit tout de même être déclaré à l\'arrivée.'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'We\'ve put together a quick reference table further down this page showing the exemption amounts by trip length.', steps_fr:'Nous avons préparé un tableau de référence rapide plus bas sur cette page montrant les montants d\'exemption selon la durée du voyage.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Keep receipts for everything you purchased while travelling — border officers may ask to see them.','If you exceed your exemption, you generally only pay duty and taxes on the amount over your allowance — not on everything you purchased.','The tobacco allowance applies to stamped tobacco. Product not marked \'duty paid Canada droit acquitté\' attracts a special duty even inside your exemption.','You must meet the legal drinking age of the province or territory where you enter Canada.'], tips_list_fr:['Conservez les reçus de tous vos achats en voyage — les agents frontaliers pourraient les demander.','Si vous dépassez votre exemption, vous payez généralement des droits et taxes seulement sur le montant excédentaire — pas sur la totalité de vos achats.','L\'exemption de tabac s\'applique au tabac estampillé. Un produit non marqué « droit acquitté Canada duty paid » est assujetti à un droit spécial même à l\'intérieur de votre exemption.','Vous devez respecter l\'âge légal pour consommer de l\'alcool dans la province ou le territoire où vous entrez au Canada.'], official_links:[{label_en:'Personal Exemptions Mini Guide', label_fr:'Mini-guide des exemptions personnelles', url:"https://travel.gc.ca/returning/customs/bringing-to-canada/personal-exemptions-mini-guide"},{label_en:'I Declare: A Guide for Residents Returning to Canada', label_fr:'Je déclare : Guide à l\'intention des résidents revenant au Canada', url:"https://www.cbsa-asfc.gc.ca/travel-voyage/declare-eng.html"},{label_en:'Alcohol and Tobacco Limits', label_fr:'Limites d\'alcool et de tabac', url:"https://www.cbsa-asfc.gc.ca/travel-voyage/atl-lat-eng.html"}], related:['canada-border-services-agency-cbsa'], reviewed:'August 2026', slug:'duty-free-allowances', label_en1:'View Allowances →', label_fr1:'Voir les exemptions →'},
         {en:'Travel Advisories', fr:'Avis de voyage', desc_en:'Current travel advisories issued by the Government of Canada.', desc_fr:'Avis de voyage actuels émis par le gouvernement du Canada.', url:"https://travel.gc.ca/travelling/advisories", what_en:'This page shows the government\'s current travel advisories for destinations around the world.', what_fr:'Cette page présente les avis de voyage actuels du gouvernement pour des destinations à travers le monde.', steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Search for your destination before booking or travelling, since advisories can change closer to your trip date.', steps_fr:'Recherchez votre destination avant de réserver ou de voyager, puisque les avis peuvent changer à l\'approche de votre voyage.', official_links:[{label_en:'Travel Advisories', label_fr:'Avis de voyage', url:"https://travel.gc.ca/travelling/advisories"}], related:['canada-border-services-agency-cbsa','border-wait-times'], reviewed:'August 2026', label_en1:'View Advisories →', label_fr1:'Voir les avis →', slug:'travel-advisories'},
         {en:'Children Travelling', fr:'Enfants voyageant', desc_en:'Recommended documents when travelling with children.', desc_fr:'Documents recommandés lors de voyages avec des enfants.', url:"https://travel.gc.ca/travelling/children", what_en:'Review this information if only one parent is travelling with a child, a grandparent or relative is travelling with a child, or someone other than the child\'s parent is travelling with the child.', what_fr:'Consultez cette information si un seul parent voyage avec un enfant, un grand-parent ou un proche voyage avec un enfant, ou une personne autre que le parent voyage avec l\'enfant.', need_heading_en:'Bring With You', need_heading_fr:'Apportez avec vous', need_intro_en:'It is strongly recommended to carry:', need_intro_fr:'Il est fortement recommandé d\'apporter :', need_list_en:['The child\'s passport','A consent letter signed by the parent(s) or legal guardian(s) who are not travelling','Contact information for the parent(s)'], need_list_fr:['Le passeport de l\'enfant','Une lettre de consentement signée par le ou les parents ou tuteurs légaux qui ne voyagent pas','Les coordonnées des parents'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Prepare this documentation before you travel — border officers may ask for it, and having it ready avoids delays.', steps_fr:'Préparez ces documents avant votre voyage — les agents frontaliers peuvent les demander, et les avoir en main évite des délais.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Although a consent letter is not always legally required, border officers in Canada and the United States may ask for it.','Having it ready can help prevent delays.'], tips_list_fr:['Bien qu\'une lettre de consentement ne soit pas toujours légalement requise, les agents frontaliers au Canada et aux États-Unis peuvent la demander.','L\'avoir en main peut aider à éviter des délais.'], official_links:[{label_en:'Children Travelling', label_fr:'Enfants voyageant', url:"https://travel.gc.ca/travelling/children"}], related:['child-passport','canada-border-services-agency-cbsa','us-customs-border-protection-cbp'], reviewed:'August 2026', slug:'children-travelling', label_en1:'Learn More →', label_fr1:'En savoir plus →'},
-      {en:'Child Travel Consent Letter', fr:'Lettre de consentement au voyage d\'un enfant', desc_en:'Create and download a printable consent letter for a child\'s Canada\u2013U.S. travel.', desc_fr:'Cr\u00e9ez et t\u00e9l\u00e9chargez une lettre de consentement imprimable pour le voyage Canada\u2013\u00c9tats-Unis d\'un enfant.', url:'/child-travel-consent', internalPage:'child-travel-consent', label_en1:'Create Letter \u2192', label_fr1:'Cr\u00e9er la lettre \u2192', blankForm:true, what_en:'A free CJHQ tool that fills in a standard travel consent letter for a child travelling between Canada and the United States without both parents or guardians. You complete a short form, review the letter, then download or print it and sign it by hand.', what_fr:'Un outil gratuit du CJHQ qui remplit une lettre de consentement type pour un enfant voyageant entre le Canada et les \u00c9tats-Unis sans ses deux parents ou tuteurs. Vous remplissez un court formulaire, v\u00e9rifiez la lettre, puis vous la t\u00e9l\u00e9chargez ou l\'imprimez et la signez \u00e0 la main.', question_en:'Is this the right tool?', question_fr:'Est-ce le bon outil?', answer_en:'Use this if a child is crossing the Canada\u2013U.S. border with one parent, a grandparent, a relative or another adult. Border officers may ask for a consent letter. This tool creates the letter only \u2014 it is not legal advice, and it does not replace custody or court documents.', answer_fr:'Utilisez cet outil si un enfant traverse la fronti\u00e8re Canada\u2013\u00c9tats-Unis avec un seul parent, un grand-parent, un proche ou un autre adulte. Les agents frontaliers peuvent demander une lettre de consentement. Cet outil ne fait que produire la lettre \u2014 il ne constitue pas un avis juridique et ne remplace pas les documents de garde ou une ordonnance du tribunal.', need_heading_en:'What You\'ll Need', need_heading_fr:'Ce dont vous aurez besoin', need_list_en:['The child\'s full name, date of birth and passport number','The accompanying adult\'s full name, passport number and phone number','Your address and phone number','Departure and return dates, and the destination'], need_list_fr:['Le nom complet, la date de naissance et le num\u00e9ro de passeport de l\'enfant','Le nom complet, le num\u00e9ro de passeport et le num\u00e9ro de t\u00e9l\u00e9phone de l\'adulte accompagnateur','Votre adresse et votre num\u00e9ro de t\u00e9l\u00e9phone','Les dates de d\u00e9part et de retour, ainsi que la destination'], tips_list_en:['The letter is created in your browser. Nothing you enter is sent to CJHQ or stored anywhere.','Print the letter and sign it by hand \u2014 the signature lines are left blank on purpose.','Where possible, have the other parent or guardian sign as well.'], tips_list_fr:['La lettre est cr\u00e9\u00e9e dans votre navigateur. Rien de ce que vous saisissez n\'est envoy\u00e9 au CJHQ ni conserv\u00e9.','Imprimez la lettre et signez-la \u00e0 la main \u2014 les lignes de signature sont volontairement laiss\u00e9es vides.','Dans la mesure du possible, faites-la signer aussi par l\'autre parent ou tuteur.'], official_links:[{label_en:'Government of Canada \u2014 Children Travelling Abroad', label_fr:'Gouvernement du Canada \u2014 Enfants voyageant \u00e0 l\'\u00e9tranger', url:"https://travel.gc.ca/travelling/children"}], related:['children-travelling'], reviewed:'August 2026', slug:'child-travel-consent-letter'}
+      {en:'Child Travel Consent Letter', fr:'Lettre de consentement au voyage d\'un enfant', desc_en:'Create and download a printable consent letter for a child\'s Canada\u2013U.S. travel.', desc_fr:'Cr\u00e9ez et t\u00e9l\u00e9chargez une lettre de consentement imprimable pour le voyage Canada\u2013\u00c9tats-Unis d\'un enfant.', url:'/child-travel-consent', internalPage:'child-travel-consent', label_en1:'Create Letter \u2192', label_fr1:'Cr\u00e9er la lettre \u2192', blankForm:true, what_en:'A free CJHQ tool that fills in a standard travel consent letter for a child travelling between Canada and the United States without both parents or guardians. You complete a short form, review the letter, then download or print it and sign it by hand.', what_fr:'Un outil gratuit du CJHQ qui remplit une lettre de consentement type pour un enfant voyageant entre le Canada et les \u00c9tats-Unis sans ses deux parents ou tuteurs. Vous remplissez un court formulaire, v\u00e9rifiez la lettre, puis vous la t\u00e9l\u00e9chargez ou l\'imprimez et la signez \u00e0 la main.', question_en:'Is this the right tool?', question_fr:'Est-ce le bon outil?', answer_en:'Use this if a child is crossing the Canada\u2013U.S. border with one parent, a grandparent, a relative or another adult. Border officers may ask for a consent letter. This tool creates the letter only \u2014 it is not legal advice, and it does not replace custody or court documents.', answer_fr:'Utilisez cet outil si un enfant traverse la fronti\u00e8re Canada\u2013\u00c9tats-Unis avec un seul parent, un grand-parent, un proche ou un autre adulte. Les agents frontaliers peuvent demander une lettre de consentement. Cet outil ne fait que produire la lettre \u2014 il ne constitue pas un avis juridique et ne remplace pas les documents de garde ou une ordonnance du tribunal.', need_heading_en:'What You\'ll Need', need_heading_fr:'Ce dont vous aurez besoin', need_list_en:['The child\'s full name, date of birth and passport number','The accompanying adult\'s full name, passport number and phone number','Your address and phone number','Departure and return dates'], need_list_fr:['Le nom complet, la date de naissance et le num\u00e9ro de passeport de l\'enfant','Le nom complet, le num\u00e9ro de passeport et le num\u00e9ro de t\u00e9l\u00e9phone de l\'adulte accompagnateur','Votre adresse et votre num\u00e9ro de t\u00e9l\u00e9phone','Les dates de d\u00e9part et de retour'], tips_list_en:['The letter is created in your browser. Nothing you enter is sent to CJHQ or stored anywhere.','Print the letter and sign it by hand \u2014 the signature lines are left blank on purpose.','Where possible, have the other parent or guardian sign as well.'], tips_list_fr:['La lettre est cr\u00e9\u00e9e dans votre navigateur. Rien de ce que vous saisissez n\'est envoy\u00e9 au CJHQ ni conserv\u00e9.','Imprimez la lettre et signez-la \u00e0 la main \u2014 les lignes de signature sont volontairement laiss\u00e9es vides.','Dans la mesure du possible, faites-la signer aussi par l\'autre parent ou tuteur.'], official_links:[{label_en:'Government of Canada \u2014 Children Travelling Abroad', label_fr:'Gouvernement du Canada \u2014 Enfants voyageant \u00e0 l\'\u00e9tranger', url:"https://travel.gc.ca/travelling/children"}], related:['children-travelling'], reviewed:'August 2026', slug:'child-travel-consent-letter'}
       ] },
       { heading_en:'Travel Insurance', heading_fr:'Assurance voyage', items:[
         {en:'Manulife Travel Insurance', fr:'Assurance voyage Manulife', desc_en:'Purchase travel medical insurance before leaving Canada.', desc_fr:'Achetez une assurance médicale voyage avant de quitter le Canada.', url:"https://www.manulife-travel.ca/dist/home.html?as=wllebovits", what_en:'Travel medical insurance helps protect you against unexpected medical expenses while travelling outside your home province or country.', what_fr:'L\'assurance médicale voyage vous protège contre des dépenses médicales imprévues lors d\'un voyage à l\'extérieur de votre province ou pays.', need_heading_en:'Before You Buy', need_heading_fr:'Avant d\'acheter', need_intro_en:'Have ready:', need_intro_fr:'Ayez en main :', need_list_en:['Your travel dates','Destination','Traveller information','Basic health information'], need_list_fr:['Vos dates de voyage','La destination','Les renseignements du voyageur','Des renseignements de santé de base'], steps_heading_en:'Next Step', steps_heading_fr:'Prochaine étape', steps_en:'Get a quote directly on their site, compare coverage options, and purchase your policy before you leave.', steps_fr:'Obtenez une soumission directement sur leur site, comparez les options de couverture, et achetez votre police avant de partir.', tips_heading_en:'Good to Know', tips_heading_fr:'Bon à savoir', tips_list_en:['Provincial health coverage generally pays only a small portion of medical costs outside Canada.','Travel medical insurance can help cover emergency medical treatment, hospital stays, and medical transportation.'], tips_list_fr:['La couverture santé provinciale ne couvre généralement qu\'une petite partie des frais médicaux à l\'extérieur du Canada.','L\'assurance médicale voyage peut couvrir les traitements médicaux d\'urgence, les séjours hospitaliers et le transport médical.'], official_links:[{label_en:'Manulife Travel Insurance', label_fr:'Assurance voyage Manulife', url:"https://www.manulife-travel.ca/dist/home.html?as=wllebovits"}], related:['tugo-travel-insurance'], reviewed:'August 2026', slug:'manulife-travel-insurance', label_en1:'Get a Quote →', label_fr1:'Obtenir une soumission →'},
@@ -4117,9 +4139,9 @@ setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
   document.querySelectorAll('#mobileDrawerNav a').forEach(a=>{
     a.addEventListener('click', (e)=>{
       if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-      // Subscribe has no data-page: it runs its own handler (route + scroll to
-      // the form), so routing it here as well would fire goPage(undefined) and
-      // cancel the scroll. It still closes the panel.
+      // A drawer link without data-page runs its own handler, so routing it
+      // here as well would fire goPage(undefined) and cancel whatever that
+      // handler was doing. It still closes the panel.
       if(!a.dataset.page){ closeDrawer(); return; }
       e.preventDefault();
       goPage(a.dataset.page);
@@ -4244,6 +4266,249 @@ if(contactForm){
     });
   }
 
+  /* ---------- country picker: "Travelling to" ----------
+     A searchable list rather than a free-text box. Nobody should scroll 240
+     countries, and a half-typed name must never reach the letter, so the value
+     the letter reads is written only when a country is actually chosen. The
+     list is embedded in the page: no third-party widget, no CDN, no request.
+     Each country carries both names; the one shown - and the one stored, since
+     the letter prints it - follows the page language, while the search matches
+     either name with accents ignored, so "Eta", "Etats" and "United States" all
+     find the same country. */
+  const CTC_COUNTRIES = [
+    ['Afghanistan'], ['\u00c5land Islands','\u00celes \u00c5land'], ['Albania','Albanie'],
+    ['Algeria','Alg\u00e9rie'], ['American Samoa','Samoa am\u00e9ricaines'], ['Andorra','Andorre'], ['Angola'],
+    ['Anguilla'], ['Antigua & Barbuda','Antigua-et-Barbuda'], ['Argentina','Argentine'], ['Armenia','Arm\u00e9nie'],
+    ['Aruba'], ['Australia','Australie'], ['Austria','Autriche'], ['Azerbaijan','Azerba\u00efdjan'], ['Bahamas'],
+    ['Bahrain','Bahre\u00efn'], ['Bangladesh'], ['Barbados','Barbade'], ['Belarus','Bi\u00e9lorussie'],
+    ['Belgium','Belgique'], ['Belize'], ['Benin','B\u00e9nin'], ['Bermuda','Bermudes'], ['Bhutan','Bhoutan'],
+    ['Bolivia','Bolivie'], ['Bosnia & Herzegovina','Bosnie-Herz\u00e9govine'], ['Botswana'],
+    ['Brazil','Br\u00e9sil'],
+    ['British Indian Ocean Territory','Territoire britannique de l\u2019oc\u00e9an Indien'],
+    ['British Virgin Islands','\u00celes Vierges britanniques'], ['Brunei'], ['Bulgaria','Bulgarie'],
+    ['Burkina Faso'], ['Burundi'], ['Cambodia','Cambodge'], ['Cameroon','Cameroun'], ['Canada'],
+    ['Cape Verde','Cap-Vert'], ['Cayman Islands','\u00celes Ca\u00efmans'],
+    ['Central African Republic','R\u00e9publique centrafricaine'], ['Chad','Tchad'], ['Chile','Chili'],
+    ['China','Chine'], ['Christmas Island','\u00cele Christmas'], ['Cocos (Keeling) Islands','\u00celes Cocos'],
+    ['Colombia','Colombie'], ['Comoros','Comores'], ['Congo - Brazzaville','Congo-Brazzaville'],
+    ['Congo - Kinshasa','Congo-Kinshasa'], ['Cook Islands','\u00celes Cook'], ['Costa Rica'],
+    ['C\u00f4te d\u2019Ivoire'], ['Croatia','Croatie'], ['Cuba'], ['Cura\u00e7ao'], ['Cyprus','Chypre'],
+    ['Czechia','Tch\u00e9quie'], ['Denmark','Danemark'], ['Djibouti'], ['Dominica','Dominique'],
+    ['Dominican Republic','R\u00e9publique dominicaine'], ['Ecuador','\u00c9quateur'], ['Egypt','\u00c9gypte'],
+    ['El Salvador','Salvador'], ['Equatorial Guinea','Guin\u00e9e \u00e9quatoriale'],
+    ['Eritrea','\u00c9rythr\u00e9e'], ['Estonia','Estonie'], ['Eswatini'], ['Ethiopia','\u00c9thiopie'],
+    ['Falkland Islands','\u00celes Malouines'], ['Faroe Islands','\u00celes F\u00e9ro\u00e9'], ['Fiji','Fidji'],
+    ['Finland','Finlande'], ['France'], ['French Guiana','Guyane fran\u00e7aise'],
+    ['French Polynesia','Polyn\u00e9sie fran\u00e7aise'], ['Gabon'], ['Gambia','Gambie'], ['Georgia','G\u00e9orgie'],
+    ['Germany','Allemagne'], ['Ghana'], ['Gibraltar'], ['Greece','Gr\u00e8ce'], ['Greenland','Groenland'],
+    ['Grenada','Grenade'], ['Guadeloupe'], ['Guam'], ['Guatemala'], ['Guernsey','Guernesey'],
+    ['Guinea','Guin\u00e9e'], ['Guinea-Bissau','Guin\u00e9e-Bissau'], ['Guyana'], ['Haiti','Ha\u00efti'],
+    ['Honduras'], ['Hong Kong SAR China','R.A.S. chinoise de Hong Kong'], ['Hungary','Hongrie'],
+    ['Iceland','Islande'], ['India','Inde'], ['Indonesia','Indon\u00e9sie'], ['Iran'], ['Iraq','Irak'],
+    ['Ireland','Irlande'], ['Isle of Man','\u00cele de Man'], ['Israel','Isra\u00ebl'], ['Italy','Italie'],
+    ['Jamaica','Jama\u00efque'], ['Japan','Japon'], ['Jersey'], ['Jordan','Jordanie'], ['Kazakhstan'], ['Kenya'],
+    ['Kiribati'], ['Kuwait','Kowe\u00eft'], ['Kyrgyzstan','Kirghizstan'], ['Laos'], ['Latvia','Lettonie'],
+    ['Lebanon','Liban'], ['Lesotho'], ['Liberia'], ['Libya','Libye'], ['Liechtenstein'], ['Lithuania','Lituanie'],
+    ['Luxembourg'], ['Macao SAR China','R.A.S. chinoise de Macao'], ['Madagascar'], ['Malawi'],
+    ['Malaysia','Malaisie'], ['Maldives'], ['Mali'], ['Malta','Malte'], ['Marshall Islands','\u00celes Marshall'],
+    ['Martinique'], ['Mauritania','Mauritanie'], ['Mauritius','Maurice'], ['Mayotte'], ['Mexico','Mexique'],
+    ['Micronesia','Micron\u00e9sie'], ['Moldova','Moldavie'], ['Monaco'], ['Mongolia','Mongolie'],
+    ['Montenegro','Mont\u00e9n\u00e9gro'], ['Montserrat'], ['Morocco','Maroc'], ['Mozambique'],
+    ['Myanmar (Burma)','Myanmar (Birmanie)'], ['Namibia','Namibie'], ['Nauru'], ['Nepal','N\u00e9pal'],
+    ['Netherlands','Pays-Bas'], ['New Caledonia','Nouvelle-Cal\u00e9donie'], ['New Zealand','Nouvelle-Z\u00e9lande'],
+    ['Nicaragua'], ['Niger'], ['Nigeria'], ['Niue'], ['Norfolk Island','\u00cele Norfolk'],
+    ['North Korea','Cor\u00e9e du Nord'], ['North Macedonia','Mac\u00e9doine du Nord'],
+    ['Northern Mariana Islands','\u00celes Mariannes du Nord'], ['Norway','Norv\u00e8ge'], ['Oman'], ['Pakistan'],
+    ['Palau','Palaos'], ['Palestinian Territories','Territoires palestiniens'], ['Panama'],
+    ['Papua New Guinea','Papouasie-Nouvelle-Guin\u00e9e'], ['Paraguay'], ['Peru','P\u00e9rou'], ['Philippines'],
+    ['Poland','Pologne'], ['Portugal'], ['Puerto Rico','Porto Rico'], ['Qatar'], ['R\u00e9union','La R\u00e9union'],
+    ['Romania','Roumanie'], ['Russia','Russie'], ['Rwanda'], ['Samoa'], ['San Marino','Saint-Marin'],
+    ['S\u00e3o Tom\u00e9 & Pr\u00edncipe','Sao Tom\u00e9-et-Principe'], ['Saudi Arabia','Arabie saoudite'],
+    ['Senegal','S\u00e9n\u00e9gal'], ['Serbia','Serbie'], ['Seychelles'], ['Sierra Leone'],
+    ['Singapore','Singapour'], ['Sint Maarten','Saint-Martin (partie n\u00e9erlandaise)'], ['Slovakia','Slovaquie'],
+    ['Slovenia','Slov\u00e9nie'], ['Solomon Islands','\u00celes Salomon'], ['Somalia','Somalie'],
+    ['South Africa','Afrique du Sud'], ['South Korea','Cor\u00e9e du Sud'], ['South Sudan','Soudan du Sud'],
+    ['Spain','Espagne'], ['Sri Lanka'], ['St. Barth\u00e9lemy','Saint-Barth\u00e9lemy'],
+    ['St. Helena','Sainte-H\u00e9l\u00e8ne'], ['St. Kitts & Nevis','Saint-Christophe-et-Ni\u00e9v\u00e8s'],
+    ['St. Lucia','Sainte-Lucie'], ['St. Martin','Saint-Martin'],
+    ['St. Pierre & Miquelon','Saint-Pierre-et-Miquelon'],
+    ['St. Vincent & Grenadines','Saint-Vincent-et-les Grenadines'], ['Sudan','Soudan'], ['Suriname'],
+    ['Sweden','Su\u00e8de'], ['Switzerland','Suisse'], ['Syria','Syrie'], ['Taiwan','Ta\u00efwan'],
+    ['Tajikistan','Tadjikistan'], ['Tanzania','Tanzanie'], ['Thailand','Tha\u00eflande'],
+    ['Timor-Leste','Timor oriental'], ['Togo'], ['Tokelau'], ['Tonga'],
+    ['Trinidad & Tobago','Trinit\u00e9-et-Tobago'], ['Tunisia','Tunisie'], ['T\u00fcrkiye','Turquie'],
+    ['Turkmenistan','Turkm\u00e9nistan'], ['Turks & Caicos Islands','\u00celes Turques-et-Ca\u00efques'], ['Tuvalu'],
+    ['U.S. Virgin Islands','\u00celes Vierges des \u00c9tats-Unis'], ['Uganda','Ouganda'], ['Ukraine'],
+    ['United Arab Emirates','\u00c9mirats arabes unis'], ['United Kingdom','Royaume-Uni'],
+    ['United States','\u00c9tats-Unis'], ['Uruguay'], ['Uzbekistan','Ouzb\u00e9kistan'], ['Vanuatu'],
+    ['Vatican City','\u00c9tat de la Cit\u00e9 du Vatican'], ['Venezuela'], ['Vietnam','Vi\u00eat Nam'],
+    ['Wallis & Futuna','Wallis-et-Futuna'], ['Western Sahara','Sahara occidental'], ['Yemen','Y\u00e9men'],
+    ['Zambia','Zambie'], ['Zimbabwe'],
+  ];
+
+  // Accent- and case-insensitive folding, so "Eta" matches "Etats-Unis" and
+  // "reunion" matches "Reunion".
+  const ctcFold = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  // Assigned by the picker below; leaving the custom direction clears it.
+  let ctcResetCountry = function(){};
+
+  (function ctcCountryPicker(){
+    const input = $('ctcToCountrySearch');
+    const list  = $('ctcToCountryList');
+    const store = $('ctcToCountry');
+    const otherWrap = $('ctcToCountryOtherWrap');
+    const otherIn   = $('ctcToCountryOther');
+    if(!input || !list || !store || !otherWrap || !otherIn) return;
+
+    const MAXSHOWN = 8;
+    let items = [], active = -1, mode = '', chosenIdx = -1;
+
+    const nameOf = (c) => (isFr() ? (c[1] || c[0]) : c[0]);
+    const otherLabel = () => isFr() ? 'Autre (pays non listé)' : 'Other (country not listed)';
+
+    const close = () => {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      active = -1;
+    };
+
+    const setActive = (i) => {
+      active = i;
+      [...list.children].forEach((li, n) => li.setAttribute('aria-selected', String(n === i)));
+      if(i >= 0){
+        input.setAttribute('aria-activedescendant', 'ctcToCountryOpt' + i);
+        const li = list.children[i];
+        if(li && li.scrollIntoView) li.scrollIntoView({ block: 'nearest' });
+      } else input.removeAttribute('aria-activedescendant');
+    };
+
+    function open(q){
+      const f = ctcFold(q);
+      let hits = f
+        ? CTC_COUNTRIES.filter(c => ctcFold(c[0]).indexOf(f) > -1 || ctcFold(c[1] || c[0]).indexOf(f) > -1)
+        : CTC_COUNTRIES.slice();
+      // Names that START with what was typed come first, so "Uni" offers United
+      // Kingdom and United States before Tunisia.
+      if(f) hits.sort((a, b) => {
+        const sa = ctcFold(nameOf(a)).indexOf(f) === 0 ? 0 : 1;
+        const sb = ctcFold(nameOf(b)).indexOf(f) === 0 ? 0 : 1;
+        return sa !== sb ? sa - sb : nameOf(a).localeCompare(nameOf(b), isFr() ? 'fr' : 'en');
+      });
+      items = hits.slice(0, MAXSHOWN).map(c => ({ label: nameOf(c), idx: CTC_COUNTRIES.indexOf(c) }));
+      items.push({ label: otherLabel(), other: true });
+      list.innerHTML = items.map((it, i) =>
+        '<li role="option" id="ctcToCountryOpt' + i + '" data-i="' + i +
+        '" class="ctc-combo-opt' + (it.other ? ' ctc-combo-opt-other' : '') +
+        '" aria-selected="false">' + cjhqEscapeHtml(it.label) + '</li>').join('');
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      setActive(-1);
+    }
+
+    function exitOther(){
+      mode = '';
+      otherWrap.hidden = true;
+      otherIn.value = '';
+      input.readOnly = false;
+      store.dataset.focusProxy = 'ctcToCountrySearch';
+    }
+
+    function enterOther(){
+      mode = 'other';
+      chosenIdx = -1;
+      input.value = otherLabel();
+      input.readOnly = true;
+      otherWrap.hidden = false;
+      store.value = otherIn.value.trim();
+      store.dataset.focusProxy = 'ctcToCountryOther';
+      close();
+      otherIn.focus();
+    }
+
+    function pick(i){
+      const it = items[i];
+      if(!it) return;
+      if(it.other){ enterOther(); return; }
+      exitOther();
+      mode = 'list';
+      chosenIdx = it.idx;
+      input.value = it.label;
+      store.value = it.label;
+      hideError('ctcToCountry');
+      close();
+    }
+
+    input.addEventListener('input', ()=>{
+      if(input.readOnly) return;
+      // Typing again abandons the previous choice: the stored value is cleared
+      // so a name left half-typed can never be treated as a country.
+      mode = ''; chosenIdx = -1; store.value = '';
+      open(input.value);
+    });
+    input.addEventListener('focus', ()=>{ if(!input.readOnly && list.hidden) open(input.value); });
+    // In "Other" mode the box is read-only and shows the Other label; clicking
+    // it is how the user goes back to the list.
+    input.addEventListener('mousedown', ()=>{
+      if(input.readOnly){ exitOther(); input.value = ''; store.value = ''; setTimeout(()=>open(''), 0); }
+    });
+    input.addEventListener('keydown', (e)=>{
+      if(input.readOnly){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); exitOther(); input.value = ''; store.value = ''; open(''); }
+        return;
+      }
+      if(e.key === 'ArrowDown'){ e.preventDefault(); if(list.hidden) open(input.value); setActive(Math.min(active + 1, items.length - 1)); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); if(!list.hidden) setActive(Math.max(active - 1, 0)); }
+      else if(e.key === 'Home' && !list.hidden){ e.preventDefault(); setActive(0); }
+      else if(e.key === 'End' && !list.hidden){ e.preventDefault(); setActive(items.length - 1); }
+      else if(e.key === 'Enter'){ if(!list.hidden){ e.preventDefault(); pick(active >= 0 ? active : 0); } }
+      else if(e.key === 'Escape'){ if(!list.hidden){ e.preventDefault(); close(); } }
+      else if(e.key === 'Tab'){ close(); }
+    });
+    // pointerdown fires before the input's blur, so a tap on a phone and a
+    // click on a desktop both land on the option instead of closing the list.
+    list.addEventListener('pointerdown', (e)=>{
+      const li = e.target.closest('[data-i]');
+      if(!li) return;
+      e.preventDefault();
+      pick(Number(li.dataset.i));
+    });
+    input.addEventListener('blur', ()=>{
+      setTimeout(()=>{
+        if(document.activeElement === input || list.contains(document.activeElement)) return;
+        close();
+        // Nothing chosen: leave the box showing what is actually stored rather
+        // than free text the letter will not use.
+        if(mode === '') input.value = '';
+      }, 120);
+    });
+    otherIn.addEventListener('input', ()=>{
+      store.value = otherIn.value.trim();
+      if(store.value) hideError('ctcToCountry');
+    });
+
+    // A language switch re-labels the chosen country and the Other option, and
+    // restores what is stored in the new language, because the letter prints it.
+    document.addEventListener('cjhq:langchange', ()=>{
+      if(mode === 'list' && chosenIdx > -1){
+        const n = nameOf(CTC_COUNTRIES[chosenIdx]);
+        input.value = n; store.value = n;
+      } else if(mode === 'other'){
+        input.value = otherLabel();
+      }
+      if(!list.hidden) open(input.readOnly ? '' : input.value);
+    });
+
+    // Leaving the custom direction clears the picker with the rest of the form.
+    ctcResetCountry = function(){
+      exitOther();
+      mode = ''; chosenIdx = -1;
+      input.value = ''; store.value = '';
+      close();
+    };
+  })();
+
   /* ---------- direction ---------- */
   // Who the child travels with: switches the exact letter wording, the
   // signature blocks and whether the accompanying-adult section applies.
@@ -4272,7 +4537,8 @@ if(contactForm){
         syncPlaceholders();
         $('ctcFromCountry').focus();
       }else{
-        $('ctcFromCountry').value = ''; $('ctcToCountry').value = '';
+        $('ctcFromCountry').value = '';
+        ctcResetCountry();
         hideError('ctcFromCountry'); hideError('ctcToCountry');
       }
     });
@@ -4303,7 +4569,6 @@ if(contactForm){
     ctcParentPhone:   ['Please enter a phone number.','Veuillez saisir un num\u00e9ro de t\u00e9l\u00e9phone.'],
     ctcDeparture:     ['Please select a departure date.','Veuillez choisir une date de d\u00e9part.'],
     ctcReturn:        ['Please select a return date.','Veuillez choisir une date de retour.'],
-    ctcDestination:   ['Please enter the destination.','Veuillez saisir la destination.'],
     direction:        ['Please choose a travel direction.','Veuillez choisir le sens du voyage.'],
     travelWith:       ['Please choose who the child is travelling with.','Veuillez indiquer avec qui l\u2019enfant voyage.'],
     ctcParent2Name:   ['Please enter the second parent or guardian\u2019s full name.','Veuillez saisir le nom complet du second parent ou tuteur.'],
@@ -4315,23 +4580,32 @@ if(contactForm){
   // message of the base field rather than duplicating it per child.
   const t = (k) => (MSG[k] || MSG[String(k).replace(/\d+$/,'')])[isFr() ? 1 : 0];
 
+  // A field may delegate its visible presence to another control.
+  const focusProxy = (el) => (el && el.dataset && el.dataset.focusProxy) ? $(el.dataset.focusProxy) : null;
+
   function showError(key, msgKey){
     const el = $('err-' + key);
     if(el){ el.textContent = t(msgKey || key); el.hidden = false; }
     const field = $(key);
     if(field){ field.setAttribute('aria-invalid','true'); field.setAttribute('aria-describedby','err-'+key); }
+    // The country picker keeps its value in a hidden input, so the red border
+    // and the focus have to go to the search box the visitor can actually see.
+    const px = focusProxy(field);
+    if(px) px.setAttribute('aria-invalid','true');
   }
   function hideError(key){
     const el = $('err-' + key);
     if(el) el.hidden = true;
     const field = $(key);
     if(field){ field.removeAttribute('aria-invalid'); field.removeAttribute('aria-describedby'); }
+    const px = focusProxy(field);
+    if(px) px.removeAttribute('aria-invalid');
   }
-  // Only these seven are mandatory. Everything else is genuinely optional and
+  // Only these six are mandatory. Everything else is genuinely optional and
   // is simply left unmarked - the form never uses the word "optional".
   const REQUIRED = ['ctcAdultName',
     'ctcParentName','ctcParentPhone',
-    'ctcDeparture','ctcDestination'];
+    'ctcDeparture'];
   // The child fields are required too, but there can be more than one child, so
   // they are derived from the current blocks rather than listed here.
   const childRequired = () => childIds.reduce((a,c)=> a.concat([c.name, c.dob]), []);
@@ -4349,7 +4623,7 @@ if(contactForm){
     if(direction === 'custom'){
       ['ctcFromCountry','ctcToCountry'].forEach(id=>{
         hideError(id);
-        if(!$(id).value.trim()){ showError(id); firstBad = firstBad || $(id); }
+        if(!$(id).value.trim()){ showError(id); firstBad = firstBad || focusProxy($(id)) || $(id); }
       });
     }
     // Travelling alone hides the accompanying-adult section, so requiring that
@@ -4453,7 +4727,7 @@ if(contactForm){
       childName:'', childDob:'',
       adultName:'', adultRel:'', adultPhone:'', adultEmail:'',
       parentName:'', parentAddress:'', parentPhone:'', parentEmail:'',
-      departure:'', ret:'', destination:'' };
+      departure:'', ret:'' };
   }
 
   function collect(){
@@ -4477,7 +4751,7 @@ if(contactForm){
       adultPhone: v('ctcAdultPhone'), adultEmail: v('ctcAdultEmail'),
       parentName: v('ctcParentName'), parentAddress: v('ctcParentAddress'),
       parentPhone: v('ctcParentPhone'), parentEmail: v('ctcParentEmail'),
-      departure: v('ctcDeparture'), ret: v('ctcReturn'), destination: v('ctcDestination')
+      departure: v('ctcDeparture'), ret: v('ctcReturn')
     };
   }
 
@@ -4574,10 +4848,8 @@ if(contactForm){
             : `J\u2019autorise l\u2019adulte accompagnateur \u00e0 voyager avec ${withChildFr}${bothFr}.`);
       body = fr
         ? [`Je soussign\u00e9(e), ${B(d.parentName)}, ${guardianOf}${kidPhrase}, consens \u00e0 ce que ${consentFr} de ${origin} \u00e0 ${destCtry} avec ${companion}${tripFr}.`,
-           `La destination du voyage est ${B(d.destination)}.`,
            authFr]
         : [`I, ${B(d.parentName)}, ${guardianOf}${kidPhrase}, and give my consent for ${consentEn} from ${origin} to ${destCtry} with ${companion}${tripEn}.`,
-           `The destination of travel is ${B(d.destination)}.`,
            authEn];
 
     /* ---- labelled view of the declaration, for the blank form only ----------
@@ -4592,10 +4864,10 @@ if(contactForm){
       const LBL = fr
         ? { parent:'parent ou tuteur', child:'nom de l\u2019enfant', dob:'date de naissance',
             from:'d\u00e9part de (lieu)', to:'destination (lieu)', adult:'accompagn\u00e9 par',
-            dep:'date de d\u00e9part', ret:'date de retour', dest:'destination compl\u00e8te' }
+            dep:'date de d\u00e9part', ret:'date de retour' }
         : { parent:'parent / guardian', child:'child\u2019s full name', dob:'date of birth',
             from:'departure from (place)', to:'travelling to (place)', adult:'accompanied by',
-            dep:'departure date', ret:'return date', dest:'full destination' };
+            dep:'departure date', ret:'return date' };
       const T = t => ({ t });
       const S = (v, lab) => (v === FILL ? { blank:true, lab } : { t:String(v) });
       const kidSegs = [];
@@ -4620,11 +4892,8 @@ if(contactForm){
         : [T('I, '), S(B(d.parentName), LBL.parent), T(', ' + guardianOf)]
             .concat(kidSegs, [T(', and give my consent for ' + consentEn + ' from '), S(origin, LBL.from),
                               T(' to '), S(destCtry, LBL.to), T(' with '), S(companion, LBL.adult)], trip, [T('.')]);
-      const p2 = fr
-        ? [T('La destination du voyage est '), S(B(d.destination), LBL.dest), T('.')]
-        : [T('The destination of travel is '), S(B(d.destination), LBL.dest), T('.')];
       const flat = segs => segs.map(g => g.blank ? FILL : g.t).join('');
-      if(flat(p1) === body[0] && flat(p2) === body[1]) bodySegs = [p1, p2, null];
+      if(flat(p1) === body[0]) bodySegs = [p1, null];
     }
 
     return {
@@ -4644,9 +4913,9 @@ if(contactForm){
       lblDate: fr ? 'Date' : 'Date',
       k: fr
         ? {name:'Nom complet :', name2:'Second parent / tuteur :', dob:'Date de naissance :', rel:'Lien avec l\u2019enfant :', phone:'T\u00e9l\u00e9phone :', email:'Courriel :', address:'Adresse :',
-           dep:'Date de d\u00e9part :', retn:'Date de retour :', dest:'Destination :'}
+           dep:'Date de d\u00e9part :', retn:'Date de retour :'}
         : {name:'Full Name:', name2:'Second Parent / Guardian:', dob:'Date of Birth:', rel:'Relationship to Child:', phone:'Phone:', email:'Email:', address:'Address:',
-           dep:'Departure Date:', retn:'Return Date:', dest:'Destination:'},
+           dep:'Departure Date:', retn:'Return Date:'},
       // Guidance printed ONLY on the blank downloadable form, beneath each field
       // label. It exists because someone who prints the blank form has not read
       // the web page and has no hint text to fall back on. Every line below is
@@ -4664,8 +4933,7 @@ if(contactForm){
            parentAddress:'Rue, ville, province ou état, et code postal',
            parentPhone:'Un numéro où joindre ce parent ou tuteur',
            parentEmail:'Adresse courriel où joindre ce parent ou tuteur',
-           dep:'JJ / MM / AAAA', retn:'JJ / MM / AAAA',
-           dest:'Ville, province ou état, et pays — n’inscrivez pas de compagnie aérienne ni de numéro de vol'}
+           dep:'JJ / MM / AAAA', retn:'JJ / MM / AAAA'}
         : {childName:'First and last name, exactly as shown on the child’s travel document',
            childDob:'DD / MM / YYYY',
            adultName:'Full legal name of the adult travelling with the child',
@@ -4677,8 +4945,7 @@ if(contactForm){
            parentAddress:'Street, city, province/state, and postal code',
            parentPhone:'A number where this parent or guardian can be reached',
            parentEmail:'Email address where this parent or guardian can be reached',
-           dep:'DD / MM / YYYY', retn:'DD / MM / YYYY',
-           dest:'City, province/state, and country — do not enter an airline or flight number'},
+           dep:'DD / MM / YYYY', retn:'DD / MM / YYYY'},
       // The two section notes the web page already shows above these blocks.
       noteAdult:  fr ? 'Personne qui voyage avec l\u2019enfant' : 'Person travelling with the child',
       noteParent: fr ? 'Parent ou tuteur donnant son consentement au voyage de l\u2019enfant'
@@ -4711,7 +4978,7 @@ if(contactForm){
       <h3>${esc(x.secParent)}</h3>
       ${row(x.k.name,d.parentName)}${row(x.k.name2,d.parent2Name)}${row(x.k.address,d.parentAddress.replace(/\s*\n\s*/g,', '))}${row(x.k.phone,d.parentPhone)}${row(x.k.email,d.parentEmail)}
       <h3>${esc(x.secTravel)}</h3>
-      ${row(x.k.dep,prettyDate(d.departure))}${row(x.k.retn,prettyDate(d.ret))}${row(x.k.dest,d.destination)}
+      ${row(x.k.dep,prettyDate(d.departure))}${row(x.k.retn,prettyDate(d.ret))}
       ${sig(x.sigParent, d.blank ? '' : d.parentName)}${sig(x.sigOther, d.blank ? '' : d.parent2Name)}
       <p class="ctc-note">${esc(x.note)}</p>`;
   }
@@ -4754,10 +5021,10 @@ if(contactForm){
 
   function buildPdf(d){
     const x = L(d);
-    // The filled letter keeps its 0.7in margins exactly. The blank form uses
-    // 0.6in, a normal margin for a printable government-style form, and part
-    // of how it fits one page without shrinking the type.
-    const PW = 612, PH = 792, M = d.blank ? 43.2 : 50.4;
+    // 0.6in all round - a normal margin for a printable government-style form,
+    // and part of how both the blank form and the filled letter fit one page
+    // without shrinking the type.
+    const PW = 612, PH = 792, M = 43.2;
     const CW = PW - M*2;
     const pages = [];
     let ops = [], y = PH - M;
@@ -4776,67 +5043,33 @@ if(contactForm){
       y -= (gap || 0);
     }
     function rule(){ need(8); ops.push(`0.72 w 0.75 G ${M} ${(y-3).toFixed(2)} m ${PW-M} ${(y-3).toFixed(2)} l S`); y -= 9; }
-    // One line of grey guidance, printed under a label on the blank form. Small
-    // and set in grey so it reads as instruction, not as something to copy out.
-    function hintLine(str){
-      if(!str) return;
-      const size = 7.6;
-      need(size * 1.3);
-      ops.push(`BT /F1 ${size} Tf 0.42 g 1 0 0 1 ${M} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(str))}) Tj ET 0 g`);
-      y -= size * 1.3 + 3.5;
-    }
-    function kv(k, v, hint){
-      // Filled form: omit empty rows entirely. Blank form: keep every row, draw
-      // a rule to write on, and print the field's guidance beneath the label.
-      if(!v && !d.blank) return;
-      if(!v && d.blank){
-        const size = 10, kw = 132;
-        need(size * 1.35 + (hint ? 14 : 0));
-        ops.push(`BT /F2 ${size} Tf 1 0 0 1 ${M} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(k))}) Tj ET`);
-        ops.push(`0.6 w 0.55 G ${(M+kw).toFixed(2)} ${(y-size-1.5).toFixed(2)} m ${PW-M} ${(y-size-1.5).toFixed(2)} l S`);
-        y -= size * 1.35 + 1.5;
-        hintLine(hint);
-        return;
-      }
-      const kw = 132, size = 10;
-      const lines = wrapText(v, size, false, CW - kw);
-      need(size * 1.35 * lines.length);
-      ops.push(`BT /F2 ${size} Tf 1 0 0 1 ${M} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(k))}) Tj ET`);
-      lines.forEach((line,i)=>{
-        ops.push(`BT /F1 ${size} Tf 1 0 0 1 ${(M+kw).toFixed(2)} ${(y-size).toFixed(2)} Tm (${pdfEscape(toWinAnsi(line))}) Tj ET`);
-        y -= size * 1.35;
-        if(i < lines.length-1) need(size*1.35);
-      });
-      y -= 1.5;
-    }
-    function section(title){ y -= 7; need(30); put(title, 10, true, 0, 1); rule(); }
-    function sigBlock(heading, printedName){
-      section(heading);
-      need(26); put(x.lblSig + ': ' + '_'.repeat(46), 10, false, 0, 5);
-      need(26); put(x.lblPrinted + ': ' + (printedName || '_'.repeat(46)), 10, false, 0, 5);
-      need(26); put(x.lblDate + ': ' + '_'.repeat(46), 10, false, 0, 5);
-    }
 
-    /* ---------- blank form: a single-page printable layout ----------
-       Same copy, same sections, same legal text - only the arrangement differs.
-       The filled letter below is untouched. The page fits because the fields sit
-       in two columns and the two signature blocks sit side by side, not because
-       the type was shrunk: labels are 9pt bold, guidance 7pt, declaration 9pt. */
-    if(d.blank){
+    /* ---------- one-page layout, shared by the blank form and the filled letter
+       The two must match, so they run through the same code: same type scale,
+       the same two-column field grid, and the two signature blocks side by side.
+       A blank cell draws a rule to write on; a filled cell prints the value
+       under the same label. Nothing is ever dropped to make a letter fit - if
+       the content would run past the page, the WHOLE page is laid out again a
+       few percent smaller until it fits, so a letter with three children and
+       long names stays on one page without losing a field. */
+    function renderOnePage(SC){
+      ops = []; pages.length = 0; y = PH - M;
       const GUT = 18, COLW = (CW - GUT) / 2;
-      const S_LABEL = 9, S_HINT = 7, S_BODY = 9, S_SEC = 9.2, S_TITLE = 13.5, S_NOTE = 7.2;
-      const WRITE = 13;          // clear height above a writing rule
+      const S_LABEL = 9*SC, S_HINT = 7*SC, S_BODY = 9*SC, S_SEC = 9.2*SC,
+            S_TITLE = 13.5*SC, S_NOTE = 7.2*SC, S_VAL = 9.2*SC;
+      const WRITE = 13*SC;       // clear height above a writing rule
       const at = (str, size, bold, tx, ty, grey) => {
         if(!str) return;
-        ops.push(`BT ${bold?'/F2':'/F1'} ${size} Tf ${grey?grey+' g ':''}1 0 0 1 ${tx.toFixed(2)} ${ty.toFixed(2)} Tm (${pdfEscape(toWinAnsi(str))}) Tj ET${grey?' 0 g':''}`);
+        ops.push(`BT ${bold?'/F2':'/F1'} ${size.toFixed(2)} Tf ${grey?grey+' g ':''}1 0 0 1 ${tx.toFixed(2)} ${ty.toFixed(2)} Tm (${pdfEscape(toWinAnsi(str))}) Tj ET${grey?' 0 g':''}`);
       };
       const hrule = (x1, x2, ty, w, g) => ops.push(`${w} w ${g} G ${x1.toFixed(2)} ${ty.toFixed(2)} m ${x2.toFixed(2)} ${ty.toFixed(2)} l S`);
 
       // heading + hairline
-      const sec = (title) => { y -= 4; at(title, S_SEC, true, M, y - S_SEC); y -= S_SEC + 2.5;
-                               hrule(M, PW - M, y, 0.7, 0.72); y -= 4; };
-      const note = (t) => { if(!t) return; at(t, S_NOTE, false, M, y - S_NOTE, '0.42'); y -= S_NOTE + 4; };
-      // one field cell: label, guidance under it, then a full-width rule to write on
+      const sec = (title) => { y -= 4*SC; at(title, S_SEC, true, M, y - S_SEC); y -= S_SEC + 2.5*SC;
+                               hrule(M, PW - M, y, 0.7, 0.72); y -= 4*SC; };
+      const note = (t) => { if(!t) return; at(t, S_NOTE, false, M, y - S_NOTE, '0.42'); y -= S_NOTE + 4*SC; };
+
+      /* ---- blank form: label, guidance under it, then a rule to write on ---- */
       const cell = (tx, w, label, hint) => {
         at(label, S_LABEL, true, tx, y - S_LABEL);
         // Guidance is one line by design. If a future wording change would make
@@ -4844,24 +5077,54 @@ if(contactForm){
         // the next column - the form must never clip text.
         if(hint){
           let hs = S_HINT;
-          while(hs > 5.8 && textWidth(hint, hs, false) > w) hs -= 0.2;
-          at(hint, hs, false, tx, y - S_LABEL - S_HINT - 2.6, '0.42');
+          while(hs > 5.8*SC && textWidth(hint, hs, false) > w) hs -= 0.2;
+          at(hint, hs, false, tx, y - S_LABEL - S_HINT - 2.6*SC, '0.42');
         }
-        hrule(tx, tx + w, y - S_LABEL - S_HINT - 2.6 - WRITE, 0.6, 0.55);
+        hrule(tx, tx + w, y - S_LABEL - S_HINT - 2.6*SC - WRITE, 0.6, 0.55);
       };
-      const ROW = S_LABEL + S_HINT + 2.6 + WRITE + 4;
+      const ROW = S_LABEL + S_HINT + 2.6*SC + WRITE + 4*SC;
       const row = (a, b) => { need(ROW); if(a) cell(M, b ? COLW : CW, a[0], a[1]);
                               if(b) cell(M + COLW + GUT, COLW, b[0], b[1]); y -= ROW; };
 
-      put(x.title, S_TITLE, true, 0, 2, 'center');
-      rule(); y -= 2;
-      at(x.salutation, S_BODY, true, M, y - S_BODY); y -= S_BODY + 5;
+      /* ---- filled letter: the same cell, with the value printed in it ---- */
+      const VLEAD = S_VAL * 1.22, VGAP = 3.2*SC, VPAD = 5*SC;
+      const vlines = (v, w) => wrapText(String(v), S_VAL, false, w);
+      const valCell = (tx, w, label, value) => {
+        at(label, S_LABEL, true, tx, y - S_LABEL);
+        vlines(value, w).forEach((ln, i) =>
+          at(ln, S_VAL, false, tx, y - S_LABEL - VGAP - S_VAL - i * VLEAD));
+      };
+      const vrow = (a, b) => {
+        const wA = b ? COLW : CW;
+        const n = Math.max(a ? vlines(a[1], wA).length : 1, b ? vlines(b[1], COLW).length : 1, 1);
+        const h = S_LABEL + VGAP + n * VLEAD + VPAD;
+        need(h);
+        if(a) valCell(M, wA, a[0], a[1]);
+        if(b) valCell(M + COLW + GUT, COLW, b[0], b[1]);
+        y -= h;
+      };
+      // Pairs fields two to a row. A value too long for half the width takes a
+      // full-width row of its own rather than wrapping into a narrow column.
+      const grid = (items) => {
+        const list = items.filter(it => it && it[1]).map(it => [it[0], String(it[1])]);
+        let i = 0;
+        while(i < list.length){
+          const a = list[i], b = list[i+1];
+          const aFits = vlines(a[1], COLW).length === 1;
+          const bFits = b && vlines(b[1], COLW).length === 1;
+          if(aFits && bFits){ vrow(a, b); i += 2; } else { vrow(a, null); i += 1; }
+        }
+      };
+
+      put(x.title, S_TITLE, true, 0, 2*SC, 'center');
+      rule(); y -= 2*SC;
+      at(x.salutation, S_BODY, true, M, y - S_BODY); y -= S_BODY + 5*SC;
 
       /* The declaration, laid out inline with a caption under every blank.
          Words are placed one at a time so a blank can be an atomic box with its
          own caption; a line that contains a blank gets extra leading to make
          room for the caption. Text is never altered - only positioned. */
-      const CAP = 5.6, CAPDROP = 8.2, LEAD = 9.4;
+      const CAP = 5.6*SC, CAPDROP = 8.2*SC, LEAD = 9.4*SC;
       function declBlock(segs, size){
         // Words are measured individually for wrapping, but consecutive words are
         // DRAWN as one string so the PDF viewer does the spacing. Drawing word by
@@ -4900,86 +5163,77 @@ if(contactForm){
       }
 
       if(x.bodySegs){
-        declBlock(x.bodySegs[0], S_BODY); y -= 3;
-        declBlock(x.bodySegs[1], S_BODY); y -= 3;
-        put(x.body[2], S_BODY, false, 0, 4);
+        declBlock(x.bodySegs[0], S_BODY); y -= 3*SC;
+        put(x.body[1], S_BODY, false, 0, 4*SC);
       } else {
-        x.body.filter(Boolean).forEach(pp => put(pp, S_BODY, false, 0, 4));
+        x.body.filter(Boolean).forEach(pp => put(pp, S_BODY, false, 0, 4*SC));
       }
-      y -= 2;
+      y -= 2*SC;
 
-      const H = x.hints;
+      const H = d.blank ? x.hints : {};
       sec(x.secChild);
-      row([x.k.name, H.childName], [x.k.dob, H.childDob]);
+      if(d.blank) row([x.k.name, H.childName], [x.k.dob, H.childDob]);
+      else grid([].concat.apply([], x.children.map(c =>
+             [[x.k.name, c.name], [x.k.dob, prettyDate(c.dob)]])));
 
-      sec(x.secAdult); note(x.noteAdult);
-      row([x.k.name, H.adultName], [x.k.rel, H.adultRel]);
-      row([x.k.phone, H.adultPhone], [x.k.email, H.adultEmail]);
+      if(x.showAdult){
+        sec(x.secAdult); if(d.blank) note(x.noteAdult);
+        if(d.blank){
+          row([x.k.name, H.adultName], [x.k.rel, H.adultRel]);
+          row([x.k.phone, H.adultPhone], [x.k.email, H.adultEmail]);
+        } else grid([[x.k.name, d.adultName], [x.k.rel, d.adultRel],
+                     [x.k.phone, d.adultPhone], [x.k.email, d.adultEmail]]);
+      }
 
-      sec(x.secParent); note(x.noteParent);
-      row([x.k.name, H.parentName], [x.k.name2, H.parent2Name]);
-      row([x.k.phone, H.parentPhone], [x.k.email, H.parentEmail]);
-      row([x.k.address, H.parentAddress], null);
+      sec(x.secParent); if(d.blank) note(x.noteParent);
+      if(d.blank){
+        row([x.k.name, H.parentName], [x.k.name2, H.parent2Name]);
+        row([x.k.phone, H.parentPhone], [x.k.email, H.parentEmail]);
+        row([x.k.address, H.parentAddress], null);
+      } else grid([[x.k.name, d.parentName], [x.k.name2, d.parent2Name],
+                   [x.k.phone, d.parentPhone], [x.k.email, d.parentEmail],
+                   [x.k.address, (d.parentAddress||'').replace(/\s*\n\s*/g, ', ')]]);
 
       sec(x.secTravel);
-      row([x.k.dep, H.dep], [x.k.retn, H.retn]);
-      row([x.k.dest, H.dest], null);
+      if(d.blank) row([x.k.dep, H.dep], [x.k.retn, H.retn]);
+      else grid([[x.k.dep, prettyDate(d.departure)], [x.k.retn, prettyDate(d.ret)]]);
 
-      // Both signature blocks side by side - same three lines each, half the height.
-      y -= 3;
+      /* Both signature blocks side by side - same three lines each, half the
+         height, and always kept together with their heading. */
+      const SIGH = S_SEC + 3*SC + 8*SC + 3 * (S_HINT + WRITE + 3*SC) + 2*SC + 6*SC + S_NOTE * 3;
+      need(SIGH);
+      y -= 3*SC;
       at(x.sigParent, S_SEC, true, M, y - S_SEC);
       at(x.sigOther,  S_SEC, true, M + COLW + GUT, y - S_SEC);
-      y -= S_SEC + 3; hrule(M, PW - M, y, 0.7, 0.72); y -= 8;
-      [x.lblSig, x.lblPrinted, x.lblDate].forEach(lbl => {
-        at(lbl, S_HINT, false, M, y - S_HINT, '0.42');
-        at(lbl, S_HINT, false, M + COLW + GUT, y - S_HINT, '0.42');
-        const ry = y - S_HINT - WRITE;
-        hrule(M, M + COLW, ry, 0.6, 0.55);
-        hrule(M + COLW + GUT, M + COLW + GUT + COLW, ry, 0.6, 0.55);
-        y -= S_HINT + WRITE + 3;
+      y -= S_SEC + 3*SC; hrule(M, PW - M, y, 0.7, 0.72); y -= 8*SC;
+      // The consenting parents' names are already known on a filled letter, so
+      // the printed-name line shows them; the signature and date stay handwritten.
+      const printed = d.blank ? ['', ''] : [d.parentName || '', d.parent2Name || ''];
+      [x.lblSig, x.lblPrinted, x.lblDate].forEach((lbl, idx) => {
+        [0, 1].forEach(col => {
+          const tx = col === 0 ? M : M + COLW + GUT;
+          at(lbl, S_HINT, false, tx, y - S_HINT, '0.42');
+          if(idx === 1 && printed[col]){
+            let vs = S_VAL;
+            while(vs > 6*SC && textWidth(printed[col], vs, false) > COLW) vs -= 0.2;
+            at(printed[col], vs, false, tx, y - S_HINT - WRITE + 2.5*SC);
+          } else hrule(tx, tx + COLW, y - S_HINT - WRITE, 0.6, 0.55);
+        });
+        y -= S_HINT + WRITE + 3*SC;
       });
 
-      y -= 2; hrule(M, PW - M, y, 0.7, 0.75); y -= 6;
-      put(x.note, 7.4, false, 0, 0);
+      y -= 2*SC; hrule(M, PW - M, y, 0.7, 0.75); y -= 6*SC;
+      put(x.note, S_NOTE + 0.2, false, 0, 0);
+      const overflowed = pages.length > 0;
       newPage();
-      return assemble();
+      return overflowed;
     }
 
-    put(x.title, 15, true, 0, 3, 'center');
-    rule();
-    y -= 4;
-    put(x.salutation, 10.5, false, 0, 7);
-    x.body.filter(Boolean).forEach(pp => put(pp, 10.5, false, 0, 7));
-
-    // The hints are passed only for the blank form; kv() ignores them whenever a
-    // value is present, so the filled letter is byte-for-byte what it was.
-    const H = d.blank ? x.hints : {};
-    section(x.secChild);
-    x.children.forEach(c => { kv(x.k.name, c.name, H.childName); kv(x.k.dob, prettyDate(c.dob), H.childDob); });
-
-    if(x.showAdult){
-      section(x.secAdult);
-      if(d.blank) hintLine(x.noteAdult);
-      kv(x.k.name, d.adultName, H.adultName); kv(x.k.rel, d.adultRel, H.adultRel);
-      kv(x.k.phone, d.adultPhone, H.adultPhone); kv(x.k.email, d.adultEmail);
-    }
-
-    section(x.secParent);
-    if(d.blank) hintLine(x.noteParent);
-    kv(x.k.name, d.parentName, H.parentName); kv(x.k.name2, d.parent2Name, H.parent2Name);
-    kv(x.k.address, d.parentAddress.replace(/\s*\n\s*/g, ', '), H.parentAddress);
-    kv(x.k.phone, d.parentPhone, H.parentPhone); kv(x.k.email, d.parentEmail);
-
-    section(x.secTravel);
-    kv(x.k.dep, prettyDate(d.departure), H.dep); kv(x.k.retn, prettyDate(d.ret), H.retn);
-    kv(x.k.dest, d.destination, H.dest);
-
-    sigBlock(x.sigParent, d.blank ? '' : d.parentName);
-    sigBlock(x.sigOther, d.blank ? '' : d.parent2Name);
-
-    y -= 6; rule();
-    put(x.note, 8.5, false, 0, 0);
-    newPage();
+    // Try the natural size first and step down only as far as a long letter
+    // needs. 0.8 is the floor: below that the type stops being comfortable to
+    // read, and a letter that still does not fit would be a bug worth seeing.
+    let scale = 1;
+    while(renderOnePage(scale) && scale > 0.8) scale = Math.round((scale - 0.03) * 100) / 100;
     return assemble();
 
     // ---- assemble the PDF objects ----
