@@ -379,10 +379,22 @@ function askMatchResources(question, limit){
   (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
     (cat.groups || []).forEach(g=>{
       (g.items || []).forEach(it=>{
+        // Every English body field is joined by its French twin, the same way
+        // askQuestionBreadth's bodyOf() already does it. The titles were made
+        // bilingual earlier; the bodies were not, so a French question could
+        // only ever match a title and almost always fell below the relevance
+        // threshold - "Ou faire une photo pour mon passeport" reached none of
+        // the French text that answers it. No field is removed, none is
+        // reordered, and nothing about scoring or the thresholds changes.
         const hay = cjhqNormalizeSearch([
-          it.en, it.fr, it.what_en, it.need_en, it.steps_en,
-          it.question_en, it.answer_en, (it.tips_list_en || []).join(' '),
-          cat.en, g.heading_en || ''
+          it.en, it.fr,
+          it.what_en, it.what_fr,
+          it.need_en, it.need_fr,
+          it.steps_en, it.steps_fr,
+          it.question_en, it.question_fr,
+          it.answer_en, it.answer_fr,
+          (it.tips_list_en || []).join(' '), (it.tips_list_fr || []).join(' '),
+          cat.en, cat.fr, g.heading_en || '', g.heading_fr || ''
         ].filter(Boolean).join(' ').toLowerCase());
         // Both titles count. Previously only the English title did, so a French
         // question ("Ou puis-je demander un passeport?") scored a single body hit

@@ -2049,9 +2049,22 @@
             </div>
             <div class="ctc-custom-dir" id="ctcCustomDir" hidden>
               <div class="form-group">
-                <label for="ctcFromCountry"><span data-en>Travelling from</span><span data-fr>En provenance de</span> <abbr class="ctc-req" title="required">*</abbr></label>
-                <p class="ctc-hint ctc-field-hint" id="hint-ctcFromCountry"><span data-en>Enter the country or location the child is travelling from</span><span data-fr>Entrez le pays ou le lieu d'où l'enfant voyage</span></p>
-                <input type="text" id="ctcFromCountry" aria-describedby="hint-ctcFromCountry" autocomplete="off" data-ph-en="Country of departure" data-ph-fr="Pays de départ">
+                <label for="ctcFromCountrySearch"><span data-en>Travelling from</span><span data-fr>En provenance de</span> <abbr class="ctc-req" title="required">*</abbr></label>
+                <p class="ctc-hint ctc-field-hint" id="hint-ctcFromCountry"><span data-en>Start typing to search the list of countries, then choose one</span><span data-fr>Commencez à taper pour rechercher dans la liste des pays, puis choisissez-en un</span></p>
+                <div class="ctc-combo">
+                  <input type="text" id="ctcFromCountrySearch" class="ctc-combo-input" role="combobox"
+                         aria-expanded="false" aria-controls="ctcFromCountryList" aria-autocomplete="list"
+                         aria-describedby="hint-ctcFromCountry" autocomplete="off" autocapitalize="off"
+                         autocorrect="off" spellcheck="false" enterkeyhint="search"
+                         data-ph-en="Search countries — e.g. Can, Uni, Fra" data-ph-fr="Rechercher un pays — p. ex. Can, Roy, Fra">
+                  <ul class="ctc-combo-list" id="ctcFromCountryList" role="listbox" hidden></ul>
+                </div>
+                <input type="hidden" id="ctcFromCountry" data-focus-proxy="ctcFromCountrySearch">
+                <div class="ctc-combo-other" id="ctcFromCountryOtherWrap" hidden>
+                  <label for="ctcFromCountryOther"><span data-en>Country name</span><span data-fr>Nom du pays</span></label>
+                  <p class="ctc-hint ctc-field-hint" id="hint-ctcFromCountryOther"><span data-en>Enter the country the child is travelling from</span><span data-fr>Entrez le pays d'où l'enfant voyage</span></p>
+                  <input type="text" id="ctcFromCountryOther" aria-describedby="hint-ctcFromCountryOther" autocomplete="off" data-ph-en="Country name" data-ph-fr="Nom du pays">
+                </div>
                 <p class="ctc-err" id="err-ctcFromCountry" hidden></p>
               </div>
               <div class="form-group">
@@ -4784,15 +4797,22 @@ if(contactForm){
   // "reunion" matches "Reunion".
   const ctcFold = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-  // Assigned by the picker below; leaving the custom direction clears it.
-  let ctcResetCountry = function(){};
+  // Assigned by the pickers below; leaving the custom direction clears both.
+  const ctcCountryResets = [];
+  const ctcResetCountry = function(){ ctcCountryResets.forEach(function(f){ f(); }); };
 
-  (function ctcCountryPicker(){
-    const input = $('ctcToCountrySearch');
-    const list  = $('ctcToCountryList');
-    const store = $('ctcToCountry');
-    const otherWrap = $('ctcToCountryOtherWrap');
-    const otherIn   = $('ctcToCountryOther');
+  // Both country fields are the same control, so they are the same code. The
+  // only difference between them is the id prefix, which is why this is a
+  // factory rather than a second copy: a fix to one is a fix to both.
+  function ctcCountryPicker(which){
+    const ID = (suffix) => 'ctc' + which + 'Country' + suffix;
+    let reset = function(){};
+
+    const input = $(ID('Search'));
+    const list  = $(ID('List'));
+    const store = $(ID(''));
+    const otherWrap = $(ID('OtherWrap'));
+    const otherIn   = $(ID('Other'));
     if(!input || !list || !store || !otherWrap || !otherIn) return;
 
     const MAXSHOWN = 8;
@@ -4812,7 +4832,7 @@ if(contactForm){
       active = i;
       [...list.children].forEach((li, n) => li.setAttribute('aria-selected', String(n === i)));
       if(i >= 0){
-        input.setAttribute('aria-activedescendant', 'ctcToCountryOpt' + i);
+        input.setAttribute('aria-activedescendant', ID('Opt') + i);
         const li = list.children[i];
         if(li && li.scrollIntoView) li.scrollIntoView({ block: 'nearest' });
       } else input.removeAttribute('aria-activedescendant');
@@ -4846,7 +4866,7 @@ if(contactForm){
       otherWrap.hidden = true;
       otherIn.value = '';
       input.readOnly = false;
-      store.dataset.focusProxy = 'ctcToCountrySearch';
+      store.dataset.focusProxy = ID('Search');
     }
 
     function enterOther(){
@@ -4856,7 +4876,7 @@ if(contactForm){
       input.readOnly = true;
       otherWrap.hidden = false;
       store.value = otherIn.value.trim();
-      store.dataset.focusProxy = 'ctcToCountryOther';
+      store.dataset.focusProxy = ID('Other');
       close();
       otherIn.focus();
     }
@@ -4870,7 +4890,7 @@ if(contactForm){
       chosenIdx = it.idx;
       input.value = it.label;
       store.value = it.label;
-      hideError('ctcToCountry');
+      hideError(ID(''));
       close();
     }
 
@@ -4919,7 +4939,7 @@ if(contactForm){
     });
     otherIn.addEventListener('input', ()=>{
       store.value = otherIn.value.trim();
-      if(store.value) hideError('ctcToCountry');
+      if(store.value) hideError(ID(''));
     });
 
     // A language switch re-labels the chosen country and the Other option, and
@@ -4935,13 +4955,16 @@ if(contactForm){
     });
 
     // Leaving the custom direction clears the picker with the rest of the form.
-    ctcResetCountry = function(){
+    reset = function(){
       exitOther();
       mode = ''; chosenIdx = -1;
       input.value = ''; store.value = '';
       close();
     };
-  })();
+    ctcCountryResets.push(function(){ reset(); });
+  }
+  ctcCountryPicker('To');
+  ctcCountryPicker('From');
 
   /* ---------- direction ---------- */
   // Who the child travels with: switches the exact letter wording, the
@@ -4962,16 +4985,17 @@ if(contactForm){
       direction = btn.dataset.dir;
       document.querySelectorAll('.ctc-dir-btn[data-dir]').forEach(b=>b.setAttribute('aria-checked', String(b===btn)));
       hideError('direction');
-      // "Other countries" reveals two free-text country fields. They are only
-      // required while that option is selected.
+      // "Other countries" reveals the two country pickers. They are only
+      // required while that option is selected, and both store their value in
+      // a hidden input, so focus goes to the visible search box.
       const cd = $('ctcCustomDir');
       const custom = direction === 'custom';
       cd.hidden = !custom;
       if(custom){
         syncPlaceholders();
-        $('ctcFromCountry').focus();
+        const first = $('ctcFromCountrySearch') || $('ctcFromCountry');
+        if(first) first.focus();
       }else{
-        $('ctcFromCountry').value = '';
         ctcResetCountry();
         hideError('ctcFromCountry'); hideError('ctcToCountry');
       }
@@ -7207,10 +7231,22 @@ function askMatchResources(question, limit){
   (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
     (cat.groups || []).forEach(g=>{
       (g.items || []).forEach(it=>{
+        // Every English body field is joined by its French twin, the same way
+        // askQuestionBreadth's bodyOf() already does it. The titles were made
+        // bilingual earlier; the bodies were not, so a French question could
+        // only ever match a title and almost always fell below the relevance
+        // threshold - "Ou faire une photo pour mon passeport" reached none of
+        // the French text that answers it. No field is removed, none is
+        // reordered, and nothing about scoring or the thresholds changes.
         const hay = cjhqNormalizeSearch([
-          it.en, it.fr, it.what_en, it.need_en, it.steps_en,
-          it.question_en, it.answer_en, (it.tips_list_en || []).join(' '),
-          cat.en, g.heading_en || ''
+          it.en, it.fr,
+          it.what_en, it.what_fr,
+          it.need_en, it.need_fr,
+          it.steps_en, it.steps_fr,
+          it.question_en, it.question_fr,
+          it.answer_en, it.answer_fr,
+          (it.tips_list_en || []).join(' '), (it.tips_list_fr || []).join(' '),
+          cat.en, cat.fr, g.heading_en || '', g.heading_fr || ''
         ].filter(Boolean).join(' ').toLowerCase());
         // Both titles count. Previously only the English title did, so a French
         // question ("Ou puis-je demander un passeport?") scored a single body hit
@@ -11748,9 +11784,77 @@ checkCurrentPath({deferUnknown:true});
 </script>
 
 
-<!-- Begin Constant Contact Active Forms -->
-<script> var _ctct_m = "e9166a9e087397b9011843b153dfb1d3"; </script>
-<script id="signupScript" src="//static.ctctcdn.com/js/signup-form-widget/current/signup-form-widget.min.js" async defer></script>
+<!-- Begin Constant Contact Active Forms - loaded only where the form is shown.
+     The widget used to load on every route. It is a single script tag, but
+     jQuery, Underscore, reCAPTCHA, its own stylesheet and a config request all
+     come in behind it - close to a megabyte of third-party code, and a Google tracker,
+     on pages that carry no form at all.
+
+     The inline form lives on one route. But this is a single-page app: every
+     route file ships every page div and only the active one is rendered, so
+     the form element is PRESENT in the DOM everywhere. Testing for presence
+     would load the widget everywhere, which is the bug. The test below is
+     whether the element is actually RENDERED - getClientRects() is empty for
+     anything inside a display:none page - and the enclosing page's class
+     attribute is watched, so arriving at the form's route through a
+     client-side navigation loads it at that moment.
+
+     Nothing about the form changes: when its route is shown the same script
+     loads with the same account id and renders the same way. Performance and
+     third-party exposure only. No functionality removed, no consent mechanism
+     added - that decision is documented separately. -->
+<script>
+(function deferConstantContact(){
+  var ACCOUNT = "e9166a9e087397b9011843b153dfb1d3";
+  var SRC = '//static.ctctcdn.com/js/signup-form-widget/current/signup-form-widget.min.js';
+  var loaded = false;
+  function load(){
+    // Two guards rather than one: the flag covers this closure, the id lookup
+    // covers anything that appended the script by other means.
+    if(loaded || document.getElementById('signupScript')) return;
+    loaded = true;
+    // The widget reads this global as it initialises, so it has to be set
+    // before the script is appended - the same order the two inline tags had.
+    window._ctct_m = ACCOUNT;
+    var el = document.createElement('script');
+    el.id = 'signupScript';
+    el.async = true; el.defer = true;
+    el.src = SRC;
+    document.body.appendChild(el);
+  }
+  // display:none anywhere up the tree - which is every inactive route - yields
+  // no client rects. Rendered but scrolled out of view still does, so the form
+  // loads as soon as its route is shown rather than waiting to be scrolled to.
+  function rendered(el){ return !!(el && el.getClientRects().length); }
+  var mo = null;
+  function watch(){
+    if(loaded) return;
+    var form = document.querySelector('.ctct-inline-form');
+    if(!form) return;                         // no form in this build at all
+    if(rendered(form)){ load(); return; }     // direct load of the form's route
+    if(mo) return;
+    var page = form.closest ? form.closest('.page') : null;
+    if(!page) return;
+    // The router reveals a route by putting `active` on its page div, so that
+    // attribute is the signal. It also fires for pushState navigation, which
+    // popstate does not. If the class changes but the form still is not
+    // rendered, keep watching rather than giving up.
+    mo = new MutationObserver(function(){
+      if(!rendered(form)) return;
+      mo.disconnect(); mo = null;
+      load();
+    });
+    mo.observe(page, { attributes:true, attributeFilter:['class','style','hidden'] });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', watch);
+  }else{
+    watch();
+  }
+  window.addEventListener('popstate', function(){ setTimeout(watch, 60); });
+  window.__cjhqWatchSignupForm = watch;
+})();
+</script>
 <!-- End Constant Contact Active Forms -->
 
 <!-- Social embed loaders - deferred until the embeds are actually needed.
