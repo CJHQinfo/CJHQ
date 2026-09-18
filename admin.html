@@ -924,8 +924,20 @@
     header, footer, .ctc-actions, .ctc-back, #ctcFormScreen, .mobile-drawer, .mobile-drawer-overlay{display:none !important;}
   }
 </style>
-<!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-Mxh1NOqSxSmdh22TkJq7kFv7Xq7Bpqj5kGAWTa1k1tgKMsatRFInGMYSBrDiQQl3+kJvqnJYGXVzGTEkFkUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS.
+
+     Served from this site, not a CDN. It used to load from cdnjs with an
+     integrity attribute whose value was 86 base64 characters. A SHA-512 digest
+     is 64 bytes, which is ALWAYS 88 base64 characters - so that value could not
+     match any file, the browser refused to run the script, DOMPurify was never
+     defined, and cjhqSanitizeHtml() fell back to escaping. Every page written in
+     HTML from the admin panel therefore displayed its own markup as visible
+     text. Failing closed was correct; failing closed on every page was not.
+
+     Hosting it here removes the whole class of problem: no integrity value to
+     get wrong, and no ad blocker, filtered network or CDN outage that can
+     silently turn every admin-written page back into escaped source. -->
+<script defer src="/assets/purify.min.js"></script>
 <!--
   FIRST-VISIT LANGUAGE DEFAULT
   Runs before <body> parses, so the page paints in the right language with no
@@ -2379,6 +2391,7 @@
           <button class="admin-tab-btn" data-tab="messages">Messages</button>
           <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ</button>
           <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
+          <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
         </div>
 
         <!-- ===== TAB: PAGES ===== -->
@@ -2845,6 +2858,47 @@
             and it is recorded.
           </p>
           <div id="visibilityList"></div>
+        </div>
+
+        <!-- ============ Staff access ============
+             Who may sign in to this panel. Two sources: a short list written
+             into the Firestore security rules (shown here as Built-in, and
+             changeable only in the Firebase console), and the `staff`
+             collection, which this tab manages. -->
+        <div class="admin-tab-panel" id="tab-staff" style="display:none;">
+          <h2 style="font-size:1.2rem;">Staff Access</h2>
+          <p style="font-size:.88rem; color:var(--muted);">
+            Everyone who can sign in to this admin panel. Adding an address here lets that person
+            sign in with Google using that exact address &mdash; they do not need an invitation email,
+            and nothing is sent to them. Tell them yourself that they now have access.
+          </p>
+
+          <p id="staffBuiltInNote" style="display:none; font-size:.84rem; color:var(--muted); border-left:3px solid var(--line); padding-left:12px; margin:16px 0;">
+            Built-in accounts appear in this list the first time each one signs in after this update.
+            One that is missing still has full access &mdash; it just has not signed in yet.
+          </p>
+
+          <div id="staffList" style="margin-top:8px;"></div>
+
+          <h3 style="font-size:.95rem; margin-top:28px;">Add someone</h3>
+          <p style="font-size:.82rem; color:var(--muted);">
+            Use the exact address they sign in to Google with. Access is granted to that address only.
+          </p>
+          <form id="staffAddForm" class="card" style="margin:12px 0;">
+            <label class="admin-label" for="staffAddEmail">Email address</label>
+            <input type="email" id="staffAddEmail" class="admin-input" required
+                   autocomplete="off" spellcheck="false" placeholder="name@example.com">
+            <button class="btn" type="submit" style="margin-top:8px;">Add</button>
+          </form>
+          <p id="staffAddMsg" style="font-size:.84rem; margin-top:10px; display:none;"></p>
+
+          <div style="border-top:1px solid var(--line); margin-top:28px; padding-top:16px;">
+            <p style="font-size:.82rem; color:var(--muted);">
+              <strong>Built-in accounts</strong> are written into the database security rules. They are the
+              recovery path if this list is ever emptied by mistake, so they cannot be removed from here.
+              To change them, edit the rules in the Firebase console.
+            </p>
+          </div>
         </div>
 
         <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
@@ -6641,16 +6695,67 @@ async function sha256Hex(str){
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+/* Staff can also be added from the panel, which writes one document per
+   address into the `staff` collection. The panel therefore has to ask
+   Firestore about anyone who is not in the hash list above.
+
+   The reason that read used to be wrong was never the read itself - it was
+   that it could hang, leaving the answer undetermined and a real staff member
+   stranded. So it is bounded: the hash list answers first and costs no
+   network call, the Firestore lookup runs only for addresses it does not
+   cover, and it is raced against a timeout. Anything other than a document
+   that exists - denied, offline, timed out, malformed - resolves to NOT
+   staff. Fail closed, never hang.
+
+   The rules allow a signed-in account to `get` exactly one document: the one
+   whose id is its own address. So this lookup cannot be used to enumerate
+   staff, and a stranger learns only that they are not on the list.
+
+   None of this is a security boundary. Firestore rules are; they run the
+   same two checks server-side on every read and write. */
+const STAFF_LOOKUP_TIMEOUT_MS = 6000;
+
+function staffDocId(email){ return String(email || '').trim().toLowerCase(); }
+
+async function staffDocExists(email){
+  const id = staffDocId(email);
+  if(!id || !firebaseReady || !window.__fbFirestore) return false;
+  const fs = window.__fbFirestore;
+  let timer;
+  try{
+    const lookup = fs.getDoc(fs.doc(fbDb, 'staff', id)).then(snap => snap.exists());
+    const bail   = new Promise(resolve => { timer = setTimeout(() => resolve('timeout'), STAFF_LOOKUP_TIMEOUT_MS); });
+    const result = await Promise.race([lookup, bail]);
+    if(result === 'timeout'){
+      console.warn('[CJHQ] staff lookup timed out; treating as not staff');
+      return false;
+    }
+    return result === true;
+  }catch(err){
+    console.warn('[CJHQ] staff lookup failed:', err);
+    return false;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
 async function verifyAdminIsStaff(){
   if(!adminUser || !adminUser.email){ adminIsStaff = false; return false; }
   try{
-    const hash = await sha256Hex(String(adminUser.email).trim().toLowerCase());
-    adminIsStaff = STAFF_EMAIL_HASHES.includes(hash);
+    const hash = await sha256Hex(staffDocId(adminUser.email));
+    if(STAFF_EMAIL_HASHES.includes(hash)){
+      adminIsStaff = true;
+      // Not awaited: access is already decided, and this must not delay or
+      // endanger sign-in. See ensureOwnStaffRecord().
+      ensureOwnStaffRecord();
+      return true;
+    }
   }catch(err){
-    // crypto.subtle needs a secure context. Fail closed rather than open.
-    console.warn('[CJHQ] could not verify staff access:', err);
-    adminIsStaff = false;
+    // crypto.subtle needs a secure context. Do not fail the whole check on
+    // this - the Firestore lookup below does not depend on it.
+    console.warn('[CJHQ] could not hash the signed-in address:', err);
   }
+  adminIsStaff = await staffDocExists(adminUser.email);
   return adminIsStaff === true;
 }
 
@@ -6727,9 +6832,238 @@ function showAdminPanel(){
   loadSettingsIntoForm();
 }
 
+/* ---------- Admin panel: Staff access ----------
+   Who may sign in. Two sources, and the difference matters to the person
+   reading the list:
+
+     Built-in  - written into the Firestore security rules. Not removable
+                 from here, by design: they are the way back in if this list
+                 is ever emptied. Changing them means editing the rules.
+     Added     - a document in the `staff` collection, one per address,
+                 doc id = the lowercased address. This tab writes those.
+
+   The built-in addresses are deliberately NOT listed in this file. This file
+   is public: six real staff addresses in page source would be harvested by
+   scrapers, which is the whole reason STAFF_EMAIL_HASHES above holds hashes
+   rather than addresses. So the panel never enumerates them from code. Each
+   built-in account records itself in the `staff` collection the first time it
+   signs in - see ensureOwnStaffRecord() - and the tab lists it from there,
+   flagged built_in so it is shown but not removable. The collection is
+   staff-only to read, so the addresses stay out of public reach.
+
+   Consequence, stated plainly in the tab: a built-in account that has not
+   signed in since this went live is not in the list yet. It still has full
+   access - the rules grant it - it simply has not introduced itself.
+
+   Every guard below is a courtesy to the person clicking, not a security
+   control. The rules decide; they apply the same two sources on the server
+   for every read and write, including the writes this tab makes. */
+
+let STAFF_COLLECTION_CACHE = null;   // null = not loaded yet
+
+// Built-in means "in the rules", and the only copy of that list this file has
+// is the hash list used for sign-in. Async because hashing is.
+async function staffIsBuiltIn(email){
+  try{
+    return STAFF_EMAIL_HASHES.includes(await sha256Hex(staffDocId(email)));
+  }catch(e){
+    return false;
+  }
+}
+
+// Deliberately permissive - Firebase Auth, not this, decides what is a real
+// address. This only catches the obvious typo before a pointless write.
+function staffEmailLooksValid(email){
+  const e = staffDocId(email);
+  return e.length > 2 && e.length <= 320 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+      && !/[\/#?\[\]*]/.test(e);   // characters Firestore will not take in a doc id
+}
+
+/* Best-effort self-registration, run once per sign-in AFTER access has already
+   been decided. It exists so a built-in account appears in the Staff tab
+   without any address ever being written into this file. It must never affect
+   whether someone gets in: every failure is swallowed. */
+async function ensureOwnStaffRecord(){
+  if(!adminUser || !adminUser.email || !firebaseReady || !window.__fbFirestore) return;
+  const id = staffDocId(adminUser.email);
+  if(!id) return;
+  const fs = window.__fbFirestore;
+  try{
+    const snap = await fs.getDoc(fs.doc(fbDb, 'staff', id));
+    const builtIn = await staffIsBuiltIn(id);
+    if(snap.exists()){
+      // Only ever ADD the flag to an existing record; never rewrite it.
+      if(builtIn && snap.data() && snap.data().built_in !== true){
+        await fs.setDoc(fs.doc(fbDb, 'staff', id), { built_in:true }, { merge:true });
+      }
+      return;
+    }
+    if(!builtIn) return;   // a non-built-in account with no record is not staff
+    await fs.setDoc(fs.doc(fbDb, 'staff', id), {
+      email: id, built_in: true, added_by: 'built-in', added_at: new Date().toISOString()
+    }, { merge:true });
+  }catch(e){
+    console.warn('[CJHQ] could not record this account in the staff list:', e);
+  }
+}
+
+async function fetchStaffCollection(){
+  if(!firebaseReady || !window.__fbFirestore) return [];
+  const fs = window.__fbFirestore;
+  try{
+    const snap = await fs.getDocs(fs.collection(fbDb, 'staff'));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(e){
+    console.warn('[CJHQ] could not read the staff list:', e);
+    return null;   // distinct from "empty" - the UI says which
+  }
+}
+
+function staffRowHtml(rec){
+  const email = rec.id;
+  const builtIn = rec.built_in === true;
+  const isYou = adminUser && staffDocId(adminUser.email) === email;
+  const badge = builtIn
+    ? '<span style="font-size:.72rem; font-weight:600; color:#6B7280; border:1px solid #D1D5DB; border-radius:99px; padding:2px 8px;">Built-in</span>'
+    : '<span style="font-size:.72rem; font-weight:600; color:#2E7D32; border:1px solid #A9CBA9; border-radius:99px; padding:2px 8px;">Added</span>';
+  const you = isYou ? ' <span style="font-size:.72rem; color:var(--muted);">(you)</span>' : '';
+  const action = builtIn
+    ? '<span style="font-size:.78rem; color:var(--muted);">Edit in the Firebase console</span>'
+    : (isYou
+        ? '<span style="font-size:.78rem; color:var(--muted);">You cannot remove yourself</span>'
+        : '<button class="btn admin-btn-outline" type="button" data-staff-remove="' +
+          cjhqEscapeHtml(email) + '" style="font-size:.8rem;">Remove</button>');
+  const meta = staffAddedMeta(rec);
+  return '<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; ' +
+         'border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px;">' +
+         '<span style="flex:1 1 240px; font-size:.9rem; word-break:break-all;">' +
+         cjhqEscapeHtml(email) + you + '</span>' + badge +
+         (meta ? '<span style="font-size:.76rem; color:var(--muted); flex:1 1 160px;">' +
+                 cjhqEscapeHtml(meta) + '</span>' : '') +
+         '<span>' + action + '</span></div>';
+}
+
+function staffAddedMeta(rec){
+  if(rec && rec.built_in === true) return 'in the security rules';
+  const by = rec && rec.added_by ? 'added by ' + rec.added_by : '';
+  const on = rec && rec.added_at ? String(rec.added_at).slice(0, 10) : '';
+  return [by, on].filter(Boolean).join(' · ');
+}
+
+async function renderStaffList(){
+  const box  = document.getElementById('staffList');
+  const note = document.getElementById('staffBuiltInNote');
+  if(!box) return;
+  box.innerHTML = '<p style="font-size:.86rem; color:var(--muted);">Loading…</p>';
+
+  const rows = await fetchStaffCollection();
+  STAFF_COLLECTION_CACHE = rows;
+
+  if(rows === null){
+    box.innerHTML = '<p style="font-size:.86rem; color:#A23B3B;">Could not read the staff list. ' +
+      'Check your connection and reopen this tab. Nobody\'s access has changed.</p>';
+    if(note) note.style.display = 'none';
+    return;
+  }
+
+  const builtIn = rows.filter(r => r.built_in === true).sort((a, b) => a.id.localeCompare(b.id));
+  const added   = rows.filter(r => r.built_in !== true).sort((a, b) => a.id.localeCompare(b.id));
+  const total   = builtIn.length + added.length;
+
+  // The list is honest about what it can and cannot see. It shows built-in
+  // accounts that have signed in; it cannot show the ones that have not.
+  if(note) note.style.display = 'block';
+
+  box.innerHTML =
+    (total === 0
+      ? '<p style="font-size:.88rem; color:var(--muted);">No accounts are listed yet. ' +
+        'Built-in accounts appear here the first time each one signs in.</p>'
+      : builtIn.map(staffRowHtml).join('') + added.map(staffRowHtml).join('')) +
+    (total
+      ? '<p style="font-size:.8rem; color:var(--muted); margin-top:10px;">' + total +
+        ' account' + (total === 1 ? '' : 's') + ' listed' +
+        (added.length ? ', ' + added.length + ' added from here' : '') + '.</p>'
+      : '');
+}
+
+function showStaffMsg(text, bad){
+  const el = document.getElementById('staffAddMsg');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = bad ? '#A23B3B' : '#2E7D32';
+  el.style.display = text ? 'block' : 'none';
+}
+
+async function addStaffMember(emailRaw){
+  const email = staffDocId(emailRaw);
+  if(!staffEmailLooksValid(email)){
+    showStaffMsg('That does not look like an email address. Check it and try again.', true);
+    return false;
+  }
+  if(await staffIsBuiltIn(email)){
+    showStaffMsg(email + ' already has access as a built-in account.', true);
+    return false;
+  }
+  if((STAFF_COLLECTION_CACHE || []).some(r => r.id === email)){
+    showStaffMsg(email + ' already has access.', true);
+    return false;
+  }
+  if(!firebaseReady || !window.__fbFirestore){
+    showStaffMsg('Not connected to the database, so nothing was saved.', true);
+    return false;
+  }
+  const fs = window.__fbFirestore;
+  try{
+    await fs.setDoc(fs.doc(fbDb, 'staff', email), {
+      email,
+      added_by: (adminUser && adminUser.email) || 'unknown',
+      added_at: new Date().toISOString()
+    });
+  }catch(err){
+    reportSaveFailure('staff', err);
+    return false;
+  }
+  showStaffMsg(email + ' can now sign in to this panel. Let them know — nothing was emailed.', false);
+  await renderStaffList();
+  return true;
+}
+
+async function removeStaffMember(emailRaw){
+  const email = staffDocId(emailRaw);
+  if(await staffIsBuiltIn(email)){
+    alert('This is a built-in account. Removing it here would change nothing, because the ' +
+          'security rules grant it access directly. To change that, edit the rules in the ' +
+          'Firebase console.');
+    return false;
+  }
+  if(adminUser && staffDocId(adminUser.email) === email){
+    alert('You cannot remove your own access from here. Ask another staff member to do it.');
+    return false;
+  }
+  if(!firebaseReady || !window.__fbFirestore){
+    alert('Not connected to the database. Nothing was changed.');
+    return false;
+  }
+  if(!confirm('Remove access for ' + email + '?\n\nThey will no longer be able to sign in to the admin panel. ' +
+              'Nothing they have already saved is affected, and you can add them again at any time.')) return false;
+  const fs = window.__fbFirestore;
+  try{
+    await fs.deleteDoc(fs.doc(fbDb, 'staff', email));
+  }catch(err){
+    reportSaveFailure('staff', err);
+    return false;
+  }
+  showStaffMsg(email + ' no longer has access.', false);
+  await renderStaffList();
+  return true;
+}
+
 function switchAdminTab(tab){
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
   document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = (p.id === 'tab-'+tab) ? 'block' : 'none');
+  // Read the staff list when the tab is opened rather than on every panel
+  // load: it is one collection read, and most sessions never look at it.
+  if(tab === 'staff'){ showStaffMsg('', false); renderStaffList(); }
 }
 
 /* ---------- Admin panel: Pages ---------- */
@@ -9921,7 +10255,13 @@ function editCustomPage(slug){
   updateCustomPageStatusPreview();
   if(window.syncHomeCtaPlaceholders) syncHomeCtaPlaceholders();
   if(window.renderCustomPagePreview) renderCustomPagePreview();
-  window.scrollTo({top:0, behavior:'smooth'});
+  // Bring the EDITOR into view, not the top of the admin page. The form sits
+  // below a long list of pages, so scrolling to the top left the editor off
+  // screen and looked as though Edit had done nothing.
+  const form = document.getElementById('customPageForm');
+  if(form && form.scrollIntoView) form.scrollIntoView({ behavior:'smooth', block:'start' });
+  const firstField = document.getElementById('customPageTitleEn');
+  if(firstField) try{ firstField.focus({ preventScroll:true }); }catch(e){ /* older browsers */ }
 }
 async function deleteCustomPage(slug){
   if(!confirm('Permanently delete this page? This cannot be undone.')) return;
@@ -10833,15 +11173,26 @@ async function publishChangeNotice(slug){
   document.getElementById('customPageShowNav').addEventListener('change', (e)=>{
     document.getElementById('customPageNavLabelFields').style.display = e.target.checked ? 'block' : 'none';
   });
-  document.getElementById('customPageCancelBtn').addEventListener('click', ()=>{
+  /* Clearing the editor is more than form.reset(): the panel also carries
+     derived state - the preview, the status line, the format hint and the
+     button-label placeholders - none of which reset() knows about. Saving used
+     to clear only the fields, so the previous page's preview stayed on screen
+     under an empty form and looked like unsaved work. One function now does
+     the whole job, so Cancel and Save cannot drift apart again. */
+  function resetCustomPageForm(){
     document.getElementById('customPageForm').reset();
     document.getElementById('customPageId').value = '';
     document.getElementById('customPageSlug').disabled = false;
     document.getElementById('customPageNavLabelFields').style.display = 'none';
     document.getElementById('customPageHomeFields').style.display = 'none';
+    // reset() restores the markup default, which is HTML - make the hint agree.
+    updateCustomPageFormatHint();
     updateCustomPageStatusPreview();
+    if(window.syncHomeCtaPlaceholders) syncHomeCtaPlaceholders();
     if(window.renderCustomPagePreview) renderCustomPagePreview();
-  });
+  }
+  window.resetCustomPageForm = resetCustomPageForm;
+  document.getElementById('customPageCancelBtn').addEventListener('click', resetCustomPageForm);
   /* The switcher only changes how the body is rendered - it never rewrites what
      was typed, so flipping it back and forth is safe and reversible. */
   function updateCustomPageFormatHint(){
@@ -11005,10 +11356,7 @@ async function publishChangeNotice(slug){
     }
     await saveToCollection('custom_pages', page);
     await enhancePagesFromBackend();
-    document.getElementById('customPageForm').reset();
-    document.getElementById('customPageId').value = '';
-    document.getElementById('customPageSlug').disabled = false;
-    document.getElementById('customPageNavLabelFields').style.display = 'none';
+    if(window.resetCustomPageForm) window.resetCustomPageForm();
     renderCustomPagesList();
   });
 
@@ -11114,6 +11462,20 @@ async function publishChangeNotice(slug){
 
   document.querySelectorAll('.admin-tab-btn').forEach(b=>{
     b.addEventListener('click', ()=>switchAdminTab(b.dataset.tab));
+  });
+
+  // Staff access
+  const staffForm = document.getElementById('staffAddForm');
+  if(staffForm) staffForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const input = document.getElementById('staffAddEmail');
+    const ok = await addStaffMember(input ? input.value : '');
+    if(ok && input) input.value = '';
+  });
+  const staffListBox = document.getElementById('staffList');
+  if(staffListBox) staffListBox.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-staff-remove]');
+    if(btn) removeStaffMember(btn.getAttribute('data-staff-remove'));
   });
 
   // Notices form
