@@ -9707,6 +9707,7 @@ async function deleteCustomPage(slug){
   if(!confirm('Permanently delete this page? This cannot be undone.')) return;
   await deleteFromCollection('custom_pages', slug);
   await enhancePagesFromBackend();
+  await syncPublicPageIndex();
   renderCustomPagesList();
   refreshNav();
 }
@@ -9722,20 +9723,89 @@ async function deleteCustomPage(slug){
    A page saved before this feature existed has no public_until_ms and cannot
    satisfy the query, so the admin offers a one-time backfill and flags any page
    that still needs it. */
+/* A visitor cannot QUERY this collection, and no rule change can make that
+   work. Firestore evaluates a list rule against the QUERY, not against the
+   documents it would return: it has to prove from the query's own constraints
+   that nothing forbidden can come back. `published == true` can be proved that
+   way. `public_until_ms >= request.time.toMillis()` cannot - the client can
+   only put a number it chose into the query, and the engine has no way to know
+   that number is the current time. So every list shape is refused, however
+   exactly it mirrors the rule. Measured against production: an anonymous GET
+   of a live page returns 200, while five different query shapes - including
+   the one the SDK sends - all return PERMISSION_DENIED.
+
+   Reads of SINGLE documents ARE evaluated against the document, where
+   request.time works normally. So the public path is: read one small public
+   index document listing the slugs, then fetch each page by id. A page outside
+   its window is refused by the rules and simply drops out here - which is the
+   behaviour that was wanted: the body never reaches the browser.
+
+   The index only has to be right about WHICH pages exist, never about whether
+   they are still in date. Time is enforced by the rules on every read, so an
+   index that has gone stale over a weekend still cannot leak an expired page.
+   It is rewritten whenever an admin saves, deletes, or just opens the panel. */
+const CJHQ_PUBLIC_INDEX_DOC = 'public_pages';   // page_settings/public_pages
+const CJHQ_PUBLIC_INDEX_MAX = 40;               // a sane ceiling on the fan-out
+
 async function fetchPublicCustomPages(){
   if(!firebaseReady) return Object.values(CUSTOM_PAGES_CACHE);
   const fs = window.__fbFirestore;
+  let slugs = [];
   try{
-    const q = fs.query(fs.collection(fbDb, 'custom_pages'),
-      fs.where('published', '==', true),
-      fs.where('public_until_ms', '>=', Date.now()));
-    const snap = await fs.getDocs(q);
-    return snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    const idx = await fs.getDoc(fs.doc(fbDb, 'page_settings', CJHQ_PUBLIC_INDEX_DOC));
+    slugs = (idx.exists() && Array.isArray(idx.data().slugs)) ? idx.data().slugs : [];
   }catch(e){
-    // A missing composite index or a rules change would otherwise take the
-    // whole site's routing down with it. Fail closed on custom pages only.
-    console.warn('Custom pages unavailable:', e);
+    // Fail closed on custom pages only - never take the site's routing down.
+    console.warn('[CJHQ] public page index unavailable:', e);
     return [];
+  }
+  const wanted = slugs.filter(x => typeof x === 'string' && x.trim())
+                      .map(x => x.trim()).slice(0, CJHQ_PUBLIC_INDEX_MAX);
+  if(!wanted.length) return [];
+  const reads = await Promise.all(wanted.map(async slug => {
+    try{
+      const snap = await fs.getDoc(fs.doc(fbDb, 'custom_pages', slug));
+      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    }catch(e){
+      // permission-denied here is the expiry rule doing its job, not a fault.
+      return null;
+    }
+  }));
+  return reads.filter(Boolean);
+}
+
+/* Keeping the index honest. Draft pages are left out entirely, so an
+   unpublished page's address is not advertised before anyone has decided to
+   publish it. Expired and not-yet-started pages STAY in: the rules refuse them
+   on read anyway, and leaving them means the index never has to be rewritten
+   just because the clock moved. */
+function cjhqPublicIndexSlugs(){
+  return Object.values(CUSTOM_PAGES_CACHE)
+    .filter(p => p && p.slug && p.published !== false)
+    .map(p => String(p.slug))
+    .sort();
+}
+
+async function syncPublicPageIndex(){
+  if(!firebaseReady || !adminUser || !window.__fbFirestore) return false;
+  const fs = window.__fbFirestore;
+  const want = cjhqPublicIndexSlugs();
+  try{
+    const ref  = fs.doc(fbDb, 'page_settings', CJHQ_PUBLIC_INDEX_DOC);
+    const snap = await fs.getDoc(ref);
+    const have = (snap.exists() && Array.isArray(snap.data().slugs)) ? snap.data().slugs : null;
+    if(have && have.length === want.length && have.every((v, i) => v === want[i])) return false;
+    await fs.setDoc(ref, {
+      pageId: CJHQ_PUBLIC_INDEX_DOC,      // this collection is keyed by pageId elsewhere
+      slugs: want,
+      updated_at: new Date().toISOString(),
+      updated_by: (adminUser && adminUser.email) || 'admin'
+    }, { merge:true });
+    console.info('[CJHQ] public page index updated:', want);
+    return true;
+  }catch(e){
+    console.warn('[CJHQ] could not update the public page index:', e);
+    return false;
   }
 }
 
@@ -9744,6 +9814,10 @@ async function enhancePagesFromBackend(){
   HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
   const pages = adminUser ? await fetchCollection('custom_pages') : await fetchPublicCustomPages();
   CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
+  // Self-healing: an admin looking at the site rewrites the public index
+  // whenever it disagrees with the collection, so one missed write cannot
+  // leave visitors seeing nothing. It only writes on a real difference.
+  if(adminUser) syncPublicPageIndex();
   // The public split is computed here, once, and every public surface reads it.
   // The Firestore rules also refuse to serve a non-live page to a visitor, so
   // this is the second of two gates rather than the only one.
@@ -10796,6 +10870,9 @@ async function publishChangeNotice(slug){
     }
     await saveToCollection('custom_pages', page);
     await enhancePagesFromBackend();
+    // The index is what visitors read from. A page saved without reaching the
+    // index is a page nobody can see, so this is awaited, not fired and forgotten.
+    await syncPublicPageIndex();
     if(window.resetCustomPageForm) window.resetCustomPageForm();
     renderCustomPagesList();
   });
