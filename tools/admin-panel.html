@@ -48,6 +48,7 @@
           <button class="admin-tab-btn" data-tab="messages">Messages</button>
           <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ</button>
           <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
+          <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
         </div>
 
         <!-- ===== TAB: PAGES ===== -->
@@ -514,6 +515,47 @@
             and it is recorded.
           </p>
           <div id="visibilityList"></div>
+        </div>
+
+        <!-- ============ Staff access ============
+             Who may sign in to this panel. Two sources: a short list written
+             into the Firestore security rules (shown here as Built-in, and
+             changeable only in the Firebase console), and the `staff`
+             collection, which this tab manages. -->
+        <div class="admin-tab-panel" id="tab-staff" style="display:none;">
+          <h2 style="font-size:1.2rem;">Staff Access</h2>
+          <p style="font-size:.88rem; color:var(--muted);">
+            Everyone who can sign in to this admin panel. Adding an address here lets that person
+            sign in with Google using that exact address &mdash; they do not need an invitation email,
+            and nothing is sent to them. Tell them yourself that they now have access.
+          </p>
+
+          <p id="staffBuiltInNote" style="display:none; font-size:.84rem; color:var(--muted); border-left:3px solid var(--line); padding-left:12px; margin:16px 0;">
+            Built-in accounts appear in this list the first time each one signs in after this update.
+            One that is missing still has full access &mdash; it just has not signed in yet.
+          </p>
+
+          <div id="staffList" style="margin-top:8px;"></div>
+
+          <h3 style="font-size:.95rem; margin-top:28px;">Add someone</h3>
+          <p style="font-size:.82rem; color:var(--muted);">
+            Use the exact address they sign in to Google with. Access is granted to that address only.
+          </p>
+          <form id="staffAddForm" class="card" style="margin:12px 0;">
+            <label class="admin-label" for="staffAddEmail">Email address</label>
+            <input type="email" id="staffAddEmail" class="admin-input" required
+                   autocomplete="off" spellcheck="false" placeholder="name@example.com">
+            <button class="btn" type="submit" style="margin-top:8px;">Add</button>
+          </form>
+          <p id="staffAddMsg" style="font-size:.84rem; margin-top:10px; display:none;"></p>
+
+          <div style="border-top:1px solid var(--line); margin-top:28px; padding-top:16px;">
+            <p style="font-size:.82rem; color:var(--muted);">
+              <strong>Built-in accounts</strong> are written into the database security rules. They are the
+              recovery path if this list is ever emptied by mistake, so they cannot be removed from here.
+              To change them, edit the rules in the Firebase console.
+            </p>
+          </div>
         </div>
 
         <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
