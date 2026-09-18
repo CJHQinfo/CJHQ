@@ -853,6 +853,15 @@
   .tp-btnwrap{text-align:center;}
   .tp-promo .btn{min-height:44px;}
   @media(max-width:600px){ .tp-tile{padding:20px 18px;} }
+  /* Admin page preview. Borrowed from the real page's typography so what the
+     editor sees is what the visitor gets, inside an obvious frame so it is
+     never mistaken for the page itself. */
+  .ctc-page-preview{border:1px dashed var(--line); border-radius:var(--radius); background:var(--paper);
+    padding:22px 24px; max-height:460px; overflow-y:auto;}
+  .ctc-page-preview h1{font-size:clamp(1.4rem,3vw,1.9rem); margin:0 0 14px;}
+  .ctc-page-preview #customPagePreviewBody{font-size:1.02rem; line-height:1.7; color:var(--ink-soft);}
+  .ctc-page-preview #customPagePreviewBody p{margin:0 0 12px;}
+  .ctc-page-preview .tp-preview-empty{color:var(--muted); font-style:italic;}
   .ctc-custom-dir{margin-top:14px; padding-top:4px;}
   /* Country picker. Built from the page's own markup - no third-party widget,
      no CDN and no request - and it still reads as a labelled text field to a
@@ -3080,6 +3089,25 @@ function cjhqPageLifecycle(p, today){
 }
 function cjhqPageIsPublic(p){ return cjhqPageLifecycle(p) === 'live'; }
 
+/* A page body is either HTML or plain text, chosen per page in the admin.
+
+   HTML goes through DOMPurify exactly as it always has. Plain text is ESCAPED
+   first and then given its paragraphs back, so a body pasted out of an email or
+   a Word document keeps its shape instead of collapsing into one block - and a
+   stray < or & in it is shown as typed rather than swallowed as markup.
+
+   Anything saved before the switch existed has no body_format and is treated as
+   HTML, which is what it was. */
+function cjhqRenderPageBody(body, format){
+  const raw = String(body == null ? '' : body);
+  if(format !== 'text') return cjhqSanitizeHtml(raw);
+  return raw.replace(/\r\n?/g, '\n').split(/\n{2,}/)
+    .map(block => block.trim())
+    .filter(Boolean)
+    .map(block => '<p>' + cjhqEscapeHtml(block).replace(/\n/g, '<br>') + '</p>')
+    .join('');
+}
+
 /* The last instant of `endDate` in Montreal, as epoch milliseconds. No end
    date means a sentinel far enough out to mean "never expires". Montreal is
    UTC-5 in winter and UTC-4 in summer, so the offset is read from the date
@@ -3843,9 +3871,9 @@ function goPage(name, opts){
   if(custom){
     document.getElementById('customPageTitle').innerHTML =
       `<span data-en>${cjhqEscapeHtml(custom.title_en)}</span><span data-fr>${cjhqEscapeHtml(custom.title_fr)}</span>`;
-    const sanitize = cjhqSanitizeHtml;
     document.getElementById('customPageBody').innerHTML =
-      `<div data-en>${sanitize(custom.body_en)}</div><div data-fr>${sanitize(custom.body_fr)}</div>`;
+      `<div data-en>${cjhqRenderPageBody(custom.body_en, custom.body_format)}</div>` +
+      `<div data-fr>${cjhqRenderPageBody(custom.body_fr, custom.body_format)}</div>`;
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-custom').classList.add('active');
     highlightActiveNav(name);
@@ -9250,7 +9278,7 @@ async function renderCustomPagesList(){
     <div class="card admin-row" style="${live ? '' : 'opacity:.62;'}">
       <div>
         <p style="margin:0; font-weight:600;">${p.title_en} ${cjhqPageStatusPill(state)}${p.show_in_nav ? ' <span class="pill" style="font-size:.65rem;">in nav</span>' : ''}${live && p.show_on_home ? ' <span class="pill" style="font-size:.65rem;">on homepage</span>' : ''}</p>
-        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">#${p.slug} &middot; ${cjhqPageWindowLabel(p)}</p>
+        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">${cjhqPageAddressLine(p, state)} &middot; ${cjhqPageWindowLabel(p)}</p>
       </div>
       <div style="display:flex; gap:6px; flex-shrink:0;">
         <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.slug}'), '_blank')">View</button>
@@ -9299,6 +9327,18 @@ function cjhqPageStatusPill(state){
   const m = CJHQ_PAGE_STATUS[state] || CJHQ_PAGE_STATUS.draft;
   return `<span class="pill" style="font-size:.65rem; background:${m.colour}; color:#fff;">${m.label}</span>`;
 }
+/* While a page is live its real address is worth showing in full, so it can be
+   copied into an email or a WhatsApp message without anyone having to assemble
+   it. While it is not live there is no address to give out, and saying so is
+   more useful than printing a link that answers 404. */
+function cjhqPageAddressLine(p, state){
+  const url = location.origin + pathForPage(p.slug);
+  if(state === 'live'){
+    return `<a href="${cjhqEscapeHtml(url)}" target="_blank" rel="noopener">${cjhqEscapeHtml(url)}</a>`;
+  }
+  const why = { draft:'not published', scheduled:'not public yet', expired:'no longer public' }[state] || '';
+  return `<span style="text-decoration:line-through;">${cjhqEscapeHtml(url)}</span> <em>(${why})</em>`;
+}
 function cjhqPageWindowLabel(p){
   const from = String(p.start_date || '').trim(), to = String(p.end_date || '').trim();
   if(from && to) return from + ' to ' + to;
@@ -9337,6 +9377,12 @@ function editCustomPage(slug){
   document.getElementById('customPageTitleFr').value = p.title_fr || '';
   document.getElementById('customPageBodyEn').value = p.body_en || '';
   document.getElementById('customPageBodyFr').value = p.body_fr || '';
+  // No body_format means the page predates the switch, and what it holds is
+  // HTML - which is what it was always rendered as.
+  const isText = p.body_format === 'text';
+  document.getElementById('customPageFormatText').checked = isText;
+  document.getElementById('customPageFormatHtml').checked = !isText;
+  if(window.updateCustomPageFormatHint) updateCustomPageFormatHint();
   document.getElementById('customPageShowNav').checked = !!p.show_in_nav;
   document.getElementById('customPageNavLabelFields').style.display = p.show_in_nav ? 'block' : 'none';
   document.getElementById('customPageNavEn').value = p.nav_en || '';
@@ -9355,6 +9401,8 @@ function editCustomPage(slug){
   document.getElementById('customPageHomeBlurbEn').value = p.home_blurb_en || '';
   document.getElementById('customPageHomeBlurbFr').value = p.home_blurb_fr || '';
   updateCustomPageStatusPreview();
+  if(window.syncHomeCtaPlaceholders) syncHomeCtaPlaceholders();
+  if(window.renderCustomPagePreview) renderCustomPagePreview();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function deleteCustomPage(slug){
@@ -10274,7 +10322,117 @@ async function publishChangeNotice(slug){
     document.getElementById('customPageNavLabelFields').style.display = 'none';
     document.getElementById('customPageHomeFields').style.display = 'none';
     updateCustomPageStatusPreview();
+    if(window.renderCustomPagePreview) renderCustomPagePreview();
   });
+  /* The switcher only changes how the body is rendered - it never rewrites what
+     was typed, so flipping it back and forth is safe and reversible. */
+  function updateCustomPageFormatHint(){
+    const hint = document.getElementById('customPageFormatHint');
+    if(!hint) return;
+    const isText = document.getElementById('customPageFormatText').checked;
+    hint.textContent = isText
+      ? 'Typed exactly as written. Blank lines start a new paragraph; tags are shown, not applied.'
+      : 'Tags like <p>, <strong> and <a> are applied. Anything unsafe is stripped when the page is shown.';
+  }
+  window.updateCustomPageFormatHint = updateCustomPageFormatHint;
+  ['customPageFormatHtml','customPageFormatText'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', updateCustomPageFormatHint);
+  });
+  updateCustomPageFormatHint();
+
+  /* Read an .html or .txt file straight into the box. The file is read in the
+     browser and never uploaded anywhere; it just saves pasting. Choosing an
+     .html file also flips the switch to HTML, which is almost always what was
+     meant by opening one. */
+  [['En','customPageBodyEn'], ['Fr','customPageBodyFr']].forEach(([side, target])=>{
+    const btn   = document.getElementById('customPageFile' + side + 'Btn');
+    const input = document.getElementById('customPageFile' + side);
+    const name  = document.getElementById('customPageFile' + side + 'Name');
+    if(!btn || !input) return;
+    btn.addEventListener('click', ()=> input.click());
+    input.addEventListener('change', ()=>{
+      const file = input.files && input.files[0];
+      if(!file) return;
+      if(file.size > 512 * 1024){
+        alert('That file is larger than 512 KB. Page bodies are stored in the database and downloaded by every visitor, so please trim it first.');
+        input.value = ''; return;
+      }
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        document.getElementById(target).value = String(reader.result || '');
+        if(/\.html?$/i.test(file.name)){
+          document.getElementById('customPageFormatHtml').checked = true;
+          updateCustomPageFormatHint();
+        }
+        if(name) name.textContent = 'Loaded ' + file.name;
+        renderCustomPagePreview();
+        input.value = '';
+      };
+      reader.onerror = ()=>{ alert('Could not read that file.'); input.value = ''; };
+      reader.readAsText(file);
+    });
+  });
+
+  /* The homepage button says the page title unless something else is typed.
+     Showing the title as the placeholder makes that visible instead of
+     implied - the field stays empty and fully editable. */
+  function syncHomeCtaPlaceholders(){
+    const t = { En: document.getElementById('customPageTitleEn'),
+                Fr: document.getElementById('customPageTitleFr') };
+    ['En','Fr'].forEach(side=>{
+      const cta = document.getElementById('customPageHomeCta' + side);
+      if(cta && t[side]) cta.placeholder = t[side].value.trim() || 'Uses the page title';
+    });
+  }
+  window.syncHomeCtaPlaceholders = syncHomeCtaPlaceholders;
+  ['customPageTitleEn','customPageTitleFr'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', syncHomeCtaPlaceholders);
+  });
+  syncHomeCtaPlaceholders();
+
+  /* The preview runs the body through cjhqRenderPageBody() - the very function
+     the public page uses - so it cannot drift from what a visitor sees. That
+     includes the sanitiser: markup stripped here is markup that would have been
+     stripped there. */
+  let previewLang = 'en';
+  function renderCustomPagePreview(){
+    const host  = document.getElementById('customPagePreviewBody');
+    const title = document.getElementById('customPagePreviewTitle');
+    if(!host || !title) return;
+    const fr = previewLang === 'fr';
+    const t = (document.getElementById(fr ? 'customPageTitleFr' : 'customPageTitleEn') || {}).value || '';
+    const b = (document.getElementById(fr ? 'customPageBodyFr'  : 'customPageBodyEn')  || {}).value || '';
+    const fmt = document.getElementById('customPageFormatText').checked ? 'text' : 'html';
+    title.textContent = t || (fr ? 'Titre de la page' : 'Page title');
+    title.style.opacity = t ? '1' : '.45';
+    host.innerHTML = b.trim()
+      ? cjhqRenderPageBody(b, fmt)
+      : `<p class="tp-preview-empty">${fr ? 'Le contenu apparaîtra ici.' : 'Content will appear here.'}</p>`;
+  }
+  window.renderCustomPagePreview = renderCustomPagePreview;
+  function setPreviewLang(lang){
+    previewLang = lang;
+    const en = document.getElementById('customPagePreviewEnBtn');
+    const frb = document.getElementById('customPagePreviewFrBtn');
+    if(en)  en.setAttribute('aria-pressed', String(lang === 'en'));
+    if(frb) frb.setAttribute('aria-pressed', String(lang === 'fr'));
+    renderCustomPagePreview();
+  }
+  const enBtn = document.getElementById('customPagePreviewEnBtn');
+  const frBtn = document.getElementById('customPagePreviewFrBtn');
+  if(enBtn) enBtn.addEventListener('click', ()=> setPreviewLang('en'));
+  if(frBtn) frBtn.addEventListener('click', ()=> setPreviewLang('fr'));
+  // Debounced: re-sanitising on every keystroke of a long body is wasted work.
+  let previewTimer = null;
+  const schedulePreview = ()=>{ clearTimeout(previewTimer); previewTimer = setTimeout(renderCustomPagePreview, 180); };
+  ['customPageTitleEn','customPageTitleFr','customPageBodyEn','customPageBodyFr']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.addEventListener('input', schedulePreview); });
+  ['customPageFormatHtml','customPageFormatText']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.addEventListener('change', renderCustomPagePreview); });
+  renderCustomPagePreview();
+
   const backfillBtn = document.getElementById('customPageBackfillBtn');
   if(backfillBtn) backfillBtn.addEventListener('click', backfillCustomPageLifecycle);
   document.getElementById('customPageShowHome').addEventListener('change', (e)=>{
@@ -10301,6 +10459,7 @@ async function publishChangeNotice(slug){
       title_fr: document.getElementById('customPageTitleFr').value,
       body_en: document.getElementById('customPageBodyEn').value,
       body_fr: document.getElementById('customPageBodyFr').value,
+      body_format: document.getElementById('customPageFormatText').checked ? 'text' : 'html',
       show_in_nav: document.getElementById('customPageShowNav').checked,
       nav_en: document.getElementById('customPageNavEn').value,
       nav_fr: document.getElementById('customPageNavFr').value,
