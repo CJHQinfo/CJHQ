@@ -840,6 +840,19 @@
   .ctc-hint{font-size:.86rem; color:var(--muted); margin-top:10px;}
   .ctc-back{margin-bottom:22px; padding:9px 16px; font-size:.9rem;}
   .ctc-flag-blank{border-style:dashed;}
+  /* Homepage promotion for a temporary page. One of two shapes - a full tile
+     or a single button - chosen per page in the admin. Hidden entirely unless
+     a page is live today AND asked to be promoted. */
+  .tp-promo{padding-top:44px; padding-bottom:44px;}
+  .tp-promo[hidden]{display:none;}
+  .tp-tile{max-width:720px; margin:0 auto; padding:26px 28px; border:1px solid var(--line);
+    border-left:4px solid var(--bronze); border-radius:var(--radius); background:var(--paper);
+    box-shadow:0 6px 22px rgba(0,0,0,.05);}
+  .tp-tile h2{margin:0 0 8px; font-size:clamp(1.25rem,2.4vw,1.55rem);}
+  .tp-tile p{margin:0 0 16px; color:var(--muted); font-size:.98rem;}
+  .tp-btnwrap{text-align:center;}
+  .tp-promo .btn{min-height:44px;}
+  @media(max-width:600px){ .tp-tile{padding:20px 18px;} }
   .ctc-custom-dir{margin-top:14px; padding-top:4px;}
   /* Country picker. Built from the page's own markup - no third-party widget,
      no CDN and no request - and it still reads as a labelled text field to a
@@ -1127,6 +1140,10 @@
       </p>
     </div>
   </section>
+
+  <!-- Filled by renderHomePromo() only when a temporary page is live today and
+       set to be promoted. Empty and hidden otherwise, so it costs nothing. -->
+  <section class="tp-promo" id="homeTempPromo" hidden></section>
 
   <section class="alt" style="padding-top:64px; padding-bottom:80px;">
     <div class="section-inner" style="text-align:center;">
@@ -2289,6 +2306,7 @@
       </div>
     </div>
   </section>
+</div>
 
 
 <!-- ============ CUSTOM PAGE (admin-created, generic container) ============ -->
@@ -3020,6 +3038,73 @@ function cjhqSafeUrl(u){
 }
 let HIDDEN_PAGES_CACHE = {};
 let CUSTOM_PAGES_CACHE = {};
+// Only the pages a visitor may see today. Everything public reads this one;
+// CUSTOM_PAGES_CACHE keeps every page because the admin has to manage the ones
+// that are expired or not yet started.
+let CUSTOM_PAGES_PUBLIC = {};
+
+/* ---------- Temporary-page lifecycle ----------
+   Start and End govern the whole public life of a page, not just whether it is
+   promoted on the homepage: outside the window the page is not routable, not in
+   the nav, and not reachable by its own URL.
+
+   Dates are plain YYYY-MM-DD and are compared as strings, which sorts correctly
+   for that format and avoids every timezone trap that Date parsing brings. The
+   day is Montreal's, not the visitor's - a page that ends October 5 ends at the
+   close of October 5 here, whether the reader is in Montreal or Melbourne. */
+function cjhqMontrealToday(){
+  try{
+    return new Intl.DateTimeFormat('en-CA', { timeZone:'America/Toronto',
+      year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+  }catch(e){
+    return new Date().toISOString().slice(0,10);   // last resort, UTC
+  }
+}
+// Test seam. Nothing in the product sets this; the date suite does, so the
+// boundary days can be checked without waiting for them to arrive.
+function cjhqToday(){ return window.__cjhqTodayOverride || cjhqMontrealToday(); }
+
+/* draft | scheduled | live | expired - the four states the admin shows. */
+function cjhqPageLifecycle(p, today){
+  if(!p) return 'expired';
+  today = today || cjhqToday();
+  // A page saved before this feature existed has no `published` field and was
+  // public simply by existing, so absent means published. Only an explicit
+  // false is a draft.
+  if(p.published === false) return 'draft';
+  const from = String(p.start_date || '').trim();
+  const to   = String(p.end_date   || '').trim();
+  if(from && today < from) return 'scheduled';
+  if(to   && today > to)   return 'expired';   // inclusive: ends AFTER `to`
+  return 'live';
+}
+function cjhqPageIsPublic(p){ return cjhqPageLifecycle(p) === 'live'; }
+
+/* The last instant of `endDate` in Montreal, as epoch milliseconds. No end
+   date means a sentinel far enough out to mean "never expires". Montreal is
+   UTC-5 in winter and UTC-4 in summer, so the offset is read from the date
+   itself rather than assumed - an hour's error here would expire a page early
+   or late on its final day. */
+const CJHQ_NO_EXPIRY_MS = 253402300799000;   // 9999-12-31T23:59:59Z
+function cjhqEndOfDayMs(endDate){
+  const d = String(endDate || '').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return CJHQ_NO_EXPIRY_MS;
+  // Midnight UTC on the day AFTER, then step back by Montreal's offset on that
+  // day and by a millisecond, giving 23:59:59.999 local time.
+  const nextUtc = Date.parse(d + 'T00:00:00Z') + 86400000;
+  const offsetMin = cjhqMontrealOffsetMinutes(new Date(nextUtc));
+  return nextUtc + offsetMin * 60000 - 1;
+}
+function cjhqMontrealOffsetMinutes(when){
+  try{
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone:'America/Toronto',
+      hour12:false, year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit' }).formatToParts(when);
+    const g = t => Number(parts.find(p => p.type === t).value);
+    const asUtc = Date.UTC(g('year'), g('month') - 1, g('day'), g('hour') % 24, g('minute'), g('second'));
+    return Math.round((when.getTime() - asUtc) / 60000);   // +240 or +300
+  }catch(e){ return 300; }
+}
 let PENDING_NOTICES = {};
 async function enhanceResourceMetaFromBackend(){
   const overrides = await fetchCollection('reviewed_overrides');
@@ -3751,8 +3836,10 @@ function goPage(name, opts){
     else { updatePageMeta(name); trackPageView(); }
     return;
   }
-  // Not a built-in page -> check custom pages
-  const custom = CUSTOM_PAGES_CACHE[name];
+  // Not a built-in page -> check custom pages. PUBLIC, not the full cache: a
+  // draft, a page whose start date has not arrived, and an expired page all
+  // fall through to the 404 below, including when the URL is typed directly.
+  const custom = CUSTOM_PAGES_PUBLIC[name];
   if(custom){
     document.getElementById('customPageTitle').innerHTML =
       `<span data-en>${cjhqEscapeHtml(custom.title_en)}</span><span data-fr>${cjhqEscapeHtml(custom.title_fr)}</span>`;
@@ -6802,10 +6889,22 @@ function askMatchResources(question, limit){
   (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
     (cat.groups || []).forEach(g=>{
       (g.items || []).forEach(it=>{
+        // Every English body field is joined by its French twin, the same way
+        // askQuestionBreadth's bodyOf() already does it. The titles were made
+        // bilingual earlier; the bodies were not, so a French question could
+        // only ever match a title and almost always fell below the relevance
+        // threshold - "Ou faire une photo pour mon passeport" reached none of
+        // the French text that answers it. No field is removed, none is
+        // reordered, and nothing about scoring or the thresholds changes.
         const hay = cjhqNormalizeSearch([
-          it.en, it.fr, it.what_en, it.need_en, it.steps_en,
-          it.question_en, it.answer_en, (it.tips_list_en || []).join(' '),
-          cat.en, g.heading_en || ''
+          it.en, it.fr,
+          it.what_en, it.what_fr,
+          it.need_en, it.need_fr,
+          it.steps_en, it.steps_fr,
+          it.question_en, it.question_fr,
+          it.answer_en, it.answer_fr,
+          (it.tips_list_en || []).join(' '), (it.tips_list_fr || []).join(' '),
+          cat.en, cat.fr, g.heading_en || '', g.heading_fr || ''
         ].filter(Boolean).join(' ').toLowerCase());
         // Both titles count. Previously only the English title did, so a French
         // question ("Ou puis-je demander un passeport?") scored a single body hit
@@ -9129,22 +9228,104 @@ async function toggleBuiltInPageHidden(pageId){
 
 /* ---------- Admin panel: Custom Pages ---------- */
 async function renderCustomPagesList(){
+  // Staff see every page, whatever its state - that is the point of the
+  // Expired badge. Only the public split is filtered.
   const pages = await fetchCollection('custom_pages');
   CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
   const list = document.getElementById('customPagesList');
+  const stale = pages.filter(cjhqPageNeedsBackfill);
+  const bar = document.getElementById('customPageBackfillBar');
+  if(bar){
+    bar.style.display = stale.length ? 'block' : 'none';
+    const msg = document.getElementById('customPageBackfillMsg');
+    if(msg) msg.textContent = stale.length +
+      ' page(s) were created before start and end dates existed and will not appear on the website until they are updated: ' +
+      stale.map(p => '#' + p.slug).join(', ') + '.';
+  }
   if(!pages.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No custom pages added yet.</p>`; return; }
-  list.innerHTML = pages.map(p => `
-    <div class="card admin-row">
+  list.innerHTML = pages.map(p => {
+    const state = cjhqPageLifecycle(p);
+    const live = state === 'live';
+    return `
+    <div class="card admin-row" style="${live ? '' : 'opacity:.62;'}">
       <div>
-        <p style="margin:0; font-weight:600;">${p.title_en}${p.show_in_nav ? ' <span class="pill" style="font-size:.65rem;">in nav</span>' : ''}</p>
-        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">#${p.slug}</p>
+        <p style="margin:0; font-weight:600;">${p.title_en} ${cjhqPageStatusPill(state)}${p.show_in_nav ? ' <span class="pill" style="font-size:.65rem;">in nav</span>' : ''}${live && p.show_on_home ? ' <span class="pill" style="font-size:.65rem;">on homepage</span>' : ''}</p>
+        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">#${p.slug} &middot; ${cjhqPageWindowLabel(p)}</p>
       </div>
       <div style="display:flex; gap:6px; flex-shrink:0;">
         <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.slug}'), '_blank')">View</button>
         <button class="admin-small-btn" onclick="editCustomPage('${p.slug}')">Edit</button>
         <button class="admin-small-btn" style="color:#A23B3B;" onclick="deleteCustomPage('${p.slug}')">Delete</button>
       </div>
-    </div>`).join('');
+    </div>`; }).join('');
+}
+
+/* Pages created before the lifecycle existed carry none of its fields. They
+   cannot satisfy the public query, so they need one write to bring them in
+   line. It is offered as a button rather than done silently: it changes stored
+   data, and the editor should know it happened. Defaults preserve exactly what
+   those pages did before - published, no dates, not promoted. */
+function cjhqPageNeedsBackfill(p){ return typeof p.public_until_ms !== 'number'; }
+
+async function backfillCustomPageLifecycle(){
+  const stale = Object.values(CUSTOM_PAGES_CACHE).filter(cjhqPageNeedsBackfill);
+  if(!stale.length) return;
+  if(!confirm('Update ' + stale.length + ' existing page(s) so they work with start and end dates?\n\n' +
+              'They stay exactly as they are now: published, with no dates and not on the homepage.')) return;
+  for(const p of stale){
+    await saveToCollection('custom_pages', Object.assign({}, p, {
+      id: p.slug,
+      published: p.published !== false,
+      start_date: p.start_date || '',
+      end_date: p.end_date || '',
+      show_on_home: !!p.show_on_home,
+      home_style: p.home_style || 'tile',
+      public_until_ms: cjhqEndOfDayMs(p.end_date)
+    }));
+  }
+  await enhancePagesFromBackend();
+  renderCustomPagesList();
+  alert('Updated ' + stale.length + ' page(s).');
+}
+
+/* The four states, said plainly and coloured the same way everywhere. */
+const CJHQ_PAGE_STATUS = {
+  draft:     { label:'Draft',     colour:'#6B7280', note:'Not published. Nobody but you can see it.' },
+  scheduled: { label:'Scheduled', colour:'#8A6D1F', note:'Published, but its start date has not arrived.' },
+  live:      { label:'Live',      colour:'#2E7D32', note:'Public right now.' },
+  expired:   { label:'Expired',   colour:'#A23B3B', note:'Past its end date. Removed from the website, still editable here.' }
+};
+function cjhqPageStatusPill(state){
+  const m = CJHQ_PAGE_STATUS[state] || CJHQ_PAGE_STATUS.draft;
+  return `<span class="pill" style="font-size:.65rem; background:${m.colour}; color:#fff;">${m.label}</span>`;
+}
+function cjhqPageWindowLabel(p){
+  const from = String(p.start_date || '').trim(), to = String(p.end_date || '').trim();
+  if(from && to) return from + ' to ' + to;
+  if(from) return 'from ' + from + ', no end date';
+  if(to)   return 'until ' + to;
+  return 'no start or end date';
+}
+/* Live preview under the date fields, so the editor sees the consequence of
+   what they typed before they save it. */
+function updateCustomPageStatusPreview(){
+  const el = document.getElementById('customPageStatusPreview');
+  if(!el) return;
+  const pub = document.getElementById('customPagePublished');
+  const draft = {
+    published: pub ? pub.checked : true,
+    start_date: (document.getElementById('customPageStart')||{}).value || '',
+    end_date: (document.getElementById('customPageEnd')||{}).value || ''
+  };
+  if(draft.start_date && draft.end_date && draft.end_date < draft.start_date){
+    el.innerHTML = `<span style="color:#A23B3B; font-weight:600;">End Date is before Start Date</span>
+      <span style="color:var(--muted);"> — the page would never be public.</span>`;
+    return;
+  }
+  const state = cjhqPageLifecycle(draft);
+  const m = CJHQ_PAGE_STATUS[state];
+  el.innerHTML = `Status if saved now: ${cjhqPageStatusPill(state)}
+    <span style="color:var(--muted);"> ${m.note} (${cjhqPageWindowLabel(draft)})</span>`;
 }
 function editCustomPage(slug){
   const p = CUSTOM_PAGES_CACHE[slug];
@@ -9160,6 +9341,20 @@ function editCustomPage(slug){
   document.getElementById('customPageNavLabelFields').style.display = p.show_in_nav ? 'block' : 'none';
   document.getElementById('customPageNavEn').value = p.nav_en || '';
   document.getElementById('customPageNavFr').value = p.nav_fr || '';
+  // A page saved before this feature existed has no `published` field and was
+  // public by existing, so it loads as published rather than silently becoming
+  // a draft the first time someone opens it.
+  document.getElementById('customPagePublished').checked = p.published !== false;
+  document.getElementById('customPageStart').value = p.start_date || '';
+  document.getElementById('customPageEnd').value = p.end_date || '';
+  document.getElementById('customPageShowHome').checked = !!p.show_on_home;
+  document.getElementById('customPageHomeFields').style.display = p.show_on_home ? 'block' : 'none';
+  document.getElementById('customPageHomeStyle').value = p.home_style || 'tile';
+  document.getElementById('customPageHomeCtaEn').value = p.home_cta_en || '';
+  document.getElementById('customPageHomeCtaFr').value = p.home_cta_fr || '';
+  document.getElementById('customPageHomeBlurbEn').value = p.home_blurb_en || '';
+  document.getElementById('customPageHomeBlurbFr').value = p.home_blurb_fr || '';
+  updateCustomPageStatusPreview();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function deleteCustomPage(slug){
@@ -9171,12 +9366,84 @@ async function deleteCustomPage(slug){
 }
 
 /* ---------- Public-facing: apply page settings + custom pages ---------- */
+/* Security rules are not filters: a list query fails outright if any document
+   it returns breaks the rule. So the public read asks for precisely the set the
+   rules permit - published, and not past its end - and the rules refuse
+   anything else. A visitor never receives an expired page's body at all, not
+   merely a page they are not shown.
+
+   Staff read the collection unconstrained, which the rules allow them to do.
+   A page saved before this feature existed has no public_until_ms and cannot
+   satisfy the query, so the admin offers a one-time backfill and flags any page
+   that still needs it. */
+async function fetchPublicCustomPages(){
+  if(!firebaseReady) return Object.values(CUSTOM_PAGES_CACHE);
+  const fs = window.__fbFirestore;
+  try{
+    const q = fs.query(fs.collection(fbDb, 'custom_pages'),
+      fs.where('published', '==', true),
+      fs.where('public_until_ms', '>=', Date.now()));
+    const snap = await fs.getDocs(q);
+    return snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  }catch(e){
+    // A missing composite index or a rules change would otherwise take the
+    // whole site's routing down with it. Fail closed on custom pages only.
+    console.warn('Custom pages unavailable:', e);
+    return [];
+  }
+}
+
 async function enhancePagesFromBackend(){
   const hidden = await fetchCollection('page_settings');
   HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
-  const pages = await fetchCollection('custom_pages');
+  const pages = adminUser ? await fetchCollection('custom_pages') : await fetchPublicCustomPages();
   CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
+  // The public split is computed here, once, and every public surface reads it.
+  // The Firestore rules also refuse to serve a non-live page to a visitor, so
+  // this is the second of two gates rather than the only one.
+  CUSTOM_PAGES_PUBLIC = Object.fromEntries(
+    Object.values(CUSTOM_PAGES_CACHE).filter(cjhqPageIsPublic).map(p => [p.slug, p]));
   refreshNav();
+  renderHomePromo();
+}
+
+/* ---------- Homepage promotion ----------
+   A temporary page appears on the homepage only when it is published, inside
+   its dates, and has asked to be promoted. If several qualify, the one ending
+   soonest goes first - it is the one with the least time left to be seen. */
+function renderHomePromo(){
+  const host = document.getElementById('homeTempPromo');
+  if(!host) return;
+  const promoted = Object.values(CUSTOM_PAGES_PUBLIC)
+    .filter(p => p.show_on_home)
+    .sort((a,b) => String(a.end_date||'9999-12-31').localeCompare(String(b.end_date||'9999-12-31')));
+  if(!promoted.length){ host.innerHTML = ''; host.hidden = true; return; }
+  const esc = cjhqEscapeHtml;
+  const pair = (en, fr) => `<span data-en>${esc(en||'')}</span><span data-fr>${esc(fr||en||'')}</span>`;
+  host.innerHTML = promoted.map(p => {
+    const href = SITE_BASE_PATH + '/' + p.slug;
+    const label = pair(p.home_cta_en || p.title_en, p.home_cta_fr || p.title_fr);
+    if(p.home_style === 'button'){
+      return `<div class="section-inner tp-btnwrap">
+        <a class="btn dark" href="${esc(href)}" data-temp-page="${esc(p.slug)}">${label}</a>
+      </div>`;
+    }
+    return `<div class="section-inner"><div class="tp-tile">
+      <h2>${pair(p.title_en, p.title_fr)}</h2>
+      ${(p.home_blurb_en || p.home_blurb_fr) ? `<p>${pair(p.home_blurb_en, p.home_blurb_fr)}</p>` : ''}
+      <a class="btn dark" href="${esc(href)}" data-temp-page="${esc(p.slug)}">${label}</a>
+    </div></div>`;
+  }).join('');
+  host.hidden = false;
+  // Route through the SPA rather than reloading, but leave modified clicks and
+  // middle-clicks alone so "open in new tab" still works.
+  host.querySelectorAll('a[data-temp-page]').forEach(a => {
+    a.addEventListener('click', (e)=>{
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      goPage(a.dataset.tempPage);
+    });
+  });
 }
 function refreshNav(){
   const nav = document.getElementById('mainNav');
@@ -9198,7 +9465,7 @@ function refreshNav(){
   // Remove previously-injected custom nav buttons, then re-add current ones
   nav.querySelectorAll('button[data-custom-nav]').forEach(b => b.remove());
   if(drawerNav) drawerNav.querySelectorAll('a[data-custom-nav]').forEach(a => a.remove());
-  Object.values(CUSTOM_PAGES_CACHE).filter(p => p.show_in_nav).forEach(p => {
+  Object.values(CUSTOM_PAGES_PUBLIC).filter(p => p.show_in_nav).forEach(p => {
     const btn = document.createElement('button');
     btn.dataset.customNav = '1';
     btn.dataset.page = p.slug;
@@ -10005,7 +10272,20 @@ async function publishChangeNotice(slug){
     document.getElementById('customPageId').value = '';
     document.getElementById('customPageSlug').disabled = false;
     document.getElementById('customPageNavLabelFields').style.display = 'none';
+    document.getElementById('customPageHomeFields').style.display = 'none';
+    updateCustomPageStatusPreview();
   });
+  const backfillBtn = document.getElementById('customPageBackfillBtn');
+  if(backfillBtn) backfillBtn.addEventListener('click', backfillCustomPageLifecycle);
+  document.getElementById('customPageShowHome').addEventListener('change', (e)=>{
+    document.getElementById('customPageHomeFields').style.display = e.target.checked ? 'block' : 'none';
+  });
+  // Tells the editor, before they save, exactly what the public will get.
+  ['customPagePublished','customPageStart','customPageEnd'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', updateCustomPageStatusPreview);
+  });
+  updateCustomPageStatusPreview();
   document.getElementById('customPageForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const isEdit = !!document.getElementById('customPageId').value;
@@ -10024,7 +10304,28 @@ async function publishChangeNotice(slug){
       show_in_nav: document.getElementById('customPageShowNav').checked,
       nav_en: document.getElementById('customPageNavEn').value,
       nav_fr: document.getElementById('customPageNavFr').value,
+      published: document.getElementById('customPagePublished').checked,
+      start_date: document.getElementById('customPageStart').value || '',
+      end_date: document.getElementById('customPageEnd').value || '',
+      show_on_home: document.getElementById('customPageShowHome').checked,
+      home_style: document.getElementById('customPageHomeStyle').value || 'tile',
+      home_cta_en: document.getElementById('customPageHomeCtaEn').value,
+      home_cta_fr: document.getElementById('customPageHomeCtaFr').value,
+      home_blurb_en: document.getElementById('customPageHomeBlurbEn').value,
+      home_blurb_fr: document.getElementById('customPageHomeBlurbFr').value,
     };
+    // Firestore rules cannot read a YYYY-MM-DD string as a date, and security
+    // rules are not filters - a list query fails outright if ANY returned
+    // document breaks the rule. So the end of the window is also stored as a
+    // number the rules and the public query can both use, and the public query
+    // asks for exactly what the rules allow.
+    page.public_until_ms = cjhqEndOfDayMs(page.end_date);
+    // An end date before the start date would make the page permanently
+    // unreachable without ever saying so.
+    if(page.start_date && page.end_date && page.end_date < page.start_date){
+      alert('The End Date is before the Start Date, so the page would never be public. Please correct the dates.');
+      return;
+    }
     await saveToCollection('custom_pages', page);
     await enhancePagesFromBackend();
     document.getElementById('customPageForm').reset();
