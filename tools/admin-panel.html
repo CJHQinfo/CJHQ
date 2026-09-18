@@ -79,6 +79,50 @@
               <label class="admin-label">Nav Menu Label — French</label>
               <input type="text" id="customPageNavFr" class="admin-input">
             </div>
+
+            <hr style="margin:18px 0; border:none; border-top:1px solid var(--line);">
+            <h3 style="font-size:.95rem; margin:0 0 4px;">When the page is public</h3>
+            <p style="font-size:.84rem; color:var(--muted); margin:0 0 12px;">
+              These dates control the whole public life of the page, not just the homepage.
+              Outside them the page is not reachable at all — not by its address, not from the
+              menu, not from the homepage. It stays here for you to edit either way.
+              <strong>For a temporary page, set both dates.</strong> Leave a date blank only if
+              you really mean "no limit" on that end.
+            </p>
+            <label style="display:flex; align-items:center; gap:8px; font-size:.88rem;">
+              <input type="checkbox" id="customPagePublished" checked> Published
+            </label>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
+              <div style="flex:1 1 200px;">
+                <label class="admin-label">Start Date (first day it is public)</label>
+                <input type="date" id="customPageStart" class="admin-input">
+              </div>
+              <div style="flex:1 1 200px;">
+                <label class="admin-label">End Date (last day it is public)</label>
+                <input type="date" id="customPageEnd" class="admin-input">
+              </div>
+            </div>
+            <p id="customPageStatusPreview" style="font-size:.84rem; margin:10px 0 0;"></p>
+
+            <h3 style="font-size:.95rem; margin:18px 0 4px;">Homepage</h3>
+            <label style="display:flex; align-items:center; gap:8px; font-size:.88rem;">
+              <input type="checkbox" id="customPageShowHome"> Display on homepage while the page is live
+            </label>
+            <div id="customPageHomeFields" style="display:none; margin-top:10px;">
+              <label class="admin-label">How it appears</label>
+              <select id="customPageHomeStyle" class="admin-input">
+                <option value="tile">Tile — title, short text and a button</option>
+                <option value="button">Button — a single button, nothing else</option>
+              </select>
+              <label class="admin-label">Button Label — English (optional, defaults to the title)</label>
+              <input type="text" id="customPageHomeCtaEn" class="admin-input">
+              <label class="admin-label">Button Label — French</label>
+              <input type="text" id="customPageHomeCtaFr" class="admin-input">
+              <label class="admin-label">Tile Text — English (optional, tile only)</label>
+              <input type="text" id="customPageHomeBlurbEn" class="admin-input">
+              <label class="admin-label">Tile Text — French</label>
+              <input type="text" id="customPageHomeBlurbFr" class="admin-input">
+            </div>
             <div style="margin-top:14px; display:flex; gap:10px;">
               <button type="submit" class="btn dark" id="customPageSaveBtn">Save Page</button>
               <button type="button" class="btn admin-btn-outline" id="customPageCancelBtn">Cancel Edit</button>
@@ -86,6 +130,12 @@
           </form>
 
           <h3 style="font-size:.95rem;">Pages Added Here</h3>
+          <div id="customPageBackfillBar" style="display:none; margin:0 0 12px; padding:12px 14px;
+               border:1px solid #E0C97F; background:#FDF8E7; border-radius:8px; font-size:.86rem;">
+            <strong>One-time update needed.</strong>
+            <span id="customPageBackfillMsg"></span>
+            <button type="button" class="admin-small-btn" id="customPageBackfillBtn" style="margin-left:8px;">Update now</button>
+          </div>
           <div id="customPagesList"></div>
         </div>
 
