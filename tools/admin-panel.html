@@ -66,10 +66,32 @@
             <input type="text" id="customPageTitleEn" class="admin-input">
             <label class="admin-label">Title — French</label>
             <input type="text" id="customPageTitleFr" class="admin-input">
-            <label class="admin-label">Content — English (basic HTML like &lt;p&gt;, &lt;strong&gt;, &lt;a&gt; is fine)</label>
-            <textarea id="customPageBodyEn" rows="6" class="admin-input"></textarea>
+            <label class="admin-label">Content format</label>
+            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:.88rem;">
+                <input type="radio" name="customPageBodyFormat" id="customPageFormatHtml" value="html" checked> HTML
+              </label>
+              <label style="display:flex; align-items:center; gap:6px; font-size:.88rem;">
+                <input type="radio" name="customPageBodyFormat" id="customPageFormatText" value="text"> Plain text
+              </label>
+              <span id="customPageFormatHint" style="font-size:.8rem; color:var(--muted);"></span>
+            </div>
+
+            <label class="admin-label">Content — English</label>
+            <textarea id="customPageBodyEn" rows="8" class="admin-input"></textarea>
+            <div style="margin:6px 0 12px;">
+              <input type="file" id="customPageFileEn" accept=".html,.htm,.txt,text/html,text/plain" style="display:none;">
+              <button type="button" class="admin-small-btn" id="customPageFileEnBtn">Load from a file…</button>
+              <span id="customPageFileEnName" style="font-size:.8rem; color:var(--muted); margin-left:8px;"></span>
+            </div>
+
             <label class="admin-label">Content — French</label>
-            <textarea id="customPageBodyFr" rows="6" class="admin-input"></textarea>
+            <textarea id="customPageBodyFr" rows="8" class="admin-input"></textarea>
+            <div style="margin:6px 0 4px;">
+              <input type="file" id="customPageFileFr" accept=".html,.htm,.txt,text/html,text/plain" style="display:none;">
+              <button type="button" class="admin-small-btn" id="customPageFileFrBtn">Load from a file…</button>
+              <span id="customPageFileFrName" style="font-size:.8rem; color:var(--muted); margin-left:8px;"></span>
+            </div>
             <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:.88rem;">
               <input type="checkbox" id="customPageShowNav"> Show in main navigation menu
             </label>
@@ -123,6 +145,23 @@
               <label class="admin-label">Tile Text — French</label>
               <input type="text" id="customPageHomeBlurbFr" class="admin-input">
             </div>
+            <hr style="margin:18px 0; border:none; border-top:1px solid var(--line);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <h3 style="font-size:.95rem; margin:0;">Preview</h3>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="admin-small-btn" id="customPagePreviewEnBtn" aria-pressed="true">English</button>
+                <button type="button" class="admin-small-btn" id="customPagePreviewFrBtn" aria-pressed="false">Français</button>
+              </div>
+            </div>
+            <p style="font-size:.82rem; color:var(--muted); margin:6px 0 10px;">
+              Exactly how the page will look to a visitor — the same rendering, the same cleaning of unsafe
+              markup. It updates as you type. Nothing here is saved until you press Save Page.
+            </p>
+            <div id="customPagePreview" class="ctc-page-preview">
+              <h1 id="customPagePreviewTitle"></h1>
+              <div id="customPagePreviewBody"></div>
+            </div>
+
             <div style="margin-top:14px; display:flex; gap:10px;">
               <button type="submit" class="btn dark" id="customPageSaveBtn">Save Page</button>
               <button type="button" class="btn admin-btn-outline" id="customPageCancelBtn">Cancel Edit</button>
