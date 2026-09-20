@@ -5,7 +5,7 @@
    Where "unchanged" is the requirement, the assertion compares against the
    DEPLOYED main branch rather than against a hand-copied expectation, so the
    test cannot drift into agreeing with a mistake. */
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import * as NEW from '../ask-core.mjs';
 import { categories } from '../ask-data.mjs';
@@ -59,10 +59,37 @@ export default async function run(){
     t.check(f + ' is byte-identical to the deployed branch',
       readFileSync(SITE + f, 'utf8') === readFileSync(LIVE + f, 'utf8'));
   }
-  const idx = readFileSync(SITE + 'index.html', 'utf8');
+  /* The Ask CJHQ engine moved out of index.html into tools/ask-engine.js, which
+     generate-routes.mjs injects into admin.html only - it is admin-only code and
+     no public page could ever run it. These assertions guard that the engine
+     SOURCE is intact and byte-identical to the deployed build, not which file it
+     sits in, so they read index.html and the engine file together and compare
+     that against the deployed index.html, where both used to live.
+
+     The guarantee is unchanged: if one byte of the Gemini config, the App Check
+     path or the backend call path differs from what is deployed, these still
+     fail. */
+  const idxFile = readFileSync(SITE + 'index.html', 'utf8');
+  const engineFile = existsSync(SITE + 'tools/ask-engine.js')
+    ? readFileSync(SITE + 'tools/ask-engine.js', 'utf8') : '';
+  const idx = idxFile + '\n' + engineFile;
   for(const marker of ['<!DOCTYPE html>', 'renderAccordion', 'askCommunityAssistant', 'ASK CJHQ',
                        '===== BROWSER AI ADAPTER: BEGIN', '===== SHARED ASK CORE: END']){
-    t.check('index.html still contains ' + JSON.stringify(marker), idx.indexOf(marker) >= 0);
+    t.check('the site source still contains ' + JSON.stringify(marker), idx.indexOf(marker) >= 0);
+  }
+  /* The public bundle must NOT carry the engine any more - this is what would
+     catch the extraction being silently reverted. These match DEFINITIONS, not
+     mentions: two admin-UI call sites to askCommunityAssistant still sit in
+     index.html (the Ask panel's send button and the language benchmark). They
+     are unreachable on a public page - initAskCjhq() is an IIFE that returns
+     immediately when the askLog markup is absent, and the markup ships only in
+     admin.html - so they cost nothing and moving them is admin-JS extraction,
+     which is a separate, deliberately deferred step. */
+  for(const marker of ['===== SHARED ASK CORE: END',
+                       'async function askCommunityAssistant',
+                       'const ASK_AI_CONFIG']){
+    t.check('index.html no longer ships ' + JSON.stringify(marker) + ' to the public',
+      idxFile.indexOf(marker) < 0);
   }
 
   // ---- Gemini configuration is untouched -----------------------------------
