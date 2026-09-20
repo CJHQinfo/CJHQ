@@ -44,10 +44,11 @@
 <meta property="og:title" id="ogTitle" content="CJHQ — Jewish Hasidic Council of Quebec">
 <meta property="og:description" id="ogDescription" content="The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec's Hasidic Jewish communities — providing practical assistance, advocacy, and community resources.">
 <meta property="og:url" id="ogUrl" content="https://cjhq.org/">
-<meta property="og:image" content="https://cjhq.org/og-image.png">
+<meta property="og:image" id="ogImage" content="https://cjhq.org/og-image.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" id="ogImageAlt" content="CJHQ — Le Conseil des Juifs Hassidiques du Québec">
 <meta property="og:locale" content="en_CA">
 <meta property="og:locale:alternate" content="fr_CA">
 
@@ -56,7 +57,8 @@
 <meta name="twitter:site" content="@CJHQinfo">
 <meta name="twitter:title" id="twitterTitle" content="CJHQ — Jewish Hasidic Council of Quebec">
 <meta name="twitter:description" id="twitterDescription" content="The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec's Hasidic Jewish communities.">
-<meta name="twitter:image" content="https://cjhq.org/og-image.png">
+<meta name="twitter:image" id="twitterImage" content="https://cjhq.org/og-image.png">
+<meta name="twitter:image:alt" id="twitterImageAlt" content="CJHQ — Le Conseil des Juifs Hassidiques du Québec">
 
 <!-- Schema.org Organization structured data -->
 <script type="application/ld+json">
@@ -2469,6 +2471,35 @@
               </div>
             </div>
             <p id="customPageStatusPreview" style="font-size:.84rem; margin:10px 0 0;"></p>
+
+            <!-- ===== Sharing =====
+                 A temporary page has no file of its own on GitHub Pages, so its
+                 own address shows no preview card when posted. /notice is a real
+                 file that does, and ?p= tells it which page to open. Both URLs
+                 are derived from the address field above, so they follow a
+                 rename with no second place to update. -->
+            <h3 style="font-size:.95rem; margin:18px 0 4px;">Sharing</h3>
+            <div id="customPageShareBox" data-ready="0" class="card"
+                 style="margin:8px 0 0; background:var(--bg-alt); border-color:var(--line);">
+              <p style="margin:0 0 2px; font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);">Share link</p>
+              <p id="customPageShareUrl" style="margin:0 0 8px; font-size:.9rem; word-break:break-all;">Enter a page address above to get the share link.</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="admin-small-btn" id="customPageShareCopy" disabled>Copy Share Link</button>
+                <button type="button" class="admin-small-btn" id="customPageShareOpen" disabled>Open Share Link</button>
+                <span id="customPageShareMsg" style="font-size:.82rem; opacity:0; transition:opacity .2s;"></span>
+              </div>
+
+              <p style="margin:14px 0 2px; font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);">Destination</p>
+              <p id="customPageDestUrl" style="margin:0 0 8px; font-size:.9rem; word-break:break-all;">&mdash;</p>
+              <button type="button" class="admin-small-btn" id="customPageDestOpen" disabled>Open Page</button>
+
+              <p style="margin:14px 0 0; font-size:.82rem; color:var(--muted); line-height:1.5;">
+                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere to get the CJHQ
+                Community Notice preview card. The preview image and title are the same generic CJHQ card
+                for every page; the visitor is taken to this specific page. If the page is not published,
+                or is outside its dates, the visitor sees the normal &ldquo;page not found&rdquo; instead.
+              </p>
+            </div>
 
             <h3 style="font-size:.95rem; margin:18px 0 4px;">Homepage</h3>
             <label style="display:flex; align-items:center; gap:8px; font-size:.88rem;">
