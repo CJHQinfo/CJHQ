@@ -57,6 +57,16 @@ function slice(src, startMarker, endMarker, label) {
 
 const src = readFileSync(INDEX, 'utf8');
 
+/* The engine moved out of index.html into tools/ask-engine.js, so that ~191 KB
+   of admin-only code stopped shipping to every public visitor. The DATASET did
+   not move - categories, SPECIAL_INFO_* and PARTNERS_DATA are rendered by the
+   website itself - so this tool now reads the core from one file and the data
+   from the other. Both are still single sources of truth; there is still no
+   second copy of anything. */
+const ENGINE = join(ROOT, 'tools', 'ask-engine.js');
+if (!existsSync(ENGINE)) throw new Error('sync-ask-core: tools/ask-engine.js is missing');
+const engineSrc = readFileSync(ENGINE, 'utf8');
+
 /* ---------------------------------------------------------------- data ---- */
 const catStart = src.indexOf('\nconst categories = [');
 const catEnd   = src.indexOf('\nconst contactCats', catStart);
@@ -94,7 +104,7 @@ export ${partners}
 `;
 
 /* ---------------------------------------------------------------- core ---- */
-const core = slice(src, CORE_BEGIN, CORE_END, 'shared core');
+const core = slice(engineSrc, CORE_BEGIN, CORE_END, 'shared core');
 const ai   = slice(core.text, AI_BEGIN, AI_END, 'browser AI adapter');
 
 // Drop the browser-only span so the generated module carries no Firebase,

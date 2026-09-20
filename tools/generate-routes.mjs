@@ -45,6 +45,12 @@ const ROUTES = [
 // tools/admin-panel.html and is injected into admin.html only - keeping it out
 // of index.html is what makes this generator idempotent.
 const ADMIN_PARTIAL = join(dirname(fileURLToPath(import.meta.url)), 'admin-panel.html');
+// The Ask CJHQ engine, same arrangement as the admin panel: it lives outside
+// index.html and is injected into admin.html only. ASK_CJHQ_PUBLIC is false and
+// the panel markup exists only in admin.html, so no public page could ever run
+// it - it was ~191 KB every visitor downloaded and parsed for nothing.
+const ASK_ENGINE = join(dirname(fileURLToPath(import.meta.url)), 'ask-engine.js');
+const ASK_PLACEHOLDER = '/* Ask CJHQ engine: source lives in tools/ask-engine.js and is injected into';
 const ADMIN_PLACEHOLDER =
   '<!-- Admin panel: source lives in tools/admin-panel.html and is injected into admin.html only. -->';
 
@@ -112,6 +118,39 @@ function replaceOnce(source, pattern, replacement, label) {
   return source.replace(pattern, () => replacement);
 }
 
+/* Per-route WebPage node.
+
+   Ten routes previously shipped one identical JSON-LD block, so a consumer had
+   no machine-readable way to tell the documents apart. Each route now carries
+   its own WebPage, built from the title, description, canonical and card this
+   function has already computed - no new source of truth, and nothing that can
+   drift from the <head> it sits beside.
+
+   isPartOf and about are @id references, so the WebPage, the WebSite and the
+   Organization resolve to one graph across the whole site. */
+function webPageNode(url, name, desc, image, lang) {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': url + '#webpage',
+    url,
+    name,
+    description: desc,
+    inLanguage: lang,
+    isPartOf: { '@id': 'https://cjhq.org/#website' },
+    about:     { '@id': 'https://cjhq.org/#organization' },
+    primaryImageOfPage: image
+  }, null, 2);
+}
+
+function replacePageSchema(out, url, name, desc, image, lang, label) {
+  return replaceOnce(out,
+    /<script type="application\/ld\+json" id="pageSchema">[\s\S]*?<\/script>/,
+    '<script type="application/ld+json" id="pageSchema">\n' +
+      webPageNode(url, name, desc, image, lang) + '\n</script>',
+    label);
+}
+
 function buildRoute(route) {
   const meta = META[route];
   if (!meta) throw new Error(`No PAGE_META entry for route "${route}"`);
@@ -162,6 +201,10 @@ function buildRoute(route) {
   } else {
     console.warn(`  note: ${cardFile} not found - ${route} keeps the default og-image.png`);
   }
+
+  const cardAbs = existsSync(join(ROOT, cardFile))
+    ? `${ORIGIN}/${cardFile}` : `${ORIGIN}/og-image.png`;
+  out = replacePageSchema(out, url, meta.en, meta.desc_en, cardAbs, 'en-CA', `${route}: WebPage schema`);
 
   // Mark this route's own page as the active one.
   //
@@ -220,6 +263,23 @@ function buildAdmin() {
     .replace('<div class="page" id="page-admin">', '<div class="page active" id="page-admin">');
   if (!out.includes(ADMIN_PLACEHOLDER)) throw new Error('admin: placeholder not found in index.html');
   out = out.replace(ADMIN_PLACEHOLDER, panel);
+
+  // Put the Ask CJHQ engine back, for admin.html only.
+  if (!existsSync(ASK_ENGINE)) throw new Error('tools/ask-engine.js is missing');
+  const engine = readFileSync(ASK_ENGINE, 'utf8');
+  const at = out.indexOf(ASK_PLACEHOLDER);
+  if (at < 0) throw new Error('admin: Ask engine placeholder not found in index.html');
+  // Replace the whole placeholder comment block, not just its first line.
+  const close = out.indexOf('*/', at);
+  if (close < 0) throw new Error('admin: Ask engine placeholder comment is unterminated');
+  out = out.slice(0, at) + engine + out.slice(close + 2);
+  if (!out.includes('SHARED ASK CORE: END')) throw new Error('admin.html lost the Ask engine');
+  // admin.html is noindex,nofollow and is not a public document, so it carries
+  // no WebPage node. Removing it is cleaner than shipping a page description
+  // for a URL no crawler is allowed to index.
+  out = replaceOnce(out,
+    /<script type="application\/ld\+json" id="pageSchema">[\s\S]*?<\/script>\n?/,
+    '', 'admin: drop WebPage schema');
   out = stripHreflang(out);
   if (!out.includes('id="page-admin"')) throw new Error('admin.html lost its panel');
   return out;
@@ -242,6 +302,23 @@ function buildFrenchHome() {
     `<link rel="canonical" id="canonicalTag" href="${url}">`, 'fr: canonical');
   out = replaceOnce(out, /<meta property="og:url" id="ogUrl" content="[^"]*">/,
     `<meta property="og:url" id="ogUrl" content="${url}">`, 'fr: og:url');
+
+  /* The French homepage used to declare the English Organization node - French
+     title, French description, French lang attribute, English structured data.
+     Same @id, so this is still one entity; only the label a French consumer
+     reads changes. The English name stays in alternateName, which it already
+     was, so nothing is lost. */
+  // No capture group: replaceOnce counts match array length, and a group would
+  // make a single match look like two.
+  out = replaceOnce(out,
+    /"name": "Jewish Hasidic Council of Quebec",\n      "alternateName"/,
+    '"name": "Le Conseil des Juifs Hassidiques du Québec",\n      "alternateName"',
+    'fr: Organization name');
+  out = replaceOnce(out,
+    /"description": "The Jewish Hasidic Council of Quebec \(CJHQ\) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities\.",/,
+    `"description": ${JSON.stringify(meta.desc_fr)},`,
+    'fr: Organization description');
+  out = replacePageSchema(out, url, meta.fr, meta.desc_fr, `${ORIGIN}/og-image.png`, 'fr-CA', 'fr: WebPage schema');
   out = replaceOnce(out, /<meta property="og:title" id="ogTitle" content="[^"]*">/,
     `<meta property="og:title" id="ogTitle" content="${title}">`, 'fr: og:title');
   out = replaceOnce(out, /<meta property="og:description" id="ogDescription" content="[^"]*">/,
