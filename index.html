@@ -9574,6 +9574,7 @@ async function renderCustomPagesList(){
       </div>
       <div style="display:flex; gap:6px; flex-shrink:0;">
         <button class="admin-small-btn" onclick="window.open(location.origin + pathForPage('${p.slug}'), '_blank')">View</button>
+        <button class="admin-small-btn" data-copy-share="${p.slug}">Copy Link</button>
         <button class="admin-small-btn" onclick="editCustomPage('${p.slug}')">Edit</button>
         <button class="admin-small-btn" style="color:#A23B3B;" onclick="deleteCustomPage('${p.slug}')">Delete</button>
       </div>
@@ -9623,6 +9624,19 @@ function cjhqPageStatusPill(state){
    copied into an email or a WhatsApp message without anyone having to assemble
    it. While it is not live there is no address to give out, and saying so is
    more useful than printing a link that answers 404. */
+/* Copy the share link straight from the list, so posting a notice does not
+   mean opening the editor. Delegated once rather than an onclick per row. */
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest && e.target.closest('[data-copy-share]');
+  if(!btn) return;
+  const url = cjhqShareUrl(btn.getAttribute('data-copy-share'));
+  if(!url) return;
+  const ok = await cjhqCopyText(url);
+  const original = btn.textContent;
+  btn.textContent = ok ? 'Link copied' : 'Copy failed';
+  setTimeout(() => { btn.textContent = original; }, 2000);
+});
+
 function cjhqPageAddressLine(p, state){
   const url = location.origin + pathForPage(p.slug);
   if(state === 'live'){
@@ -9640,6 +9654,94 @@ function cjhqPageWindowLabel(p){
 }
 /* Live preview under the date fields, so the editor sees the consequence of
    what they typed before they save it. */
+/* ---------- Share link for a temporary page ----------
+   A temporary page has no file of its own on GitHub Pages, so its own address
+   answers 404 to a social crawler and shows no preview card. /notice is a real
+   committed file that does have preview tags, and ?p= tells it which page to
+   open. So the address to POST is /notice?p=<slug>; the address the visitor
+   ends up on is the page's own, through the existing router.
+
+   Nothing new is stored for this. The share URL is derived from the slug the
+   page already has, every time it is displayed, so it cannot drift - rename the
+   page and the link follows. SITE_BASE_PATH is honoured exactly as pathForPage
+   does, so this is correct on cjhq.org and on the GitHub project address. */
+const CJHQ_NOTICE_PATH = '/notice';
+
+function cjhqShareUrl(slug){
+  const s = String(slug || '').trim().toLowerCase();
+  if(!s) return '';
+  return location.origin + SITE_BASE_PATH + CJHQ_NOTICE_PATH + '?p=' + encodeURIComponent(s);
+}
+function cjhqPageUrl(slug){
+  const s = String(slug || '').trim().toLowerCase();
+  if(!s) return '';
+  return location.origin + pathForPage(s);
+}
+
+/* Clipboard, without assuming the modern API is there. navigator.clipboard is
+   undefined outside a secure context and can reject even inside one, so the
+   old textarea trick stays as the fallback rather than leaving the button
+   silently doing nothing. */
+async function cjhqCopyText(text){
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(e){ /* fall through */ }
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed; top:0; left:-9999px; opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }catch(e){ return false; }
+}
+
+// A quiet inline confirmation next to the button, not an alert - the rest of
+// this panel only alerts for failures and confirmations, never for success.
+function cjhqFlashMsg(el, text, bad){
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = bad ? '#A23B3B' : '#2E7D32';
+  el.style.opacity = '1';
+  clearTimeout(el.__t);
+  el.__t = setTimeout(() => { el.style.opacity = '0'; }, 2600);
+}
+
+function updateCustomPageShareBox(){
+  const box = document.getElementById('customPageShareBox');
+  if(!box) return;
+  const slugEl = document.getElementById('customPageSlug');
+  // Same normalisation the save handler applies, so what is shown is what will
+  // be saved rather than what was typed.
+  const slug = String((slugEl && slugEl.value) || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const share = cjhqShareUrl(slug);
+  const dest  = cjhqPageUrl(slug);
+  const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  if(!slug){
+    box.dataset.ready = '0';
+    set('customPageShareUrl', 'Enter a page address above to get the share link.');
+    set('customPageDestUrl', '—');
+  } else {
+    box.dataset.ready = '1';
+    set('customPageShareUrl', share);
+    set('customPageDestUrl', dest);
+  }
+  ['customPageShareCopy','customPageShareOpen','customPageDestOpen'].forEach(id => {
+    const b = document.getElementById(id);
+    if(b) b.disabled = !slug;
+  });
+  box.__share = share;
+  box.__dest  = dest;
+}
+window.updateCustomPageShareBox = updateCustomPageShareBox;
+
 function updateCustomPageStatusPreview(){
   const el = document.getElementById('customPageStatusPreview');
   if(!el) return;
@@ -9693,6 +9795,7 @@ function editCustomPage(slug){
   document.getElementById('customPageHomeBlurbEn').value = p.home_blurb_en || '';
   document.getElementById('customPageHomeBlurbFr').value = p.home_blurb_fr || '';
   updateCustomPageStatusPreview();
+  updateCustomPageShareBox();
   if(window.syncHomeCtaPlaceholders) syncHomeCtaPlaceholders();
   if(window.renderCustomPagePreview) renderCustomPagePreview();
   // Bring the EDITOR into view, not the top of the admin page. The form sits
@@ -10702,6 +10805,7 @@ async function publishChangeNotice(slug){
     // reset() restores the markup default, which is HTML - make the hint agree.
     updateCustomPageFormatHint();
     updateCustomPageStatusPreview();
+    updateCustomPageShareBox();
     if(window.syncHomeCtaPlaceholders) syncHomeCtaPlaceholders();
     if(window.renderCustomPagePreview) renderCustomPagePreview();
   }
@@ -10980,6 +11084,35 @@ async function publishChangeNotice(slug){
   document.querySelectorAll('.admin-tab-btn').forEach(b=>{
     b.addEventListener('click', ()=>switchAdminTab(b.dataset.tab));
   });
+
+  // Share link box: derived from the address field, so it follows a rename.
+  const slugField = document.getElementById('customPageSlug');
+  if(slugField){
+    slugField.addEventListener('input', updateCustomPageShareBox);
+    slugField.addEventListener('change', updateCustomPageShareBox);
+  }
+  const shareBox = document.getElementById('customPageShareBox');
+  const shareMsg = document.getElementById('customPageShareMsg');
+  const copyBtn  = document.getElementById('customPageShareCopy');
+  if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+    const url = (shareBox && shareBox.__share) || '';
+    if(!url) return;
+    const ok = await cjhqCopyText(url);
+    cjhqFlashMsg(shareMsg,
+      ok ? 'Link copied' : 'Could not copy \u2014 select the link above and copy it manually.',
+      !ok);
+  });
+  const shareOpen = document.getElementById('customPageShareOpen');
+  if(shareOpen) shareOpen.addEventListener('click', ()=>{
+    const url = (shareBox && shareBox.__share) || '';
+    if(url) window.open(url, '_blank', 'noopener');
+  });
+  const destOpen = document.getElementById('customPageDestOpen');
+  if(destOpen) destOpen.addEventListener('click', ()=>{
+    const url = (shareBox && shareBox.__dest) || '';
+    if(url) window.open(url, '_blank', 'noopener');
+  });
+  updateCustomPageShareBox();
 
   // Staff access
   const staffForm = document.getElementById('staffAddForm');

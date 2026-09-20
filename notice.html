@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ===================================================================
+     ONE permanent, shareable address for every temporary CJHQ page.
+
+     Why this file exists
+     --------------------
+     A temporary page lives in Firestore and is drawn by the site's JavaScript
+     at run time. GitHub Pages serves only files that are in the repository, so
+     /travel-guide has no file behind it: the server answers 404 and hands back
+     404.html, which carries no preview tags. Social crawlers do not run
+     JavaScript and generally ignore a 404, so a shared link shows no card.
+
+     This file is real, so /notice answers 200 and the tags below are read
+     straight out of the raw HTML - no JavaScript involved in the preview. The
+     ?p= parameter chooses which temporary page to open. A static host ignores
+     the query string, so ONE committed file covers every page ever created:
+     upload this once and never touch the repository for a new page again.
+
+     What it deliberately does NOT do
+     --------------------------------
+     The card is the same for every page. A static file cannot carry a
+     different title or image per ?p= value, because the crawler never runs the
+     script that would change them. That is a property of static hosting, not
+     an oversight.
+
+     Expiry is NOT re-implemented here. This page hands the visitor to the
+     site's own router, which already refuses a page that is unpublished,
+     not yet started or expired, and shows the normal 404. Duplicating that
+     check here would mean a second copy of the rules to keep in step, and
+     would need the Firebase SDK in this file - a dependency this file does
+     not have and does not want.
+
+     Share:  https://cjhq.org/notice?p=travel-guide
+     =================================================================== -->
+
+<title>CJHQ Community Notice</title>
+<meta name="description" content="Official community information and updates from the Jewish Hasidic Council of Quebec.">
+<link rel="canonical" href="https://cjhq.org/notice">
+<!-- Not a page with content of its own, so it should not compete in search
+     results. This is a search-engine directive; the Open Graph crawlers that
+     build link previews read the tags below regardless. -->
+<meta name="robots" content="noindex, follow">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CJHQ">
+<meta property="og:title" content="CJHQ Community Notice">
+<meta property="og:description" content="Official community information and updates from the Jewish Hasidic Council of Quebec.">
+<meta property="og:url" content="https://cjhq.org/notice">
+<meta property="og:image" content="https://cjhq.org/assets/og-notice.png">
+<meta property="og:image:secure_url" content="https://cjhq.org/assets/og-notice.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CJHQ Community Notice — Le Conseil des Juifs Hassidiques du Québec">
+<meta property="og:locale" content="en_CA">
+<meta property="og:locale:alternate" content="fr_CA">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CJHQ Community Notice">
+<meta name="twitter:description" content="Official community information and updates from the Jewish Hasidic Council of Quebec.">
+<meta name="twitter:image" content="https://cjhq.org/assets/og-notice.png">
+<meta name="twitter:image:alt" content="CJHQ Community Notice — Le Conseil des Juifs Hassidiques du Québec">
+
+<link rel="icon" href="/favicon.ico">
+<style>
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       color:#0E2149;background:#fff;display:flex;min-height:100vh;align-items:center;
+       justify-content:center;padding:24px;}
+  .box{max-width:30rem;text-align:center;}
+  h1{font-size:1.15rem;font-weight:600;margin:0 0 8px;}
+  a{color:#0E2149;}
+</style>
+<script>
+  /* A visitor is sent straight to the page. A crawler does not run this and
+     stays here reading the tags above, which is the whole point of the file.
+
+     The slug is validated against the same shape the site's router accepts
+     before it is put in a URL. Without that check, ?p=//evil.example would
+     become location.replace('//evil.example') - a protocol-relative URL, and
+     an open redirect on cjhq.org that anyone could use in a phishing link.
+
+     The base path is taken from this file's own location rather than assumed
+     to be "/", so the same file works on cjhq.org and on the GitHub project
+     address (cjhqinfo.github.io/CJHQ/notice), where the site lives one level
+     down. replace() rather than assign() so Back does not trap anyone here. */
+  (function(){
+    var base = '/';
+    try{
+      base = location.pathname.replace(/\/notice(\.html)?\/?$/i, '') + '/';
+      var m = /[?&]p=([^&#]*)/.exec(location.search);
+      var slug = m ? decodeURIComponent(m[1]).trim().toLowerCase() : '';
+      var ok = /^[a-z0-9][a-z0-9-]{0,60}$/.test(slug);
+      location.replace(ok ? base + '?/' + slug : base);
+    }catch(e){
+      location.replace(base);
+    }
+  })();
+</script>
+</head>
+<body>
+  <div class="box">
+    <h1>CJHQ Community Notice</h1>
+    <p>Opening the notice… <a href="/">Go to cjhq.org</a> if nothing happens.</p>
+  </div>
+</body>
+</html>
