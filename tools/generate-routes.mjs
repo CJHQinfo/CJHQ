@@ -138,6 +138,31 @@ function buildRoute(route) {
   out = replaceOnce(out, /<meta name="twitter:description" id="twitterDescription" content="[^"]*">/,
     `<meta name="twitter:description" id="twitterDescription" content="${desc}">`, `${route}: twitter:description`);
 
+  /* Every page used to share og-image.png - the logo and nothing else - so a
+     link to /resources and a link to /contact produced an identical card that
+     said nothing about the page. Each route now points at its own card, built
+     by tools/og-cards.py from the same logo and footer so they stay one family.
+
+     A route with no card falls back to og-image.png rather than pointing at a
+     404: a missing card means a plain logo preview, which is what the site had
+     before, not a broken one. The check is on the file, so adding a card is
+     enough to pick it up and nothing here needs editing. */
+  const cardFile = `assets/og-${route}.png`;
+  if (existsSync(join(ROOT, cardFile))) {
+    const cardUrl = `${ORIGIN}/${cardFile}`;
+    const alt = `${title} — CJHQ`;
+    out = replaceOnce(out, /<meta property="og:image" id="ogImage" content="[^"]*">/,
+      `<meta property="og:image" id="ogImage" content="${cardUrl}">`, `${route}: og:image`);
+    out = replaceOnce(out, /<meta property="og:image:alt" id="ogImageAlt" content="[^"]*">/,
+      `<meta property="og:image:alt" id="ogImageAlt" content="${esc(alt)}">`, `${route}: og:image:alt`);
+    out = replaceOnce(out, /<meta name="twitter:image" id="twitterImage" content="[^"]*">/,
+      `<meta name="twitter:image" id="twitterImage" content="${cardUrl}">`, `${route}: twitter:image`);
+    out = replaceOnce(out, /<meta name="twitter:image:alt" id="twitterImageAlt" content="[^"]*">/,
+      `<meta name="twitter:image:alt" id="twitterImageAlt" content="${esc(alt)}">`, `${route}: twitter:image:alt`);
+  } else {
+    console.warn(`  note: ${cardFile} not found - ${route} keeps the default og-image.png`);
+  }
+
   // Mark this route's own page as the active one.
   //
   // Every route file previously shipped with <div class="page active"
