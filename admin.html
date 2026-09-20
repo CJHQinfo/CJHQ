@@ -61,43 +61,94 @@
 <meta name="twitter:image:alt" id="twitterImageAlt" content="CJHQ — Le Conseil des Juifs Hassidiques du Québec">
 
 <!-- Schema.org Organization structured data -->
+<!-- Structured data.
+
+     One @graph, three linked nodes: the Organization, the WebSite, and (added
+     per route by tools/generate-routes.mjs) the WebPage. Before this, ten pages
+     each declared an unlinked Organization node, so a consumer could read them
+     as ten separate declarations of ten similar bodies. The @id values make all
+     ten resolve to one entity and one site.
+
+     alternateName carries only name variants that are documented in published
+     coverage - CTV News and Israel National News use "Council of Hasidic Jews of
+     Quebec", Global News has used "Quebec Council of Hasidic Jews", Noovo Info
+     uses "Conseil juif hassidique du Québec". Listing them is a factual record
+     of how the organization is named, not a claim about its status, and it is
+     what connects those strings to this site.
+
+     sameAs is UNCHANGED. The three profiles here were already declared; the
+     Facebook URL still needs a human to confirm it (CJHQinfo vs the CJHQuebec
+     page that search surfaced), and nothing unverified has been added. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Jewish Hasidic Council of Quebec",
-  "alternateName": ["CJHQ", "Conseil des Juifs Hassidiques du Québec"],
-  "url": "https://cjhq.org/",
-  "logo": "https://cjhq.org/cjhq-logo.png",
-  "description": "The Jewish Hasidic Council of Quebec (CJHQ) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "1040 Van Horne Ave",
-    "addressLocality": "Outremont",
-    "addressRegion": "QC",
-    "postalCode": "H2V 1J5",
-    "addressCountry": "CA"
-  },
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": "+1-514-819-9440",
-    "email": "info@cjhq.org",
-    "contactType": "customer service",
-    "areaServed": "Quebec",
-    "availableLanguage": ["English", "French"]
-  },
-  "sameAs": [
-    "https://www.facebook.com/CJHQinfo",
-    "https://x.com/CJHQinfo",
-    "https://www.instagram.com/cjhqinfo/"
-  ],
-  "areaServed": {
-    "@type": "State",
-    "name": "Quebec",
-    "addressCountry": "CA"
-  }
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://cjhq.org/#organization",
+      "name": "Jewish Hasidic Council of Quebec",
+      "alternateName": [
+        "CJHQ",
+        "Le Conseil des Juifs Hassidiques du Québec",
+        "Conseil des Juifs Hassidiques du Québec",
+        "Council of Hasidic Jews of Quebec",
+        "Quebec Council of Hasidic Jews",
+        "Conseil juif hassidique du Québec"
+      ],
+      "url": "https://cjhq.org/",
+      "logo": "https://cjhq.org/cjhq-logo.png",
+      "description": "The Jewish Hasidic Council of Quebec (CJHQ) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.",
+      "disambiguatingDescription": "CJHQ is the council representing Quebec's Hasidic Jewish communities, including the Tosh community in Boisbriand, and the Hasidic Jewish community in Montreal and Outremont.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "1040 Van Horne Ave",
+        "addressLocality": "Outremont",
+        "addressRegion": "QC",
+        "postalCode": "H2V 1J5",
+        "addressCountry": "CA"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+1-514-819-9440",
+        "email": "info@cjhq.org",
+        "contactType": "customer service",
+        "areaServed": "Quebec",
+        "availableLanguage": ["English", "French"]
+      },
+      "sameAs": [
+        "https://www.facebook.com/CJHQinfo",
+        "https://x.com/CJHQinfo",
+        "https://www.instagram.com/cjhqinfo/"
+      ],
+      "availableLanguage": ["en", "fr"],
+      "areaServed": [
+        { "@type": "State", "name": "Quebec", "addressCountry": "CA" },
+        { "@type": "City", "name": "Montreal", "addressRegion": "QC", "addressCountry": "CA" },
+        { "@type": "AdministrativeArea", "name": "Outremont", "addressRegion": "QC", "addressCountry": "CA" },
+        { "@type": "City", "name": "Boisbriand", "addressRegion": "QC", "addressCountry": "CA" }
+      ],
+      "knowsAbout": [
+        "Community advocacy",
+        "Government liaison",
+        "Travel and identity documents",
+        "Municipal services",
+        "Family benefits"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://cjhq.org/#website",
+      "url": "https://cjhq.org/",
+      "name": "CJHQ — Jewish Hasidic Council of Quebec",
+      "inLanguage": ["en-CA", "fr-CA"],
+      "publisher": { "@id": "https://cjhq.org/#organization" }
+    }
+  ]
 }
 </script>
+<!-- Per-route WebPage node. Written by tools/generate-routes.mjs; on this file
+     (the homepage) it describes the homepage. It is what gives each of the ten
+     near-identical documents a distinct machine-readable identity. -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
