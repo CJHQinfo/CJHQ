@@ -128,12 +128,13 @@
             <p id="customPageStatusPreview" style="font-size:.84rem; margin:10px 0 0;"></p>
 
             <!-- ===== Sharing =====
-                 Every live temporary page gets a real preview file at
-                 /notice/<slug>, generated from Firestore every 15 minutes by
-                 the Notice Pages workflow, so a posted link previews with the
-                 page's own title and card. Both URLs are derived from the
-                 address field above, so they follow a rename with no second
-                 place to update. -->
+                 Every live temporary page gets a real preview file at its own
+                 address /<slug> (plus /notice/<slug> for links shared earlier),
+                 generated from Firestore every 15 minutes by the Notice Pages
+                 workflow, so a posted link previews with the page's own title
+                 and card. The share link IS the page address: derived from the
+                 address field above, it follows a rename with no second place
+                 to update. -->
             <h3 style="font-size:.95rem; margin:18px 0 4px;">Sharing</h3>
             <div id="customPageShareBox" data-ready="0" class="card"
                  style="margin:8px 0 0; background:var(--bg-alt); border-color:var(--line);">
@@ -147,17 +148,13 @@
                 <span id="customPageShareMsg" style="font-size:.82rem; opacity:0; transition:opacity .2s;"></span>
               </div>
 
-              <p style="margin:14px 0 2px; font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);">Destination</p>
-              <p id="customPageDestUrl" style="margin:0 0 8px; font-size:.9rem; word-break:break-all;">&mdash;</p>
-              <button type="button" class="admin-small-btn" id="customPageDestOpen" disabled>Open Page</button>
-
               <p style="margin:14px 0 0; font-size:.82rem; color:var(--muted); line-height:1.5;">
-                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere. The preview
-                shows this page's own title and a card with its name, generated automatically within
-                about 15&ndash;30 minutes of publishing. The visitor is taken to this specific page. If
-                the page is not published, or is outside its dates, the visitor sees the normal
-                &ldquo;page not found&rdquo; instead. Old links in the /notice?p=&hellip; form keep
-                working, with the generic CJHQ card.
+                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere &mdash; it is
+                the page's own address. The preview shows this page's own title and a card with its
+                name, generated automatically within about 15&ndash;30 minutes of publishing. The
+                visitor is taken to this specific page. If the page is not published, or is outside
+                its dates, the visitor sees the normal &ldquo;page not found&rdquo; instead. Old links
+                in the /notice/&hellip; forms keep working.
               </p>
             </div>
 
