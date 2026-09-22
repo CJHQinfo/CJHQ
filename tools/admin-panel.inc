@@ -128,11 +128,12 @@
             <p id="customPageStatusPreview" style="font-size:.84rem; margin:10px 0 0;"></p>
 
             <!-- ===== Sharing =====
-                 A temporary page has no file of its own on GitHub Pages, so its
-                 own address shows no preview card when posted. /notice is a real
-                 file that does, and ?p= tells it which page to open. Both URLs
-                 are derived from the address field above, so they follow a
-                 rename with no second place to update. -->
+                 Every live temporary page gets a real preview file at
+                 /notice/<slug>, generated from Firestore every 15 minutes by
+                 the Notice Pages workflow, so a posted link previews with the
+                 page's own title and card. Both URLs are derived from the
+                 address field above, so they follow a rename with no second
+                 place to update. -->
             <h3 style="font-size:.95rem; margin:18px 0 4px;">Sharing</h3>
             <div id="customPageShareBox" data-ready="0" class="card"
                  style="margin:8px 0 0; background:var(--bg-alt); border-color:var(--line);">
@@ -141,6 +142,8 @@
               <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                 <button type="button" class="admin-small-btn" id="customPageShareCopy" disabled>Copy Share Link</button>
                 <button type="button" class="admin-small-btn" id="customPageShareOpen" disabled>Open Share Link</button>
+                <button type="button" class="admin-small-btn" id="customPageShareWhatsApp" disabled>WhatsApp</button>
+                <button type="button" class="admin-small-btn" id="customPageShareEmail" disabled>Email</button>
                 <span id="customPageShareMsg" style="font-size:.82rem; opacity:0; transition:opacity .2s;"></span>
               </div>
 
@@ -149,10 +152,12 @@
               <button type="button" class="admin-small-btn" id="customPageDestOpen" disabled>Open Page</button>
 
               <p style="margin:14px 0 0; font-size:.82rem; color:var(--muted); line-height:1.5;">
-                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere to get the CJHQ
-                Community Notice preview card. The preview image and title are the same generic CJHQ card
-                for every page; the visitor is taken to this specific page. If the page is not published,
-                or is outside its dates, the visitor sees the normal &ldquo;page not found&rdquo; instead.
+                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere. The preview
+                shows this page's own title and a card with its name, generated automatically within
+                about 15&ndash;30 minutes of publishing. The visitor is taken to this specific page. If
+                the page is not published, or is outside its dates, the visitor sees the normal
+                &ldquo;page not found&rdquo; instead. Old links in the /notice?p=&hellip; form keep
+                working, with the generic CJHQ card.
               </p>
             </div>
 

@@ -2525,11 +2525,12 @@
             <p id="customPageStatusPreview" style="font-size:.84rem; margin:10px 0 0;"></p>
 
             <!-- ===== Sharing =====
-                 A temporary page has no file of its own on GitHub Pages, so its
-                 own address shows no preview card when posted. /notice is a real
-                 file that does, and ?p= tells it which page to open. Both URLs
-                 are derived from the address field above, so they follow a
-                 rename with no second place to update. -->
+                 Every live temporary page gets a real preview file at
+                 /notice/<slug>, generated from Firestore every 15 minutes by
+                 the Notice Pages workflow, so a posted link previews with the
+                 page's own title and card. Both URLs are derived from the
+                 address field above, so they follow a rename with no second
+                 place to update. -->
             <h3 style="font-size:.95rem; margin:18px 0 4px;">Sharing</h3>
             <div id="customPageShareBox" data-ready="0" class="card"
                  style="margin:8px 0 0; background:var(--bg-alt); border-color:var(--line);">
@@ -2538,6 +2539,8 @@
               <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                 <button type="button" class="admin-small-btn" id="customPageShareCopy" disabled>Copy Share Link</button>
                 <button type="button" class="admin-small-btn" id="customPageShareOpen" disabled>Open Share Link</button>
+                <button type="button" class="admin-small-btn" id="customPageShareWhatsApp" disabled>WhatsApp</button>
+                <button type="button" class="admin-small-btn" id="customPageShareEmail" disabled>Email</button>
                 <span id="customPageShareMsg" style="font-size:.82rem; opacity:0; transition:opacity .2s;"></span>
               </div>
 
@@ -2546,10 +2549,12 @@
               <button type="button" class="admin-small-btn" id="customPageDestOpen" disabled>Open Page</button>
 
               <p style="margin:14px 0 0; font-size:.82rem; color:var(--muted); line-height:1.5;">
-                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere to get the CJHQ
-                Community Notice preview card. The preview image and title are the same generic CJHQ card
-                for every page; the visitor is taken to this specific page. If the page is not published,
-                or is outside its dates, the visitor sees the normal &ldquo;page not found&rdquo; instead.
+                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere. The preview
+                shows this page's own title and a card with its name, generated automatically within
+                about 15&ndash;30 minutes of publishing. The visitor is taken to this specific page. If
+                the page is not published, or is outside its dates, the visitor sees the normal
+                &ldquo;page not found&rdquo; instead. Old links in the /notice?p=&hellip; form keep
+                working, with the generic CJHQ card.
               </p>
             </div>
 
@@ -10322,21 +10327,27 @@ function cjhqPageWindowLabel(p){
    what they typed before they save it. */
 /* ---------- Share link for a temporary page ----------
    A temporary page has no file of its own on GitHub Pages, so its own address
-   answers 404 to a social crawler and shows no preview card. /notice is a real
-   committed file that does have preview tags, and ?p= tells it which page to
-   open. So the address to POST is /notice?p=<slug>; the address the visitor
-   ends up on is the page's own, through the existing router.
+   answers 404 to a social crawler and shows no preview card. The Notice Pages
+   workflow (tools/generate-notice-pages.py) commits a real preview file for
+   every LIVE temporary page at /notice/<slug> - the page's own title,
+   description and card - which forwards the human visitor to the page itself
+   through the existing router. So the address to POST is /notice/<slug>.
+
+   Files regenerate every 15 minutes, so a brand-new page's preview file can
+   lag publication by a few minutes; a click in that window is bounced by
+   404.html to the generic bridge. Links already posted as /notice?p=<slug>
+   keep working: notice.html stays as the generic-card bridge.
 
    Nothing new is stored for this. The share URL is derived from the slug the
    page already has, every time it is displayed, so it cannot drift - rename the
    page and the link follows. SITE_BASE_PATH is honoured exactly as pathForPage
    does, so this is correct on cjhq.org and on the GitHub project address. */
-const CJHQ_NOTICE_PATH = '/notice';
+const CJHQ_NOTICE_PATH = '/notice/';
 
 function cjhqShareUrl(slug){
   const s = String(slug || '').trim().toLowerCase();
   if(!s) return '';
-  return location.origin + SITE_BASE_PATH + CJHQ_NOTICE_PATH + '?p=' + encodeURIComponent(s);
+  return location.origin + SITE_BASE_PATH + CJHQ_NOTICE_PATH + encodeURIComponent(s);
 }
 function cjhqPageUrl(slug){
   const s = String(slug || '').trim().toLowerCase();
@@ -10399,7 +10410,7 @@ function updateCustomPageShareBox(){
     set('customPageShareUrl', share);
     set('customPageDestUrl', dest);
   }
-  ['customPageShareCopy','customPageShareOpen','customPageDestOpen'].forEach(id => {
+  ['customPageShareCopy','customPageShareOpen','customPageShareWhatsApp','customPageShareEmail','customPageDestOpen'].forEach(id => {
     const b = document.getElementById(id);
     if(b) b.disabled = !slug;
   });
@@ -11772,6 +11783,24 @@ async function publishChangeNotice(slug){
   if(shareOpen) shareOpen.addEventListener('click', ()=>{
     const url = (shareBox && shareBox.__share) || '';
     if(url) window.open(url, '_blank', 'noopener');
+  });
+  // One-tap share straight from the admin, same pattern as the resources
+  // page's share buttons (shareResourceVia): a WhatsApp draft and an email
+  // draft with the page's share link prefilled.
+  const shareWa = document.getElementById('customPageShareWhatsApp');
+  if(shareWa) shareWa.addEventListener('click', ()=>{
+    const url = (shareBox && shareBox.__share) || '';
+    if(!url) return;
+    const title = ((document.getElementById('customPageTitleEn')||{}).value || 'CJHQ Community Notice').trim();
+    window.open('https://wa.me/?text=' + encodeURIComponent(title + ' \u2014 ' + url), '_blank', 'noopener');
+  });
+  const shareEmail = document.getElementById('customPageShareEmail');
+  if(shareEmail) shareEmail.addEventListener('click', ()=>{
+    const url = (shareBox && shareBox.__share) || '';
+    if(!url) return;
+    const title = ((document.getElementById('customPageTitleEn')||{}).value || 'CJHQ Community Notice').trim();
+    window.location.href = 'mailto:?subject=' + encodeURIComponent(title) +
+      '&body=' + encodeURIComponent('Here is a CJHQ community notice: ' + url);
   });
   const destOpen = document.getElementById('customPageDestOpen');
   if(destOpen) destOpen.addEventListener('click', ()=>{

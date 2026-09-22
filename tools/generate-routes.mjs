@@ -187,13 +187,18 @@ function buildRoute(route) {
   /* Every page used to share og-image.png - the logo and nothing else - so a
      link to /resources and a link to /contact produced an identical card that
      said nothing about the page. Each route now points at its own card, built
-     by tools/og-cards.py from the same logo and footer so they stay one family.
+     by tools/og-cards.py on the og-image-v2 safe-zone treatment.
 
-     A route with no card falls back to og-image.png rather than pointing at a
-     404: a missing card means a plain logo preview, which is what the site had
-     before, not a broken one. The check is on the file, so adding a card is
-     enough to pick it up and nothing here needs editing. */
-  const cardFile = `assets/og-${route}.png`;
+     The -v2 file is preferred because platforms cache a card by URL for
+     weeks: a recomposed card under the old name would keep showing the old
+     pixels. A route with no v2 card falls back to its v1 card, then to
+     og-image-v2.png rather than pointing at a 404: a missing card means a
+     plain logo preview, which is what the site had before, not a broken one.
+     The check is on the file, so adding a card is enough to pick it up and
+     nothing here needs editing. */
+  const cardV2 = `assets/og-${route}-v2.png`;
+  const cardV1 = `assets/og-${route}.png`;
+  const cardFile = existsSync(join(ROOT, cardV2)) ? cardV2 : cardV1;
   if (existsSync(join(ROOT, cardFile))) {
     const cardUrl = `${ORIGIN}/${cardFile}`;
     const alt = `${title} — CJHQ`;
@@ -206,11 +211,11 @@ function buildRoute(route) {
     out = replaceOnce(out, /<meta name="twitter:image:alt" id="twitterImageAlt" content="[^"]*">/,
       `<meta name="twitter:image:alt" id="twitterImageAlt" content="${esc(alt)}">`, `${route}: twitter:image:alt`);
   } else {
-    console.warn(`  note: ${cardFile} not found - ${route} keeps the default og-image.png`);
+    console.warn(`  note: no og-${route} card (v2 or v1) found - ${route} keeps the default og-image-v2.png`);
   }
 
   const cardAbs = existsSync(join(ROOT, cardFile))
-    ? `${ORIGIN}/${cardFile}` : `${ORIGIN}/og-image.png`;
+    ? `${ORIGIN}/${cardFile}` : `${ORIGIN}/assets/og-image-v2.png`;
   out = replacePageSchema(out, url, meta.en, meta.desc_en, cardAbs, 'en-CA', `${route}: WebPage schema`);
 
   // Mark this route's own page as the active one.

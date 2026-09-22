@@ -25,13 +25,29 @@
   <script>
     var pathSegmentsToKeep = window.location.hostname.endsWith('.github.io') ? 1 : 0;
     var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
+    /* Per-page share previews are real files at /notice/<slug>. A page
+       published in the last few minutes can lack its file while the Notice
+       Pages workflow is between runs; send those visitors to the generic
+       bridge, which always works, instead of bouncing them into the SPA's
+       "page not found". Crawlers still get a real 404 - correct, since there
+       is nothing per-page to show them yet. */
+    var noticeMatch = /^notice\/([a-z0-9][a-z0-9-]{0,60})(?:\.html)?\/?$/i.exec(
+      l.pathname.split('/').slice(1 + pathSegmentsToKeep).join('/'));
+    if (noticeMatch) {
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        (pathSegmentsToKeep ? '/' + l.pathname.split('/')[1] : '') +
+        '/notice?p=' + noticeMatch[1].toLowerCase()
+      );
+    } else {
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    }
   </script>
 </head>
 <body>

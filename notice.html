@@ -23,10 +23,12 @@
 
      What it deliberately does NOT do
      --------------------------------
-     The card is the same for every page. A static file cannot carry a
-     different title or image per ?p= value, because the crawler never runs the
-     script that would change them. That is a property of static hosting, not
-     an oversight.
+     The card is the generic CJHQ one. Per-page previews now live in the
+     generated /notice/<slug> files (tools/generate-notice-pages.py plus the
+     Notice Pages workflow); this file remains as the bridge for ?p= links
+     already posted, and as the fallback 404.html sends early clicks to while
+     a new page's preview file is being generated. New share links produced by
+     the admin use /notice/<slug>.
 
      Expiry is NOT re-implemented here. This page hands the visitor to the
      site's own router, which already refuses a page that is unpublished,
@@ -51,8 +53,8 @@
 <meta property="og:title" content="CJHQ Community Notice">
 <meta property="og:description" content="Official community information and updates from the Jewish Hasidic Council of Quebec.">
 <meta property="og:url" content="https://cjhq.org/notice">
-<meta property="og:image" content="https://cjhq.org/assets/og-notice.png">
-<meta property="og:image:secure_url" content="https://cjhq.org/assets/og-notice.png">
+<meta property="og:image" content="https://cjhq.org/assets/og-notice-v2.png">
+<meta property="og:image:secure_url" content="https://cjhq.org/assets/og-notice-v2.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -63,7 +65,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CJHQ Community Notice">
 <meta name="twitter:description" content="Official community information and updates from the Jewish Hasidic Council of Quebec.">
-<meta name="twitter:image" content="https://cjhq.org/assets/og-notice.png">
+<meta name="twitter:image" content="https://cjhq.org/assets/og-notice-v2.png">
 <meta name="twitter:image:alt" content="CJHQ Community Notice — Le Conseil des Juifs Hassidiques du Québec">
 
 <link rel="icon" href="/favicon.ico">

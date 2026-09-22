@@ -47,7 +47,7 @@
 <meta property="og:title" id="ogTitle" content="Child Travel Consent Letter — CJHQ">
 <meta property="og:description" id="ogDescription" content="Create a simple consent letter for your child's Canada-U.S. travel. Complete the form, generate your letter, then print and sign it.">
 <meta property="og:url" id="ogUrl" content="https://cjhq.org/child-travel-consent">
-<meta property="og:image" id="ogImage" content="https://cjhq.org/assets/og-child-travel-consent.png">
+<meta property="og:image" id="ogImage" content="https://cjhq.org/assets/og-child-travel-consent-v2.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -60,7 +60,7 @@
 <meta name="twitter:site" content="@CJHQinfo">
 <meta name="twitter:title" id="twitterTitle" content="Child Travel Consent Letter — CJHQ">
 <meta name="twitter:description" id="twitterDescription" content="Create a simple consent letter for your child's Canada-U.S. travel. Complete the form, generate your letter, then print and sign it.">
-<meta name="twitter:image" id="twitterImage" content="https://cjhq.org/assets/og-child-travel-consent.png">
+<meta name="twitter:image" id="twitterImage" content="https://cjhq.org/assets/og-child-travel-consent-v2.png">
 <meta name="twitter:image:alt" id="twitterImageAlt" content="Child Travel Consent Letter — CJHQ — CJHQ">
 
 <!-- Schema.org Organization structured data -->
@@ -167,7 +167,7 @@
   "about": {
     "@id": "https://cjhq.org/#organization"
   },
-  "primaryImageOfPage": "https://cjhq.org/assets/og-child-travel-consent.png"
+  "primaryImageOfPage": "https://cjhq.org/assets/og-child-travel-consent-v2.png"
 }
 </script>
 
@@ -6979,21 +6979,27 @@ function cjhqPageWindowLabel(p){
    what they typed before they save it. */
 /* ---------- Share link for a temporary page ----------
    A temporary page has no file of its own on GitHub Pages, so its own address
-   answers 404 to a social crawler and shows no preview card. /notice is a real
-   committed file that does have preview tags, and ?p= tells it which page to
-   open. So the address to POST is /notice?p=<slug>; the address the visitor
-   ends up on is the page's own, through the existing router.
+   answers 404 to a social crawler and shows no preview card. The Notice Pages
+   workflow (tools/generate-notice-pages.py) commits a real preview file for
+   every LIVE temporary page at /notice/<slug> - the page's own title,
+   description and card - which forwards the human visitor to the page itself
+   through the existing router. So the address to POST is /notice/<slug>.
+
+   Files regenerate every 15 minutes, so a brand-new page's preview file can
+   lag publication by a few minutes; a click in that window is bounced by
+   404.html to the generic bridge. Links already posted as /notice?p=<slug>
+   keep working: notice.html stays as the generic-card bridge.
 
    Nothing new is stored for this. The share URL is derived from the slug the
    page already has, every time it is displayed, so it cannot drift - rename the
    page and the link follows. SITE_BASE_PATH is honoured exactly as pathForPage
    does, so this is correct on cjhq.org and on the GitHub project address. */
-const CJHQ_NOTICE_PATH = '/notice';
+const CJHQ_NOTICE_PATH = '/notice/';
 
 function cjhqShareUrl(slug){
   const s = String(slug || '').trim().toLowerCase();
   if(!s) return '';
-  return location.origin + SITE_BASE_PATH + CJHQ_NOTICE_PATH + '?p=' + encodeURIComponent(s);
+  return location.origin + SITE_BASE_PATH + CJHQ_NOTICE_PATH + encodeURIComponent(s);
 }
 function cjhqPageUrl(slug){
   const s = String(slug || '').trim().toLowerCase();
@@ -7056,7 +7062,7 @@ function updateCustomPageShareBox(){
     set('customPageShareUrl', share);
     set('customPageDestUrl', dest);
   }
-  ['customPageShareCopy','customPageShareOpen','customPageDestOpen'].forEach(id => {
+  ['customPageShareCopy','customPageShareOpen','customPageShareWhatsApp','customPageShareEmail','customPageDestOpen'].forEach(id => {
     const b = document.getElementById(id);
     if(b) b.disabled = !slug;
   });
@@ -8429,6 +8435,24 @@ async function publishChangeNotice(slug){
   if(shareOpen) shareOpen.addEventListener('click', ()=>{
     const url = (shareBox && shareBox.__share) || '';
     if(url) window.open(url, '_blank', 'noopener');
+  });
+  // One-tap share straight from the admin, same pattern as the resources
+  // page's share buttons (shareResourceVia): a WhatsApp draft and an email
+  // draft with the page's share link prefilled.
+  const shareWa = document.getElementById('customPageShareWhatsApp');
+  if(shareWa) shareWa.addEventListener('click', ()=>{
+    const url = (shareBox && shareBox.__share) || '';
+    if(!url) return;
+    const title = ((document.getElementById('customPageTitleEn')||{}).value || 'CJHQ Community Notice').trim();
+    window.open('https://wa.me/?text=' + encodeURIComponent(title + ' \u2014 ' + url), '_blank', 'noopener');
+  });
+  const shareEmail = document.getElementById('customPageShareEmail');
+  if(shareEmail) shareEmail.addEventListener('click', ()=>{
+    const url = (shareBox && shareBox.__share) || '';
+    if(!url) return;
+    const title = ((document.getElementById('customPageTitleEn')||{}).value || 'CJHQ Community Notice').trim();
+    window.location.href = 'mailto:?subject=' + encodeURIComponent(title) +
+      '&body=' + encodeURIComponent('Here is a CJHQ community notice: ' + url);
   });
   const destOpen = document.getElementById('customPageDestOpen');
   if(destOpen) destOpen.addEventListener('click', ()=>{
