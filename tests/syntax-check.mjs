@@ -9,7 +9,9 @@ import { join } from 'node:path';
 const SITE = new URL('../', import.meta.url).pathname;
 const FILES = ['index.html','fr/index.html','about.html','contact.html','resources.html',
   'admin.html','privacy.html','terms.html','accessibility.html','stay-informed.html',
-  'child-travel-consent.html','404.html','tools/admin-panel.html'];
+  'child-travel-consent.html','404.html','tools/admin-panel.inc',
+  ...['ressources','actualites','a-propos','contact','politique-de-confidentialite',
+       'conditions-utilisation','accessibilite','consentement-voyage-enfant'].map(x => `fr/${x}.html`)];
 const dir = mkdtempSync(join(tmpdir(),'cjhq-syn-'));
 let n=0, bad=0;
 for(const f of FILES){

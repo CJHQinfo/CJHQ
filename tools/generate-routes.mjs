@@ -28,23 +28,22 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'index.html');
 const ORIGIN = 'https://cjhq.org';
 
-// Routes to generate. 'home' is index.html itself and is deliberately excluded.
-// Keep in sync with SITE_PAGES in index.html.
+// Existing English route IDs and their established French slugs. The French
+// terms come from the site's current UI and translations; no route copy is new.
 const ROUTES = [
-  'resources',
-  'stay-informed',
-  'contact',
-  'about',
-  'privacy',
-  'terms',
-  'accessibility',
-  'child-travel-consent',
+  'resources', 'stay-informed', 'contact', 'about', 'privacy', 'terms',
+  'accessibility', 'child-travel-consent',
 ];
+const FRENCH_ROUTES = {
+  home:'', resources:'ressources', 'stay-informed':'actualites', about:'a-propos',
+  contact:'contact', privacy:'politique-de-confidentialite', terms:'conditions-utilisation',
+  accessibility:'accessibilite', 'child-travel-consent':'consentement-voyage-enfant',
+};
 
 // The admin panel is ~24 KB of markup no visitor can use. It lives in
-// tools/admin-panel.html and is injected into admin.html only - keeping it out
+// tools/admin-panel.inc and is injected into admin.html only - keeping it out
 // of index.html is what makes this generator idempotent.
-const ADMIN_PARTIAL = join(dirname(fileURLToPath(import.meta.url)), 'admin-panel.html');
+const ADMIN_PARTIAL = join(dirname(fileURLToPath(import.meta.url)), 'admin-panel.inc');
 // The Ask CJHQ engine, same arrangement as the admin panel: it lives outside
 // index.html and is injected into admin.html only. ASK_CJHQ_PUBLIC is false and
 // the panel markup exists only in admin.html, so no public page could ever run
@@ -52,27 +51,35 @@ const ADMIN_PARTIAL = join(dirname(fileURLToPath(import.meta.url)), 'admin-panel
 const ASK_ENGINE = join(dirname(fileURLToPath(import.meta.url)), 'ask-engine.js');
 const ASK_PLACEHOLDER = '/* Ask CJHQ engine: source lives in tools/ask-engine.js and is injected into';
 const ADMIN_PLACEHOLDER =
-  '<!-- Admin panel: source lives in tools/admin-panel.html and is injected into admin.html only. -->';
+  '<!-- Admin panel: source lives in tools/admin-panel.inc and is injected into admin.html only. -->';
 
-// Reciprocal hreflang, on / and /fr/ only. The other routes have no French URL.
-const HREFLANG = [
-  '<link rel="alternate" hreflang="en" href="https://cjhq.org/">',
-  '<link rel="alternate" hreflang="fr" href="https://cjhq.org/fr/">',
-  '<link rel="alternate" hreflang="x-default" href="https://cjhq.org/">',
-].join('\n');
-
-// index.html carries hreflang in the source. It is correct there and on /fr/,
-// and wrong on every other route - there is no French equivalent of /about to
-// point at - so those get it stripped.
-function stripHreflang(doc) {
+function routeUrl(route, lang){
+  if(lang === 'fr'){
+    const slug = FRENCH_ROUTES[route];
+    return `${ORIGIN}/fr/${slug ? slug : ''}`;
+  }
+  return route === 'home' ? `${ORIGIN}/` : `${ORIGIN}/${route}`;
+}
+function hreflangFor(route){
+  const en = routeUrl(route, 'en'), fr = routeUrl(route, 'fr');
+  return [
+    `<link rel="alternate" hreflang="en" href="${en}">`,
+    `<link rel="alternate" hreflang="fr" href="${fr}">`,
+    `<link rel="alternate" hreflang="x-default" href="${en}">`,
+  ].join('\n');
+}
+function replaceHreflang(doc, route, label){
+  const tags = hreflangFor(route);
+  let out = doc.replace(/\n<!-- Reciprocal with \/fr\/[\s\S]*?-->/, '')
+               .replace(/\n<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g, '');
+  out = out.replace(/(<link rel="canonical" id="canonicalTag" href="[^"]*">)/,
+    `$1\n${tags}`);
+  for(const tag of tags.split('\n')) if(!out.includes(tag)) throw new Error(`${label}: missing ${tag}`);
+  return out;
+}
+function stripHreflang(doc){
   return doc.replace(/\n<!-- Reciprocal with \/fr\/[\s\S]*?-->/, '')
             .replace(/\n<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g, '');
-}
-function assertHreflang(doc, label) {
-  for (const tag of HREFLANG.split('\n')) {
-    if (!doc.includes(tag)) throw new Error(`${label}: missing hreflang ${tag}`);
-  }
-  return doc;
 }
 
 const checkOnly = process.argv.includes('--check');
@@ -234,8 +241,7 @@ function buildRoute(route) {
   if (out.includes('id="page-admin"')) {
     throw new Error(`${route}: admin markup leaked into a public route`);
   }
-  out = stripHreflang(out);
-  if (out.includes('hreflang=')) throw new Error(`${route}: hreflang should not be on this route`);
+  out = replaceHreflang(out, route, `${route}: hreflang`);
 
   // Nothing outside <head> may differ from index.html except that one class.
   const normalise = (s) => s.slice(s.indexOf('</head>'))
@@ -258,7 +264,7 @@ function buildAdmin() {
     '<link rel="canonical" id="canonicalTag" href="https://cjhq.org/admin">', 'admin: canonical');
   out = replaceOnce(out, /<div class="page active" id="page-home"/,
     '<div class="page" id="page-home"', 'admin: deactivate home');
-  if (!existsSync(ADMIN_PARTIAL)) throw new Error('tools/admin-panel.html is missing');
+  if (!existsSync(ADMIN_PARTIAL)) throw new Error('tools/admin-panel.inc is missing');
   const panel = readFileSync(ADMIN_PARTIAL, 'utf8')
     .replace('<div class="page" id="page-admin">', '<div class="page active" id="page-admin">');
   if (!out.includes(ADMIN_PLACEHOLDER)) throw new Error('admin: placeholder not found in index.html');
@@ -285,53 +291,43 @@ function buildAdmin() {
   return out;
 }
 
-/* ---- /fr/: one crawlable French homepage. Not a French site. ---- */
-function buildFrenchHome() {
-  const meta = META.home;
-  if (!meta || !meta.fr || !meta.desc_fr) throw new Error('PAGE_META.home lacks fr/desc_fr');
-  const title = esc(meta.fr), desc = esc(meta.desc_fr), url = `${ORIGIN}/fr/`;
+/* ---- independently crawlable French counterparts ---- */
+function buildFrenchRoute(route) {
+  const meta = META[route];
+  if (!meta || !meta.fr || !meta.desc_fr) throw new Error(`${route}: missing French PAGE_META`);
+  const title = esc(meta.fr), desc = esc(meta.desc_fr), url = routeUrl(route, 'fr');
   let out = html;
-  // French before any JavaScript runs, so a crawler sees French.
   out = replaceOnce(out, /<html lang="en">/,
-    '<html lang="fr" class="lang-fr" data-force-lang="fr">', 'fr: html lang + force marker');
+    '<html lang="fr" class="lang-fr" data-force-lang="fr">', `${route}: French html`);
   out = replaceOnce(out, /<title id="pageTitle">[\s\S]*?<\/title>/,
-    `<title id="pageTitle">${title}</title>`, 'fr: title');
+    `<title id="pageTitle">${title}</title>`, `${route}: French title`);
   out = replaceOnce(out, /<meta name="description" content="[^"]*">/,
-    `<meta name="description" content="${desc}">`, 'fr: description');
+    `<meta name="description" content="${desc}">`, `${route}: French description`);
   out = replaceOnce(out, /<link rel="canonical" id="canonicalTag" href="[^"]*">/,
-    `<link rel="canonical" id="canonicalTag" href="${url}">`, 'fr: canonical');
-  out = replaceOnce(out, /<meta property="og:url" id="ogUrl" content="[^"]*">/,
-    `<meta property="og:url" id="ogUrl" content="${url}">`, 'fr: og:url');
-
-  /* The French homepage used to declare the English Organization node - French
-     title, French description, French lang attribute, English structured data.
-     Same @id, so this is still one entity; only the label a French consumer
-     reads changes. The English name stays in alternateName, which it already
-     was, so nothing is lost. */
-  // No capture group: replaceOnce counts match array length, and a group would
-  // make a single match look like two.
-  out = replaceOnce(out,
-    /"name": "Jewish Hasidic Council of Quebec",\n      "alternateName"/,
-    '"name": "Le Conseil des Juifs Hassidiques du Québec",\n      "alternateName"',
-    'fr: Organization name');
-  out = replaceOnce(out,
-    /"description": "The Jewish Hasidic Council of Quebec \(CJHQ\) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities\.",/,
-    `"description": ${JSON.stringify(meta.desc_fr)},`,
-    'fr: Organization description');
-  out = replacePageSchema(out, url, meta.fr, meta.desc_fr, `${ORIGIN}/og-image.png`, 'fr-CA', 'fr: WebPage schema');
-  out = replaceOnce(out, /<meta property="og:title" id="ogTitle" content="[^"]*">/,
-    `<meta property="og:title" id="ogTitle" content="${title}">`, 'fr: og:title');
-  out = replaceOnce(out, /<meta property="og:description" id="ogDescription" content="[^"]*">/,
-    `<meta property="og:description" id="ogDescription" content="${desc}">`, 'fr: og:description');
-  out = replaceOnce(out, /<meta name="twitter:title" id="twitterTitle" content="[^"]*">/,
-    `<meta name="twitter:title" id="twitterTitle" content="${title}">`, 'fr: twitter:title');
-  out = replaceOnce(out, /<meta name="twitter:description" id="twitterDescription" content="[^"]*">/,
-    `<meta name="twitter:description" id="twitterDescription" content="${desc}">`, 'fr: twitter:description');
+    `<link rel="canonical" id="canonicalTag" href="${url}">`, `${route}: French canonical`);
+  for (const [id, value] of [['ogUrl',url],['ogTitle',title],['ogDescription',desc],
+                              ['twitterTitle',title],['twitterDescription',desc]]) {
+    const attr = id.startsWith('og') ? 'property' : 'name';
+    const key = id === 'ogUrl' ? 'og:url' : id === 'ogTitle' ? 'og:title' : id === 'ogDescription' ? 'og:description' : id === 'twitterTitle' ? 'twitter:title' : 'twitter:description';
+    out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
+      `<meta ${attr}="${key}" id="${id}" content="${value}">`, `${route}: ${id}`);
+  }
   out = replaceOnce(out, /<meta property="og:locale" content="[^"]*">/,
-    '<meta property="og:locale" content="fr_CA">', 'fr: og:locale');
+    '<meta property="og:locale" content="fr_CA">', `${route}: locale`);
   out = replaceOnce(out, /<meta property="og:locale:alternate" content="[^"]*">/,
-    '<meta property="og:locale:alternate" content="en_CA">', 'fr: og:locale:alternate');
-  if (out.includes('id="page-admin"')) throw new Error('fr: admin markup leaked');
+    '<meta property="og:locale:alternate" content="en_CA">', `${route}: alternate locale`);
+  out = replacePageSchema(out, url, meta.fr, meta.desc_fr,
+    route === 'home' ? `${ORIGIN}/og-image.png` : `${ORIGIN}/assets/og-${route}.png`,
+    'fr-CA', `${route}: French WebPage schema`);
+  const pageId = `page-${route}`;
+  if(route !== 'home'){
+    out = replaceOnce(out, /<div class="page active" id="page-home"/,
+      '<div class="page" id="page-home"', `${route}: deactivate home`);
+    out = replaceOnce(out, new RegExp(`<div class="page" id="${pageId}"`),
+      `<div class="page active" id="${pageId}"`, `${route}: activate page`);
+  }
+  out = replaceHreflang(out, route, `${route}: French hreflang`);
+  if (out.includes('id="page-admin"')) throw new Error(`${route}: admin leaked into French route`);
   return out;
 }
 
@@ -353,13 +349,14 @@ for (const route of ROUTES) {
 }
 
 /* ---- index.html (served copy), admin.html, fr/index.html ---- */
-// index.html is the source AND the served homepage, so the generator does not
-// rewrite it - it only asserts the hreflang block is present.
-assertHreflang(html, 'index.html (source)');
-const extras = [
-  ['admin.html', buildAdmin()],
-  [join('fr', 'index.html'), assertHreflang(buildFrenchHome(), 'fr')],
-];
+// index.html carries the home reciprocal tags in source.
+for(const tag of hreflangFor('home').split('\n')){
+  if(!html.includes(tag)) throw new Error(`index.html: missing ${tag}`);
+}
+const extras = [['admin.html', buildAdmin()]];
+for(const [route, slug] of Object.entries(FRENCH_ROUTES)){
+  extras.push([join('fr', slug || 'index.html') + (slug ? '.html' : ''), buildFrenchRoute(route)]);
+}
 
 // The forced-language marker must exist ONLY on the French page. Test the
 // attribute on <html>, not the string anywhere - the language script contains

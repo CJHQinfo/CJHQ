@@ -7,6 +7,9 @@
 <meta name="description" content="Accessibility Statement for the CJHQ website.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" id="canonicalTag" href="https://cjhq.org/accessibility">
+<link rel="alternate" hreflang="en" href="https://cjhq.org/accessibility">
+<link rel="alternate" hreflang="fr" href="https://cjhq.org/fr/accessibilite">
+<link rel="alternate" hreflang="x-default" href="https://cjhq.org/accessibility">
 
 <!-- Favicon. favicon.ico carries 16/32/48px; browsers also request /favicon.ico
      from the site root automatically, so this works even without these tags. -->
@@ -1147,15 +1150,15 @@
 <header>
   <div class="header-inner">
     <a class="brand" href="/" data-page="home">
-      <img class="brand-mark" id="brandLogoImg" src="/assets/cjhq-brand-mark.webp" width="1000" height="563" decoding="async" alt="CJHQ \u2014 Le Conseil des Juifs Hassidiques du Qu\u00e9bec \u2014 The Jewish Hasidic Council of Quebec">
+      <img class="brand-mark" id="brandLogoImg" src="/assets/cjhq-brand-mark.webp" width="1000" height="563" decoding="async" alt="CJHQ">
     </a>
 
     <nav class="main-nav" id="mainNav" aria-label="Main">
       <a href="/" data-page="home"><span data-en>Home</span><span data-fr>Accueil</span></a>
       <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
       <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
-      <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
       <a href="/about" data-page="about"><span data-en>About</span><span data-fr>À propos</span></a>
+      <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
     </nav>
 
     <div style="display:flex; align-items:center; gap:10px;">
@@ -1189,8 +1192,8 @@
     <a href="/" data-page="home"><span data-en>Home</span><span data-fr>Accueil</span></a>
     <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
     <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
-    <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
     <a href="/about" data-page="about"><span data-en>About CJHQ</span><span data-fr>À propos du CJHQ</span></a>
+    <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
   </div>
   <div class="mobile-drawer-foot">
     <div class="lang-toggle">
@@ -1396,7 +1399,7 @@
 
       <div class="res-search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="resourceSearch" data-en-ph="Search resources (passport, RAMQ, NEXUS, parking...)" data-fr-ph="Rechercher une ressource (passeport, RAMQ, NEXUS, stationnement...)" placeholder="Search resources (passport, RAMQ, NEXUS, parking...)">
+        <input type="text" id="resourceSearch" data-en-ph="Search resources (passport, RAMQ, NEXUS, parking...)" data-fr-ph="Rechercher (passeport, RAMQ, NEXUS...)" placeholder="Search resources (passport, RAMQ, NEXUS, parking...)">
         <button id="resourceSearchClear" style="display:none;">&times;</button>
       </div>
       <p id="resourceSearchCount" style="font-size:.85rem; color:var(--muted); margin-top:8px; display:none;"></p>
@@ -1521,6 +1524,7 @@
       <div class="follow-btn-row" style="margin-bottom:32px;">
         <a class="btn dark" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Facebook →</span><span data-fr>Suivre le CJHQ sur Facebook →</span></a>
         <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://x.com/CJHQinfo" target="_blank" rel="noopener"><span data-en>Follow CJHQ on X →</span><span data-fr>Suivre le CJHQ sur X →</span></a>
+        <a class="btn" style="background:transparent; border:1.5px solid var(--ink); color:var(--ink);" href="https://www.instagram.com/cjhqinfo/" target="_blank" rel="noopener"><span data-en>Follow CJHQ on Instagram →</span><span data-fr>Suivre le CJHQ sur Instagram →</span></a>
       </div>
       <div id="socialEmbedGrid" class="social-embed-grid">
         <div style="width:100%;">
@@ -1690,11 +1694,11 @@
         </div>
         <div class="contact-info-item">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 5c0 8.3 6.7 15 15 15l3-3-5-4-2 2c-2-1-4.5-3.5-5.5-5.5l2-2-4-5-3 3z"/></svg>
-          <div id="contactPhone">(514) 819-9440</div>
+          <div id="contactPhone"><a href="tel:+15148199440">(514) 819-9440</a></div>
         </div>
         <div class="contact-info-item">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
-          <div id="contactEmail">info@cjhq.org</div>
+          <div id="contactEmail"><a href="mailto:info@cjhq.org">info@cjhq.org</a></div>
         </div>
       </div>
     </div>
@@ -2412,7 +2416,7 @@
 
 
 <!-- ============ ADMIN (hidden — access via /admin) ============ -->
-<!-- Admin panel: source lives in tools/admin-panel.html and is injected into admin.html only. -->
+<!-- Admin panel: source lives in tools/admin-panel.inc and is injected into admin.html only. -->
 
 <!-- ============ FOOTER ============ -->
 </main>
@@ -2440,15 +2444,15 @@
         <a href="/" data-page="home" style="margin-top:8px;"><span data-en>Home</span><span data-fr>Accueil</span></a>
         <a href="/resources" data-page="resources"><span data-en>Resources</span><span data-fr>Ressources</span></a>
         <a href="/stay-informed" data-page="stay-informed"><span data-en>News &amp; Updates</span><span data-fr>Actualités</span></a>
-        <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
         <a href="/about" data-page="about"><span data-en>About</span><span data-fr>À propos</span></a>
+        <a href="/contact" data-page="contact"><span data-en>Contact</span><span data-fr>Contact</span></a>
       </nav>
 
       <div>
         <span class="eyebrow" style="color:#8FA3C7;" data-en>Contact</span>
         <span class="eyebrow" style="color:#8FA3C7;" data-fr>Contact</span>
         <div style="font-size:.85rem; margin-top:8px; line-height:1.8;">
-          <span data-en id="footerAddrEn">1040 Van Horne Ave<br>Outremont, QC, H2V 1J5, CANADA</span><span data-fr id="footerAddrFr">1040, avenue Van Horne, 2e étage<br>Outremont (Québec) H2V 1J5, CANADA</span><br><span id="footerPhone">(514) 819-9440</span> · <span id="footerEmail">info@cjhq.org</span>
+          <span data-en id="footerAddrEn">1040 Van Horne Ave<br>Outremont, QC, H2V 1J5, CANADA</span><span data-fr id="footerAddrFr">1040, avenue Van Horne, 2e étage<br>Outremont (Québec) H2V 1J5, CANADA</span><br><a id="footerPhone" href="tel:+15148199440">(514) 819-9440</a> · <a id="footerEmail" href="mailto:info@cjhq.org">info@cjhq.org</a>
         </div>
       </div>
 
@@ -3918,7 +3922,20 @@ async function applyPartnerOverrides(){
 
 
 // ---------- NAVIGATION ----------
-function pathForPage(name){
+const FRENCH_ROUTE_BY_PAGE = {
+  home:'', resources:'ressources', 'stay-informed':'actualites', about:'a-propos',
+  contact:'contact', privacy:'politique-de-confidentialite', terms:'conditions-utilisation',
+  accessibility:'accessibilite', 'child-travel-consent':'consentement-voyage-enfant'
+};
+const PAGE_BY_FRENCH_ROUTE = Object.fromEntries(
+  Object.entries(FRENCH_ROUTE_BY_PAGE).map(([page, route]) => [route, page])
+);
+function pathForPage(name, lang){
+  const useFr = lang === 'fr' || (!lang && document.documentElement.classList.contains('lang-fr'));
+  if(useFr && Object.prototype.hasOwnProperty.call(FRENCH_ROUTE_BY_PAGE, name)){
+    const route = FRENCH_ROUTE_BY_PAGE[name];
+    return SITE_BASE_PATH + '/fr/' + (route ? route : '');
+  }
   return name === 'home' ? (SITE_BASE_PATH + '/') : (SITE_BASE_PATH + '/' + name);
 }
 function goPage(name, opts){
@@ -4039,12 +4056,9 @@ function updatePageMeta(name){
   // page's canonical and og:url to the English homepage - telling Google the two
   // are the same page and collapsing /fr/ out of the index. The raw HTML is
   // correct; only this runtime update needed to respect the route.
-  const onFrenchHome = /^\/fr\/?$/.test(location.pathname) && name === 'home';
-  const url   = (name === '404')
+  const url = (name === '404')
     ? (location.origin + location.pathname)
-    : onFrenchHome
-      ? (location.origin + '/fr/')
-      : (location.origin + pathForPage(name));
+    : (location.origin + pathForPage(name, isFr ? 'fr' : 'en'));
   document.getElementById('pageTitle').textContent = title;
   document.title = title;
   const setMeta = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
@@ -4180,7 +4194,7 @@ function setLang(lang){
   document.documentElement.classList.toggle('lang-fr', lang==='fr');
   document.getElementById('btnEN').classList.toggle('active', lang==='en');
   document.getElementById('btnFR').classList.toggle('active', lang==='fr');
-  document.getElementById('btnEN').textContent = lang==='fr' ? 'AN' : 'EN';
+  document.getElementById('btnEN').textContent = 'EN';
   document.documentElement.lang = lang;
   const searchInput = document.getElementById('siteSearch');
   searchInput.placeholder = lang==='fr' ? searchInput.dataset.frPh : searchInput.dataset.enPh;
@@ -4188,7 +4202,7 @@ function setLang(lang){
   if(drawerEN && drawerFR){
     drawerEN.classList.toggle('active', lang==='en');
     drawerFR.classList.toggle('active', lang==='fr');
-    drawerEN.textContent = lang==='fr' ? 'AN' : 'EN';
+    drawerEN.textContent = 'EN';
   }
   const drawerSearch = document.getElementById('drawerSearch');
   if(drawerSearch) drawerSearch.placeholder = lang==='fr' ? drawerSearch.dataset.frPh : drawerSearch.dataset.enPh;
@@ -4277,8 +4291,15 @@ function translateCtctForm(lang){
 // deliberately not written to storage, so "saved" always means "the visitor
 // chose this" and never "we guessed this once".
 function chooseLang(lang){
+  const activePage = document.querySelector('.page.active');
+  const pageName = activePage ? activePage.id.replace('page-','') : 'home';
   setLang(lang);
   try{ localStorage.setItem('cjhq_language', lang); }catch(e){}
+  if(Object.prototype.hasOwnProperty.call(FRENCH_ROUTE_BY_PAGE, pageName)){
+    const nextPath = pathForPage(pageName, lang);
+    if(location.pathname !== nextPath) history.pushState({page:pageName}, '', nextPath);
+    updatePageMeta(pageName);
+  }
 }
 document.getElementById('btnEN').addEventListener('click', ()=>chooseLang('en'));
 document.getElementById('btnFR').addEventListener('click', ()=>chooseLang('fr'));
@@ -4364,6 +4385,12 @@ setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
 // ---------- CONTACT FORM (Formspree) ----------
 const contactForm = document.getElementById('contactForm');
 if(contactForm){
+  const resetContactStatus = () => {
+    const statusEl = document.getElementById('contactFormStatus');
+    if(statusEl){ statusEl.textContent = ''; statusEl.style.display = 'none'; }
+  };
+  resetContactStatus();
+  window.addEventListener('pageshow', resetContactStatus);
   contactForm.addEventListener('submit', function(e){
     e.preventDefault();
     const statusEl = document.getElementById('contactFormStatus');
@@ -9310,12 +9337,15 @@ function checkCurrentPath(opts){
   // A visit to /index.html (or /index.htm) is the same as the bare root —
   // without this, it would be parsed as an unrecognized page name and 404.
   if(/^\/index\.html?$/i.test(path)) path = '/';
-  // /fr/ is the French homepage: a distinct crawlable URL serving the same
-  // home page. Without this it fell through to the unknown-route branch and
-  // JavaScript replaced the correctly-rendered French page with the 404 page.
-  // The URL is left alone so the canonical, hreflang and history all stay /fr/.
-  if(path === '/fr' || /^\/fr\/index\.html?$/i.test(path)){
-    goPage('home', {skipHistory:true, skipScroll:opts.skipScroll});
+  // Every /fr/ route has a static French counterpart. Resolve its established
+  // slug to the existing SPA page without removing any page containers.
+  if(/^\/fr(?:\/|$)/i.test(path)){
+    const frPath = path.replace(/^\/fr\/?/i, '').replace(/\/index\.html?$/i, '').replace(/\.html?$/i, '').replace(/\/$/, '');
+    const pageName = PAGE_BY_FRENCH_ROUTE[frPath];
+    if(pageName){
+      setLang('fr');
+      goPage(pageName, {skipHistory:true, skipScroll:opts.skipScroll});
+    } else show404(path, {skipHistory:true});
     return;
   }
   if(path === '/'){
@@ -9718,17 +9748,20 @@ checkCurrentPath({deferUnknown:true});
      consent mechanism added - that decision is documented separately. -->
 <script>
 (function deferSocialEmbeds(){
-  var LOADERS = [
-    { id:'cjhq-fb-sdk',    src:'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0',
-      attrs:{ crossOrigin:'anonymous' } },
-    { id:'cjhq-x-widgets', src:'https://platform.x.com/widgets.js',
-      attrs:{ charset:'utf-8' } }
-  ];
+  function loaders(){
+    var locale = document.documentElement.classList.contains('lang-fr') ? 'fr_CA' : 'en_US';
+    return [
+      { id:'cjhq-fb-sdk', src:'https://connect.facebook.net/' + locale + '/sdk.js#xfbml=1&version=v19.0',
+        attrs:{ crossOrigin:'anonymous' } },
+      { id:'cjhq-x-widgets', src:'https://platform.x.com/widgets.js',
+        attrs:{ charset:'utf-8' } }
+    ];
+  }
   var loaded = false;
   function load(){
     if(loaded) return;
     loaded = true;
-    LOADERS.forEach(function(l){
+    loaders().forEach(function(l){
       if(document.getElementById(l.id)) return;
       var el = document.createElement('script');
       el.id = l.id; el.async = true; el.defer = true;

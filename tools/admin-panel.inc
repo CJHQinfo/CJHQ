@@ -1,0 +1,595 @@
+<div class="page" id="page-admin">
+  <section style="padding-top:56px; min-height:70vh;">
+    <div class="section-inner" style="max-width:840px;">
+      <span class="eyebrow">CJHQ Staff</span>
+      <h1 style="font-size:1.8rem; margin-top:10px;">Site Admin</h1>
+
+      <div id="adminLoginBox" class="card" style="max-width:360px; margin-top:20px;">
+        <p style="font-size:.9rem; color:var(--muted);">Sign in with your CJHQ staff account to manage the site.</p>
+        <label for="adminEmailInput" style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Email</label>
+        <input type="email" id="adminEmailInput" autocomplete="username" style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:1rem; margin-bottom:10px;">
+        <label for="adminPasswordInput" style="display:block; font-size:.82rem; font-weight:600; margin-bottom:4px;">Password</label>
+        <input type="password" id="adminPasswordInput" autocomplete="current-password" style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:6px; font-size:1rem; margin-bottom:10px;">
+        <button class="btn dark" id="adminLoginBtn" style="width:100%;">Sign In</button>
+
+        <div style="display:flex; align-items:center; gap:10px; margin:14px 0 12px;">
+          <span style="flex:1; height:1px; background:var(--line);"></span>
+          <span style="font-size:.78rem; color:var(--muted);">or</span>
+          <span style="flex:1; height:1px; background:var(--line);"></span>
+        </div>
+
+        <button class="btn outline" id="adminGoogleBtn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; color:var(--ink); border-color:var(--line);">
+          <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true" style="flex-shrink:0;">
+            <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.3 6.6v5.5h7C42.6 36.7 45.1 31.1 45.1 24.5z"/>
+            <path fill="#34A853" d="M24 46c5.8 0 10.7-1.9 14.3-5.2l-7-5.5c-1.9 1.3-4.4 2.1-7.3 2.1-5.6 0-10.4-3.8-12.1-8.9H4.7v5.6C8.3 41.3 15.6 46 24 46z"/>
+            <path fill="#FBBC05" d="M11.9 28.5c-.4-1.3-.7-2.7-.7-4.5s.3-3.2.7-4.5v-5.6H4.7C3.1 17.1 2.2 20.4 2.2 24s.9 6.9 2.5 10.1l7.2-5.6z"/>
+            <path fill="#EA4335" d="M24 9.5c3.2 0 6 1.1 8.2 3.2l6.2-6.2C34.7 3 29.8 1 24 1 15.6 1 8.3 5.7 4.7 13.9l7.2 5.6C13.6 14.4 18.4 9.5 24 9.5z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </button>
+
+        <p id="adminLoginError" style="color:#A23B3B; font-size:.85rem; margin-top:8px; display:none;"></p>
+      </div>
+
+      <div id="adminPanelBox" style="display:none; margin-top:20px;">
+        <div id="adminFirebaseWarning" class="notice" style="display:none; margin-bottom:20px; background:#FBF3DD; border-color:#B4881A;">
+          <strong>Not signed in.</strong> Saving is unavailable until you sign in with a CJHQ staff account. Anything you change here will not be saved.
+        </div>
+
+        <div id="adminTabs" style="display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:24px; padding-bottom:0;">
+          <button class="admin-tab-btn active" data-tab="pages">Pages</button>
+          <button class="admin-tab-btn" data-tab="content">Page Content</button>
+          <button class="admin-tab-btn" data-tab="notices">Notices &amp; Popups</button>
+          <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
+          <button class="admin-tab-btn" data-tab="partners">Partners</button>
+          <button class="admin-tab-btn" data-tab="resources">Resource Links</button>
+          <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
+          <button class="admin-tab-btn" data-tab="linkaudit">Link Audit</button>
+          <button class="admin-tab-btn" data-tab="messages">Messages</button>
+          <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ</button>
+          <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
+          <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
+        </div>
+
+        <!-- ===== TAB: PAGES ===== -->
+        <div class="admin-tab-panel" id="tab-pages">
+          <h2 style="font-size:1.2rem;">Site Pages</h2>
+          <p style="font-size:.88rem; color:var(--muted);">Every built-in page on the site. Click "View" to open it, or "Deactivate" to hide it from navigation and visitors (without deleting anything — you can reactivate any time).</p>
+          <div id="pagesList"></div>
+
+          <h3 style="font-size:.95rem; margin-top:28px;">Add a New Page</h3>
+          <p style="font-size:.82rem; color:var(--muted);">Creates a brand-new page with its own web address. Optionally add it to the main navigation menu.</p>
+          <form id="customPageForm" class="card" style="margin:16px 0;">
+            <input type="hidden" id="customPageId">
+            <label class="admin-label">Page Address (letters, numbers, and dashes only — this becomes yoursite.com#your-slug)</label>
+            <input type="text" id="customPageSlug" class="admin-input" placeholder="e.g. community-events">
+            <label class="admin-label">Title — English</label>
+            <input type="text" id="customPageTitleEn" class="admin-input">
+            <label class="admin-label">Title — French</label>
+            <input type="text" id="customPageTitleFr" class="admin-input">
+            <label class="admin-label">Content format</label>
+            <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:.88rem;">
+                <input type="radio" name="customPageBodyFormat" id="customPageFormatHtml" value="html" checked> HTML
+              </label>
+              <label style="display:flex; align-items:center; gap:6px; font-size:.88rem;">
+                <input type="radio" name="customPageBodyFormat" id="customPageFormatText" value="text"> Plain text
+              </label>
+              <span id="customPageFormatHint" style="font-size:.8rem; color:var(--muted);"></span>
+            </div>
+
+            <label class="admin-label">Content — English</label>
+            <textarea id="customPageBodyEn" rows="8" class="admin-input"></textarea>
+            <div style="margin:6px 0 12px;">
+              <input type="file" id="customPageFileEn" accept=".html,.htm,.txt,text/html,text/plain" style="display:none;">
+              <button type="button" class="admin-small-btn" id="customPageFileEnBtn">Load from a file…</button>
+              <span id="customPageFileEnName" style="font-size:.8rem; color:var(--muted); margin-left:8px;"></span>
+            </div>
+
+            <label class="admin-label">Content — French</label>
+            <textarea id="customPageBodyFr" rows="8" class="admin-input"></textarea>
+            <div style="margin:6px 0 4px;">
+              <input type="file" id="customPageFileFr" accept=".html,.htm,.txt,text/html,text/plain" style="display:none;">
+              <button type="button" class="admin-small-btn" id="customPageFileFrBtn">Load from a file…</button>
+              <span id="customPageFileFrName" style="font-size:.8rem; color:var(--muted); margin-left:8px;"></span>
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:.88rem;">
+              <input type="checkbox" id="customPageShowNav"> Show in main navigation menu
+            </label>
+            <div id="customPageNavLabelFields" style="display:none; margin-top:8px;">
+              <label class="admin-label">Nav Menu Label — English</label>
+              <input type="text" id="customPageNavEn" class="admin-input">
+              <label class="admin-label">Nav Menu Label — French</label>
+              <input type="text" id="customPageNavFr" class="admin-input">
+            </div>
+
+            <hr style="margin:18px 0; border:none; border-top:1px solid var(--line);">
+            <h3 style="font-size:.95rem; margin:0 0 4px;">When the page is public</h3>
+            <p style="font-size:.84rem; color:var(--muted); margin:0 0 12px;">
+              These dates control the whole public life of the page, not just the homepage.
+              Outside them the page is not reachable at all — not by its address, not from the
+              menu, not from the homepage. It stays here for you to edit either way.
+              <strong>For a temporary page, set both dates.</strong> Leave a date blank only if
+              you really mean "no limit" on that end.
+            </p>
+            <label style="display:flex; align-items:center; gap:8px; font-size:.88rem;">
+              <input type="checkbox" id="customPagePublished" checked> Published
+            </label>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;">
+              <div style="flex:1 1 200px;">
+                <label class="admin-label">Start Date (first day it is public)</label>
+                <input type="date" id="customPageStart" class="admin-input">
+              </div>
+              <div style="flex:1 1 200px;">
+                <label class="admin-label">End Date (last day it is public)</label>
+                <input type="date" id="customPageEnd" class="admin-input">
+              </div>
+            </div>
+            <p id="customPageStatusPreview" style="font-size:.84rem; margin:10px 0 0;"></p>
+
+            <!-- ===== Sharing =====
+                 A temporary page has no file of its own on GitHub Pages, so its
+                 own address shows no preview card when posted. /notice is a real
+                 file that does, and ?p= tells it which page to open. Both URLs
+                 are derived from the address field above, so they follow a
+                 rename with no second place to update. -->
+            <h3 style="font-size:.95rem; margin:18px 0 4px;">Sharing</h3>
+            <div id="customPageShareBox" data-ready="0" class="card"
+                 style="margin:8px 0 0; background:var(--bg-alt); border-color:var(--line);">
+              <p style="margin:0 0 2px; font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);">Share link</p>
+              <p id="customPageShareUrl" style="margin:0 0 8px; font-size:.9rem; word-break:break-all;">Enter a page address above to get the share link.</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="admin-small-btn" id="customPageShareCopy" disabled>Copy Share Link</button>
+                <button type="button" class="admin-small-btn" id="customPageShareOpen" disabled>Open Share Link</button>
+                <span id="customPageShareMsg" style="font-size:.82rem; opacity:0; transition:opacity .2s;"></span>
+              </div>
+
+              <p style="margin:14px 0 2px; font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);">Destination</p>
+              <p id="customPageDestUrl" style="margin:0 0 8px; font-size:.9rem; word-break:break-all;">&mdash;</p>
+              <button type="button" class="admin-small-btn" id="customPageDestOpen" disabled>Open Page</button>
+
+              <p style="margin:14px 0 0; font-size:.82rem; color:var(--muted); line-height:1.5;">
+                Post the <strong>share link</strong> on WhatsApp, Facebook or elsewhere to get the CJHQ
+                Community Notice preview card. The preview image and title are the same generic CJHQ card
+                for every page; the visitor is taken to this specific page. If the page is not published,
+                or is outside its dates, the visitor sees the normal &ldquo;page not found&rdquo; instead.
+              </p>
+            </div>
+
+            <h3 style="font-size:.95rem; margin:18px 0 4px;">Homepage</h3>
+            <label style="display:flex; align-items:center; gap:8px; font-size:.88rem;">
+              <input type="checkbox" id="customPageShowHome"> Display on homepage while the page is live
+            </label>
+            <div id="customPageHomeFields" style="display:none; margin-top:10px;">
+              <label class="admin-label">How it appears</label>
+              <select id="customPageHomeStyle" class="admin-input">
+                <option value="tile">Tile — title, short text and a button</option>
+                <option value="button">Button — a single button, nothing else</option>
+              </select>
+              <label class="admin-label">Button Label — English (optional, defaults to the title)</label>
+              <input type="text" id="customPageHomeCtaEn" class="admin-input">
+              <label class="admin-label">Button Label — French</label>
+              <input type="text" id="customPageHomeCtaFr" class="admin-input">
+              <label class="admin-label">Tile Text — English (optional, tile only)</label>
+              <input type="text" id="customPageHomeBlurbEn" class="admin-input">
+              <label class="admin-label">Tile Text — French</label>
+              <input type="text" id="customPageHomeBlurbFr" class="admin-input">
+            </div>
+            <hr style="margin:18px 0; border:none; border-top:1px solid var(--line);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <h3 style="font-size:.95rem; margin:0;">Preview</h3>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="admin-small-btn" id="customPagePreviewEnBtn" aria-pressed="true">English</button>
+                <button type="button" class="admin-small-btn" id="customPagePreviewFrBtn" aria-pressed="false">Français</button>
+              </div>
+            </div>
+            <p style="font-size:.82rem; color:var(--muted); margin:6px 0 10px;">
+              Exactly how the page will look to a visitor — the same rendering, the same cleaning of unsafe
+              markup. It updates as you type. Nothing here is saved until you press Save Page.
+            </p>
+            <div id="customPagePreview" class="ctc-page-preview">
+              <h1 id="customPagePreviewTitle"></h1>
+              <div id="customPagePreviewBody"></div>
+            </div>
+
+            <div style="margin-top:14px; display:flex; gap:10px;">
+              <button type="submit" class="btn dark" id="customPageSaveBtn">Save Page</button>
+              <button type="button" class="btn admin-btn-outline" id="customPageCancelBtn">Cancel Edit</button>
+            </div>
+          </form>
+
+          <h3 style="font-size:.95rem;">Pages Added Here</h3>
+          <div id="customPageBackfillBar" style="display:none; margin:0 0 12px; padding:12px 14px;
+               border:1px solid #E0C97F; background:#FDF8E7; border-radius:8px; font-size:.86rem;">
+            <strong>One-time update needed.</strong>
+            <span id="customPageBackfillMsg"></span>
+            <button type="button" class="admin-small-btn" id="customPageBackfillBtn" style="margin-left:8px;">Update now</button>
+          </div>
+          <div id="customPagesList"></div>
+        </div>
+
+        <!-- ===== TAB: PAGE CONTENT ===== -->
+        <div class="admin-tab-panel" id="tab-content" style="display:none;">
+          <h2 style="font-size:1.2rem;">Page Content</h2>
+          <p style="font-size:.88rem; color:var(--muted);">
+            Edit any heading or paragraph on the site's main pages. Changes save per block, in both languages,
+            and apply immediately for all visitors. If you leave a field blank, the site falls back to its
+            original wording for that block.
+          </p>
+          <label class="admin-label" style="margin-top:14px;">Choose a page</label>
+          <select id="contentPageSelect" class="admin-input"></select>
+          <div id="contentBlocksList" style="margin-top:16px;"></div>
+        </div>
+
+        <!-- ===== TAB: NOTICES & POPUPS ===== -->
+        <div class="admin-tab-panel" id="tab-notices" style="display:none;">
+          <h2 style="font-size:1.2rem;">Site Notices &amp; Popups</h2>
+          <p style="font-size:.88rem; color:var(--muted);">Notices appear as a dismissible bar at the top of every page. Popups appear once per visitor session as a modal.</p>
+
+          <form id="noticeForm" class="card" style="margin:16px 0;">
+            <input type="hidden" id="noticeId">
+            <label class="admin-label">Type</label>
+            <select id="noticeType" class="admin-input">
+              <option value="banner">Banner (top of every page)</option>
+              <option value="popup">Popup (once per visit)</option>
+            </select>
+            <label class="admin-label">Style</label>
+            <select id="noticeStyle" class="admin-input">
+              <option value="info">Info (neutral)</option>
+              <option value="warning">Warning (yellow)</option>
+              <option value="urgent">Urgent (red)</option>
+            </select>
+            <label class="admin-label">Title — English</label>
+            <input type="text" id="noticeTitleEn" class="admin-input">
+            <label class="admin-label">Title — French</label>
+            <input type="text" id="noticeTitleFr" class="admin-input">
+            <label class="admin-label">Message — English</label>
+            <textarea id="noticeBodyEn" rows="2" class="admin-input"></textarea>
+            <label class="admin-label">Message — French</label>
+            <textarea id="noticeBodyFr" rows="2" class="admin-input"></textarea>
+            <!-- Scheduling lives here, with the notice itself, rather than in the
+                 Publishing tab: the dates are part of the notice you are writing. -->
+            <div class="vis-dates" style="margin-top:14px;">
+              <div>
+                <label for="noticeStartsOn">Start date</label>
+                <input type="date" id="noticeStartsOn" class="admin-input">
+              </div>
+              <div>
+                <label for="noticeEndsOn">End date</label>
+                <input type="date" id="noticeEndsOn" class="admin-input">
+              </div>
+              <p>Leave blank for no limit. Dates are inclusive: an end date of 5 September stays visible all day on the 5th.</p>
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:.88rem;">
+              <input type="checkbox" id="noticeActive" checked> Active (visible on site)
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:.88rem;">
+              <input type="checkbox" id="noticeDraft"> Save as draft (keep working on it — never shows publicly)
+            </label>
+            <div style="margin-top:14px; display:flex; gap:10px;">
+              <button type="submit" class="btn dark" id="noticeSaveBtn">Save Notice</button>
+              <button type="button" class="btn admin-btn-outline" id="noticeCancelBtn">Cancel Edit</button>
+            </div>
+          </form>
+
+          <div id="noticesList"></div>
+        </div>
+
+        <!-- ===== TAB: SITE SETTINGS ===== -->
+        <div class="admin-tab-panel" id="tab-settings" style="display:none;">
+          <h2 style="font-size:1.2rem;">Site Settings</h2>
+          <p style="font-size:.88rem; color:var(--muted);">These values are used across the site — header, footer, and contact page. Changes apply everywhere once saved.</p>
+
+          <form id="settingsForm" class="card" style="margin:16px 0;">
+            <h3 style="font-size:.95rem;">Organization Name</h3>
+            <label class="admin-label">English</label>
+            <input type="text" id="setOrgEn" class="admin-input" placeholder="The Jewish Hasidic Council of Quebec">
+            <label class="admin-label">French</label>
+            <input type="text" id="setOrgFr" class="admin-input" placeholder="Le Conseil des Juifs Hassidiques du Québec">
+
+            <h3 style="font-size:.95rem; margin-top:18px;">Contact Information</h3>
+            <label class="admin-label">Street Address — English</label>
+            <input type="text" id="setAddrEn" class="admin-input" placeholder="1040 Van Horne Ave, Outremont, QC, H2V 1J5, CANADA">
+            <label class="admin-label">Street Address — French</label>
+            <input type="text" id="setAddrFr" class="admin-input" placeholder="1040, avenue Van Horne, 2e étage, Outremont (Québec) H2V 1J5, CANADA">
+            <label class="admin-label">Phone</label>
+            <input type="text" id="setPhone" class="admin-input" placeholder="(514) 819-9440">
+            <label class="admin-label">Email</label>
+            <input type="text" id="setEmail" class="admin-input" placeholder="info@cjhq.org">
+
+            <h3 style="font-size:.95rem; margin-top:18px;">Social Media</h3>
+            <label class="admin-label">Facebook URL</label>
+            <input type="text" id="setFacebook" class="admin-input" placeholder="https://www.facebook.com/CJHQinfo">
+            <label class="admin-label">X (Twitter) URL</label>
+            <input type="text" id="setX" class="admin-input" placeholder="https://x.com/CJHQinfo">
+
+            <h3 style="font-size:.95rem; margin-top:18px;">Footer Tagline</h3>
+            <label class="admin-label">English</label>
+            <input type="text" id="setTaglineEn" class="admin-input">
+            <label class="admin-label">French</label>
+            <input type="text" id="setTaglineFr" class="admin-input">
+
+            <h3 style="font-size:.95rem; margin-top:18px;">Logo</h3>
+            <p style="font-size:.78rem; color:var(--muted); margin:0 0 8px;">Leave blank to keep the logo currently built into the site. If set, this image replaces it in the header everywhere.</p>
+            <label class="admin-label">Logo Image URL</label>
+            <input type="text" id="setLogoUrl" class="admin-input" placeholder="https://example.com/logo.png">
+
+            <h3 style="font-size:.95rem; margin-top:18px;">Brand Colors</h3>
+            <p style="font-size:.78rem; color:var(--muted); margin:0 0 8px;">Changes the site's two main brand colors everywhere they're used — headings, buttons, links, and accents.</p>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+              <div>
+                <label class="admin-label">Primary (dark)</label>
+                <input type="color" id="setColorPrimary" value="#0E2149" style="width:60px; height:38px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+              </div>
+              <div>
+                <label class="admin-label">Accent</label>
+                <input type="color" id="setColorAccent" value="#2F4C7A" style="width:60px; height:38px; border:1px solid var(--line); border-radius:6px; cursor:pointer;">
+              </div>
+              <div>
+                <button type="button" class="btn admin-btn-outline" id="resetColorsBtn" style="align-self:flex-end; font-size:.8rem;">Reset to Default Colors</button>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn dark" id="settingsSaveBtn">Save Settings</button>
+              <span id="settingsSavedMsg" style="display:none; color:#3A7D52; font-size:.85rem; margin-left:10px;">Saved.</span>
+            </div>
+          </form>
+        </div>
+
+        <!-- ===== TAB: PARTNERS ===== -->
+        <div class="admin-tab-panel" id="tab-partners" style="display:none;">
+          <h2 style="font-size:1.2rem;">Partners Marquee</h2>
+          <p style="font-size:.88rem; color:var(--muted);">Add or remove organizations shown in the scrolling partners strip on the homepage. Use an image URL for the logo, or leave blank to show the name as text.</p>
+
+          <h3 style="font-size:.95rem; margin-top:18px;">Currently on the site</h3>
+          <p style="font-size:.82rem; color:var(--muted);">These logos are embedded directly in the site file, so the image itself can't be swapped from here — but you can hide one from the marquee, or change its website link, without touching the file.</p>
+<div id="partnerContactEditorBox" class="card" style="display:none; margin:10px 0 18px;"></div>
+                    <div id="embeddedPartnersList" style="margin:10px 0 20px;"></div>
+
+          <h3 style="font-size:.95rem;">Add a New Partner</h3>
+          <form id="partnerForm" class="card" style="margin:16px 0;">
+            <input type="hidden" id="partnerId">
+            <label class="admin-label">Organization Name</label>
+            <input type="text" id="partnerName" class="admin-input" placeholder="e.g. Yaldei">
+            <label class="admin-label">Logo Image URL (optional)</label>
+            <input type="text" id="partnerLogoUrl" class="admin-input" placeholder="https://example.com/logo.png">
+            <label class="admin-label">Website URL (optional — makes the logo clickable)</label>
+            <input type="text" id="partnerLinkUrl" class="admin-input" placeholder="https://example.org">
+            <div style="margin-top:14px; display:flex; gap:10px;">
+              <button type="submit" class="btn dark" id="partnerSaveBtn">Save Partner</button>
+              <button type="button" class="btn admin-btn-outline" id="partnerCancelBtn">Cancel Edit</button>
+            </div>
+          </form>
+
+          <h3 style="font-size:.95rem;">Added via this admin panel</h3>
+          <div id="partnersAdminList"></div>
+        </div>
+
+        <!-- ===== TAB: RESOURCE LINKS ===== -->
+        <div class="admin-tab-panel" id="tab-resources" style="display:none;">
+          <h2 style="font-size:1.2rem;">Add a Resource Link</h2>
+          <p style="font-size:.88rem; color:var(--muted);">Add new links to the Community Resource Centre. New links appear at the end of the selected category, in both languages.</p>
+
+          <form id="resourceForm" class="card" style="margin:16px 0;">
+            <input type="hidden" id="resourceId">
+            <label class="admin-label">Category</label>
+            <select id="resourceCategory" class="admin-input"></select>
+            <label class="admin-label">Link Title — English</label>
+            <input type="text" id="resourceTitleEn" class="admin-input">
+            <label class="admin-label">Link Title — French</label>
+            <input type="text" id="resourceTitleFr" class="admin-input">
+            <label class="admin-label">Description — English (recommended — shown when someone clicks this resource)</label>
+            <input type="text" id="resourceDescEn" class="admin-input" placeholder="e.g. What this is and how to apply, in plain language">
+            <label class="admin-label">Description — French</label>
+            <input type="text" id="resourceDescFr" class="admin-input" placeholder="ex. Ce que c'est et comment faire la demande, en langage simple">
+            <label class="admin-label">URL</label>
+            <input type="text" id="resourceUrl" class="admin-input" placeholder="https://...">
+            <div style="margin-top:14px; display:flex; gap:10px;">
+              <button type="submit" class="btn dark" id="resourceSaveBtn">Save Link</button>
+              <button type="button" class="btn admin-btn-outline" id="resourceCancelBtn">Cancel Edit</button>
+            </div>
+          </form>
+
+          <div id="resourcesAdminList"></div>
+
+          <h3 style="font-size:.95rem; margin-top:28px;">Existing Resources (edit or hide)</h3>
+          <p style="font-size:.82rem; color:var(--muted);">These are the resources already built into the Resource Centre. You can edit their title, summary, and link, or hide one from the public site without deleting it.</p>
+          <input type="text" id="existingResourceSearch" class="admin-input" placeholder="Search existing resources…" style="margin:10px 0;">
+          <div id="existingResourcesList" style="max-height:480px; overflow-y:auto;"></div>
+        </div>
+
+        <!-- ===== TAB: CALENDAR ===== -->
+        <div class="admin-tab-panel" id="tab-calendar" style="display:none;">
+          <h2 style="font-size:1.2rem;">Community Calendar</h2>
+          <p style="font-size:.88rem; color:var(--muted);">The full Jewish holiday calendar was removed from the public site for now, as agreed. This tab manages <strong>community events</strong> (dinners, fundraisers, closures, etc.) so the data is ready whenever the public calendar comes back — it just isn't displayed anywhere on the live site yet.</p>
+
+          <form id="eventForm" class="card" style="margin:16px 0;">
+            <input type="hidden" id="eventId">
+            <label class="admin-label">Title — English</label>
+            <input type="text" id="eventTitleEn" class="admin-input">
+            <label class="admin-label">Title — French</label>
+            <input type="text" id="eventTitleFr" class="admin-input">
+            <label class="admin-label">Date</label>
+            <input type="date" id="eventDate" class="admin-input">
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label class="admin-label">Start Time (optional)</label><input type="time" id="eventStart" class="admin-input"></div>
+              <div style="flex:1;"><label class="admin-label">End Time (optional)</label><input type="time" id="eventEnd" class="admin-input"></div>
+            </div>
+            <label class="admin-label">Location (optional)</label>
+            <input type="text" id="eventLocation" class="admin-input">
+            <label class="admin-label">Description — English</label>
+            <textarea id="eventDescEn" rows="2" class="admin-input"></textarea>
+            <label class="admin-label">Description — French</label>
+            <textarea id="eventDescFr" rows="2" class="admin-input"></textarea>
+            <label class="admin-label">Link (optional)</label>
+            <input type="text" id="eventLink" class="admin-input" placeholder="https://...">
+            <div style="margin-top:14px; display:flex; gap:10px;">
+              <button type="submit" class="btn dark" id="eventSaveBtn">Save Event</button>
+              <button type="button" class="btn admin-btn-outline" id="eventCancelBtn">Cancel Edit</button>
+            </div>
+          </form>
+
+          <div id="eventsAdminList"></div>
+        </div>
+
+        <!-- ===== TAB: LINK AUDIT ===== -->
+        <div class="admin-tab-panel" id="tab-linkaudit" style="display:none;">
+          <h2 style="font-size:1.2rem;">Monthly Link Audit</h2>
+          <p style="font-size:.88rem; color:var(--muted);">
+            Once set up (see the developer note near "LINK AUDIT CLOUD FUNCTION" in the page source), an automated check runs on the 1st of every month: it visits every resource link, confirms it still loads, and asks an AI to compare our instructions against the live government page. It never edits anything on its own — it only flags what a person should look at here.
+          </p>
+          <div id="linkAuditSetupWarning" class="notice" style="display:none; margin:16px 0; background:#FBF3DD; border-color:#B4881A;">
+            <strong>Not connected yet.</strong> The monthly checker is a separate piece (a Firebase Cloud Function) that hasn't been deployed. This tab will populate once it's running — see the setup note in the source for the steps.
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0;">
+            <button class="btn dark" id="syncResourcesBtn" type="button">Sync Current Resources to Backend</button>
+            <button class="btn admin-btn-outline" id="refreshAuditBtn" type="button">Refresh Results</button>
+          </div>
+          <p style="font-size:.78rem; color:var(--muted);">Run "Sync" once now, and again any time you add or edit resources — it tells the monthly checker what to compare against.</p>
+
+          <h3 style="font-size:.95rem; margin-top:20px;">Flagged Items</h3>
+          <div id="linkAuditList"></div>
+
+          <h3 style="font-size:.95rem; margin-top:28px;">Visitor-Reported Issues</h3>
+          <p style="font-size:.82rem; color:var(--muted);">Broken links visitors ran into (with a "Report" button click) and unexpected site errors, captured automatically.</p>
+          <div id="errorReportsList"></div>
+        </div>
+
+        <!-- ===== TAB: MESSAGES ===== -->
+        <div class="admin-tab-panel" id="tab-messages" style="display:none;">
+          <h2 style="font-size:1.2rem;">Contact Form Messages</h2>
+          <p style="font-size:.88rem; color:var(--muted);">
+            A copy of every contact form submission, saved here independently of Formspree — so you have a
+            backup and a searchable history even if an email gets missed or filtered.
+          </p>
+          <input type="text" id="messagesSearch" class="admin-input" placeholder="Search messages…" style="margin:12px 0;">
+          <div id="messagesList"></div>
+        </div>
+
+        <!-- ================= Ask CJHQ (admin test mode) =================
+             Lives inside the existing admin panel so it inherits the existing
+             Firebase Auth gate and staff allowlist. Nothing here is reachable
+             from the public site: this markup ships only in admin.html. -->
+        <div class="admin-tab-panel" id="tab-askcjhq" style="display:none;">
+          <div class="ask-banner" role="status">
+            <strong>ADMIN TEST MODE — NOT PUBLIC.</strong>
+            Ask CJHQ is not launched. Visitors cannot see or reach it.
+          </div>
+
+          <h2 class="ask-title">Ask CJHQ</h2>
+          <p class="ask-sub">Your Jewish Community Assistant</p>
+
+          <div class="ask-status" id="askBackendStatus"></div>
+
+          <div class="ask-shell">
+            <div class="ask-log" id="askLog" role="log" aria-live="polite" aria-label="Conversation"></div>
+
+  
+            <form class="ask-input-row" id="askForm">
+              <label class="visually-hidden" for="askInput">What can I help you with?</label>
+              <input type="text" id="askInput" class="admin-input" autocomplete="off"
+                     placeholder="What can I help you with?">
+              <button type="submit" class="btn dark" id="askSend">Send</button>
+            </form>
+
+            <div class="ask-actions">
+              <button type="button" class="btn admin-btn-outline" id="askNew">New Conversation</button>
+              <button type="button" class="btn admin-btn-outline" id="askClear">Clear</button>
+              <button type="button" class="btn admin-btn-outline" id="askCopy">Copy Response</button>
+              <button type="button" class="btn admin-btn-outline" id="askToggleSources" aria-pressed="true">Hide Sources</button>
+            </div>
+          </div>
+
+          <!-- ============ Language Review bench ============
+               Runs a fixed set of questions across English, French, Hebrew and
+               Yiddish and lays the results out for a human reviewer. Nothing
+               here is stored: results live in the page for the session only,
+               the same as the conversation above. -->
+          <h3 class="ask-h3">Language Review</h3>
+          <p class="ask-help">
+            Runs the standard question set in all four languages and shows what the assistant
+            actually answers. The Yiddish has not been checked by a native speaker &mdash; this is
+            where to read it. Use <b>Copy for reviewer</b> to send the Yiddish rows to someone fluent.
+          </p>
+          <div class="ask-actions" style="margin-bottom:10px;">
+            <button type="button" class="btn dark" id="langBenchRun">Run Language Review</button>
+            <button type="button" class="btn admin-btn-outline" id="langBenchRunAI">Run with AI phrasing</button>
+            <button type="button" class="btn admin-btn-outline" id="langBenchCopy">Copy for reviewer</button>
+            <button type="button" class="btn admin-btn-outline" id="langBenchClear">Clear</button>
+          </div>
+          <div class="ask-status" id="langBenchStatus">Not run yet.</div>
+          <div id="langBenchResults"></div>
+
+          <h3 class="ask-h3">Knowledge Sources</h3>
+          <p class="ask-help">
+            The registry the assistant draws on. Stored in Firestore and editable here, so sources can be
+            added or retired without a code change.
+          </p>
+          <div id="askSourcesList"></div>
+          <button type="button" class="btn admin-btn-outline" id="askAddSource" style="margin-top:10px;">Add Source</button>
+          <button type="button" class="btn admin-btn-outline" id="askSeedSources" style="margin-top:10px;">Load Default Sources</button>
+        </div>
+
+        <!-- ============ Publishing / public visibility ============
+             Controls whether a built-but-unreviewed section is visible to the
+             public. Default hidden; publishing is always a deliberate act. -->
+        <div class="admin-tab-panel" id="tab-visibility" style="display:none;">
+          <h2 class="ask-title">Publishing</h2>
+          <p class="ask-sub">Control what the public can see</p>
+          <p class="ask-help">
+            Sections listed here are built but not automatically public. Content and visibility are
+            separate: editing a section never publishes it. Publishing is always a deliberate action,
+            and it is recorded.
+          </p>
+          <div id="visibilityList"></div>
+        </div>
+
+        <!-- ============ Staff access ============
+             Who may sign in to this panel. Two sources: a short list written
+             into the Firestore security rules (shown here as Built-in, and
+             changeable only in the Firebase console), and the `staff`
+             collection, which this tab manages. -->
+        <div class="admin-tab-panel" id="tab-staff" style="display:none;">
+          <h2 style="font-size:1.2rem;">Staff Access</h2>
+          <p style="font-size:.88rem; color:var(--muted);">
+            Everyone who can sign in to this admin panel. Adding an address here lets that person
+            sign in with Google using that exact address &mdash; they do not need an invitation email,
+            and nothing is sent to them. Tell them yourself that they now have access.
+          </p>
+
+          <p id="staffBuiltInNote" style="display:none; font-size:.84rem; color:var(--muted); border-left:3px solid var(--line); padding-left:12px; margin:16px 0;">
+            Built-in accounts appear in this list the first time each one signs in after this update.
+            One that is missing still has full access &mdash; it just has not signed in yet.
+          </p>
+
+          <div id="staffList" style="margin-top:8px;"></div>
+
+          <h3 style="font-size:.95rem; margin-top:28px;">Add someone</h3>
+          <p style="font-size:.82rem; color:var(--muted);">
+            Use the exact address they sign in to Google with. Access is granted to that address only.
+          </p>
+          <form id="staffAddForm" class="card" style="margin:12px 0;">
+            <label class="admin-label" for="staffAddEmail">Email address</label>
+            <input type="email" id="staffAddEmail" class="admin-input" required
+                   autocomplete="off" spellcheck="false" placeholder="name@example.com">
+            <button class="btn" type="submit" style="margin-top:8px;">Add</button>
+          </form>
+          <p id="staffAddMsg" style="font-size:.84rem; margin-top:10px; display:none;"></p>
+
+          <div style="border-top:1px solid var(--line); margin-top:28px; padding-top:16px;">
+            <p style="font-size:.82rem; color:var(--muted);">
+              <strong>Built-in accounts</strong> are written into the database security rules. They are the
+              recovery path if this list is ever emptied by mistake, so they cannot be removed from here.
+              To change them, edit the rules in the Firebase console.
+            </p>
+          </div>
+        </div>
+
+        <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
+        <button class="btn admin-btn-outline" style="margin-top:8px; font-size:.82rem; color:var(--muted); border-color:var(--line);" id="adminLogoutBtn">Sign out</button>
+      </div>
+    </div>
+  </section>
+</div>

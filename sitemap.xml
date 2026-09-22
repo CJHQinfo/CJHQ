@@ -7,19 +7,15 @@
   date on each deploy. Change a page's date only when that page's content
   actually changes.
 
-  2026-08-28: all eight updated together because every route file was
-  regenerated on that date (each now marks its own page active in the raw
-  HTML, not the homepage). That is a genuine change to every page, so a
-  shared date is accurate here rather than a bulk refresh for its own sake.
+  Existing English lastmod dates are preserved. French counterparts added in
+  this implementation use the corresponding English page's lastmod because
+  their visible content is the already-existing translation of that page.
 
   changefreq / priority: Google ignores both. Retained because Bing still
   reads them and they cost nothing.
 
-  hreflang: /fr/ is the one distinct French URL, added 2026-08-28. It is the
-  French homepage, and it is reciprocal with / via hreflang tags in both files.
-  The other seven routes have no French equivalent and deliberately carry no
-  hreflang - pointing fr at an English URL would be wrong, and inventing
-  /fr/about would mean shipping pages that do not exist. See the note in-->
+  hreflang: each English route and its French counterpart reference each other;
+  x-default consistently points to the English counterpart.-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
@@ -41,9 +37,21 @@
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://cjhq.org/fr/consentement-voyage-enfant</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
 
   <url>
     <loc>https://cjhq.org/resources</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://cjhq.org/fr/ressources</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -55,9 +63,21 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://cjhq.org/fr/actualites</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
   <url>
     <loc>https://cjhq.org/contact</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cjhq.org/fr/contact</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -69,9 +89,21 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://cjhq.org/fr/a-propos</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 
   <url>
     <loc>https://cjhq.org/privacy</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://cjhq.org/fr/politique-de-confidentialite</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
@@ -83,9 +115,21 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url>
+    <loc>https://cjhq.org/fr/conditions-utilisation</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
 
   <url>
     <loc>https://cjhq.org/accessibility</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://cjhq.org/fr/accessibilite</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

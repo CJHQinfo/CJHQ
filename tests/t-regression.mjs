@@ -55,7 +55,7 @@ export default async function run(){
   t.check('shared core still declares itself generated', core.startsWith('/* GENERATED FILE'));
 
   // ---- routes / SEO / robots: nothing unrelated moved ----------------------
-  for(const f of ['robots.txt', 'sitemap.xml', 'CNAME', '404.html', '.nojekyll']){
+  for(const f of ['robots.txt', 'CNAME', '404.html', '.nojekyll']){
     t.check(f + ' is byte-identical to the deployed branch',
       readFileSync(SITE + f, 'utf8') === readFileSync(LIVE + f, 'utf8'));
   }
