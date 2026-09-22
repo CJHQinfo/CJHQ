@@ -32,10 +32,7 @@ PROJECT = 'cjhqinfo'
 API_KEY = 'AIzaSyDPzTFbsiOtJ4LOKiFjL0aVtSKhl21zwuc'  # public web key, same as index.html
 BASE = f'https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents'
 ORIGIN = 'https://cjhq.org'
-FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf'
-LOGO = os.path.join(ROOT, 'cjhq-logo.png')
 SLUG_RE = re.compile(r'^[a-z0-9][a-z0-9-]{0,60}$')
-W, H, NAVY, SAFE = 1200, 630, (20, 35, 74), 630
 
 
 def get(path):
@@ -55,60 +52,15 @@ def strip_html(s):
     return re.sub(r'\s+', ' ', html.unescape(s)).strip()
 
 
-def fit(draw, text, start, maxw, min_size=15):
-    from PIL import ImageFont
-    size = start
-    while size > min_size:
-        f = ImageFont.truetype(FONT, size)
-        if draw.textlength(text, font=f) <= maxw:
-            return f, size
-        size -= 1
-    return ImageFont.truetype(FONT, min_size), min_size
-
-
-def wrap(draw, text, maxw, max_lines=3):
-    words, lines, cur = text.split(), [], ''
-    from PIL import ImageFont
-    probe = ImageFont.truetype(FONT, 34)
-    for w in words:
-        t = (cur + ' ' + w).strip()
-        if draw.textlength(t, font=probe) <= maxw or not cur:
-            cur = t
-        else:
-            lines.append(cur); cur = w
-    if cur: lines.append(cur)
-    if len(lines) > max_lines:
-        lines = lines[:max_lines]
-        last = lines[-1]
-        while ' ' in last and draw.textlength(last + ' \u2026', font=probe) > maxw:
-            last = last.rsplit(' ', 1)[0]
-        lines[-1] = last + ' \u2026'
-    return lines
-
-
-def make_card(label, out_path):
-    from PIL import Image, ImageDraw
-    card = Image.new('RGB', (W, H), (255, 255, 255))
-    logo = Image.open(LOGO).convert('RGB')
-    lw = 470
-    lh = round(lw * logo.height / logo.width)
-    d = ImageDraw.Draw(card)
-    lines = wrap(d, label.upper(), SAFE - 40)
-    sizes = [fit(d, ln, 34, SAFE - 40) for ln in lines]
-    text_h = sum(s for _, s in sizes) + 8 * (len(lines) - 1)
-    f_org_h = 30
-    total_h = lh + 26 + text_h + 14 + f_org_h
-    y = (H - total_h) // 2
-    card.paste(logo.resize((lw, lh), Image.LANCZOS), ((W - lw) // 2, y))
-    y += lh + 26
-    for ln, (f, s) in zip(lines, sizes):
-        d.text(((W - d.textlength(ln, font=f)) / 2, y), ln, font=f, fill=NAVY)
-        y += s + 8
-    y += 6
-    from PIL import ImageFont
-    f_org = ImageFont.truetype(FONT, f_org_h)
-    d.text(((W - d.textlength('cjhq.org', font=f_org)) / 2, y), 'cjhq.org', font=f_org, fill=NAVY)
-    card.save(out_path, optimize=True)
+def make_card(en_short, fr_short, out_path):
+    """Same classic treatment as the static pages' cards: og-cards.py's build()
+       (logo lockup + footer strip lifted from og-image.png, Lora labels)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'ogcards', os.path.join(ROOT, 'tools', 'og-cards.py'))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    m.build(en_short, fr_short, out_path)
 
 
 HTML_TMPL = """<!DOCTYPE html>
@@ -222,7 +174,12 @@ def main():
             os.makedirs(direct_dir, exist_ok=True)
             with open(direct_index, 'w', encoding='utf-8') as f:
                 f.write(page_html)
-        make_card(short, os.path.join(ROOT, 'assets', f'og-notice-{slug}.png'))
+        fr_short = (field(doc, 'title_fr').split('\u00b7')[0].strip()
+                    or 'AVIS COMMUNAUTAIRE').upper()
+        if fr_short == short.upper():
+            fr_short = ''  # identical EN/FR titles: one line is enough
+        make_card(short.upper(), fr_short,
+                  os.path.join(ROOT, 'assets', f'og-notice-{slug}.png'))
         live.append(slug)
 
     # Remove generated files for pages that left the live window.
