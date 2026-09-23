@@ -363,6 +363,11 @@
               <button type="submit" class="btn dark" id="noticeSaveBtn">Save Notice</button>
               <button type="button" class="btn admin-btn-outline" id="noticeCancelBtn">Cancel Edit</button>
             </div>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <span style="font-size:.82rem; color:var(--muted);">Preview (nothing is saved):</span>
+              <button type="button" class="admin-small-btn" onclick="admPreviewNotice('en')">Preview EN</button>
+              <button type="button" class="admin-small-btn" onclick="admPreviewNotice('fr')">Preview FR</button>
+            </div>
           </form>
 
           <div id="noticesList"></div>

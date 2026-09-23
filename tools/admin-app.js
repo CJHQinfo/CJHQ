@@ -319,6 +319,54 @@ function admWatchBilingual(){
   box.__admPairObs.observe(box, {childList:true, subtree:true});
 }
 
+
+/* ---------- Preview a notice before saving ----------
+   Shows the banner or popup exactly as visitors would get it (same element,
+   same classes, same sanitiser), from what is typed in the form right now.
+   Nothing is saved and nothing is remembered: closing the preview puts the
+   page back the way it was and does not mark anything as seen. */
+function admPreviewNotice(lang){
+  const val = id => (document.getElementById(id) || {}).value || '';
+  const type = val('noticeType') || 'banner';
+  const style = val('noticeStyle') || 'info';
+  const fr = lang === 'fr';
+  const title = val(fr ? 'noticeTitleFr' : 'noticeTitleEn');
+  const body = val(fr ? 'noticeBodyFr' : 'noticeBodyEn');
+  if(!title && !body){ admToast('Type a title or message first, in ' + (fr ? 'French' : 'English') + '.', 'error'); return; }
+  const sp = cjhqSanitizeHtml;
+  const tag = '<span style="display:inline-block; margin-left:8px; padding:1px 7px; border-radius:10px; background:#FFF3CD; color:#7A5B00; font-size:.72rem; font-weight:600; vertical-align:middle;">PREVIEW · ' + (fr ? 'FR' : 'EN') + ' · not saved</span>';
+  if(type === 'popup'){
+    const overlay = document.getElementById('sitePopupOverlay');
+    const box = document.getElementById('sitePopupBody');
+    if(!overlay || !box){ admToast('Could not open the popup preview on this page.', 'error'); return; }
+    const before = box.innerHTML;
+    box.innerHTML = `
+        <div class="site-modal-head"><h2 style="margin:2px 0;">${sp(title)||''}${tag}</h2>
+          <button class="site-modal-close" type="button" aria-label="Close">&times;</button></div>
+        <div class="site-modal-body"><div class="site-modal-section"><p>${sp(body)||''}</p></div></div>`;
+    const close = ()=>{ overlay.classList.remove('open'); box.innerHTML = before; overlay.removeEventListener('click', onBack); };
+    const onBack = e=>{ if(e.target === overlay) close(); };
+    box.querySelector('.site-modal-close').addEventListener('click', close);
+    overlay.addEventListener('click', onBack);
+    overlay.classList.add('open');
+    return;
+  }
+  const el = document.getElementById('siteNoticeBanner');
+  if(!el){ admToast('Could not open the banner preview on this page.', 'error'); return; }
+  if(!el.__admBefore) el.__admBefore = { cls: el.className, disp: el.style.display, html: el.innerHTML };
+  el.className = 'notice-' + style;
+  el.style.display = 'block';
+  el.innerHTML = `${title?`<b>${sp(title)}</b>`:''}${sp(body)}${tag}<button class="notice-close" type="button" aria-label="Close preview">&times;</button>`;
+  el.querySelector('.notice-close').addEventListener('click', ()=>{
+    const b = el.__admBefore; el.__admBefore = null;
+    el.className = b.cls; el.style.display = b.disp; el.innerHTML = b.html;
+    // Re-render the real banner (if any) so its own close button works again.
+    if(typeof renderPublicNotices === 'function') renderPublicNotices().catch(()=>{});
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+  admToast('Banner preview shown at the top of the page. Close it with its ×.');
+}
+
 function showAdminPanel(){
   document.getElementById('adminLoginBox').style.display = 'none';
   document.getElementById('adminPanelBox').style.display = 'block';
@@ -928,10 +976,39 @@ async function renderContentBlocksList(){
       <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="fr">${hasOverride ? (ov.fr||'') : m.default_fr}</textarea>
       <div style="display:flex; gap:8px; margin-top:10px;">
         <button class="admin-small-btn" onclick="saveContentBlock('${m.cid}')">Save</button>
+        <button class="admin-small-btn" type="button" onclick="admToggleBlockPreview('${m.cid}')">Preview</button>
         ${hasOverride ? `<button class="admin-small-btn" style="color:#A23B3B;" onclick="resetContentBlock('${m.cid}')">Reset to Default</button>` : ''}
       </div>
+      <div class="adm-block-preview" data-preview-cid="${m.cid}" hidden style="margin-top:10px; border:1px dashed var(--line,#d8d8d8); border-radius:8px; padding:10px 12px; background:#fcfcfa;"></div>
     </div>`;
   }).join('');
+  if(!list.__admPreviewWired){
+    list.__admPreviewWired = true;
+    list.addEventListener('input', e=>{
+      const cid = e.target && e.target.getAttribute && e.target.getAttribute('data-cid');
+      if(cid) admRenderBlockPreview(cid);
+    });
+  }
+}
+/* Preview a Page Content block before saving. Shows both languages as they
+   would read on the page, from what is typed now. A blank field previews the
+   original wording, because that is what visitors get for a blank field. */
+function admRenderBlockPreview(cid){
+  const box = document.querySelector(`[data-preview-cid="${cid}"]`);
+  if(!box || box.hidden) return;
+  const m = CONTENT_MANIFEST.find(x => x.cid === cid) || {};
+  const get = lang => (document.querySelector(`textarea[data-cid="${cid}"][data-lang="${lang}"]`) || {}).value || '';
+  const en = get('en') || m.default_en || '';
+  const fr = get('fr') || m.default_fr || '';
+  const sp = cjhqSanitizeHtml;
+  const lab = t => `<div style="font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:6px 0 2px;">${t}</div>`;
+  box.innerHTML = `<div style="font-size:.72rem; color:#7A5B00;">Preview · not saved</div>${lab('English')}<div>${sp(en)}</div>${lab('Français')}<div>${sp(fr)}</div>`;
+}
+function admToggleBlockPreview(cid){
+  const box = document.querySelector(`[data-preview-cid="${cid}"]`);
+  if(!box) return;
+  box.hidden = !box.hidden;
+  if(!box.hidden) admRenderBlockPreview(cid);
 }
 async function saveContentBlock(cid){
   const enVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="en"]`).value;
