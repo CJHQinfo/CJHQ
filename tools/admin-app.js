@@ -289,6 +289,36 @@ function showLoginErrorGlobal(msg){
   el.style.display = 'block';
 }
 
+
+/* ---------- EN | FR side by side ----------
+   Layout only. Finds each English field whose French twin follows it
+   (label, field, label, field - same parent) and wraps the two in a
+   two-column row; on narrow screens the row stacks again. Element ids,
+   values and handlers are untouched, so every save works exactly as before. */
+function admPairBilingual(root){
+  (root || document.getElementById('adminPanelBox') || document).querySelectorAll('input[id$="En"],textarea[id$="En"],select[id$="En"]').forEach(en=>{
+    if(en.closest('.adm-bi')) return;
+    const fr = document.getElementById(en.id.replace(/En$/,'Fr'));
+    if(!fr || fr.parentElement !== en.parentElement) return;
+    const lEn = en.previousElementSibling, lFr = fr.previousElementSibling;
+    if(!lEn || !lFr || lEn.tagName !== 'LABEL' || lFr.tagName !== 'LABEL') return;
+    if(en.nextElementSibling !== lFr) return;
+    const row = document.createElement('div'); row.className = 'adm-bi';
+    const c1 = document.createElement('div'); c1.className = 'adm-bi-col'; c1.setAttribute('lang','en');
+    const c2 = document.createElement('div'); c2.className = 'adm-bi-col'; c2.setAttribute('lang','fr');
+    en.parentElement.insertBefore(row, lEn);
+    c1.append(lEn, en); c2.append(lFr, fr); row.append(c1, c2);
+  });
+}
+let admPairTimer = null;
+function admWatchBilingual(){
+  const box = document.getElementById('adminPanelBox');
+  if(!box || box.__admPairObs) return;
+  admPairBilingual(box);
+  box.__admPairObs = new MutationObserver(()=>{ clearTimeout(admPairTimer); admPairTimer = setTimeout(()=>admPairBilingual(box), 60); });
+  box.__admPairObs.observe(box, {childList:true, subtree:true});
+}
+
 function showAdminPanel(){
   document.getElementById('adminLoginBox').style.display = 'none';
   document.getElementById('adminPanelBox').style.display = 'block';
@@ -302,6 +332,7 @@ function showAdminPanel(){
   // Open on Home, the dashboard, instead of dropping straight into Pages.
   // Every tab is still rendered up front exactly as before.
   switchAdminTab('home');
+  admWatchBilingual();
   renderPagesList();
   renderCustomPagesList();
   renderContentBlocksList();

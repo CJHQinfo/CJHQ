@@ -57,6 +57,11 @@
 .adm-modal-check input{width:auto !important;margin:0;flex:0 0 auto;}
 .adm-modal-check span{flex:1 1 auto;}
 .btn.adm-danger{background:#A23B3B;border-color:#A23B3B;}
+
+/* EN | FR side by side (layout only) */
+.adm-bi{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+.adm-bi-col{min-width:0;}
+@media (max-width:760px){.adm-bi{grid-template-columns:1fr;}}
 </style>
   <section style="padding-top:56px; min-height:70vh;">
     <div class="section-inner adm-wrap" style="max-width:1180px;">
