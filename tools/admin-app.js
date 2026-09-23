@@ -1614,6 +1614,7 @@ async function syncResourcesToBackend(){
 
 async function renderLinkAuditList(){
   renderLinkCheckResults();
+  renderAiCheckSummary();
   document.getElementById('linkAuditSetupWarning').style.display = firebaseReady ? 'none' : 'block';
   const audits = await fetchCollection('link_audits');
   const flagged = audits.filter(a => a.slug && a.slug !== '_run_summary' && a.status && a.status !== 'ok');
@@ -1766,6 +1767,8 @@ async function publishChangeNotice(slug){
 
   document.getElementById('syncResourcesBtn').addEventListener('click', syncResourcesToBackend);
   document.getElementById('refreshAuditBtn').addEventListener('click', renderLinkAuditList);
+  document.getElementById('aiCheckRunBtn').addEventListener('click', (e) => runAiInstructionCheck(e.currentTarget));
+  document.querySelectorAll('[data-img-upload]').forEach(buildImageUploader);
   document.getElementById('existingResourceSearch').addEventListener('input', renderExistingResourcesList);
   document.getElementById('messagesSearch').addEventListener('input', renderMessagesList);
 
@@ -3449,4 +3452,133 @@ async function renderLinkCheckResults(){
   unsureWrap.style.display = nu ? '' : 'none';
   document.getElementById('linkCheckUnsureCount').textContent = nu;
   document.getElementById('linkCheckUnsure').innerHTML = (rep.unsure || []).map(x => row(x, '#6B7280')).join('');
+}
+
+/* ================================================================
+ * Image uploads: drag-and-drop / pick-a-file for the image URL fields
+ * (site logo, partner logos). The URL input stays - pasting a link works
+ * exactly as before and externally hosted images are untouched. The widget
+ * only fills the input after a successful upload to Firebase Storage;
+ * nothing is saved to Firestore until the form's own Save button is
+ * pressed, and the preview shows what will be used before that.
+ * ================================================================ */
+const IMG_UPLOAD_TYPES = { 'image/png':'.png', 'image/jpeg':'.jpg', 'image/webp':'.webp', 'image/gif':'.gif', 'image/svg+xml':'.svg' };
+const IMG_UPLOAD_MAX = 2 * 1024 * 1024;
+
+async function cjhqImageStorage(){
+  const stMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js');
+  return { mod: stMod, storage: stMod.getStorage(window.__fbApp) };
+}
+
+function buildImageUploader(box){
+  const input = document.getElementById(box.getAttribute('data-img-upload'));
+  if(!input) return;
+  box.innerHTML = `
+    <div class="img-up-zone" style="margin:6px 0 2px; border:1.5px dashed var(--line); border-radius:8px; padding:12px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#FAFBFD;">
+      <button type="button" class="btn admin-btn-outline img-up-pick" style="font-size:.8rem;">Upload an image</button>
+      <span class="img-up-hint" style="font-size:.78rem; color:var(--muted);">or drag one here - PNG, JPG, WebP, GIF or SVG, up to 2 MB. Pasting a URL above still works.</span>
+      <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none;">
+    </div>
+    <div class="img-up-status" style="font-size:.8rem; margin:4px 0;"></div>
+    <div class="img-up-preview" style="display:none; margin:6px 0;">
+      <img alt="Image preview" style="max-height:72px; max-width:220px; border:1px solid var(--line); border-radius:6px; background:#fff; padding:4px;">
+    </div>`;
+  const zone = box.querySelector('.img-up-zone');
+  const file = box.querySelector('input[type=file]');
+  const statusEl = box.querySelector('.img-up-status');
+  const prevBox = box.querySelector('.img-up-preview');
+  const prevImg = prevBox.querySelector('img');
+  const say = (msg, color) => { statusEl.textContent = msg || ''; statusEl.style.color = color || 'var(--muted)'; };
+  const showPreview = (url) => {
+    if(url && /^https?:\/\//i.test(url)){ prevImg.src = url; prevBox.style.display = 'block'; }
+    else prevBox.style.display = 'none';
+  };
+  input.addEventListener('input', () => showPreview(input.value.trim()));
+  showPreview(input.value.trim());
+  box.querySelector('.img-up-pick').addEventListener('click', () => file.click());
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.style.borderColor = '#2F4C7A'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = 'var(--line)'; });
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.style.borderColor = 'var(--line)';
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  file.addEventListener('change', () => { if(file.files && file.files[0]) handleFile(file.files[0]); file.value = ''; });
+
+  async function handleFile(f){
+    if(!IMG_UPLOAD_TYPES[f.type]){ say('That file type is not supported. Use PNG, JPG, WebP, GIF or SVG.', '#A23B3B'); return; }
+    if(f.size > IMG_UPLOAD_MAX){ say('That file is ' + (f.size/1048576).toFixed(1) + ' MB - the limit is 2 MB.', '#A23B3B'); return; }
+    if(!firebaseReady || !window.__fbApp){ say('Not connected to the site backend. Reload the page and try again.', '#A23B3B'); return; }
+    say('Uploading ' + f.name + '…');
+    try{
+      const { mod, storage } = await cjhqImageStorage();
+      const safeName = (f.name.replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '')) || ('image' + IMG_UPLOAD_TYPES[f.type]);
+      const ref = mod.ref(storage, 'uploads/' + Date.now() + '-' + safeName);
+      const snap = await mod.uploadBytes(ref, f, { contentType: f.type });
+      const url = await mod.getDownloadURL(snap.ref);
+      input.value = url;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      say('Uploaded ✓ - the URL is filled in above. Press Save to keep it.', '#3A7D52');
+    }catch(e){
+      console.error(e);
+      say('Upload failed: ' + (e && e.message ? e.message : 'unknown error'), '#A23B3B');
+    }
+  }
+}
+
+/* ================================================================
+ * AI instruction comparison: the "Run instruction check now" button calls
+ * the instructionCheck Cloud Function with the signed-in staff member's ID
+ * token. The function compares resources_master against each live page and
+ * writes link_audits documents, which renderLinkAuditList() shows under
+ * Flagged Items. The monthly run is a Cloud Scheduler job - same function.
+ * ================================================================ */
+const AI_CHECK_URL = 'https://instructioncheck-qu3jib66wa-ue.a.run.app';
+
+async function runAiInstructionCheck(btn){
+  const statusEl = document.getElementById('aiCheckStatus');
+  const say = (t) => { if(statusEl) statusEl.textContent = t; };
+  if(!adminUser){ say('Sign in first.'); return; }
+  btn.disabled = true;
+  say('Running… this reads every official page and takes a few minutes. Keep this tab open.');
+  try{
+    const token = await adminUser.getIdToken();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 9.5 * 60 * 1000);
+    const r = await fetch(AI_CHECK_URL, {
+      method: 'POST',
+      headers: { 'authorization': 'Bearer ' + token, 'content-type': 'application/json' },
+      body: '{}',
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    const body = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(body.error || ('HTTP ' + r.status));
+    say('Done: ' + body.checked + ' pages compared - ' + body.changed + ' changed, ' + body.unclear + ' unclear, ' + body.errors + ' could not be read. Anything needing attention is under Flagged Items below.');
+    renderLinkAuditList();
+  }catch(e){
+    say('The check failed: ' + (e && e.name === 'AbortError'
+      ? 'it took too long - partial results are saved; press "Refresh Results" in a few minutes.'
+      : (e && e.message) || e));
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+/* Shows the last AI run (from link_audits/_run_summary) above the run
+   button whenever the Link Audit tab renders. */
+async function renderAiCheckSummary(){
+  const el = document.getElementById('aiCheckStatus');
+  if(!el || el.dataset.busy === '1') return;
+  if(!firebaseReady || !window.__fbFirestore) return;
+  try{
+    const fs = window.__fbFirestore;
+    const snap = await fs.getDoc(fs.doc(fbDb, 'link_audits', '_run_summary'));
+    if(!snap.exists()) return;
+    const d = snap.data();
+    if(d.source !== 'ai_instruction_check' || !d.lastRun) return;
+    if(el.textContent) return; // a live run's own status wins
+    const when = new Date(d.lastRun).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
+    el.textContent = 'Last check ' + when + ': ' + d.checked + ' pages compared - ' + d.changed + ' changed, ' + d.unclear + ' unclear, ' + d.errors + ' could not be read.';
+  }catch(e){ /* summary is best-effort */ }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "cjhq-instruction-check",
+  "version": "1.0.0",
+  "description": "CJHQ monthly AI instruction comparison: compares the resource instructions stored in Firestore (resources_master) against each live page and writes flags to link_audits, which the admin Link Audit tab displays.",
+  "main": "index.js",
+  "scripts": { "start": "functions-framework --target=instructionCheck" },
+  "engines": { "node": "22" },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "@google-cloud/functions-framework": "^3.4.5"
+  }
+}

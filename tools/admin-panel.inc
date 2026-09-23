@@ -434,6 +434,7 @@
             <p style="font-size:.78rem; color:var(--muted); margin:0 0 8px;">Leave blank to keep the logo currently built into the site. If set, this image replaces it in the header everywhere.</p>
             <label class="admin-label">Logo Image URL</label>
             <input type="text" id="setLogoUrl" class="admin-input" placeholder="https://example.com/logo.png">
+            <div class="img-upload" data-img-upload="setLogoUrl"></div>
 
             <h3 style="font-size:.95rem; margin-top:18px;">Brand Colors</h3>
             <p style="font-size:.78rem; color:var(--muted); margin:0 0 8px;">Changes the site's two main brand colors everywhere they're used — headings, buttons, links, and accents.</p>
@@ -475,6 +476,7 @@
             <input type="text" id="partnerName" class="admin-input" placeholder="e.g. Yaldei">
             <label class="admin-label">Logo Image URL (optional)</label>
             <input type="text" id="partnerLogoUrl" class="admin-input" placeholder="https://example.com/logo.png">
+            <div class="img-upload" data-img-upload="partnerLogoUrl"></div>
             <label class="admin-label">Website URL (optional — makes the logo clickable)</label>
             <input type="text" id="partnerLinkUrl" class="admin-input" placeholder="https://example.org">
             <div style="margin-top:14px; display:flex; gap:10px;">
@@ -569,8 +571,12 @@
             <div id="linkCheckUnsure" style="margin-top:8px;"></div>
           </details>
 
-          <h3 style="font-size:.95rem; margin-top:26px;">Instruction comparison (optional add-on)</h3>
-          <p style="font-size:.82rem; color:var(--muted);">A second, optional checker could also compare our written instructions against each live government page using AI. It has not been built; it would need Firebase's paid plan. If it is ever added, its results appear under Flagged Items below.</p>
+          <h3 style="font-size:.95rem; margin-top:26px;">Instruction comparison (AI)</h3>
+          <p style="font-size:.82rem; color:var(--muted);">Once a month an automatic check reads each official page and compares it against the instructions we publish, using AI. Anything that looks out of date appears under Flagged Items below. Run "Sync Current Resources to Backend" after editing resources so the check compares against the latest text.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 4px;">
+            <button class="btn dark" id="aiCheckRunBtn" type="button">Run instruction check now</button>
+          </div>
+          <div id="aiCheckStatus" style="font-size:.85rem; color:var(--muted); margin-bottom:6px;"></div>
           <div id="linkAuditSetupWarning" class="notice" style="display:none; margin:16px 0; background:#FBF3DD; border-color:#B4881A;">
             <strong>Not connected.</strong> The admin panel could not reach the database, so saved flags can't load right now. Reload the page to try again.
           </div>
