@@ -2437,6 +2437,23 @@
     #page-admin .adm-side.open .adm-who{display:block;}
     #page-admin .admin-input{font-size:16px;}  /* stops iOS zooming into fields */
   }
+
+/* In-page messages and confirm boxes (replace browser pop-ups) */
+#admToastHost{position:fixed;right:16px;bottom:16px;z-index:10050;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 32px));}
+.adm-toast{position:relative;background:#fff;border:1px solid var(--line,#ddd);border-left:4px solid #2E7D4F;border-radius:8px;padding:12px 36px 12px 14px;font-size:.88rem;line-height:1.4;box-shadow:0 6px 20px rgba(0,0,0,.12);color:inherit;white-space:pre-line;}
+.adm-toast-error{border-left-color:#A23B3B;}
+.adm-toast-x{position:absolute;top:6px;right:8px;border:0;background:none;font-size:1.1rem;cursor:pointer;color:var(--muted,#666);}
+.adm-modal-back{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:10040;display:flex;align-items:center;justify-content:center;padding:16px;}
+.adm-modal{background:#fff;border-radius:10px;max-width:460px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.25);max-height:calc(100vh - 32px);overflow:auto;}
+.adm-modal-title{font-weight:600;margin:0 0 8px;font-size:1rem;}
+.adm-modal-text{margin:0 0 8px;font-size:.88rem;color:var(--muted,#555);}
+.adm-modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.adm-modal-field{display:block;margin:10px 0;font-size:.85rem;font-weight:600;}
+.adm-modal-field .admin-input{display:block;width:100%;margin-top:4px;font-weight:400;}
+.adm-modal-check{display:flex;align-items:center;justify-content:flex-start;gap:8px;font-weight:400;text-align:left;}
+.adm-modal-check input{width:auto !important;margin:0;flex:0 0 auto;}
+.adm-modal-check span{flex:1 1 auto;}
+.btn.adm-danger{background:#A23B3B;border-color:#A23B3B;}
 </style>
   <section style="padding-top:56px; min-height:70vh;">
     <div class="section-inner adm-wrap" style="max-width:1180px;">
@@ -10070,6 +10087,132 @@ async function applyResourceOverrides(){
  *
  * Edit admin behaviour HERE, then run: node tools/generate-routes.mjs
  * ================================================================ */
+
+/* ---------- In-page messages (replace browser alert/confirm/prompt) ----------
+   The brief asks for no browser pop-ups. These keep the same meaning:
+   admToast   = alert   (information; never blocks)
+   admConfirm = confirm (resolves true/false; Esc or Cancel = false)
+   admForm    = several prompt() calls folded into one small form      */
+function admToastHost(){
+  let h = document.getElementById('admToastHost');
+  if(!h){
+    h = document.createElement('div');
+    h.id = 'admToastHost';
+    h.setAttribute('role','status');
+    h.setAttribute('aria-live','polite');
+    document.body.appendChild(h);
+  }
+  return h;
+}
+const ADM_ERROR_RE = /could not|couldn't|cannot|can't|not connected|not available|required|please|invalid|not a valid|not look like|larger than|already in use|before the start|earlier than|run the review first|no response/i;
+function admToast(msg, kind){
+  const k = kind || (ADM_ERROR_RE.test(String(msg)) ? 'error' : 'ok');
+  const t = document.createElement('div');
+  t.className = 'adm-toast adm-toast-' + k;
+  t.textContent = String(msg);
+  const x = document.createElement('button');
+  x.type = 'button'; x.className = 'adm-toast-x'; x.setAttribute('aria-label','Dismiss'); x.textContent = '×';
+  x.addEventListener('click', ()=> t.remove());
+  t.appendChild(x);
+  admToastHost().appendChild(t);
+  setTimeout(()=> t.remove(), k === 'error' ? 9000 : 5000);
+}
+function admDialog(build){
+  return new Promise(resolve => {
+    const prev = document.activeElement;
+    const back = document.createElement('div');
+    back.className = 'adm-modal-back';
+    const box = document.createElement('div');
+    box.className = 'adm-modal';
+    box.setAttribute('role','dialog');
+    box.setAttribute('aria-modal','true');
+    back.appendChild(box);
+    const done = (v)=>{ back.remove(); document.removeEventListener('keydown', onKey, true); if(prev && prev.focus) prev.focus(); resolve(v); };
+    const onKey = (e)=>{
+      if(e.key === 'Escape'){ e.preventDefault(); done(build.cancelValue); }
+      if(e.key === 'Tab'){
+        const f = [...box.querySelectorAll('button,input,select,textarea')].filter(el=>!el.disabled);
+        if(!f.length) return;
+        if(e.shiftKey && document.activeElement === f[0]){ e.preventDefault(); f[f.length-1].focus(); }
+        else if(!e.shiftKey && document.activeElement === f[f.length-1]){ e.preventDefault(); f[0].focus(); }
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    back.addEventListener('click', e=>{ if(e.target === back) done(build.cancelValue); });
+    build.render(box, done);
+    document.body.appendChild(back);
+    const first = box.querySelector(build.focus || 'button.adm-modal-ok');
+    if(first) first.focus();
+  });
+}
+function admConfirmLabel(msg){
+  const w = String(msg).trim().split(/\s+/)[0].replace(/[^A-Za-z]/g,'');
+  const map = { Delete:'Delete', Permanently:'Delete', Remove:'Remove', Reset:'Reset', Hide:'Hide',
+                Publish:'Publish', Activate:'Activate', Deactivate:'Deactivate', Update:'Update', Load:'Load' };
+  return map[w] || 'OK';
+}
+function admConfirm(msg){
+  const label = admConfirmLabel(msg);
+  const danger = /^(Delete|Remove|Reset|Hide|Deactivate)$/.test(label);
+  return admDialog({
+    cancelValue: false,
+    focus: danger ? 'button.adm-modal-cancel' : 'button.adm-modal-ok',
+    render(box, done){
+      const parts = String(msg).split(/\n\n/);
+      const h = document.createElement('p'); h.className = 'adm-modal-title'; h.textContent = parts[0];
+      box.appendChild(h);
+      parts.slice(1).forEach(p=>{ const e = document.createElement('p'); e.className = 'adm-modal-text'; e.textContent = p; box.appendChild(e); });
+      const row = document.createElement('div'); row.className = 'adm-modal-row';
+      const no = document.createElement('button'); no.type='button'; no.className='btn admin-btn-outline adm-modal-cancel'; no.textContent='Cancel';
+      const yes = document.createElement('button'); yes.type='button'; yes.className='btn dark adm-modal-ok' + (danger ? ' adm-danger' : ''); yes.textContent=label;
+      no.addEventListener('click', ()=> done(false));
+      yes.addEventListener('click', ()=> done(true));
+      row.append(no, yes); box.appendChild(row);
+    }
+  });
+}
+function admForm(title, fields, okLabel){
+  return admDialog({
+    cancelValue: null,
+    focus: 'input,select',
+    render(box, done){
+      const h = document.createElement('p'); h.className = 'adm-modal-title'; h.textContent = title; box.appendChild(h);
+      const form = document.createElement('form');
+      const inputs = {};
+      fields.forEach(f=>{
+        const wrap = document.createElement('label'); wrap.className = 'adm-modal-field' + (f.type === 'checkbox' ? ' adm-modal-check' : '');
+        let el;
+        if(f.type === 'select'){
+          el = document.createElement('select'); el.className = 'admin-input';
+          f.options.forEach(o=>{ const op = document.createElement('option'); op.value = o; op.textContent = o; el.appendChild(op); });
+          if(f.value) el.value = f.value;
+        }else{
+          el = document.createElement('input');
+          el.type = f.type === 'checkbox' ? 'checkbox' : 'text';
+          if(f.type !== 'checkbox') el.className = 'admin-input';
+          if(f.required) el.required = true;
+          if(f.value && f.type !== 'checkbox') el.value = f.value;
+        }
+        inputs[f.key] = el;
+        const span = document.createElement('span'); span.textContent = f.label;
+        if(f.type === 'checkbox'){ wrap.append(el, span); } else { wrap.append(span, el); }
+        form.appendChild(wrap);
+      });
+      const row = document.createElement('div'); row.className = 'adm-modal-row';
+      const no = document.createElement('button'); no.type='button'; no.className='btn admin-btn-outline'; no.textContent='Cancel';
+      const yes = document.createElement('button'); yes.type='submit'; yes.className='btn dark adm-modal-ok'; yes.textContent = okLabel || 'Save';
+      no.addEventListener('click', ()=> done(null));
+      row.append(no, yes); form.appendChild(row);
+      form.addEventListener('submit', e=>{
+        e.preventDefault();
+        const out = {};
+        fields.forEach(f=>{ const el = inputs[f.key]; out[f.key] = f.type === 'checkbox' ? el.checked : el.value.trim(); });
+        done(out);
+      });
+      box.appendChild(form);
+    }
+  });
+}
 /* ---------- Admin panel: shared ---------- */
 // Signed in with Firebase Auth. Firestore enforces the same condition on every
 // write, so the panel and the database agree instead of relying on a flag the
@@ -10443,21 +10586,21 @@ async function addStaffMember(emailRaw){
 async function removeStaffMember(emailRaw){
   const email = staffDocId(emailRaw);
   if(await staffIsBuiltIn(email)){
-    alert('This is a built-in account. Removing it here would change nothing, because the ' +
+    admToast('This is a built-in account. Removing it here would change nothing, because the ' +
           'security rules grant it access directly. To change that, edit the rules in the ' +
           'Firebase console.');
     return false;
   }
   if(adminUser && staffDocId(adminUser.email) === email){
-    alert('You cannot remove your own access from here. Ask another staff member to do it.');
+    admToast('You cannot remove your own access from here. Ask another staff member to do it.');
     return false;
   }
   if(!firebaseReady || !window.__fbFirestore){
-    alert('Not connected to the database. Nothing was changed.');
+    admToast('Not connected to the database. Nothing was changed.');
     return false;
   }
-  if(!confirm('Remove access for ' + email + '?\n\nThey will no longer be able to sign in to the admin panel. ' +
-              'Nothing they have already saved is affected, and you can add them again at any time.')) return false;
+  if(!(await admConfirm('Remove access for ' + email + '?\n\nThey will no longer be able to sign in to the admin panel. ' +
+              'Nothing they have already saved is affected, and you can add them again at any time.'))) return false;
   const fs = window.__fbFirestore;
   try{
     await fs.deleteDoc(fs.doc(fbDb, 'staff', email));
@@ -10504,7 +10647,7 @@ async function renderPagesList(){
   }).join('');
 }
 async function toggleBuiltInPageHidden(pageId){
-  if(pageId === 'home'){ alert("The Home page can't be deactivated, since it's where visitors land by default."); return; }
+  if(pageId === 'home'){ admToast("The Home page can't be deactivated, since it's where visitors land by default."); return; }
   const existing = HIDDEN_PAGES_CACHE[pageId] || {};
   await saveToCollection('page_settings', { id: pageId, pageId, hidden: !existing.hidden });
   await enhancePagesFromBackend();
@@ -10557,8 +10700,8 @@ function cjhqPageNeedsBackfill(p){ return typeof p.public_until_ms !== 'number';
 async function backfillCustomPageLifecycle(){
   const stale = Object.values(CUSTOM_PAGES_CACHE).filter(cjhqPageNeedsBackfill);
   if(!stale.length) return;
-  if(!confirm('Update ' + stale.length + ' existing page(s) so they work with start and end dates?\n\n' +
-              'They stay exactly as they are now: published, with no dates and not on the homepage.')) return;
+  if(!(await admConfirm('Update ' + stale.length + ' existing page(s) so they work with start and end dates?\n\n' +
+              'They stay exactly as they are now: published, with no dates and not on the homepage.'))) return;
   for(const p of stale){
     await saveToCollection('custom_pages', Object.assign({}, p, {
       id: p.slug,
@@ -10572,7 +10715,7 @@ async function backfillCustomPageLifecycle(){
   }
   await enhancePagesFromBackend();
   renderCustomPagesList();
-  alert('Updated ' + stale.length + ' page(s).');
+  admToast('Updated ' + stale.length + ' page(s).');
 }
 
 /* The four states, said plainly and coloured the same way everywhere. */
@@ -10776,7 +10919,7 @@ function editCustomPage(slug){
   if(firstField) try{ firstField.focus({ preventScroll:true }); }catch(e){ /* older browsers */ }
 }
 async function deleteCustomPage(slug){
-  if(!confirm('Permanently delete this page? This cannot be undone.')) return;
+  if(!(await admConfirm('Permanently delete this page? This cannot be undone.'))) return;
   await deleteFromCollection('custom_pages', slug);
   await enhancePagesFromBackend();
   await syncPublicPageIndex();
@@ -10837,7 +10980,7 @@ async function saveContentBlock(cid){
   renderContentBlocksList();
 }
 async function resetContentBlock(cid){
-  if(!confirm('Reset this block to the site\'s original wording?')) return;
+  if(!(await admConfirm('Reset this block to the site\'s original wording?'))) return;
   await deleteFromCollection('content_overrides', cid);
   const m = CONTENT_MANIFEST.find(x => x.cid === cid);
   const el = document.querySelector(`[data-cid="${cid}"]`);
@@ -10885,7 +11028,7 @@ async function editNotice(id){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function removeNotice(id){
-  if(!confirm('Delete this notice? This cannot be undone.')) return;
+  if(!(await admConfirm('Delete this notice? This cannot be undone.'))) return;
   await deleteFromCollection('notices', id);
   renderAdminNoticesList();
 }
@@ -11062,7 +11205,7 @@ async function savePartnerContact(key){
   if(existing.contactVerified === true && changed){
     next.contactVerified = false;
     next.contactVerifiedDate = '';
-    alert('Contact details changed, so verification was reset. Please re-confirm against the organization, then tick Contact verified again.');
+    admToast('Contact details changed, so verification was reset. Please re-confirm against the organization, then tick Contact verified again.');
   }
 
   await saveToCollection('partner_overrides', next);
@@ -11119,7 +11262,7 @@ async function editPartner(id){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function removePartner(id){
-  if(!confirm('Delete this partner? This cannot be undone.')) return;
+  if(!(await admConfirm('Delete this partner? This cannot be undone.'))) return;
   await deleteFromCollection('partners', id);
   renderAdminPartnersList();
 }
@@ -11155,7 +11298,7 @@ async function editResource(id){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function removeResource(id){
-  if(!confirm('Delete this resource link? This cannot be undone.')) return;
+  if(!(await admConfirm('Delete this resource link? This cannot be undone.'))) return;
   await deleteFromCollection('resources', id);
   renderAdminResourcesList();
 }
@@ -11318,7 +11461,7 @@ async function saveExistingResourceOverride(slug){
   renderExistingResourcesList();
 }
 async function resetExistingResourceOverride(slug){
-  if(!confirm('Reset this resource to its original text and link? This clears every field you\'ve customized for it.')) return;
+  if(!(await admConfirm('Reset this resource to its original text and link? This clears every field you\'ve customized for it.'))) return;
   const existing = RESOURCE_OVERRIDES_CACHE[slug];
   const hiddenState = existing ? existing.hidden : false;
   if(hiddenState){
@@ -11371,7 +11514,7 @@ async function editEvent(id){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function removeEvent(id){
-  if(!confirm('Delete this event? This cannot be undone.')) return;
+  if(!(await admConfirm('Delete this event? This cannot be undone.'))) return;
   await deleteFromCollection('events', id);
   renderAdminEventsList();
 }
@@ -11544,7 +11687,7 @@ async function publishChangeNotice(slug){
   const a = audits.find(x => x.slug === slug);
   if(!a) return;
   await saveToCollection('pending_change_notices', { id: slug, slug, notice_en: a.announcedFutureChange, notice_fr: a.announcedFutureChange });
-  alert('Notice published. It will now show on the public resource popup until you clear it (edit the resource once the change takes effect, then delete this notice from Firestore or extend the admin panel to manage it directly).');
+  admToast('Notice published. It will now show on the public resource popup until you clear it (edit the resource once the change takes effect, then delete this notice from Firestore or extend the admin panel to manage it directly).');
 }
 
 /* ---------- Wire up admin UI ---------- */
@@ -11616,7 +11759,7 @@ async function publishChangeNotice(slug){
       const file = input.files && input.files[0];
       if(!file) return;
       if(file.size > 512 * 1024){
-        alert('That file is larger than 512 KB. Page bodies are stored in the database and downloaded by every visitor, so please trim it first.');
+        admToast('That file is larger than 512 KB. Page bodies are stored in the database and downloaded by every visitor, so please trim it first.');
         input.value = ''; return;
       }
       const reader = new FileReader();
@@ -11630,7 +11773,7 @@ async function publishChangeNotice(slug){
         renderCustomPagePreview();
         input.value = '';
       };
-      reader.onerror = ()=>{ alert('Could not read that file.'); input.value = ''; };
+      reader.onerror = ()=>{ admToast('Could not read that file.'); input.value = ''; };
       reader.readAsText(file);
     });
   });
@@ -11709,9 +11852,9 @@ async function publishChangeNotice(slug){
     e.preventDefault();
     const isEdit = !!document.getElementById('customPageId').value;
     const slug = document.getElementById('customPageSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-');
-    if(!slug){ alert('Please enter a page address.'); return; }
+    if(!slug){ admToast('Please enter a page address.'); return; }
     if(!isEdit && (document.getElementById('page-'+slug) || CUSTOM_PAGES_CACHE[slug])){
-      alert('That page address is already in use — please choose another.');
+      admToast('That page address is already in use — please choose another.');
       return;
     }
     const page = {
@@ -11743,7 +11886,7 @@ async function publishChangeNotice(slug){
     // An end date before the start date would make the page permanently
     // unreachable without ever saying so.
     if(page.start_date && page.end_date && page.end_date < page.start_date){
-      alert('The End Date is before the Start Date, so the page would never be public. Please correct the dates.');
+      admToast('The End Date is before the Start Date, so the page would never be public. Please correct the dates.');
       return;
     }
     await saveToCollection('custom_pages', page);
@@ -12030,13 +12173,13 @@ async function publishChangeNotice(slug){
       saveOnly.textContent = 'Save dates only';
       saveOnly.addEventListener('click', async ()=>{
         if(pending.startsOn && pending.endsOn && pending.endsOn < pending.startsOn){
-          alert('The end date cannot be earlier than the start date.'); return;
+          admToast('The end date cannot be earlier than the start date.'); return;
         }
         saveOnly.disabled = true;
         try{
           await setSectionVisibility(sec.key, published, adminUser && adminUser.email, pending);
           render();
-        }catch(err){ alert('Could not save the dates.'); }
+        }catch(err){ admToast('Could not save the dates.'); }
         finally{ saveOnly.disabled = false; }
       });
 
@@ -12046,7 +12189,7 @@ async function publishChangeNotice(slug){
       toggle.textContent = published ? 'Hide from Website' : 'Publish to Website';
       toggle.addEventListener('click', async ()=>{
         if(!published && pending.startsOn && pending.endsOn && pending.endsOn < pending.startsOn){
-          alert('The end date cannot be earlier than the start date.'); return;
+          admToast('The end date cannot be earlier than the start date.'); return;
         }
         const msg = published
           ? 'Hide this resource?\n\nThis will remove the ' + sec.name + ' section from public view. '
@@ -12055,14 +12198,14 @@ async function publishChangeNotice(slug){
             + 'on the CJHQ website'
             + (pending.startsOn ? ', starting ' + pending.startsOn : '')
             + (pending.endsOn ? ' and ending after ' + pending.endsOn : '') + '.';
-        if(!confirm(msg)) return;
+        if(!(await admConfirm(msg))) return;
         toggle.disabled = true;
         try{
           await setSectionVisibility(sec.key, !published, adminUser && adminUser.email, pending);
           render();
         }catch(err){
           console.warn('[CJHQ] visibility change failed:', (err && err.code) || err);
-          alert('Could not change visibility. Check that you are still signed in and that the Firestore rules allow writing to settings.');
+          admToast('Could not change visibility. Check that you are still signed in and that the Firestore rules allow writing to settings.');
         }finally{ toggle.disabled = false; }
       });
 
@@ -12199,12 +12342,12 @@ async function publishChangeNotice(slug){
       act.type='button';
       act.className = n.active ? 'btn admin-btn-outline' : 'btn dark';
       act.textContent = n.active ? 'Deactivate' : 'Activate';
-      act.addEventListener('click', ()=>{
+      act.addEventListener('click', async ()=>{
         const msg = n.active
           ? 'Deactivate this item?\n\nIt will stop showing on the website. The content is kept.'
           : 'Activate this item?\n\nIt will show on the website'
             + ((n.startsOn || n.endsOn) ? ' according to the dates set on it.' : ' immediately.');
-        if(!confirm(msg)) return;
+        if(!(await admConfirm(msg))) return;
         persist(n, { active: !n.active }, act);
       });
 
@@ -12216,7 +12359,7 @@ async function publishChangeNotice(slug){
 
   async function persist(notice, changes, btn){
     if(changes.startsOn && changes.endsOn && changes.endsOn < changes.startsOn){
-      alert('The end date cannot be earlier than the start date.'); return;
+      admToast('The end date cannot be earlier than the start date.'); return;
     }
     if(btn) btn.disabled = true;
     try{
@@ -12226,7 +12369,7 @@ async function publishChangeNotice(slug){
       render();
     }catch(err){
       console.warn('[CJHQ] notice save failed:', (err && err.code) || err);
-      alert('Could not save. Check that you are still signed in.');
+      admToast('Could not save. Check that you are still signed in.');
     }finally{ if(btn) btn.disabled = false; }
   }
 
@@ -12401,10 +12544,10 @@ async function publishChangeNotice(slug){
   $a('askNew').addEventListener('click', ()=>{ askTurns = []; lastAnswer=''; renderLog(); $a('askInput').focus(); });
   $a('askClear').addEventListener('click', ()=>{ askTurns = []; lastAnswer=''; renderLog(); });
   $a('askCopy').addEventListener('click', ()=>{
-    if(!lastAnswer){ alert('No response to copy yet.'); return; }
+    if(!lastAnswer){ admToast('No response to copy yet.'); return; }
     navigator.clipboard.writeText(lastAnswer)
-      .then(()=> alert('Response copied.'))
-      .catch(()=> alert('Could not copy. Select the text manually.'));
+      .then(()=> admToast('Response copied.'))
+      .catch(()=> admToast('Could not copy. Select the text manually.'));
   });
   $a('askToggleSources').addEventListener('click', ()=>{
     showSources = !showSources;
@@ -12445,7 +12588,7 @@ async function publishChangeNotice(slug){
       const d = document.createElement('button');
       d.type='button'; d.className='btn admin-btn-outline'; d.style.fontSize='.78rem';
       d.textContent = 'Remove';
-      d.addEventListener('click', ()=>{ if(confirm('Remove "' + s.name + '" from the registry?')) removeSource(s); });
+      d.addEventListener('click', async ()=>{ if(await admConfirm('Remove "' + s.name + '" from the registry?')) removeSource(s); });
       bar.appendChild(t); bar.appendChild(d);
       row.appendChild(bar);
       box.appendChild(row);
@@ -12473,7 +12616,7 @@ async function publishChangeNotice(slug){
       await loadSources();
     }catch(err){
       console.warn('[CJHQ] Ask CJHQ source save failed:', (err && err.code) || err);
-      alert('Could not save. The ask_sources collection may not be permitted by the published Firestore rules yet.');
+      admToast('Could not save. The ask_sources collection may not be permitted by the published Firestore rules yet.');
     }
   }
 
@@ -12484,26 +12627,34 @@ async function publishChangeNotice(slug){
       await loadSources();
     }catch(err){
       console.warn('[CJHQ] Ask CJHQ source delete failed:', (err && err.code) || err);
-      alert('Could not remove. Check the Firestore rules for ask_sources.');
+      admToast('Could not remove. Check the Firestore rules for ask_sources.');
     }
   }
 
   $a('askSeedSources').addEventListener('click', async ()=>{
-    if(!confirm('Load the default source registry? Existing entries with the same id will be overwritten.')) return;
+    if(!(await admConfirm('Load the default source registry? Existing entries with the same id will be overwritten.'))) return;
     for(const s of ASK_DEFAULT_SOURCES){ await saveSource(s); }
   });
 
   $a('askAddSource').addEventListener('click', async ()=>{
-    const name = prompt('Source name:'); if(!name) return;
-    const url  = prompt('Source URL (https://…):') || '';
-    if(url && !cjhqSafeUrl(url)){ alert('That URL is not a valid http(s) address.'); return; }
-    const type = prompt('Source type (' + ASK_SOURCE_TYPES.join(', ') + '):', 'Community') || 'Other';
+    const v = await admForm('Add a source', [
+      { key:'name', label:'Source name', required:true },
+      { key:'url', label:'Source URL (https://…)', type:'url' },
+      { key:'type', label:'Source type', type:'select', options: ASK_SOURCE_TYPES, value:'Community' },
+      { key:'description', label:'Short description' },
+      { key:'authoritative', label:'Mark as authoritative', type:'checkbox' },
+      { key:'timeSensitive', label:'This information is time-sensitive', type:'checkbox' }
+    ], 'Add source');
+    if(!v || !v.name) return;
+    const name = v.name, url = v.url || '';
+    if(url && !cjhqSafeUrl(url)){ admToast('That URL is not a valid http(s) address.', 'error'); return; }
+    const type = v.type || 'Other';
     const src = {
       id: name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) || ('src-' + Date.now()),
       name, url, type: ASK_SOURCE_TYPES.includes(type) ? type : 'Other',
-      description: prompt('Short description:') || '',
-      active:true, authoritative: confirm('Mark as authoritative?'),
-      timeSensitive: confirm('Is this information time-sensitive?'),
+      description: v.description || '',
+      active:true, authoritative: !!v.authoritative,
+      timeSensitive: !!v.timeSensitive,
       updateFrequency:'as needed', integration:'pending', notes:''
     };
     await saveSource(src);
@@ -12623,7 +12774,7 @@ async function publishChangeNotice(slug){
     document.getElementById('langBenchStatus').textContent = 'Cleared.';
   });
   if(_bCopy) _bCopy.addEventListener('click', ()=>{
-    if(!__benchRows.length){ alert('Run the review first.'); return; }
+    if(!__benchRows.length){ admToast('Run the review first.'); return; }
     const txt = __benchRows
       .filter(r => r.expected.indexOf('Yiddish') === 0 || r.expected === 'Mixed')
       .map(r => 'QUESTION: ' + r.question
@@ -12636,10 +12787,10 @@ async function publishChangeNotice(slug){
       + 'Yiddish speaker. Mark anything that sounds wrong, stiff, or too literary.\n\n';
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(header + txt)
-        .then(()=> alert('Copied. Paste it into an email for the reviewer.'))
-        .catch(()=> alert('Could not copy automatically.'));
+        .then(()=> admToast('Copied. Paste it into an email for the reviewer.'))
+        .catch(()=> admToast('Could not copy automatically.'));
     }else{
-      alert('Clipboard not available in this browser.');
+      admToast('Clipboard not available in this browser.');
     }
   });
 
@@ -12668,7 +12819,7 @@ async function publishChangeNotice(slug){
       endsOn: document.getElementById('noticeEndsOn').value || '',
     };
     if(notice.startsOn && notice.endsOn && notice.endsOn < notice.startsOn){
-      alert('The end date cannot be earlier than the start date.');
+      admToast('The end date cannot be earlier than the start date.');
       return;
     }
     if(!notice.id) delete notice.id;
@@ -12728,7 +12879,7 @@ async function publishChangeNotice(slug){
       linkUrl: document.getElementById('partnerLinkUrl').value,
     };
     if(!p.id) delete p.id;
-    if(!p.name){ alert('Organization name is required.'); return; }
+    if(!p.name){ admToast('Organization name is required.'); return; }
     await saveToCollection('partners', p);
     document.getElementById('partnerForm').reset();
     document.getElementById('partnerId').value = '';
@@ -12753,7 +12904,7 @@ async function publishChangeNotice(slug){
       url: document.getElementById('resourceUrl').value,
     };
     if(!r.id) delete r.id;
-    if(!r.title_en || !r.url){ alert('Title and URL are required.'); return; }
+    if(!r.title_en || !r.url){ admToast('Title and URL are required.'); return; }
     await saveToCollection('resources', r);
     document.getElementById('resourceForm').reset();
     document.getElementById('resourceId').value = '';
@@ -12781,7 +12932,7 @@ async function publishChangeNotice(slug){
       link: document.getElementById('eventLink').value,
     };
     if(!ev.id) delete ev.id;
-    if(!ev.title_en || !ev.date){ alert('Title and date are required.'); return; }
+    if(!ev.title_en || !ev.date){ admToast('Title and date are required.'); return; }
     await saveToCollection('events', ev);
     document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';

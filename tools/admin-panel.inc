@@ -40,6 +40,23 @@
     #page-admin .adm-side.open .adm-who{display:block;}
     #page-admin .admin-input{font-size:16px;}  /* stops iOS zooming into fields */
   }
+
+/* In-page messages and confirm boxes (replace browser pop-ups) */
+#admToastHost{position:fixed;right:16px;bottom:16px;z-index:10050;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 32px));}
+.adm-toast{position:relative;background:#fff;border:1px solid var(--line,#ddd);border-left:4px solid #2E7D4F;border-radius:8px;padding:12px 36px 12px 14px;font-size:.88rem;line-height:1.4;box-shadow:0 6px 20px rgba(0,0,0,.12);color:inherit;white-space:pre-line;}
+.adm-toast-error{border-left-color:#A23B3B;}
+.adm-toast-x{position:absolute;top:6px;right:8px;border:0;background:none;font-size:1.1rem;cursor:pointer;color:var(--muted,#666);}
+.adm-modal-back{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:10040;display:flex;align-items:center;justify-content:center;padding:16px;}
+.adm-modal{background:#fff;border-radius:10px;max-width:460px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.25);max-height:calc(100vh - 32px);overflow:auto;}
+.adm-modal-title{font-weight:600;margin:0 0 8px;font-size:1rem;}
+.adm-modal-text{margin:0 0 8px;font-size:.88rem;color:var(--muted,#555);}
+.adm-modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.adm-modal-field{display:block;margin:10px 0;font-size:.85rem;font-weight:600;}
+.adm-modal-field .admin-input{display:block;width:100%;margin-top:4px;font-weight:400;}
+.adm-modal-check{display:flex;align-items:center;justify-content:flex-start;gap:8px;font-weight:400;text-align:left;}
+.adm-modal-check input{width:auto !important;margin:0;flex:0 0 auto;}
+.adm-modal-check span{flex:1 1 auto;}
+.btn.adm-danger{background:#A23B3B;border-color:#A23B3B;}
 </style>
   <section style="padding-top:56px; min-height:70vh;">
     <div class="section-inner adm-wrap" style="max-width:1180px;">
