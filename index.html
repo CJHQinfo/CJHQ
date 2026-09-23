@@ -995,6 +995,7 @@
     .ctc-letter-wrap{background:none; padding:0; overflow:visible;}
     header, footer, .ctc-actions, .ctc-back, #ctcFormScreen, .mobile-drawer, .mobile-drawer-overlay{display:none !important;}
   }
+.cjhq-otp-link:hover,.cjhq-otp-link:focus-visible{text-decoration:underline;border-color:#1E3A6B !important;}
 </style>
 <!-- DOMPurify: sanitizes admin-entered HTML before rendering to prevent stored XSS.
 
@@ -3178,6 +3179,40 @@ function cjhqPageIsPublic(p){ return cjhqPageLifecycle(p) === 'live'; }
 
    Anything saved before the switch existed has no body_format and is treated as
    HTML, which is what it was. */
+// "On this page" boxes in custom pages. Page bodies are admin-written HTML
+// (sanitized), so the jump list arrives as plain labels that looked clickable
+// but did nothing. When a box's labels line up one-to-one with the page's
+// section headings, each label becomes a working jump link. Nothing in the
+// stored page changes; a box that doesn't line up is left exactly as it was.
+function cjhqWireOnThisPage(root){
+  if(!root) return;
+  root.querySelectorAll('[data-en], [data-fr]').forEach(scope=>{
+    const heads = [...scope.querySelectorAll('h2')];
+    const label = [...scope.querySelectorAll('p, div, span, strong')].find(el =>
+      el.children.length === 0 && /^(on this page|sur cette page|dans cette page)$/i.test(el.textContent.trim()));
+    if(!label || !heads.length) return;
+    const list = label.nextElementSibling;
+    if(!list) return;
+    const pills = [...list.children];
+    if(pills.length !== heads.length) return;
+    const header = document.querySelector('header');
+    pills.forEach((pill, i)=>{
+      const h = heads[i];
+      pill.setAttribute('role', 'link');
+      pill.setAttribute('tabindex', '0');
+      pill.style.cursor = 'pointer';
+      pill.classList.add('cjhq-otp-link');
+      const go = (e)=>{
+        e.preventDefault();
+        const off = (header && getComputedStyle(header).position.match(/sticky|fixed/)) ? header.offsetHeight + 12 : 12;
+        const top = h.getBoundingClientRect().top + window.scrollY - off;
+        window.scrollTo({top, behavior:'smooth'});
+      };
+      pill.addEventListener('click', go);
+      pill.addEventListener('keydown', e=>{ if(e.key === 'Enter' || e.key === ' ') go(e); });
+    });
+  });
+}
 function cjhqRenderPageBody(body, format){
   const raw = String(body == null ? '' : body);
   if(format !== 'text') return cjhqSanitizeHtml(raw);
@@ -3967,6 +4002,7 @@ function goPage(name, opts){
     document.getElementById('customPageBody').innerHTML =
       `<div data-en>${cjhqRenderPageBody(custom.body_en, custom.body_format)}</div>` +
       `<div data-fr>${cjhqRenderPageBody(custom.body_fr, custom.body_format)}</div>`;
+    cjhqWireOnThisPage(document.getElementById('customPageBody'));
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-custom').classList.add('active');
     highlightActiveNav(name);
