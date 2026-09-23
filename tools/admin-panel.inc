@@ -1,6 +1,48 @@
 <div class="page" id="page-admin">
+<style>
+  /* Admin shell (sidebar + main). Admin-only: this file ships in admin.html only. */
+  #page-admin .adm-shell{display:grid; grid-template-columns:220px minmax(0,1fr); gap:32px; align-items:start;}
+  #page-admin .adm-side{position:sticky; top:84px; border-right:1px solid var(--line); padding-right:18px; max-height:calc(100vh - 100px); overflow:auto;}
+  #page-admin #adminTabs{display:flex; flex-direction:column; gap:2px;}
+  #page-admin .adm-group{margin:16px 0 4px; padding:0 10px; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+  #page-admin #adminTabs .admin-tab-btn{display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin:0; padding:9px 10px; text-align:left; border:none; border-left:3px solid transparent; border-radius:0 4px 4px 0; font-size:.9rem; font-weight:500; color:var(--charcoal); background:none;}
+  #page-admin #adminTabs .admin-tab-btn:hover{background:var(--bg-alt);}
+  #page-admin #adminTabs .admin-tab-btn.active{background:var(--c-blue-bg); border-left-color:var(--ink); color:var(--ink); font-weight:700;}
+  #page-admin #adminTabs .admin-tab-btn:focus-visible{outline:2px solid var(--c-blue); outline-offset:-2px;}
+  #page-admin .adm-tag{font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--c-yellow); background:var(--c-yellow-bg); border-radius:3px; padding:2px 5px;}
+  #page-admin .adm-who{margin-top:24px; padding:14px 10px 4px; border-top:1px solid var(--line); font-size:.8rem; color:var(--muted); word-break:break-all;}
+  #page-admin .adm-who p{margin:0 0 8px;}
+  #page-admin .adm-signout{font-size:.8rem; padding:6px 12px; color:var(--muted); border-color:var(--line);}
+  #page-admin .adm-menu-toggle{display:none;}
+  #page-admin .adm-main{min-width:0;}
+  #page-admin .adm-h2{font-size:1.2rem; margin:0;}
+  #page-admin .adm-sub{margin:4px 0 18px; font-size:.85rem; color:var(--muted);}
+  #page-admin .adm-muted{color:var(--muted); font-size:.88rem;}
+  /* Dashboard: plain sections, no decorative numbers. */
+  #page-admin .adm-dash{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;}
+  #page-admin .adm-dash section{border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:var(--paper);}
+  #page-admin .adm-dash h3{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:.95rem; margin:0 0 8px;}
+  #page-admin .adm-dash h3 button{font-size:.78rem; font-weight:600; color:var(--c-blue); background:none; border:none; cursor:pointer; padding:4px 0;}
+  #page-admin .adm-dash ul{list-style:none; margin:0; padding:0;}
+  #page-admin .adm-dash li{padding:7px 0; border-top:1px solid var(--bg-alt); font-size:.86rem; display:flex; justify-content:space-between; gap:10px;}
+  #page-admin .adm-dash li:first-child{border-top:none;}
+  #page-admin .adm-dash li span:last-child{color:var(--muted); white-space:nowrap; font-size:.8rem;}
+  #page-admin .adm-flag{color:var(--c-red); font-weight:600;}
+  #page-admin .adm-ok{color:var(--c-green);}
+  @media (max-width: 860px){
+    #page-admin .adm-shell{grid-template-columns:1fr; gap:14px;}
+    #page-admin .adm-side{position:static; border-right:none; padding-right:0; max-height:none; overflow:visible; border-bottom:1px solid var(--line); padding-bottom:10px;}
+    #page-admin .adm-menu-toggle{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:6px; background:var(--paper); font-size:.95rem; font-weight:600; color:var(--ink); cursor:pointer;}
+    #page-admin #adminTabs{display:none; margin-top:8px;}
+    #page-admin .adm-side.open #adminTabs{display:flex;}
+    #page-admin #adminTabs .admin-tab-btn{min-height:44px; font-size:.95rem;}
+    #page-admin .adm-who{display:none;}
+    #page-admin .adm-side.open .adm-who{display:block;}
+    #page-admin .admin-input{font-size:16px;}  /* stops iOS zooming into fields */
+  }
+</style>
   <section style="padding-top:56px; min-height:70vh;">
-    <div class="section-inner" style="max-width:840px;">
+    <div class="section-inner adm-wrap" style="max-width:1180px;">
       <span class="eyebrow">CJHQ Staff</span>
       <h1 style="font-size:1.8rem; margin-top:10px;">Site Admin</h1>
 
@@ -32,27 +74,54 @@
       </div>
 
       <div id="adminPanelBox" style="display:none; margin-top:20px;">
+        <div class="adm-shell">
+        <aside class="adm-side">
+          <button type="button" class="adm-menu-toggle" id="admMenuToggle" aria-expanded="false" aria-controls="adminTabs">
+            <span class="adm-menu-icon" aria-hidden="true">&#9776;</span>
+            <span id="admMenuCurrent">Home</span>
+          </button>
+          <nav id="adminTabs" aria-label="Admin sections">
+            <button class="admin-tab-btn active" data-tab="home">Home</button>
+            <p class="adm-group">Content</p>
+            <button class="admin-tab-btn" data-tab="pages">Pages</button>
+            <button class="admin-tab-btn" data-tab="content">Page Content</button>
+            <button class="admin-tab-btn" data-tab="notices">Notices &amp; Popups</button>
+            <button class="admin-tab-btn" data-tab="resources">Resource Links</button>
+            <button class="admin-tab-btn" data-tab="partners">Partners</button>
+            <p class="adm-group">Community</p>
+            <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
+            <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ <span class="adm-tag">Test mode</span></button>
+            <p class="adm-group">Inbox</p>
+            <button class="admin-tab-btn" data-tab="messages">Messages</button>
+            <button class="admin-tab-btn" data-tab="linkaudit">Link Audit &amp; Reports</button>
+            <p class="adm-group">Settings</p>
+            <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
+            <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
+            <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
+          </nav>
+          <div class="adm-who">
+            <p>Signed in as <span id="adminSignedInAs"></span></p>
+            <button class="btn admin-btn-outline adm-signout" id="adminLogoutBtn">Sign out</button>
+          </div>
+        </aside>
+        <div class="adm-main">
         <div id="adminFirebaseWarning" class="notice" style="display:none; margin-bottom:20px; background:#FBF3DD; border-color:#B4881A;">
           <strong>Not signed in.</strong> Saving is unavailable until you sign in with a CJHQ staff account. Anything you change here will not be saved.
         </div>
 
-        <div id="adminTabs" style="display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:24px; padding-bottom:0;">
-          <button class="admin-tab-btn active" data-tab="pages">Pages</button>
-          <button class="admin-tab-btn" data-tab="content">Page Content</button>
-          <button class="admin-tab-btn" data-tab="notices">Notices &amp; Popups</button>
-          <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
-          <button class="admin-tab-btn" data-tab="partners">Partners</button>
-          <button class="admin-tab-btn" data-tab="resources">Resource Links</button>
-          <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
-          <button class="admin-tab-btn" data-tab="linkaudit">Link Audit</button>
-          <button class="admin-tab-btn" data-tab="messages">Messages</button>
-          <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ</button>
-          <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
-          <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
+
+        <!-- ===== TAB: HOME (dashboard) =====
+             Read-only summary built from the same collections the tabs use.
+             Nothing here writes to Firestore. -->
+        <div class="admin-tab-panel" id="tab-home">
+          <h2 class="adm-h2">Home</h2>
+          <p class="adm-sub" id="admDashDate"></p>
+          <div id="admDashboard" class="adm-dash"><p class="adm-muted">Loading&hellip;</p></div>
         </div>
 
+
         <!-- ===== TAB: PAGES ===== -->
-        <div class="admin-tab-panel" id="tab-pages">
+        <div class="admin-tab-panel" id="tab-pages" style="display:none;">
           <h2 style="font-size:1.2rem;">Site Pages</h2>
           <p style="font-size:.88rem; color:var(--muted);">Every built-in page on the site. Click "View" to open it, or "Deactivate" to hide it from navigation and visitors (without deleting anything — you can reactivate any time).</p>
           <div id="pagesList"></div>
@@ -589,8 +658,8 @@
           </div>
         </div>
 
-        <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
-        <button class="btn admin-btn-outline" style="margin-top:8px; font-size:.82rem; color:var(--muted); border-color:var(--line);" id="adminLogoutBtn">Sign out</button>
+        </div><!-- /.adm-main -->
+        </div><!-- /.adm-shell -->
       </div>
     </div>
   </section>

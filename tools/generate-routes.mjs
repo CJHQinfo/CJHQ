@@ -50,6 +50,11 @@ const ADMIN_PARTIAL = join(dirname(fileURLToPath(import.meta.url)), 'admin-panel
 // it - it was ~191 KB every visitor downloaded and parsed for nothing.
 const ASK_ENGINE = join(dirname(fileURLToPath(import.meta.url)), 'ask-engine.js');
 const ASK_PLACEHOLDER = '/* Ask CJHQ engine: source lives in tools/ask-engine.js and is injected into';
+// The admin app (all admin-only JavaScript): same arrangement again. Every
+// public page used to carry ~135 KB of it, including the staff email hashes.
+const ADMIN_APP = join(dirname(fileURLToPath(import.meta.url)), 'admin-app.js');
+const ADMIN_APP_PLACEHOLDER =
+  '/* Admin app: source lives in tools/admin-app.js and is injected into admin.html only. */';
 const ADMIN_PLACEHOLDER =
   '<!-- Admin panel: source lives in tools/admin-panel.inc and is injected into admin.html only. -->';
 
@@ -275,6 +280,12 @@ function buildAdmin() {
   if (!out.includes(ADMIN_PLACEHOLDER)) throw new Error('admin: placeholder not found in index.html');
   out = out.replace(ADMIN_PLACEHOLDER, panel);
 
+  // Put the admin app back, for admin.html only.
+  if (!existsSync(ADMIN_APP)) throw new Error('tools/admin-app.js is missing');
+  if (out.split(ADMIN_APP_PLACEHOLDER).length !== 2) throw new Error('admin: admin-app placeholder must appear exactly once in index.html');
+  const adminApp = readFileSync(ADMIN_APP, 'utf8');
+  out = out.replace(ADMIN_APP_PLACEHOLDER, () => adminApp);
+
   // Put the Ask CJHQ engine back, for admin.html only.
   if (!existsSync(ASK_ENGINE)) throw new Error('tools/ask-engine.js is missing');
   const engine = readFileSync(ASK_ENGINE, 'utf8');
@@ -373,6 +384,14 @@ for (const [name, doc] of extras) {
   if (!name.startsWith('fr') && has) throw new Error(`${name}: force-lang marker leaked`);
 }
 if (hasForceAttr(html)) throw new Error('index.html source must not carry the force-lang marker');
+// Only admin.html may carry the admin app. syncAdminAuthUI is defined only in
+// tools/admin-app.js; index.html references it once, behind a typeof guard.
+if (/function\s+syncAdminAuthUI\b/.test(html)) throw new Error('index.html: admin app code leaked back into the public source');
+for (const [name, doc] of extras) {
+  const has = /function\s+syncAdminAuthUI\b/.test(doc);
+  if (name === 'admin.html' && !has) throw new Error('admin.html lost the admin app');
+  if (name !== 'admin.html' && has) throw new Error(`${name}: admin app leaked`);
+}
 // Only admin.html may contain the admin panel.
 for (const [name, doc] of extras) {
   const has = doc.includes('id="page-admin"');

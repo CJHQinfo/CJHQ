@@ -2396,8 +2396,50 @@
 
 <!-- ============ ADMIN (hidden — access via /admin) ============ -->
 <div class="page active" id="page-admin">
+<style>
+  /* Admin shell (sidebar + main). Admin-only: this file ships in admin.html only. */
+  #page-admin .adm-shell{display:grid; grid-template-columns:220px minmax(0,1fr); gap:32px; align-items:start;}
+  #page-admin .adm-side{position:sticky; top:84px; border-right:1px solid var(--line); padding-right:18px; max-height:calc(100vh - 100px); overflow:auto;}
+  #page-admin #adminTabs{display:flex; flex-direction:column; gap:2px;}
+  #page-admin .adm-group{margin:16px 0 4px; padding:0 10px; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+  #page-admin #adminTabs .admin-tab-btn{display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin:0; padding:9px 10px; text-align:left; border:none; border-left:3px solid transparent; border-radius:0 4px 4px 0; font-size:.9rem; font-weight:500; color:var(--charcoal); background:none;}
+  #page-admin #adminTabs .admin-tab-btn:hover{background:var(--bg-alt);}
+  #page-admin #adminTabs .admin-tab-btn.active{background:var(--c-blue-bg); border-left-color:var(--ink); color:var(--ink); font-weight:700;}
+  #page-admin #adminTabs .admin-tab-btn:focus-visible{outline:2px solid var(--c-blue); outline-offset:-2px;}
+  #page-admin .adm-tag{font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--c-yellow); background:var(--c-yellow-bg); border-radius:3px; padding:2px 5px;}
+  #page-admin .adm-who{margin-top:24px; padding:14px 10px 4px; border-top:1px solid var(--line); font-size:.8rem; color:var(--muted); word-break:break-all;}
+  #page-admin .adm-who p{margin:0 0 8px;}
+  #page-admin .adm-signout{font-size:.8rem; padding:6px 12px; color:var(--muted); border-color:var(--line);}
+  #page-admin .adm-menu-toggle{display:none;}
+  #page-admin .adm-main{min-width:0;}
+  #page-admin .adm-h2{font-size:1.2rem; margin:0;}
+  #page-admin .adm-sub{margin:4px 0 18px; font-size:.85rem; color:var(--muted);}
+  #page-admin .adm-muted{color:var(--muted); font-size:.88rem;}
+  /* Dashboard: plain sections, no decorative numbers. */
+  #page-admin .adm-dash{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;}
+  #page-admin .adm-dash section{border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:var(--paper);}
+  #page-admin .adm-dash h3{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:.95rem; margin:0 0 8px;}
+  #page-admin .adm-dash h3 button{font-size:.78rem; font-weight:600; color:var(--c-blue); background:none; border:none; cursor:pointer; padding:4px 0;}
+  #page-admin .adm-dash ul{list-style:none; margin:0; padding:0;}
+  #page-admin .adm-dash li{padding:7px 0; border-top:1px solid var(--bg-alt); font-size:.86rem; display:flex; justify-content:space-between; gap:10px;}
+  #page-admin .adm-dash li:first-child{border-top:none;}
+  #page-admin .adm-dash li span:last-child{color:var(--muted); white-space:nowrap; font-size:.8rem;}
+  #page-admin .adm-flag{color:var(--c-red); font-weight:600;}
+  #page-admin .adm-ok{color:var(--c-green);}
+  @media (max-width: 860px){
+    #page-admin .adm-shell{grid-template-columns:1fr; gap:14px;}
+    #page-admin .adm-side{position:static; border-right:none; padding-right:0; max-height:none; overflow:visible; border-bottom:1px solid var(--line); padding-bottom:10px;}
+    #page-admin .adm-menu-toggle{display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:6px; background:var(--paper); font-size:.95rem; font-weight:600; color:var(--ink); cursor:pointer;}
+    #page-admin #adminTabs{display:none; margin-top:8px;}
+    #page-admin .adm-side.open #adminTabs{display:flex;}
+    #page-admin #adminTabs .admin-tab-btn{min-height:44px; font-size:.95rem;}
+    #page-admin .adm-who{display:none;}
+    #page-admin .adm-side.open .adm-who{display:block;}
+    #page-admin .admin-input{font-size:16px;}  /* stops iOS zooming into fields */
+  }
+</style>
   <section style="padding-top:56px; min-height:70vh;">
-    <div class="section-inner" style="max-width:840px;">
+    <div class="section-inner adm-wrap" style="max-width:1180px;">
       <span class="eyebrow">CJHQ Staff</span>
       <h1 style="font-size:1.8rem; margin-top:10px;">Site Admin</h1>
 
@@ -2429,27 +2471,54 @@
       </div>
 
       <div id="adminPanelBox" style="display:none; margin-top:20px;">
+        <div class="adm-shell">
+        <aside class="adm-side">
+          <button type="button" class="adm-menu-toggle" id="admMenuToggle" aria-expanded="false" aria-controls="adminTabs">
+            <span class="adm-menu-icon" aria-hidden="true">&#9776;</span>
+            <span id="admMenuCurrent">Home</span>
+          </button>
+          <nav id="adminTabs" aria-label="Admin sections">
+            <button class="admin-tab-btn active" data-tab="home">Home</button>
+            <p class="adm-group">Content</p>
+            <button class="admin-tab-btn" data-tab="pages">Pages</button>
+            <button class="admin-tab-btn" data-tab="content">Page Content</button>
+            <button class="admin-tab-btn" data-tab="notices">Notices &amp; Popups</button>
+            <button class="admin-tab-btn" data-tab="resources">Resource Links</button>
+            <button class="admin-tab-btn" data-tab="partners">Partners</button>
+            <p class="adm-group">Community</p>
+            <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
+            <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ <span class="adm-tag">Test mode</span></button>
+            <p class="adm-group">Inbox</p>
+            <button class="admin-tab-btn" data-tab="messages">Messages</button>
+            <button class="admin-tab-btn" data-tab="linkaudit">Link Audit &amp; Reports</button>
+            <p class="adm-group">Settings</p>
+            <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
+            <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
+            <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
+          </nav>
+          <div class="adm-who">
+            <p>Signed in as <span id="adminSignedInAs"></span></p>
+            <button class="btn admin-btn-outline adm-signout" id="adminLogoutBtn">Sign out</button>
+          </div>
+        </aside>
+        <div class="adm-main">
         <div id="adminFirebaseWarning" class="notice" style="display:none; margin-bottom:20px; background:#FBF3DD; border-color:#B4881A;">
           <strong>Not signed in.</strong> Saving is unavailable until you sign in with a CJHQ staff account. Anything you change here will not be saved.
         </div>
 
-        <div id="adminTabs" style="display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:24px; padding-bottom:0;">
-          <button class="admin-tab-btn active" data-tab="pages">Pages</button>
-          <button class="admin-tab-btn" data-tab="content">Page Content</button>
-          <button class="admin-tab-btn" data-tab="notices">Notices &amp; Popups</button>
-          <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
-          <button class="admin-tab-btn" data-tab="partners">Partners</button>
-          <button class="admin-tab-btn" data-tab="resources">Resource Links</button>
-          <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
-          <button class="admin-tab-btn" data-tab="linkaudit">Link Audit</button>
-          <button class="admin-tab-btn" data-tab="messages">Messages</button>
-          <button class="admin-tab-btn" data-tab="askcjhq">Ask CJHQ</button>
-          <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
-          <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
+
+        <!-- ===== TAB: HOME (dashboard) =====
+             Read-only summary built from the same collections the tabs use.
+             Nothing here writes to Firestore. -->
+        <div class="admin-tab-panel" id="tab-home">
+          <h2 class="adm-h2">Home</h2>
+          <p class="adm-sub" id="admDashDate"></p>
+          <div id="admDashboard" class="adm-dash"><p class="adm-muted">Loading&hellip;</p></div>
         </div>
 
+
         <!-- ===== TAB: PAGES ===== -->
-        <div class="admin-tab-panel" id="tab-pages">
+        <div class="admin-tab-panel" id="tab-pages" style="display:none;">
           <h2 style="font-size:1.2rem;">Site Pages</h2>
           <p style="font-size:.88rem; color:var(--muted);">Every built-in page on the site. Click "View" to open it, or "Deactivate" to hide it from navigation and visitors (without deleting anything — you can reactivate any time).</p>
           <div id="pagesList"></div>
@@ -2986,8 +3055,8 @@
           </div>
         </div>
 
-        <p style="margin-top:28px; font-size:.82rem; color:var(--muted);">Signed in as <span id="adminSignedInAs"></span></p>
-        <button class="btn admin-btn-outline" style="margin-top:8px; font-size:.82rem; color:var(--muted); border-color:var(--line);" id="adminLogoutBtn">Sign out</button>
+        </div><!-- /.adm-main -->
+        </div><!-- /.adm-shell -->
       </div>
     </div>
   </section>
@@ -6374,7 +6443,9 @@ async function initFirebase(){
     // the UI can never show an editable panel that Firestore will reject.
     authMod.onAuthStateChanged(fbAuth, (user) => {
       adminUser = user || null;
-      syncAdminAuthUI();
+      // The admin app (tools/admin-app.js) is injected into admin.html only.
+      // On public pages there is no panel to sync, so there is nothing to call.
+      if(typeof syncAdminAuthUI === 'function') syncAdminAuthUI();
     });
   }catch(e){
     console.warn('Firebase init failed, running in local-only mode:', e);
@@ -6767,411 +6838,6 @@ async function enhanceResourcesFromBackend(){
   });
   const wrap = document.getElementById('accordionWrap');
   if(wrap){ wrap.innerHTML = ''; renderAccordion(); }
-}
-
-/* ---------- Admin panel: shared ---------- */
-// Signed in with Firebase Auth. Firestore enforces the same condition on every
-// write, so the panel and the database agree instead of relying on a flag the
-// browser could set for itself.
-function adminUnlocked(){ return !!adminUser && adminIsStaff === true; }
-
-// Signing in proves who you are, not that you are staff. This decides whether
-// to OPEN the panel; Firestore rules remain the actual security boundary and
-// reject every write from a non-staff account regardless of what the UI does.
-//
-// An earlier version probed a staff-only collection to find out. That was wrong:
-// the Firestore read can hang instead of returning permission-denied, which left
-// the answer undetermined and could stall a real staff member out of the panel.
-//
-// This compares a SHA-256 of the signed-in address against a fixed list. No
-// network call, so it cannot hang. Hashes rather than plain addresses because
-// this file is public - six real staff email addresses in page source would be
-// harvested by scrapers.
-const STAFF_EMAIL_HASHES = [
-  '802f29f18f2c21c1e75ed93c8370a46e42e1f6d1351dd65da0ee6defc356ec0a',
-  'c56b62a4276676b8988ba6e92f4569c6e9c9a09fefddf7fc4d5ab0b1c4727955',
-  'bfb5888a455e596f356dfad1cebf7b7be594b69e795b60c5cd68bb6657c27e21',
-  'da8379e0210c9cf3fd4fee3d0c53b167f459201045c39eef986ddbf65e7c6d82',
-  '40470a896474b00dfc2b9e05996a2f4bdb340d456301d65bdcaac5b132c3adaa',
-  '71b41552fc55fe00e35e511f40cd4e84975dbb16e39ea726ded0d7c680d2671b'
-];
-
-let adminIsStaff = null;   // null = not yet determined
-
-async function sha256Hex(str){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-/* Staff can also be added from the panel, which writes one document per
-   address into the `staff` collection. The panel therefore has to ask
-   Firestore about anyone who is not in the hash list above.
-
-   The reason that read used to be wrong was never the read itself - it was
-   that it could hang, leaving the answer undetermined and a real staff member
-   stranded. So it is bounded: the hash list answers first and costs no
-   network call, the Firestore lookup runs only for addresses it does not
-   cover, and it is raced against a timeout. Anything other than a document
-   that exists - denied, offline, timed out, malformed - resolves to NOT
-   staff. Fail closed, never hang.
-
-   The rules allow a signed-in account to `get` exactly one document: the one
-   whose id is its own address. So this lookup cannot be used to enumerate
-   staff, and a stranger learns only that they are not on the list.
-
-   None of this is a security boundary. Firestore rules are; they run the
-   same two checks server-side on every read and write. */
-const STAFF_LOOKUP_TIMEOUT_MS = 6000;
-
-function staffDocId(email){ return String(email || '').trim().toLowerCase(); }
-
-async function staffDocExists(email){
-  const id = staffDocId(email);
-  if(!id || !firebaseReady || !window.__fbFirestore) return false;
-  const fs = window.__fbFirestore;
-  let timer;
-  try{
-    const lookup = fs.getDoc(fs.doc(fbDb, 'staff', id)).then(snap => snap.exists());
-    const bail   = new Promise(resolve => { timer = setTimeout(() => resolve('timeout'), STAFF_LOOKUP_TIMEOUT_MS); });
-    const result = await Promise.race([lookup, bail]);
-    if(result === 'timeout'){
-      console.warn('[CJHQ] staff lookup timed out; treating as not staff');
-      return false;
-    }
-    return result === true;
-  }catch(err){
-    console.warn('[CJHQ] staff lookup failed:', err);
-    return false;
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
-async function verifyAdminIsStaff(){
-  if(!adminUser || !adminUser.email){ adminIsStaff = false; return false; }
-  try{
-    const hash = await sha256Hex(staffDocId(adminUser.email));
-    if(STAFF_EMAIL_HASHES.includes(hash)){
-      adminIsStaff = true;
-      // Not awaited: access is already decided, and this must not delay or
-      // endanger sign-in. See ensureOwnStaffRecord().
-      ensureOwnStaffRecord();
-      return true;
-    }
-  }catch(err){
-    // crypto.subtle needs a secure context. Do not fail the whole check on
-    // this - the Firestore lookup below does not depend on it.
-    console.warn('[CJHQ] could not hash the signed-in address:', err);
-  }
-  adminIsStaff = await staffDocExists(adminUser.email);
-  return adminIsStaff === true;
-}
-
-async function syncAdminAuthUI(){
-  const loginBox = document.getElementById('adminLoginBox');
-  const panelBox = document.getElementById('adminPanelBox');
-  const whoami   = document.getElementById('adminSignedInAs');
-  if(!loginBox || !panelBox) return;
-  const onAdminRoute = document.getElementById('page-admin').classList.contains('active');
-
-  if(!adminUser){
-    adminIsStaff = null;
-    panelBox.style.display = 'none';
-    loginBox.style.display = 'block';
-    return;
-  }
-
-  // Signed in - but is this account on the staff list?
-  if(adminIsStaff === null) await verifyAdminIsStaff();
-
-  if(adminIsStaff === true){
-    loginBox.style.display = 'none';
-    if(whoami) whoami.textContent = adminUser.email || '';
-    if(onAdminRoute) showAdminPanel();
-    return;
-  }
-
-  // Authenticated, not authorised. Close the panel, say so plainly, and sign
-  // the account out so it is not left in a half-open state.
-  panelBox.style.display = 'none';
-  loginBox.style.display = 'block';
-  const email = adminUser.email || 'That account';
-  showLoginErrorGlobal(adminIsStaff === false
-    ? `${email} does not have access to the CJHQ admin panel. Contact the site administrator if you believe this is a mistake.`
-    : 'Could not confirm your access. Check your connection and try signing in again.');
-  try{
-    if(fbAuth && window.__fbAuth) await window.__fbAuth.signOut(fbAuth);
-  }catch(e){ /* already signed out, or offline */ }
-  adminUser = null;
-  adminIsStaff = null;
-}
-
-// showLoginError lives inside the admin IIFE; this reaches the same element
-// from syncAdminAuthUI, which is called from onAuthStateChanged.
-function showLoginErrorGlobal(msg){
-  const el = document.getElementById('adminLoginError');
-  if(!el) return;
-  el.textContent = msg;
-  el.style.display = 'block';
-}
-
-function showAdminPanel(){
-  document.getElementById('adminLoginBox').style.display = 'none';
-  document.getElementById('adminPanelBox').style.display = 'block';
-  // The banner now means "not signed in", which is the condition that actually
-  // stops saves from working.
-  // Superseded: the banner used to key off firebaseReady, which is true even
-  // when nobody is signed in - so it stayed hidden in exactly the case that
-  // blocks saving. It now keys off the auth state, which is the real condition.
-  const warn = document.getElementById('adminFirebaseWarning');
-  if(warn) warn.style.display = adminUser ? 'none' : 'block';
-  renderPagesList();
-  renderCustomPagesList();
-  renderContentBlocksList();
-  renderEmbeddedPartnersList();
-  renderAdminNoticesList();
-  renderAdminPartnersList();
-  renderAdminResourcesList();
-  renderExistingResourcesList();
-  renderAdminEventsList();
-  renderLinkAuditList();
-  renderErrorReportsList();
-  renderMessagesList();
-  loadSettingsIntoForm();
-}
-
-/* ---------- Admin panel: Staff access ----------
-   Who may sign in. Two sources, and the difference matters to the person
-   reading the list:
-
-     Built-in  - written into the Firestore security rules. Not removable
-                 from here, by design: they are the way back in if this list
-                 is ever emptied. Changing them means editing the rules.
-     Added     - a document in the `staff` collection, one per address,
-                 doc id = the lowercased address. This tab writes those.
-
-   The built-in addresses are deliberately NOT listed in this file. This file
-   is public: six real staff addresses in page source would be harvested by
-   scrapers, which is the whole reason STAFF_EMAIL_HASHES above holds hashes
-   rather than addresses. So the panel never enumerates them from code. Each
-   built-in account records itself in the `staff` collection the first time it
-   signs in - see ensureOwnStaffRecord() - and the tab lists it from there,
-   flagged built_in so it is shown but not removable. The collection is
-   staff-only to read, so the addresses stay out of public reach.
-
-   Consequence, stated plainly in the tab: a built-in account that has not
-   signed in since this went live is not in the list yet. It still has full
-   access - the rules grant it - it simply has not introduced itself.
-
-   Every guard below is a courtesy to the person clicking, not a security
-   control. The rules decide; they apply the same two sources on the server
-   for every read and write, including the writes this tab makes. */
-
-let STAFF_COLLECTION_CACHE = null;   // null = not loaded yet
-
-// Built-in means "in the rules", and the only copy of that list this file has
-// is the hash list used for sign-in. Async because hashing is.
-async function staffIsBuiltIn(email){
-  try{
-    return STAFF_EMAIL_HASHES.includes(await sha256Hex(staffDocId(email)));
-  }catch(e){
-    return false;
-  }
-}
-
-// Deliberately permissive - Firebase Auth, not this, decides what is a real
-// address. This only catches the obvious typo before a pointless write.
-function staffEmailLooksValid(email){
-  const e = staffDocId(email);
-  return e.length > 2 && e.length <= 320 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
-      && !/[\/#?\[\]*]/.test(e);   // characters Firestore will not take in a doc id
-}
-
-/* Best-effort self-registration, run once per sign-in AFTER access has already
-   been decided. It exists so a built-in account appears in the Staff tab
-   without any address ever being written into this file. It must never affect
-   whether someone gets in: every failure is swallowed. */
-async function ensureOwnStaffRecord(){
-  if(!adminUser || !adminUser.email || !firebaseReady || !window.__fbFirestore) return;
-  const id = staffDocId(adminUser.email);
-  if(!id) return;
-  const fs = window.__fbFirestore;
-  try{
-    const snap = await fs.getDoc(fs.doc(fbDb, 'staff', id));
-    const builtIn = await staffIsBuiltIn(id);
-    if(snap.exists()){
-      // Only ever ADD the flag to an existing record; never rewrite it.
-      if(builtIn && snap.data() && snap.data().built_in !== true){
-        await fs.setDoc(fs.doc(fbDb, 'staff', id), { built_in:true }, { merge:true });
-      }
-      return;
-    }
-    if(!builtIn) return;   // a non-built-in account with no record is not staff
-    await fs.setDoc(fs.doc(fbDb, 'staff', id), {
-      email: id, built_in: true, added_by: 'built-in', added_at: new Date().toISOString()
-    }, { merge:true });
-  }catch(e){
-    console.warn('[CJHQ] could not record this account in the staff list:', e);
-  }
-}
-
-async function fetchStaffCollection(){
-  if(!firebaseReady || !window.__fbFirestore) return [];
-  const fs = window.__fbFirestore;
-  try{
-    const snap = await fs.getDocs(fs.collection(fbDb, 'staff'));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  }catch(e){
-    console.warn('[CJHQ] could not read the staff list:', e);
-    return null;   // distinct from "empty" - the UI says which
-  }
-}
-
-function staffRowHtml(rec){
-  const email = rec.id;
-  const builtIn = rec.built_in === true;
-  const isYou = adminUser && staffDocId(adminUser.email) === email;
-  const badge = builtIn
-    ? '<span style="font-size:.72rem; font-weight:600; color:#6B7280; border:1px solid #D1D5DB; border-radius:99px; padding:2px 8px;">Built-in</span>'
-    : '<span style="font-size:.72rem; font-weight:600; color:#2E7D32; border:1px solid #A9CBA9; border-radius:99px; padding:2px 8px;">Added</span>';
-  const you = isYou ? ' <span style="font-size:.72rem; color:var(--muted);">(you)</span>' : '';
-  const action = builtIn
-    ? '<span style="font-size:.78rem; color:var(--muted);">Edit in the Firebase console</span>'
-    : (isYou
-        ? '<span style="font-size:.78rem; color:var(--muted);">You cannot remove yourself</span>'
-        : '<button class="btn admin-btn-outline" type="button" data-staff-remove="' +
-          cjhqEscapeHtml(email) + '" style="font-size:.8rem;">Remove</button>');
-  const meta = staffAddedMeta(rec);
-  return '<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; ' +
-         'border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px;">' +
-         '<span style="flex:1 1 240px; font-size:.9rem; word-break:break-all;">' +
-         cjhqEscapeHtml(email) + you + '</span>' + badge +
-         (meta ? '<span style="font-size:.76rem; color:var(--muted); flex:1 1 160px;">' +
-                 cjhqEscapeHtml(meta) + '</span>' : '') +
-         '<span>' + action + '</span></div>';
-}
-
-function staffAddedMeta(rec){
-  if(rec && rec.built_in === true) return 'in the security rules';
-  const by = rec && rec.added_by ? 'added by ' + rec.added_by : '';
-  const on = rec && rec.added_at ? String(rec.added_at).slice(0, 10) : '';
-  return [by, on].filter(Boolean).join(' · ');
-}
-
-async function renderStaffList(){
-  const box  = document.getElementById('staffList');
-  const note = document.getElementById('staffBuiltInNote');
-  if(!box) return;
-  box.innerHTML = '<p style="font-size:.86rem; color:var(--muted);">Loading…</p>';
-
-  const rows = await fetchStaffCollection();
-  STAFF_COLLECTION_CACHE = rows;
-
-  if(rows === null){
-    box.innerHTML = '<p style="font-size:.86rem; color:#A23B3B;">Could not read the staff list. ' +
-      'Check your connection and reopen this tab. Nobody\'s access has changed.</p>';
-    if(note) note.style.display = 'none';
-    return;
-  }
-
-  const builtIn = rows.filter(r => r.built_in === true).sort((a, b) => a.id.localeCompare(b.id));
-  const added   = rows.filter(r => r.built_in !== true).sort((a, b) => a.id.localeCompare(b.id));
-  const total   = builtIn.length + added.length;
-
-  // The list is honest about what it can and cannot see. It shows built-in
-  // accounts that have signed in; it cannot show the ones that have not.
-  if(note) note.style.display = 'block';
-
-  box.innerHTML =
-    (total === 0
-      ? '<p style="font-size:.88rem; color:var(--muted);">No accounts are listed yet. ' +
-        'Built-in accounts appear here the first time each one signs in.</p>'
-      : builtIn.map(staffRowHtml).join('') + added.map(staffRowHtml).join('')) +
-    (total
-      ? '<p style="font-size:.8rem; color:var(--muted); margin-top:10px;">' + total +
-        ' account' + (total === 1 ? '' : 's') + ' listed' +
-        (added.length ? ', ' + added.length + ' added from here' : '') + '.</p>'
-      : '');
-}
-
-function showStaffMsg(text, bad){
-  const el = document.getElementById('staffAddMsg');
-  if(!el) return;
-  el.textContent = text;
-  el.style.color = bad ? '#A23B3B' : '#2E7D32';
-  el.style.display = text ? 'block' : 'none';
-}
-
-async function addStaffMember(emailRaw){
-  const email = staffDocId(emailRaw);
-  if(!staffEmailLooksValid(email)){
-    showStaffMsg('That does not look like an email address. Check it and try again.', true);
-    return false;
-  }
-  if(await staffIsBuiltIn(email)){
-    showStaffMsg(email + ' already has access as a built-in account.', true);
-    return false;
-  }
-  if((STAFF_COLLECTION_CACHE || []).some(r => r.id === email)){
-    showStaffMsg(email + ' already has access.', true);
-    return false;
-  }
-  if(!firebaseReady || !window.__fbFirestore){
-    showStaffMsg('Not connected to the database, so nothing was saved.', true);
-    return false;
-  }
-  const fs = window.__fbFirestore;
-  try{
-    await fs.setDoc(fs.doc(fbDb, 'staff', email), {
-      email,
-      added_by: (adminUser && adminUser.email) || 'unknown',
-      added_at: new Date().toISOString()
-    });
-  }catch(err){
-    reportSaveFailure('staff', err);
-    return false;
-  }
-  showStaffMsg(email + ' can now sign in to this panel. Let them know — nothing was emailed.', false);
-  await renderStaffList();
-  return true;
-}
-
-async function removeStaffMember(emailRaw){
-  const email = staffDocId(emailRaw);
-  if(await staffIsBuiltIn(email)){
-    alert('This is a built-in account. Removing it here would change nothing, because the ' +
-          'security rules grant it access directly. To change that, edit the rules in the ' +
-          'Firebase console.');
-    return false;
-  }
-  if(adminUser && staffDocId(adminUser.email) === email){
-    alert('You cannot remove your own access from here. Ask another staff member to do it.');
-    return false;
-  }
-  if(!firebaseReady || !window.__fbFirestore){
-    alert('Not connected to the database. Nothing was changed.');
-    return false;
-  }
-  if(!confirm('Remove access for ' + email + '?\n\nThey will no longer be able to sign in to the admin panel. ' +
-              'Nothing they have already saved is affected, and you can add them again at any time.')) return false;
-  const fs = window.__fbFirestore;
-  try{
-    await fs.deleteDoc(fs.doc(fbDb, 'staff', email));
-  }catch(err){
-    reportSaveFailure('staff', err);
-    return false;
-  }
-  showStaffMsg(email + ' no longer has access.', false);
-  await renderStaffList();
-  return true;
-}
-
-function switchAdminTab(tab){
-  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
-  document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = (p.id === 'tab-'+tab) ? 'block' : 'none');
-  // Read the staff list when the tab is opened rather than on every panel
-  // load: it is one collection read, and most sessions never look at it.
-  if(tab === 'staff'){ showStaffMsg('', false); renderStaffList(); }
 }
 
 /* ---------- Admin panel: Pages ---------- */
@@ -10188,6 +9854,638 @@ const SITE_PAGES = [
   { id:'child-travel-consent', en:'Child Travel Consent Letter', fr:'Lettre de consentement au voyage d\'un enfant' },
   { id:'special-information', en:'Special Information', fr:'Information spéciale' },
 ];
+/* ---------- Public-facing: apply page settings + custom pages ---------- */
+/* Security rules are not filters: a list query fails outright if any document
+   it returns breaks the rule. So the public read asks for precisely the set the
+   rules permit - published, and not past its end - and the rules refuse
+   anything else. A visitor never receives an expired page's body at all, not
+   merely a page they are not shown.
+
+   Staff read the collection unconstrained, which the rules allow them to do.
+   A page saved before this feature existed has no public_until_ms and cannot
+   satisfy the query, so the admin offers a one-time backfill and flags any page
+   that still needs it. */
+/* A visitor cannot QUERY this collection, and no rule change can make that
+   work. Firestore evaluates a list rule against the QUERY, not against the
+   documents it would return: it has to prove from the query's own constraints
+   that nothing forbidden can come back. `published == true` can be proved that
+   way. `public_until_ms >= request.time.toMillis()` cannot - the client can
+   only put a number it chose into the query, and the engine has no way to know
+   that number is the current time. So every list shape is refused, however
+   exactly it mirrors the rule. Measured against production: an anonymous GET
+   of a live page returns 200, while five different query shapes - including
+   the one the SDK sends - all return PERMISSION_DENIED.
+
+   Reads of SINGLE documents ARE evaluated against the document, where
+   request.time works normally. So the public path is: read one small public
+   index document listing the slugs, then fetch each page by id. A page outside
+   its window is refused by the rules and simply drops out here - which is the
+   behaviour that was wanted: the body never reaches the browser.
+
+   The index only has to be right about WHICH pages exist, never about whether
+   they are still in date. Time is enforced by the rules on every read, so an
+   index that has gone stale over a weekend still cannot leak an expired page.
+   It is rewritten whenever an admin saves, deletes, or just opens the panel. */
+const CJHQ_PUBLIC_INDEX_DOC = 'public_pages';   // page_settings/public_pages
+const CJHQ_PUBLIC_INDEX_MAX = 40;               // a sane ceiling on the fan-out
+
+async function fetchPublicCustomPages(){
+  if(!firebaseReady) return Object.values(CUSTOM_PAGES_CACHE);
+  const fs = window.__fbFirestore;
+  let slugs = [];
+  try{
+    const idx = await fs.getDoc(fs.doc(fbDb, 'page_settings', CJHQ_PUBLIC_INDEX_DOC));
+    slugs = (idx.exists() && Array.isArray(idx.data().slugs)) ? idx.data().slugs : [];
+  }catch(e){
+    // Fail closed on custom pages only - never take the site's routing down.
+    console.warn('[CJHQ] public page index unavailable:', e);
+    return [];
+  }
+  const wanted = slugs.filter(x => typeof x === 'string' && x.trim())
+                      .map(x => x.trim()).slice(0, CJHQ_PUBLIC_INDEX_MAX);
+  if(!wanted.length) return [];
+  const reads = await Promise.all(wanted.map(async slug => {
+    try{
+      const snap = await fs.getDoc(fs.doc(fbDb, 'custom_pages', slug));
+      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    }catch(e){
+      // permission-denied here is the expiry rule doing its job, not a fault.
+      return null;
+    }
+  }));
+  return reads.filter(Boolean);
+}
+
+/* Keeping the index honest. Draft pages are left out entirely, so an
+   unpublished page's address is not advertised before anyone has decided to
+   publish it. Expired and not-yet-started pages STAY in: the rules refuse them
+   on read anyway, and leaving them means the index never has to be rewritten
+   just because the clock moved. */
+function cjhqPublicIndexSlugs(){
+  return Object.values(CUSTOM_PAGES_CACHE)
+    .filter(p => p && p.slug && p.published !== false)
+    .map(p => String(p.slug))
+    .sort();
+}
+
+async function syncPublicPageIndex(){
+  if(!firebaseReady || !adminUser || !window.__fbFirestore) return false;
+  const fs = window.__fbFirestore;
+  const want = cjhqPublicIndexSlugs();
+  try{
+    const ref  = fs.doc(fbDb, 'page_settings', CJHQ_PUBLIC_INDEX_DOC);
+    const snap = await fs.getDoc(ref);
+    const have = (snap.exists() && Array.isArray(snap.data().slugs)) ? snap.data().slugs : null;
+    if(have && have.length === want.length && have.every((v, i) => v === want[i])) return false;
+    await fs.setDoc(ref, {
+      pageId: CJHQ_PUBLIC_INDEX_DOC,      // this collection is keyed by pageId elsewhere
+      slugs: want,
+      updated_at: new Date().toISOString(),
+      updated_by: (adminUser && adminUser.email) || 'admin'
+    }, { merge:true });
+    console.info('[CJHQ] public page index updated:', want);
+    return true;
+  }catch(e){
+    console.warn('[CJHQ] could not update the public page index:', e);
+    return false;
+  }
+}
+
+async function enhancePagesFromBackend(){
+  const hidden = await fetchCollection('page_settings');
+  HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
+  const pages = adminUser ? await fetchCollection('custom_pages') : await fetchPublicCustomPages();
+  CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
+  // Self-healing: an admin looking at the site rewrites the public index
+  // whenever it disagrees with the collection, so one missed write cannot
+  // leave visitors seeing nothing. It only writes on a real difference.
+  if(adminUser) syncPublicPageIndex();
+  // The public split is computed here, once, and every public surface reads it.
+  // The Firestore rules also refuse to serve a non-live page to a visitor, so
+  // this is the second of two gates rather than the only one.
+  CUSTOM_PAGES_PUBLIC = Object.fromEntries(
+    Object.values(CUSTOM_PAGES_CACHE).filter(cjhqPageIsPublic).map(p => [p.slug, p]));
+  refreshNav();
+  renderHomePromo();
+}
+
+/* ---------- Homepage promotion ----------
+   A temporary page appears on the homepage only when it is published, inside
+   its dates, and has asked to be promoted. If several qualify, the one ending
+   soonest goes first - it is the one with the least time left to be seen. */
+function renderHomePromo(){
+  const host = document.getElementById('homeTempPromo');
+  if(!host) return;
+  const promoted = Object.values(CUSTOM_PAGES_PUBLIC)
+    .filter(p => p.show_on_home)
+    .sort((a,b) => String(a.end_date||'9999-12-31').localeCompare(String(b.end_date||'9999-12-31')));
+  if(!promoted.length){ host.innerHTML = ''; host.hidden = true; return; }
+  const esc = cjhqEscapeHtml;
+  const pair = (en, fr) => `<span data-en>${esc(en||'')}</span><span data-fr>${esc(fr||en||'')}</span>`;
+  host.innerHTML = promoted.map(p => {
+    const href = SITE_BASE_PATH + '/' + p.slug;
+    const label = pair(p.home_cta_en || p.title_en, p.home_cta_fr || p.title_fr);
+    if(p.home_style === 'button'){
+      return `<div class="section-inner tp-btnwrap">
+        <a class="btn dark" href="${esc(href)}" data-temp-page="${esc(p.slug)}">${label}</a>
+      </div>`;
+    }
+    return `<div class="section-inner"><div class="tp-tile">
+      <h2>${pair(p.title_en, p.title_fr)}</h2>
+      ${(p.home_blurb_en || p.home_blurb_fr) ? `<p>${pair(p.home_blurb_en, p.home_blurb_fr)}</p>` : ''}
+      <a class="btn dark" href="${esc(href)}" data-temp-page="${esc(p.slug)}">${label}</a>
+    </div></div>`;
+  }).join('');
+  host.hidden = false;
+  // Route through the SPA rather than reloading, but leave modified clicks and
+  // middle-clicks alone so "open in new tab" still works.
+  host.querySelectorAll('a[data-temp-page]').forEach(a => {
+    a.addEventListener('click', (e)=>{
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      goPage(a.dataset.tempPage);
+    });
+  });
+}
+function refreshNav(){
+  const nav = document.getElementById('mainNav');
+  const drawerNav = document.getElementById('mobileDrawerNav');
+  if(!nav) return;
+  // Hide/show built-in nav buttons based on deactivation state
+  nav.querySelectorAll('button[data-page]').forEach(btn => {
+    const pid = btn.dataset.page;
+    const isHidden = HIDDEN_PAGES_CACHE[pid] && HIDDEN_PAGES_CACHE[pid].hidden;
+    btn.style.display = isHidden ? 'none' : '';
+  });
+  if(drawerNav){
+    drawerNav.querySelectorAll('a[data-page]').forEach(a => {
+      const pid = a.dataset.page;
+      const isHidden = HIDDEN_PAGES_CACHE[pid] && HIDDEN_PAGES_CACHE[pid].hidden;
+      a.style.display = isHidden ? 'none' : '';
+    });
+  }
+  // Remove previously-injected custom nav buttons, then re-add current ones
+  nav.querySelectorAll('button[data-custom-nav]').forEach(b => b.remove());
+  if(drawerNav) drawerNav.querySelectorAll('a[data-custom-nav]').forEach(a => a.remove());
+  Object.values(CUSTOM_PAGES_PUBLIC).filter(p => p.show_in_nav).forEach(p => {
+    const btn = document.createElement('button');
+    btn.dataset.customNav = '1';
+    btn.dataset.page = p.slug;
+    btn.innerHTML = `<span data-en>${p.nav_en || p.title_en}</span><span data-fr>${p.nav_fr || p.title_fr}</span>`;
+    btn.addEventListener('click', () => goPage(p.slug));
+    nav.appendChild(btn);
+    if(drawerNav){
+      const link = document.createElement('a');
+      link.href = '#'; link.dataset.customNav = '1'; link.dataset.page = p.slug;
+      link.innerHTML = `<span data-en>${p.nav_en || p.title_en}</span><span data-fr>${p.nav_fr || p.title_fr}</span>`;
+      link.addEventListener('click', (e)=>{ e.preventDefault(); goPage(p.slug); document.getElementById('mobileDrawer').classList.remove('open'); document.getElementById('mobileDrawerOverlay').classList.remove('open'); document.body.style.overflow=''; });
+      drawerNav.appendChild(link);
+    }
+  });
+}
+
+async function applyResourceOverrides(){
+  const overrides = await fetchCollection('resource_overrides');
+  RESOURCE_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.slug, o]));
+  const wrap = document.getElementById('accordionWrap');
+  if(wrap){ wrap.innerHTML = ''; renderAccordion(); }
+}
+
+/* ================================================================
+ * CJHQ admin app
+ * ----------------------------------------------------------------
+ * Everything only the admin panel uses: staff sign-in checks, the
+ * editors for every tab, the Publishing and Ask CJHQ admin UIs.
+ *
+ * It used to live inside index.html, so every visitor downloaded and
+ * parsed it on every page. tools/generate-routes.mjs now injects this
+ * file into admin.html only, at the placeholder in index.html's main
+ * script - same arrangement as tools/admin-panel.inc (markup) and
+ * tools/ask-engine.js (Ask engine).
+ *
+ * It runs inside that same <script> block, so it shares globals with
+ * the public code exactly as before (fetchCollection, goPage, ...).
+ * Public code must never call anything defined here; the one hook,
+ * syncAdminAuthUI from initFirebase, is guarded with typeof.
+ *
+ * Edit admin behaviour HERE, then run: node tools/generate-routes.mjs
+ * ================================================================ */
+/* ---------- Admin panel: shared ---------- */
+// Signed in with Firebase Auth. Firestore enforces the same condition on every
+// write, so the panel and the database agree instead of relying on a flag the
+// browser could set for itself.
+function adminUnlocked(){ return !!adminUser && adminIsStaff === true; }
+
+// Signing in proves who you are, not that you are staff. This decides whether
+// to OPEN the panel; Firestore rules remain the actual security boundary and
+// reject every write from a non-staff account regardless of what the UI does.
+//
+// An earlier version probed a staff-only collection to find out. That was wrong:
+// the Firestore read can hang instead of returning permission-denied, which left
+// the answer undetermined and could stall a real staff member out of the panel.
+//
+// This compares a SHA-256 of the signed-in address against a fixed list. No
+// network call, so it cannot hang. Hashes rather than plain addresses because
+// this file is public - six real staff email addresses in page source would be
+// harvested by scrapers.
+const STAFF_EMAIL_HASHES = [
+  '802f29f18f2c21c1e75ed93c8370a46e42e1f6d1351dd65da0ee6defc356ec0a',
+  'c56b62a4276676b8988ba6e92f4569c6e9c9a09fefddf7fc4d5ab0b1c4727955',
+  'bfb5888a455e596f356dfad1cebf7b7be594b69e795b60c5cd68bb6657c27e21',
+  'da8379e0210c9cf3fd4fee3d0c53b167f459201045c39eef986ddbf65e7c6d82',
+  '40470a896474b00dfc2b9e05996a2f4bdb340d456301d65bdcaac5b132c3adaa',
+  '71b41552fc55fe00e35e511f40cd4e84975dbb16e39ea726ded0d7c680d2671b'
+];
+
+let adminIsStaff = null;   // null = not yet determined
+
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* Staff can also be added from the panel, which writes one document per
+   address into the `staff` collection. The panel therefore has to ask
+   Firestore about anyone who is not in the hash list above.
+
+   The reason that read used to be wrong was never the read itself - it was
+   that it could hang, leaving the answer undetermined and a real staff member
+   stranded. So it is bounded: the hash list answers first and costs no
+   network call, the Firestore lookup runs only for addresses it does not
+   cover, and it is raced against a timeout. Anything other than a document
+   that exists - denied, offline, timed out, malformed - resolves to NOT
+   staff. Fail closed, never hang.
+
+   The rules allow a signed-in account to `get` exactly one document: the one
+   whose id is its own address. So this lookup cannot be used to enumerate
+   staff, and a stranger learns only that they are not on the list.
+
+   None of this is a security boundary. Firestore rules are; they run the
+   same two checks server-side on every read and write. */
+const STAFF_LOOKUP_TIMEOUT_MS = 6000;
+
+function staffDocId(email){ return String(email || '').trim().toLowerCase(); }
+
+async function staffDocExists(email){
+  const id = staffDocId(email);
+  if(!id || !firebaseReady || !window.__fbFirestore) return false;
+  const fs = window.__fbFirestore;
+  let timer;
+  try{
+    const lookup = fs.getDoc(fs.doc(fbDb, 'staff', id)).then(snap => snap.exists());
+    const bail   = new Promise(resolve => { timer = setTimeout(() => resolve('timeout'), STAFF_LOOKUP_TIMEOUT_MS); });
+    const result = await Promise.race([lookup, bail]);
+    if(result === 'timeout'){
+      console.warn('[CJHQ] staff lookup timed out; treating as not staff');
+      return false;
+    }
+    return result === true;
+  }catch(err){
+    console.warn('[CJHQ] staff lookup failed:', err);
+    return false;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+async function verifyAdminIsStaff(){
+  if(!adminUser || !adminUser.email){ adminIsStaff = false; return false; }
+  try{
+    const hash = await sha256Hex(staffDocId(adminUser.email));
+    if(STAFF_EMAIL_HASHES.includes(hash)){
+      adminIsStaff = true;
+      // Not awaited: access is already decided, and this must not delay or
+      // endanger sign-in. See ensureOwnStaffRecord().
+      ensureOwnStaffRecord();
+      return true;
+    }
+  }catch(err){
+    // crypto.subtle needs a secure context. Do not fail the whole check on
+    // this - the Firestore lookup below does not depend on it.
+    console.warn('[CJHQ] could not hash the signed-in address:', err);
+  }
+  adminIsStaff = await staffDocExists(adminUser.email);
+  return adminIsStaff === true;
+}
+
+async function syncAdminAuthUI(){
+  const loginBox = document.getElementById('adminLoginBox');
+  const panelBox = document.getElementById('adminPanelBox');
+  const whoami   = document.getElementById('adminSignedInAs');
+  if(!loginBox || !panelBox) return;
+  const onAdminRoute = document.getElementById('page-admin').classList.contains('active');
+
+  if(!adminUser){
+    adminIsStaff = null;
+    panelBox.style.display = 'none';
+    loginBox.style.display = 'block';
+    return;
+  }
+
+  // Signed in - but is this account on the staff list?
+  if(adminIsStaff === null) await verifyAdminIsStaff();
+
+  if(adminIsStaff === true){
+    loginBox.style.display = 'none';
+    if(whoami) whoami.textContent = adminUser.email || '';
+    if(onAdminRoute) showAdminPanel();
+    return;
+  }
+
+  // Authenticated, not authorised. Close the panel, say so plainly, and sign
+  // the account out so it is not left in a half-open state.
+  panelBox.style.display = 'none';
+  loginBox.style.display = 'block';
+  const email = adminUser.email || 'That account';
+  showLoginErrorGlobal(adminIsStaff === false
+    ? `${email} does not have access to the CJHQ admin panel. Contact the site administrator if you believe this is a mistake.`
+    : 'Could not confirm your access. Check your connection and try signing in again.');
+  try{
+    if(fbAuth && window.__fbAuth) await window.__fbAuth.signOut(fbAuth);
+  }catch(e){ /* already signed out, or offline */ }
+  adminUser = null;
+  adminIsStaff = null;
+}
+
+// showLoginError lives inside the admin IIFE; this reaches the same element
+// from syncAdminAuthUI, which is called from onAuthStateChanged.
+function showLoginErrorGlobal(msg){
+  const el = document.getElementById('adminLoginError');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showAdminPanel(){
+  document.getElementById('adminLoginBox').style.display = 'none';
+  document.getElementById('adminPanelBox').style.display = 'block';
+  // The banner now means "not signed in", which is the condition that actually
+  // stops saves from working.
+  // Superseded: the banner used to key off firebaseReady, which is true even
+  // when nobody is signed in - so it stayed hidden in exactly the case that
+  // blocks saving. It now keys off the auth state, which is the real condition.
+  const warn = document.getElementById('adminFirebaseWarning');
+  if(warn) warn.style.display = adminUser ? 'none' : 'block';
+  // Open on Home, the dashboard, instead of dropping straight into Pages.
+  // Every tab is still rendered up front exactly as before.
+  switchAdminTab('home');
+  renderPagesList();
+  renderCustomPagesList();
+  renderContentBlocksList();
+  renderEmbeddedPartnersList();
+  renderAdminNoticesList();
+  renderAdminPartnersList();
+  renderAdminResourcesList();
+  renderExistingResourcesList();
+  renderAdminEventsList();
+  renderLinkAuditList();
+  renderErrorReportsList();
+  renderMessagesList();
+  loadSettingsIntoForm();
+}
+
+/* ---------- Admin panel: Staff access ----------
+   Who may sign in. Two sources, and the difference matters to the person
+   reading the list:
+
+     Built-in  - written into the Firestore security rules. Not removable
+                 from here, by design: they are the way back in if this list
+                 is ever emptied. Changing them means editing the rules.
+     Added     - a document in the `staff` collection, one per address,
+                 doc id = the lowercased address. This tab writes those.
+
+   The built-in addresses are deliberately NOT listed in this file. This file
+   is public: six real staff addresses in page source would be harvested by
+   scrapers, which is the whole reason STAFF_EMAIL_HASHES above holds hashes
+   rather than addresses. So the panel never enumerates them from code. Each
+   built-in account records itself in the `staff` collection the first time it
+   signs in - see ensureOwnStaffRecord() - and the tab lists it from there,
+   flagged built_in so it is shown but not removable. The collection is
+   staff-only to read, so the addresses stay out of public reach.
+
+   Consequence, stated plainly in the tab: a built-in account that has not
+   signed in since this went live is not in the list yet. It still has full
+   access - the rules grant it - it simply has not introduced itself.
+
+   Every guard below is a courtesy to the person clicking, not a security
+   control. The rules decide; they apply the same two sources on the server
+   for every read and write, including the writes this tab makes. */
+
+let STAFF_COLLECTION_CACHE = null;   // null = not loaded yet
+
+// Built-in means "in the rules", and the only copy of that list this file has
+// is the hash list used for sign-in. Async because hashing is.
+async function staffIsBuiltIn(email){
+  try{
+    return STAFF_EMAIL_HASHES.includes(await sha256Hex(staffDocId(email)));
+  }catch(e){
+    return false;
+  }
+}
+
+// Deliberately permissive - Firebase Auth, not this, decides what is a real
+// address. This only catches the obvious typo before a pointless write.
+function staffEmailLooksValid(email){
+  const e = staffDocId(email);
+  return e.length > 2 && e.length <= 320 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+      && !/[\/#?\[\]*]/.test(e);   // characters Firestore will not take in a doc id
+}
+
+/* Best-effort self-registration, run once per sign-in AFTER access has already
+   been decided. It exists so a built-in account appears in the Staff tab
+   without any address ever being written into this file. It must never affect
+   whether someone gets in: every failure is swallowed. */
+async function ensureOwnStaffRecord(){
+  if(!adminUser || !adminUser.email || !firebaseReady || !window.__fbFirestore) return;
+  const id = staffDocId(adminUser.email);
+  if(!id) return;
+  const fs = window.__fbFirestore;
+  try{
+    const snap = await fs.getDoc(fs.doc(fbDb, 'staff', id));
+    const builtIn = await staffIsBuiltIn(id);
+    if(snap.exists()){
+      // Only ever ADD the flag to an existing record; never rewrite it.
+      if(builtIn && snap.data() && snap.data().built_in !== true){
+        await fs.setDoc(fs.doc(fbDb, 'staff', id), { built_in:true }, { merge:true });
+      }
+      return;
+    }
+    if(!builtIn) return;   // a non-built-in account with no record is not staff
+    await fs.setDoc(fs.doc(fbDb, 'staff', id), {
+      email: id, built_in: true, added_by: 'built-in', added_at: new Date().toISOString()
+    }, { merge:true });
+  }catch(e){
+    console.warn('[CJHQ] could not record this account in the staff list:', e);
+  }
+}
+
+async function fetchStaffCollection(){
+  if(!firebaseReady || !window.__fbFirestore) return [];
+  const fs = window.__fbFirestore;
+  try{
+    const snap = await fs.getDocs(fs.collection(fbDb, 'staff'));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(e){
+    console.warn('[CJHQ] could not read the staff list:', e);
+    return null;   // distinct from "empty" - the UI says which
+  }
+}
+
+function staffRowHtml(rec){
+  const email = rec.id;
+  const builtIn = rec.built_in === true;
+  const isYou = adminUser && staffDocId(adminUser.email) === email;
+  const badge = builtIn
+    ? '<span style="font-size:.72rem; font-weight:600; color:#6B7280; border:1px solid #D1D5DB; border-radius:99px; padding:2px 8px;">Built-in</span>'
+    : '<span style="font-size:.72rem; font-weight:600; color:#2E7D32; border:1px solid #A9CBA9; border-radius:99px; padding:2px 8px;">Added</span>';
+  const you = isYou ? ' <span style="font-size:.72rem; color:var(--muted);">(you)</span>' : '';
+  const action = builtIn
+    ? '<span style="font-size:.78rem; color:var(--muted);">Edit in the Firebase console</span>'
+    : (isYou
+        ? '<span style="font-size:.78rem; color:var(--muted);">You cannot remove yourself</span>'
+        : '<button class="btn admin-btn-outline" type="button" data-staff-remove="' +
+          cjhqEscapeHtml(email) + '" style="font-size:.8rem;">Remove</button>');
+  const meta = staffAddedMeta(rec);
+  return '<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; ' +
+         'border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px;">' +
+         '<span style="flex:1 1 240px; font-size:.9rem; word-break:break-all;">' +
+         cjhqEscapeHtml(email) + you + '</span>' + badge +
+         (meta ? '<span style="font-size:.76rem; color:var(--muted); flex:1 1 160px;">' +
+                 cjhqEscapeHtml(meta) + '</span>' : '') +
+         '<span>' + action + '</span></div>';
+}
+
+function staffAddedMeta(rec){
+  if(rec && rec.built_in === true) return 'in the security rules';
+  const by = rec && rec.added_by ? 'added by ' + rec.added_by : '';
+  const on = rec && rec.added_at ? String(rec.added_at).slice(0, 10) : '';
+  return [by, on].filter(Boolean).join(' · ');
+}
+
+async function renderStaffList(){
+  const box  = document.getElementById('staffList');
+  const note = document.getElementById('staffBuiltInNote');
+  if(!box) return;
+  box.innerHTML = '<p style="font-size:.86rem; color:var(--muted);">Loading…</p>';
+
+  const rows = await fetchStaffCollection();
+  STAFF_COLLECTION_CACHE = rows;
+
+  if(rows === null){
+    box.innerHTML = '<p style="font-size:.86rem; color:#A23B3B;">Could not read the staff list. ' +
+      'Check your connection and reopen this tab. Nobody\'s access has changed.</p>';
+    if(note) note.style.display = 'none';
+    return;
+  }
+
+  const builtIn = rows.filter(r => r.built_in === true).sort((a, b) => a.id.localeCompare(b.id));
+  const added   = rows.filter(r => r.built_in !== true).sort((a, b) => a.id.localeCompare(b.id));
+  const total   = builtIn.length + added.length;
+
+  // The list is honest about what it can and cannot see. It shows built-in
+  // accounts that have signed in; it cannot show the ones that have not.
+  if(note) note.style.display = 'block';
+
+  box.innerHTML =
+    (total === 0
+      ? '<p style="font-size:.88rem; color:var(--muted);">No accounts are listed yet. ' +
+        'Built-in accounts appear here the first time each one signs in.</p>'
+      : builtIn.map(staffRowHtml).join('') + added.map(staffRowHtml).join('')) +
+    (total
+      ? '<p style="font-size:.8rem; color:var(--muted); margin-top:10px;">' + total +
+        ' account' + (total === 1 ? '' : 's') + ' listed' +
+        (added.length ? ', ' + added.length + ' added from here' : '') + '.</p>'
+      : '');
+}
+
+function showStaffMsg(text, bad){
+  const el = document.getElementById('staffAddMsg');
+  if(!el) return;
+  el.textContent = text;
+  el.style.color = bad ? '#A23B3B' : '#2E7D32';
+  el.style.display = text ? 'block' : 'none';
+}
+
+async function addStaffMember(emailRaw){
+  const email = staffDocId(emailRaw);
+  if(!staffEmailLooksValid(email)){
+    showStaffMsg('That does not look like an email address. Check it and try again.', true);
+    return false;
+  }
+  if(await staffIsBuiltIn(email)){
+    showStaffMsg(email + ' already has access as a built-in account.', true);
+    return false;
+  }
+  if((STAFF_COLLECTION_CACHE || []).some(r => r.id === email)){
+    showStaffMsg(email + ' already has access.', true);
+    return false;
+  }
+  if(!firebaseReady || !window.__fbFirestore){
+    showStaffMsg('Not connected to the database, so nothing was saved.', true);
+    return false;
+  }
+  const fs = window.__fbFirestore;
+  try{
+    await fs.setDoc(fs.doc(fbDb, 'staff', email), {
+      email,
+      added_by: (adminUser && adminUser.email) || 'unknown',
+      added_at: new Date().toISOString()
+    });
+  }catch(err){
+    reportSaveFailure('staff', err);
+    return false;
+  }
+  showStaffMsg(email + ' can now sign in to this panel. Let them know — nothing was emailed.', false);
+  await renderStaffList();
+  return true;
+}
+
+async function removeStaffMember(emailRaw){
+  const email = staffDocId(emailRaw);
+  if(await staffIsBuiltIn(email)){
+    alert('This is a built-in account. Removing it here would change nothing, because the ' +
+          'security rules grant it access directly. To change that, edit the rules in the ' +
+          'Firebase console.');
+    return false;
+  }
+  if(adminUser && staffDocId(adminUser.email) === email){
+    alert('You cannot remove your own access from here. Ask another staff member to do it.');
+    return false;
+  }
+  if(!firebaseReady || !window.__fbFirestore){
+    alert('Not connected to the database. Nothing was changed.');
+    return false;
+  }
+  if(!confirm('Remove access for ' + email + '?\n\nThey will no longer be able to sign in to the admin panel. ' +
+              'Nothing they have already saved is affected, and you can add them again at any time.')) return false;
+  const fs = window.__fbFirestore;
+  try{
+    await fs.deleteDoc(fs.doc(fbDb, 'staff', email));
+  }catch(err){
+    reportSaveFailure('staff', err);
+    return false;
+  }
+  showStaffMsg(email + ' no longer has access.', false);
+  await renderStaffList();
+  return true;
+}
+
+function switchAdminTab(tab){
+  document.querySelectorAll('.admin-tab-btn').forEach(b => {
+    const on = b.dataset.tab===tab;
+    b.classList.toggle('active', on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = (p.id === 'tab-'+tab) ? 'block' : 'none');
+  admSyncMenuLabel(tab);
+  admCloseMenu();
+  if(tab === 'home') renderAdminDashboard();
+  // Read the staff list when the tab is opened rather than on every panel
+  // load: it is one collection read, and most sessions never look at it.
+  if(tab === 'staff'){ showStaffMsg('', false); renderStaffList(); }
+}
+
+
 async function renderPagesList(){
   const hidden = await fetchCollection('page_settings');
   HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
@@ -10486,195 +10784,6 @@ async function deleteCustomPage(slug){
   refreshNav();
 }
 
-/* ---------- Public-facing: apply page settings + custom pages ---------- */
-/* Security rules are not filters: a list query fails outright if any document
-   it returns breaks the rule. So the public read asks for precisely the set the
-   rules permit - published, and not past its end - and the rules refuse
-   anything else. A visitor never receives an expired page's body at all, not
-   merely a page they are not shown.
-
-   Staff read the collection unconstrained, which the rules allow them to do.
-   A page saved before this feature existed has no public_until_ms and cannot
-   satisfy the query, so the admin offers a one-time backfill and flags any page
-   that still needs it. */
-/* A visitor cannot QUERY this collection, and no rule change can make that
-   work. Firestore evaluates a list rule against the QUERY, not against the
-   documents it would return: it has to prove from the query's own constraints
-   that nothing forbidden can come back. `published == true` can be proved that
-   way. `public_until_ms >= request.time.toMillis()` cannot - the client can
-   only put a number it chose into the query, and the engine has no way to know
-   that number is the current time. So every list shape is refused, however
-   exactly it mirrors the rule. Measured against production: an anonymous GET
-   of a live page returns 200, while five different query shapes - including
-   the one the SDK sends - all return PERMISSION_DENIED.
-
-   Reads of SINGLE documents ARE evaluated against the document, where
-   request.time works normally. So the public path is: read one small public
-   index document listing the slugs, then fetch each page by id. A page outside
-   its window is refused by the rules and simply drops out here - which is the
-   behaviour that was wanted: the body never reaches the browser.
-
-   The index only has to be right about WHICH pages exist, never about whether
-   they are still in date. Time is enforced by the rules on every read, so an
-   index that has gone stale over a weekend still cannot leak an expired page.
-   It is rewritten whenever an admin saves, deletes, or just opens the panel. */
-const CJHQ_PUBLIC_INDEX_DOC = 'public_pages';   // page_settings/public_pages
-const CJHQ_PUBLIC_INDEX_MAX = 40;               // a sane ceiling on the fan-out
-
-async function fetchPublicCustomPages(){
-  if(!firebaseReady) return Object.values(CUSTOM_PAGES_CACHE);
-  const fs = window.__fbFirestore;
-  let slugs = [];
-  try{
-    const idx = await fs.getDoc(fs.doc(fbDb, 'page_settings', CJHQ_PUBLIC_INDEX_DOC));
-    slugs = (idx.exists() && Array.isArray(idx.data().slugs)) ? idx.data().slugs : [];
-  }catch(e){
-    // Fail closed on custom pages only - never take the site's routing down.
-    console.warn('[CJHQ] public page index unavailable:', e);
-    return [];
-  }
-  const wanted = slugs.filter(x => typeof x === 'string' && x.trim())
-                      .map(x => x.trim()).slice(0, CJHQ_PUBLIC_INDEX_MAX);
-  if(!wanted.length) return [];
-  const reads = await Promise.all(wanted.map(async slug => {
-    try{
-      const snap = await fs.getDoc(fs.doc(fbDb, 'custom_pages', slug));
-      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-    }catch(e){
-      // permission-denied here is the expiry rule doing its job, not a fault.
-      return null;
-    }
-  }));
-  return reads.filter(Boolean);
-}
-
-/* Keeping the index honest. Draft pages are left out entirely, so an
-   unpublished page's address is not advertised before anyone has decided to
-   publish it. Expired and not-yet-started pages STAY in: the rules refuse them
-   on read anyway, and leaving them means the index never has to be rewritten
-   just because the clock moved. */
-function cjhqPublicIndexSlugs(){
-  return Object.values(CUSTOM_PAGES_CACHE)
-    .filter(p => p && p.slug && p.published !== false)
-    .map(p => String(p.slug))
-    .sort();
-}
-
-async function syncPublicPageIndex(){
-  if(!firebaseReady || !adminUser || !window.__fbFirestore) return false;
-  const fs = window.__fbFirestore;
-  const want = cjhqPublicIndexSlugs();
-  try{
-    const ref  = fs.doc(fbDb, 'page_settings', CJHQ_PUBLIC_INDEX_DOC);
-    const snap = await fs.getDoc(ref);
-    const have = (snap.exists() && Array.isArray(snap.data().slugs)) ? snap.data().slugs : null;
-    if(have && have.length === want.length && have.every((v, i) => v === want[i])) return false;
-    await fs.setDoc(ref, {
-      pageId: CJHQ_PUBLIC_INDEX_DOC,      // this collection is keyed by pageId elsewhere
-      slugs: want,
-      updated_at: new Date().toISOString(),
-      updated_by: (adminUser && adminUser.email) || 'admin'
-    }, { merge:true });
-    console.info('[CJHQ] public page index updated:', want);
-    return true;
-  }catch(e){
-    console.warn('[CJHQ] could not update the public page index:', e);
-    return false;
-  }
-}
-
-async function enhancePagesFromBackend(){
-  const hidden = await fetchCollection('page_settings');
-  HIDDEN_PAGES_CACHE = Object.fromEntries(hidden.map(h => [h.pageId, h]));
-  const pages = adminUser ? await fetchCollection('custom_pages') : await fetchPublicCustomPages();
-  CUSTOM_PAGES_CACHE = Object.fromEntries(pages.map(p => [p.slug, p]));
-  // Self-healing: an admin looking at the site rewrites the public index
-  // whenever it disagrees with the collection, so one missed write cannot
-  // leave visitors seeing nothing. It only writes on a real difference.
-  if(adminUser) syncPublicPageIndex();
-  // The public split is computed here, once, and every public surface reads it.
-  // The Firestore rules also refuse to serve a non-live page to a visitor, so
-  // this is the second of two gates rather than the only one.
-  CUSTOM_PAGES_PUBLIC = Object.fromEntries(
-    Object.values(CUSTOM_PAGES_CACHE).filter(cjhqPageIsPublic).map(p => [p.slug, p]));
-  refreshNav();
-  renderHomePromo();
-}
-
-/* ---------- Homepage promotion ----------
-   A temporary page appears on the homepage only when it is published, inside
-   its dates, and has asked to be promoted. If several qualify, the one ending
-   soonest goes first - it is the one with the least time left to be seen. */
-function renderHomePromo(){
-  const host = document.getElementById('homeTempPromo');
-  if(!host) return;
-  const promoted = Object.values(CUSTOM_PAGES_PUBLIC)
-    .filter(p => p.show_on_home)
-    .sort((a,b) => String(a.end_date||'9999-12-31').localeCompare(String(b.end_date||'9999-12-31')));
-  if(!promoted.length){ host.innerHTML = ''; host.hidden = true; return; }
-  const esc = cjhqEscapeHtml;
-  const pair = (en, fr) => `<span data-en>${esc(en||'')}</span><span data-fr>${esc(fr||en||'')}</span>`;
-  host.innerHTML = promoted.map(p => {
-    const href = SITE_BASE_PATH + '/' + p.slug;
-    const label = pair(p.home_cta_en || p.title_en, p.home_cta_fr || p.title_fr);
-    if(p.home_style === 'button'){
-      return `<div class="section-inner tp-btnwrap">
-        <a class="btn dark" href="${esc(href)}" data-temp-page="${esc(p.slug)}">${label}</a>
-      </div>`;
-    }
-    return `<div class="section-inner"><div class="tp-tile">
-      <h2>${pair(p.title_en, p.title_fr)}</h2>
-      ${(p.home_blurb_en || p.home_blurb_fr) ? `<p>${pair(p.home_blurb_en, p.home_blurb_fr)}</p>` : ''}
-      <a class="btn dark" href="${esc(href)}" data-temp-page="${esc(p.slug)}">${label}</a>
-    </div></div>`;
-  }).join('');
-  host.hidden = false;
-  // Route through the SPA rather than reloading, but leave modified clicks and
-  // middle-clicks alone so "open in new tab" still works.
-  host.querySelectorAll('a[data-temp-page]').forEach(a => {
-    a.addEventListener('click', (e)=>{
-      if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-      e.preventDefault();
-      goPage(a.dataset.tempPage);
-    });
-  });
-}
-function refreshNav(){
-  const nav = document.getElementById('mainNav');
-  const drawerNav = document.getElementById('mobileDrawerNav');
-  if(!nav) return;
-  // Hide/show built-in nav buttons based on deactivation state
-  nav.querySelectorAll('button[data-page]').forEach(btn => {
-    const pid = btn.dataset.page;
-    const isHidden = HIDDEN_PAGES_CACHE[pid] && HIDDEN_PAGES_CACHE[pid].hidden;
-    btn.style.display = isHidden ? 'none' : '';
-  });
-  if(drawerNav){
-    drawerNav.querySelectorAll('a[data-page]').forEach(a => {
-      const pid = a.dataset.page;
-      const isHidden = HIDDEN_PAGES_CACHE[pid] && HIDDEN_PAGES_CACHE[pid].hidden;
-      a.style.display = isHidden ? 'none' : '';
-    });
-  }
-  // Remove previously-injected custom nav buttons, then re-add current ones
-  nav.querySelectorAll('button[data-custom-nav]').forEach(b => b.remove());
-  if(drawerNav) drawerNav.querySelectorAll('a[data-custom-nav]').forEach(a => a.remove());
-  Object.values(CUSTOM_PAGES_PUBLIC).filter(p => p.show_in_nav).forEach(p => {
-    const btn = document.createElement('button');
-    btn.dataset.customNav = '1';
-    btn.dataset.page = p.slug;
-    btn.innerHTML = `<span data-en>${p.nav_en || p.title_en}</span><span data-fr>${p.nav_fr || p.title_fr}</span>`;
-    btn.addEventListener('click', () => goPage(p.slug));
-    nav.appendChild(btn);
-    if(drawerNav){
-      const link = document.createElement('a');
-      link.href = '#'; link.dataset.customNav = '1'; link.dataset.page = p.slug;
-      link.innerHTML = `<span data-en>${p.nav_en || p.title_en}</span><span data-fr>${p.nav_fr || p.title_fr}</span>`;
-      link.addEventListener('click', (e)=>{ e.preventDefault(); goPage(p.slug); document.getElementById('mobileDrawer').classList.remove('open'); document.getElementById('mobileDrawerOverlay').classList.remove('open'); document.body.style.overflow=''; });
-      drawerNav.appendChild(link);
-    }
-  });
-}
 
 /* ---------- Admin panel: Page Content editor ---------- */
 let CONTENT_OVERRIDES_CACHE = {};
@@ -11225,12 +11334,6 @@ async function toggleResourceHidden(slug){
   await saveToCollection('resource_overrides', { ...existing, id: slug, slug, hidden: !existing.hidden });
   await applyResourceOverrides();
   renderExistingResourcesList();
-}
-async function applyResourceOverrides(){
-  const overrides = await fetchCollection('resource_overrides');
-  RESOURCE_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.slug, o]));
-  const wrap = document.getElementById('accordionWrap');
-  if(wrap){ wrap.innerHTML = ''; renderAccordion(); }
 }
 
 /* ---------- Admin panel: Calendar (Community Events) ---------- */
@@ -12685,6 +12788,158 @@ async function publishChangeNotice(slug){
     renderAdminEventsList();
   });
 })();
+
+
+
+/* ================================================================
+ * Admin shell: mobile menu + Home dashboard
+ * ----------------------------------------------------------------
+ * The dashboard is read-only. It reads the same collections the tabs
+ * already read (fetchCollection) and never writes anything. Each list
+ * links to the tab where the item is actually managed.
+ * ================================================================ */
+function admSyncMenuLabel(tab){
+  const btn = document.querySelector(`.admin-tab-btn[data-tab="${tab}"]`);
+  const label = document.getElementById('admMenuCurrent');
+  if(btn && label) label.textContent = btn.childNodes[0] ? btn.childNodes[0].textContent.trim() : btn.textContent.trim();
+}
+function admCloseMenu(){
+  const side = document.querySelector('#page-admin .adm-side');
+  const t = document.getElementById('admMenuToggle');
+  if(side) side.classList.remove('open');
+  if(t) t.setAttribute('aria-expanded','false');
+}
+(function initAdminShell(){
+  const t = document.getElementById('admMenuToggle');
+  if(!t) return;
+  t.addEventListener('click', ()=>{
+    const side = t.closest('.adm-side');
+    const open = !side.classList.contains('open');
+    side.classList.toggle('open', open);
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  const dash = document.getElementById('admDashboard');
+  if(dash) dash.addEventListener('click', (e)=>{
+    const go = e.target.closest && e.target.closest('[data-adm-go]');
+    if(go) switchAdminTab(go.getAttribute('data-adm-go'));
+  });
+})();
+
+function admAddDaysISO(iso, n){
+  const [y,m,d] = iso.split('-').map(Number);
+  const dt = new Date(y, m-1, d + n);
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+}
+function admFmtDay(iso){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(iso||''))) return '';
+  const [y,m,d] = iso.split('-').map(Number);
+  return new Date(y, m-1, d).toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+}
+function admFmtWhen(v){
+  const d = v ? new Date(v) : null;
+  return (d && !isNaN(d.getTime())) ? d.toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '';
+}
+
+let ADM_DASH_BUSY = false;
+async function renderAdminDashboard(){
+  const box = document.getElementById('admDashboard');
+  if(!box || ADM_DASH_BUSY) return;
+  ADM_DASH_BUSY = true;
+  const esc = cjhqEscapeHtml;
+  const today = cjhqTodayISO();
+  const soon = admAddDaysISO(today, 7);
+  const weekAgo = admAddDaysISO(today, -7);
+  const dateEl = document.getElementById('admDashDate');
+  if(dateEl) dateEl.textContent = 'Today: ' + admFmtDay(today) + '. Starting/ending soon means within 7 days.';
+  const safe = (p) => p.then(v => v || [], () => null);   // null = could not load
+  try{
+    const [notices, pages, messages, reports, audits] = await Promise.all([
+      safe(fetchCollection('notices')),
+      safe(fetchCollection('custom_pages')),
+      safe(fetchCollection('contact_submissions')),
+      safe(fetchCollection('error_reports')),
+      safe(fetchCollection('link_audits')),
+    ]);
+    try{ await loadSectionVisibility(); }catch(e){ /* shown as unavailable below */ }
+
+    const section = (title, tab, items, empty) => `
+      <section>
+        <h3><span>${title}</span>${tab ? `<button type="button" data-adm-go="${tab}">Open</button>` : ''}</h3>
+        ${items === null
+          ? `<p class="adm-muted">Could not load. Check your connection or sign-in.</p>`
+          : items.length ? `<ul>${items.join('')}</ul>` : `<p class="adm-muted">${empty}</p>`}
+      </section>`;
+    const li = (left, right) => `<li><span>${left}</span><span>${right || ''}</span></li>`;
+    const title = (x) => esc(x.title_en || x.titleEn || x.title_fr || x.titleFr || x.slug || x.id || 'Untitled');
+
+    // Messages: there is no read/unread flag in the data, so "new" = last 7 days.
+    let msgItems = null;
+    if(messages){
+      const recent = messages
+        .filter(m => (m.submittedAt||'').slice(0,10) >= weekAgo)
+        .sort((a,b) => (b.submittedAt||'').localeCompare(a.submittedAt||''));
+      const nameOf = (m) => { const k = Object.keys(m).find(k => /name/i.test(k) && m[k]); return k ? m[k] : (m.email || 'Message'); };
+      msgItems = recent.slice(0,5).map(m => li(esc(String(nameOf(m))), admFmtWhen(m.submittedAt)));
+      if(recent.length > 5) msgItems.push(li(`and ${recent.length-5} more`, ''));
+    }
+
+    // Notices: live now, starting soon, ending soon.
+    let noticeItems = null;
+    if(notices){
+      noticeItems = [];
+      const n = notices.filter(x => x.draft !== true && x.active);
+      const kind = (x) => x.type === 'popup' ? 'Popup' : 'Banner';
+      n.filter(isLiveNow).forEach(x => {
+        const ends = (x.endsOn||'').trim();
+        const endingSoon = ends && ends <= soon;
+        noticeItems.push(li(`${kind(x)}: ${title(x)}`, endingSoon ? `<span class="adm-flag">ends ${esc(admFmtDay(ends))}</span>` : 'live'));
+      });
+      n.filter(x => scheduleState(x) === 'scheduled' && (x.startsOn||'') <= soon)
+        .forEach(x => noticeItems.push(li(`${kind(x)}: ${title(x)}`, 'starts ' + esc(admFmtDay(x.startsOn)))));
+    }
+
+    // Pages: scheduled to start soon, live and ending soon.
+    let pageItems = null;
+    if(pages){
+      pageItems = [];
+      pages.forEach(p => {
+        const st = cjhqPageLifecycle(p);
+        const from = String(p.start_date||'').trim(), to = String(p.end_date||'').trim();
+        if(st === 'scheduled' && from <= soon) pageItems.push(li(title(p), 'starts ' + esc(admFmtDay(from))));
+        else if(st === 'live' && to && to <= soon) pageItems.push(li(title(p), `<span class="adm-flag">ends ${esc(admFmtDay(to))}</span>`));
+      });
+    }
+
+    // Publishing: section visibility, with the existing change record.
+    const pubItems = SECTION_KEYS.map(k => {
+      const a = sectionAudit(k);
+      const by = a.changedBy ? ` by ${esc(a.changedBy)}` : '';
+      const when = a.changedAt ? ` ${esc(admFmtWhen(a.changedAt))}` : '';
+      return li(esc(k), `${esc(a.state || a.status)}${a.changedAt || a.changedBy ? ' - changed' + when + by : ''}`);
+    });
+
+    // Link problems: visitor reports (last 30 days) + flagged audit items.
+    let linkItems = null;
+    if(reports || audits){
+      linkItems = [];
+      const monthAgo = admAddDaysISO(today, -30);
+      const rep = (reports||[]).filter(r => (r.reportedAt||'').slice(0,10) >= monthAgo);
+      const flagged = (audits||[]).filter(a => a.slug && a.slug !== '_run_summary' && a.status && a.status !== 'ok');
+      if(rep.length) linkItems.push(li(`${rep.length} visitor report${rep.length===1?'':'s'} (broken links / errors, last 30 days)`, ''));
+      if(flagged.length) linkItems.push(li(`${flagged.length} resource link${flagged.length===1?'':'s'} flagged by the audit`, ''));
+    }
+
+    box.innerHTML =
+      section('New messages (last 7 days)', 'messages', msgItems, 'No new messages this week.') +
+      section('Notices live or starting soon', 'notices', noticeItems, 'No notices live or starting in the next 7 days.') +
+      section('Pages starting or ending soon', 'pages', pageItems, 'Nothing starting or ending in the next 7 days.') +
+      section('Link problems', 'linkaudit', linkItems, 'No broken-link reports in the last 30 days.') +
+      section('Publishing (hidden sections)', 'visibility', pubItems, 'No sections.');
+  }finally{
+    ADM_DASH_BUSY = false;
+  }
+}
+
 
 function checkCurrentPath(opts){
   opts = opts || {};
