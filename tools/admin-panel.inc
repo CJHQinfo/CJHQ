@@ -558,8 +558,19 @@
         <div class="admin-tab-panel" id="tab-linkaudit" style="display:none;">
           <h2 style="font-size:1.2rem;">Monthly Link Audit</h2>
           <p style="font-size:.88rem; color:var(--muted);">
-            Once set up (see the developer note near "LINK AUDIT CLOUD FUNCTION" in the page source), an automated check runs on the 1st of every month: it visits every resource link, confirms it still loads, and asks an AI to compare our instructions against the live government page. It never edits anything on its own — it only flags what a person should look at here.
+            On the 1st of every month an automatic check visits every link the site sends people to and confirms it still loads. It never edits anything; it only lists what a person should look at here.
           </p>
+
+          <h3 style="font-size:.95rem; margin-top:18px;">Link check results</h3>
+          <div id="linkCheckSummary" style="font-size:.88rem;"></div>
+          <div id="linkCheckBroken" style="margin-top:10px;"></div>
+          <details id="linkCheckUnsureWrap" style="margin-top:10px; display:none;">
+            <summary style="cursor:pointer; font-size:.88rem;">Could not confirm (<span id="linkCheckUnsureCount">0</span>) - usually a site blocking automatic visits; click to check by hand</summary>
+            <div id="linkCheckUnsure" style="margin-top:8px;"></div>
+          </details>
+
+          <h3 style="font-size:.95rem; margin-top:26px;">Instruction comparison (optional add-on)</h3>
+          <p style="font-size:.82rem; color:var(--muted);">A separate, optional checker can also compare our instructions against each live government page with AI (see the developer note near "LINK AUDIT CLOUD FUNCTION" in the page source). It is not deployed; it needs Firebase's paid plan. Its results would appear under Flagged Items.</p>
           <div id="linkAuditSetupWarning" class="notice" style="display:none; margin:16px 0; background:#FBF3DD; border-color:#B4881A;">
             <strong>Not connected yet.</strong> The monthly checker is a separate piece (a Firebase Cloud Function) that hasn't been deployed. This tab will populate once it's running — see the setup note in the source for the steps.
           </div>

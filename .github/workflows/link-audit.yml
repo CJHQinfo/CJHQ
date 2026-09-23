@@ -1,0 +1,49 @@
+name: Monthly link check
+
+# Visits every outbound link the site publishes and writes the results to
+# data/link-audit.json, which the admin's Link Audit tab reads. It never edits
+# site content. Runs on the 1st of each month, or on demand from the Actions
+# tab ("Run workflow"). Free: it uses the repository's own Actions minutes and
+# needs no secrets. See tools/link-audit.mjs.
+
+on:
+  schedule:
+    - cron: '23 11 1 * *'   # 1st of the month, ~7am Montreal
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: link-audit
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check every outbound link
+        run: node tools/link-audit.mjs
+
+      - name: Save the results
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/link-audit.json
+          if git diff --staged --quiet; then
+            echo "No change."
+          else
+            git commit -m "chore: monthly link check results"
+            git pull --rebase --quiet
+            git push
+          fi

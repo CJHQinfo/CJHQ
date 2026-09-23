@@ -1613,6 +1613,7 @@ async function syncResourcesToBackend(){
 }
 
 async function renderLinkAuditList(){
+  renderLinkCheckResults();
   document.getElementById('linkAuditSetupWarning').style.display = firebaseReady ? 'none' : 'block';
   const audits = await fetchCollection('link_audits');
   const flagged = audits.filter(a => a.slug && a.slug !== '_run_summary' && a.status && a.status !== 'ok');
@@ -3408,3 +3409,44 @@ async function admDiscardContentDraft(cid){
   const orig = showAdminPanel;
   showAdminPanel = function(){ const r = orig.apply(this, arguments); try{ admLoadOwnRole(); }catch(e){} return r; };
 })();
+
+
+/* ======================================================================
+   Link check results (Step 9)
+   Written monthly by .github/workflows/link-audit.yml into
+   data/link-audit.json on the site itself; read here. Nothing is stored in
+   Firestore and nothing is edited automatically.
+   ====================================================================== */
+async function renderLinkCheckResults(){
+  const sum = document.getElementById('linkCheckSummary');
+  if(!sum) return;
+  const esc = cjhqEscapeHtml;
+  let rep = null;
+  try{
+    const r = await fetch('/data/link-audit.json?cb=' + Date.now(), { cache:'no-store' });
+    if(r.ok) rep = await r.json();
+  }catch(e){}
+  const brokenBox = document.getElementById('linkCheckBroken');
+  const unsureWrap = document.getElementById('linkCheckUnsureWrap');
+  if(!rep){
+    sum.innerHTML = '<p style="color:var(--muted);">No results yet. The first check runs on the 1st of the month, or on demand from the repository\'s Actions tab ("Monthly link check", then "Run workflow").</p>';
+    brokenBox.innerHTML = ''; unsureWrap.style.display = 'none';
+    return;
+  }
+  const when = new Date(rep.checked_at).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
+  const nb = (rep.broken || []).length, nu = (rep.unsure || []).length;
+  sum.innerHTML = `<p style="margin:0;">Last checked <strong>${esc(when)}</strong>: ${rep.total} links, ${rep.ok} fine, ` +
+    `<strong style="color:${nb ? '#A23B3B' : 'inherit'};">${nb} broken</strong>, ${nu} could not be confirmed.</p>`;
+  const row = (x, color) => {
+    const used = (x.used_by || []).map(u => esc(u.label)).join(', ');
+    const why = x.status ? ('HTTP ' + x.status) : esc(x.error || 'no response');
+    return `<div class="card" style="margin-bottom:8px; padding:10px 14px;">
+      <p style="margin:0; font-size:.85rem; font-family:monospace; word-break:break-all;"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a></p>
+      <p style="margin:4px 0 0; font-size:.8rem;"><span style="color:${color}; font-weight:600;">${why}</span>${used ? ' · used by: ' + used : ''}</p>
+    </div>`;
+  };
+  brokenBox.innerHTML = nb ? rep.broken.map(x => row(x, '#A23B3B')).join('') : '<p style="color:var(--muted); font-size:.88rem;">No broken links found.</p>';
+  unsureWrap.style.display = nu ? '' : 'none';
+  document.getElementById('linkCheckUnsureCount').textContent = nu;
+  document.getElementById('linkCheckUnsure').innerHTML = (rep.unsure || []).map(x => row(x, '#6B7280')).join('');
+}

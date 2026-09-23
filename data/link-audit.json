@@ -1,0 +1,345 @@
+{
+  "checked_at": "2026-09-23T15:06:28.588Z",
+  "total": 84,
+  "ok": 69,
+  "broken": [
+    {
+      "url": "https://ca.usembassy.gov/u-s-citizen-services/",
+      "used_by": [
+        {
+          "slug": "us-passport-application",
+          "label": "U.S. Passport"
+        },
+        {
+          "slug": "consular-report-of-birth-abroad-crba",
+          "label": "Consular Report of Birth Abroad (CRBA)"
+        },
+        {
+          "slug": "first-us-passport-for-a-child",
+          "label": "First U.S. Passport for a Child"
+        },
+        {
+          "slug": "embassy-consulate-appointments",
+          "label": "U.S. Embassy & Consulate Appointments"
+        }
+      ],
+      "status": 404,
+      "error": ""
+    },
+    {
+      "url": "https://travel.gc.ca/travelling/advisories",
+      "used_by": [
+        {
+          "slug": "travel-advisories",
+          "label": "Travel Advisories"
+        }
+      ],
+      "status": 404,
+      "error": "",
+      "final_url": "https://travel.gc.ca/vt/containers/404.aspx?aspxerrorpath=/vt/dynamic/eng/advisories.aspx"
+    }
+  ],
+  "unsure": [
+    {
+      "url": "https://dmv.ny.gov/driver-license/enhanced-or-real-id",
+      "used_by": [
+        {
+          "slug": "new-york-enhanced-drivers-license",
+          "label": "New York Enhanced Driver License (EDL)"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://offices.service.canada.ca/en/SearchPassport",
+      "used_by": [
+        {
+          "slug": "adult-passport-application",
+          "label": "Adult Passport Application"
+        },
+        {
+          "slug": "passport-renewal",
+          "label": "Passport Renewal"
+        },
+        {
+          "slug": "child-passport",
+          "label": "Child Passport"
+        },
+        {
+          "slug": "urgent-express-passport-services",
+          "label": "Urgent & Express Passport Service"
+        },
+        {
+          "slug": "find-a-passport-office",
+          "label": "Find a Passport Office"
+        },
+        {
+          "slug": "lost-stolen-or-damaged-passport",
+          "label": "Lost, Stolen or Damaged Passport"
+        }
+      ],
+      "status": 0,
+      "error": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+    },
+    {
+      "url": "https://travel.state.gov/content/travel/en/passports.html",
+      "used_by": [
+        {
+          "slug": "us-passport-application",
+          "label": "U.S. Passport"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://travel.state.gov/en/international-travel/living-abroad/birth.html",
+      "used_by": [
+        {
+          "slug": "consular-report-of-birth-abroad-crba",
+          "label": "Consular Report of Birth Abroad (CRBA)"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://travel.state.gov/en/passports/apply/child/under-16.html",
+      "used_by": [
+        {
+          "slug": "first-us-passport-for-a-child",
+          "label": "First U.S. Passport for a Child"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.facebook.com/CJHQinfo",
+      "used_by": [
+        {
+          "slug": "",
+          "label": "Page: /about.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /accessibility.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /child-travel-consent.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /contact.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/a-propos.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/accessibilite.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/actualites.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/conditions-utilisation.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/consentement-voyage-enfant.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/contact.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/index.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/politique-de-confidentialite.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /index.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /privacy.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /stay-informed.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /terms.html"
+        }
+      ],
+      "status": 400,
+      "error": "",
+      "final_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2FCJHQinfo"
+    },
+    {
+      "url": "https://www.instagram.com/cjhqinfo/",
+      "used_by": [
+        {
+          "slug": "",
+          "label": "Page: /about.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /accessibility.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /child-travel-consent.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /contact.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/a-propos.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/accessibilite.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/actualites.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/conditions-utilisation.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/consentement-voyage-enfant.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/contact.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/index.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/politique-de-confidentialite.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /index.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /privacy.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /stay-informed.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /terms.html"
+        }
+      ],
+      "status": 429,
+      "error": "",
+      "final_url": "https://www.instagram.com/accounts/login/?next=https%3A%2F%2Fwww.instagram.com%2Fcjhqinfo%2F&is_from_rle"
+    },
+    {
+      "url": "https://www.manulife-travel.ca/dist/home.html?as=wllebovits",
+      "used_by": [
+        {
+          "slug": "manulife-travel-insurance",
+          "label": "Manulife Travel Insurance"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/birth-adoption",
+      "used_by": [
+        {
+          "slug": "register-a-newborn-with-ramq",
+          "label": "Register a Newborn with RAMQ"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/obtain-new-card",
+      "used_by": [
+        {
+          "slug": "replace-or-renew-your-health-card",
+          "label": "Replace or Renew Your Health Card"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/register",
+      "used_by": [
+        {
+          "slug": "apply-for-ramq",
+          "label": "Apply for RAMQ"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/prescription-drug-insurance",
+      "used_by": [
+        {
+          "slug": "prescription-drug-insurance",
+          "label": "Prescription Drug Insurance"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ssa.gov/number-card",
+      "used_by": [
+        {
+          "slug": "social-security-number",
+          "label": "Social Security Number (SSN)"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    }
+  ]
+}
