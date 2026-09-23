@@ -1,44 +1,8 @@
 {
-  "checked_at": "2026-09-23T15:06:28.588Z",
-  "total": 84,
-  "ok": 69,
-  "broken": [
-    {
-      "url": "https://ca.usembassy.gov/u-s-citizen-services/",
-      "used_by": [
-        {
-          "slug": "us-passport-application",
-          "label": "U.S. Passport"
-        },
-        {
-          "slug": "consular-report-of-birth-abroad-crba",
-          "label": "Consular Report of Birth Abroad (CRBA)"
-        },
-        {
-          "slug": "first-us-passport-for-a-child",
-          "label": "First U.S. Passport for a Child"
-        },
-        {
-          "slug": "embassy-consulate-appointments",
-          "label": "U.S. Embassy & Consulate Appointments"
-        }
-      ],
-      "status": 404,
-      "error": ""
-    },
-    {
-      "url": "https://travel.gc.ca/travelling/advisories",
-      "used_by": [
-        {
-          "slug": "travel-advisories",
-          "label": "Travel Advisories"
-        }
-      ],
-      "status": 404,
-      "error": "",
-      "final_url": "https://travel.gc.ca/vt/containers/404.aspx?aspxerrorpath=/vt/dynamic/eng/advisories.aspx"
-    }
-  ],
+  "checked_at": "2026-09-23T15:44:43.519Z",
+  "total": 83,
+  "ok": 70,
+  "broken": [],
   "unsure": [
     {
       "url": "https://dmv.ny.gov/driver-license/enhanced-or-real-id",

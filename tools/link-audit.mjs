@@ -127,6 +127,30 @@ const report = {
   broken: pick('broken'),
   unsure: pick('unsure')
 };
+// "Last reviewed by CJHQ" dates. A resource gets the current month only when
+// every outbound link it uses checked OK this run. A resource with a broken or
+// unconfirmed link keeps its old date (and shows in the Link Audit tab), and a
+// resource with no outbound links is left alone. Only index.html is edited
+// here; the workflow then regenerates the copies. The sitemap is never touched.
+const month = new Date().toLocaleDateString('en-US', { month:'long', year:'numeric', timeZone:'America/Toronto' });
+const bySlug = new Map();
+for(const r of results) for(const w of r.used_by){
+  if(!w.slug || / \(edited in admin\)$/.test(w.label)) continue;
+  if(!bySlug.has(w.slug)) bySlug.set(w.slug, true);
+  if(r.result !== 'ok') bySlug.set(w.slug, false);
+}
+const refreshed = [], kept = [];
+const newIndex = index.split('\n').map(line => {
+  const slug = (line.match(/slug:'([^']+)'/) || [])[1];
+  if(!slug || !/reviewed:'[^']*'/.test(line) || !bySlug.has(slug)) return line;
+  if(!bySlug.get(slug)){ kept.push(slug); return line; }
+  refreshed.push(slug);
+  return line.replace(/reviewed:'[^']*'/, "reviewed:'" + month + "'");
+}).join('\n');
+if(newIndex !== index) writeFileSync(join(ROOT, 'index.html'), newIndex);
+report.reviewed = { month, refreshed: refreshed.length, kept_old_date: kept.sort() };
+
 mkdirSync(dirname(OUT), { recursive:true });
 writeFileSync(OUT, JSON.stringify(report, null, 2) + '\n');
 console.log(`Checked ${report.total} links: ${report.ok} ok, ${report.broken.length} broken, ${report.unsure.length} unsure.`);
+console.log(`Last reviewed set to ${month} on ${refreshed.length} resources; ${kept.length} kept their old date.`);

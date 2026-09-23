@@ -1,8 +1,10 @@
 name: Monthly link check
 
 # Visits every outbound link the site publishes and writes the results to
-# data/link-audit.json, which the admin's Link Audit tab reads. It never edits
-# site content. Runs on the 1st of each month, or on demand from the Actions
+# data/link-audit.json, which the admin's Link Audit tab reads. It also sets
+# "Last reviewed by CJHQ" to the current month on each resource whose links all
+# checked OK (owner's instruction, Sep 23 2026); nothing else on the site
+# changes, and the sitemap dates are never touched. Runs on the 1st of each month, or on demand from the Actions
 # tab ("Run workflow"). Free: it uses the repository's own Actions minutes and
 # needs no secrets. See tools/link-audit.mjs.
 
@@ -32,18 +34,25 @@ jobs:
           node-version: '20'
 
       - name: Check every outbound link
-        run: node tools/link-audit.mjs
+        # Larger header limit: some government sites send very large headers.
+        run: node --max-http-header-size=131072 tools/link-audit.mjs
+
+      - name: Rebuild page copies with the new reviewed dates
+        run: |
+          node tools/sync-ask-core.mjs
+          node tools/generate-routes.mjs
 
       - name: Save the results
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/link-audit.json
+          git add data/link-audit.json index.html ask-data.mjs ask-core.mjs admin.html '*.html'
+          git diff --staged --quiet -- sitemap.xml || { echo "sitemap must not change"; exit 1; }
           if git diff --staged --quiet; then
             echo "No change."
           else
-            git commit -m "chore: monthly link check results"
+            git commit -m "chore: monthly link check results and reviewed dates"
             git pull --rebase --quiet
             git push
           fi

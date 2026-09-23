@@ -98,7 +98,7 @@ const CASES = [
 export default async function run(opts){
   const t = makeSuite('Part M - French body retrieval');
 
-  t.eq('dataset still holds 68 resources', ITEMS.length, 68);
+  t.eq('dataset still holds 67 resources', ITEMS.length, 67);
 
   /* ---- guard: the witnesses really are French-only, and really are in the
           record whose French body is supposed to carry the match ---- */

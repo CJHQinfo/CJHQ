@@ -570,9 +570,9 @@
           </details>
 
           <h3 style="font-size:.95rem; margin-top:26px;">Instruction comparison (optional add-on)</h3>
-          <p style="font-size:.82rem; color:var(--muted);">A separate, optional checker can also compare our instructions against each live government page with AI (see the developer note near "LINK AUDIT CLOUD FUNCTION" in the page source). It is not deployed; it needs Firebase's paid plan. Its results would appear under Flagged Items.</p>
+          <p style="font-size:.82rem; color:var(--muted);">A second, optional checker could also compare our written instructions against each live government page using AI. It has not been built; it would need Firebase's paid plan. If it is ever added, its results appear under Flagged Items below.</p>
           <div id="linkAuditSetupWarning" class="notice" style="display:none; margin:16px 0; background:#FBF3DD; border-color:#B4881A;">
-            <strong>Not connected yet.</strong> The monthly checker is a separate piece (a Firebase Cloud Function) that hasn't been deployed. This tab will populate once it's running — see the setup note in the source for the steps.
+            <strong>Not connected.</strong> The admin panel could not reach the database, so saved flags can't load right now. Reload the page to try again.
           </div>
 
           <div style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0;">

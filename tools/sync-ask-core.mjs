@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------
  * Produces the two modules the external WhatsApp bridge imports:
  *
- *   ask-data.mjs   the 63-resource `categories` dataset
+ *   ask-data.mjs   the 62-resource `categories` dataset
  *   ask-core.mjs   the deterministic engine: language detection, the seven
  *                  handlers in order, the halachic guard, resource matching,
  *                  answer shaping, and the askRun / askAnswer entry points
@@ -92,7 +92,7 @@ const dataOut = `/* GENERATED FILE - do not edit.
  * Edit the dataset in index.html and re-run the tool; editing this file
  * directly will be overwritten and will make --check fail.
  *
- * The 63 CJHQ resources. Imported by ask-core.mjs and, through it, by the
+ * The 62 CJHQ resources. Imported by ask-core.mjs and, through it, by the
  * external WhatsApp bridge, so a resource added on the site reaches WhatsApp
  * without a second dataset being maintained anywhere.
  */
