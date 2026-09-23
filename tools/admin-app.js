@@ -493,15 +493,23 @@ function staffRowHtml(rec){
   const you = isYou ? ' <span style="font-size:.72rem; color:var(--muted);">(you)</span>' : '';
   const action = builtIn
     ? '<span style="font-size:.78rem; color:var(--muted);">Edit in the Firebase console</span>'
-    : (isYou
+    : (ADM_OWN_ROLE === 'editor'
+        ? ''
+        : isYou
         ? '<span style="font-size:.78rem; color:var(--muted);">You cannot remove yourself</span>'
         : '<button class="btn admin-btn-outline" type="button" data-staff-remove="' +
           cjhqEscapeHtml(email) + '" style="font-size:.8rem;">Remove</button>');
   const meta = staffAddedMeta(rec);
+  const role = builtIn ? 'owner' : admRoleOf(rec);
+  const roleCtl = (builtIn || isYou || ADM_OWN_ROLE !== 'owner')
+    ? '<span style="font-size:.76rem; font-weight:600; color:var(--ink);">' + (role === 'owner' ? 'Owner' : 'Editor') + '</span>'
+    : '<select class="admin-input" data-staff-role="' + cjhqEscapeHtml(email) + '" aria-label="Role for ' + cjhqEscapeHtml(email) + '" style="width:auto; padding:4px 8px; font-size:.8rem;">' +
+      '<option value="owner"' + (role === 'owner' ? ' selected' : '') + '>Owner</option>' +
+      '<option value="editor"' + (role === 'editor' ? ' selected' : '') + '>Editor</option></select>';
   return '<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; ' +
          'border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-bottom:8px;">' +
          '<span style="flex:1 1 240px; font-size:.9rem; word-break:break-all;">' +
-         cjhqEscapeHtml(email) + you + '</span>' + badge +
+         cjhqEscapeHtml(email) + you + '</span>' + badge + roleCtl +
          (meta ? '<span style="font-size:.76rem; color:var(--muted); flex:1 1 160px;">' +
                  cjhqEscapeHtml(meta) + '</span>' : '') +
          '<span>' + action + '</span></div>';
@@ -520,6 +528,7 @@ async function renderStaffList(){
   if(!box) return;
   box.innerHTML = '<p style="font-size:.86rem; color:var(--muted);">Loading…</p>';
 
+  await admLoadOwnRole();
   const rows = await fetchStaffCollection();
   STAFF_COLLECTION_CACHE = rows;
 
@@ -580,6 +589,7 @@ async function addStaffMember(emailRaw){
   try{
     await fs.setDoc(fs.doc(fbDb, 'staff', email), {
       email,
+      role: 'editor',
       added_by: (adminUser && adminUser.email) || 'unknown',
       added_at: new Date().toISOString()
     });
@@ -587,7 +597,7 @@ async function addStaffMember(emailRaw){
     reportSaveFailure('staff', err);
     return false;
   }
-  showStaffMsg(email + ' can now sign in to this panel. Let them know — nothing was emailed.', false);
+  showStaffMsg(email + ' can now sign in to this panel as an Editor (everything except the staff list). Change the role below if they should be an Owner. Let them know — nothing was emailed.', false);
   await renderStaffList();
   return true;
 }
@@ -632,6 +642,7 @@ function switchAdminTab(tab){
   admSyncMenuLabel(tab);
   admCloseMenu();
   if(tab === 'home') renderAdminDashboard();
+  if(tab === 'history') renderAdminHistory();
   // Read the staff list when the tab is opened rather than on every panel
   // load: it is one collection read, and most sessions never look at it.
   if(tab === 'staff'){ showStaffMsg('', false); renderStaffList(); }
@@ -957,6 +968,8 @@ async function renderContentBlocksList(){
   initContentEditorPageSelect();
   const overrides = await fetchCollection('content_overrides');
   CONTENT_OVERRIDES_CACHE = Object.fromEntries(overrides.map(o => [o.cid, o]));
+  const drafts = await fetchCollection('content_drafts');
+  const DRAFTS = Object.fromEntries(drafts.map(d => [d.cid || d.id, d]));
   const selectedPage = document.getElementById('contentPageSelect').value || CONTENT_MANIFEST[0].page;
   document.getElementById('contentPageSelect').value = selectedPage;
   const blocks = CONTENT_MANIFEST.filter(m => m.page === selectedPage);
@@ -964,18 +977,22 @@ async function renderContentBlocksList(){
   list.innerHTML = blocks.map(m => {
     const ov = CONTENT_OVERRIDES_CACHE[m.cid];
     const hasOverride = !!ov;
+    const dr = DRAFTS[m.cid];
     return `
     <div class="card" style="margin-bottom:12px;">
       <div class="admin-row" style="align-items:flex-start;">
         <span class="pill" style="font-size:.68rem;">${m.tag}${hasOverride ? ' · edited' : ''}</span>
+        ${dr ? `<span class="pill" style="font-size:.68rem; background:#FFF3CD; color:#7A5B00;">Draft · not live yet</span>` : ''}
       </div>
       <p style="font-size:.78rem; color:var(--muted); margin:6px 0 8px; font-style:italic;">"${m.label}${m.label.length>=70?'…':''}"</p>
       <label class="admin-label">English</label>
-      <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="en">${hasOverride ? (ov.en||'') : m.default_en}</textarea>
+      <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="en">${dr ? (dr.en||'') : hasOverride ? (ov.en||'') : m.default_en}</textarea>
       <label class="admin-label">French</label>
-      <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="fr">${hasOverride ? (ov.fr||'') : m.default_fr}</textarea>
+      <textarea class="admin-input" rows="2" data-cid="${m.cid}" data-lang="fr">${dr ? (dr.fr||'') : hasOverride ? (ov.fr||'') : m.default_fr}</textarea>
       <div style="display:flex; gap:8px; margin-top:10px;">
-        <button class="admin-small-btn" onclick="saveContentBlock('${m.cid}')">Save</button>
+        <button class="admin-small-btn" onclick="saveContentBlock('${m.cid}')">${dr ? 'Publish' : 'Save'}</button>
+        <button class="admin-small-btn" type="button" onclick="admSaveContentDraft('${m.cid}')">Save as draft</button>
+        ${dr ? `<button class="admin-small-btn" type="button" onclick="admDiscardContentDraft('${m.cid}')">Discard draft</button>` : ''}
         <button class="admin-small-btn" type="button" onclick="admToggleBlockPreview('${m.cid}')">Preview</button>
         ${hasOverride ? `<button class="admin-small-btn" style="color:#A23B3B;" onclick="resetContentBlock('${m.cid}')">Reset to Default</button>` : ''}
       </div>
@@ -1014,6 +1031,9 @@ async function saveContentBlock(cid){
   const enVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="en"]`).value;
   const frVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="fr"]`).value;
   await saveToCollection('content_overrides', { id: cid, cid, en: enVal, fr: frVal });
+  // Publishing a block clears its draft, if it had one.
+  try{ if((localCache.content_drafts || []).some(d => (d.cid || d.id) === cid)) await deleteFromCollection('content_drafts', cid); }catch(e){}
+  admToast('Saved. Visitors see this now.');
   await applyContentOverrides();
   renderContentBlocksList();
 }
@@ -1033,13 +1053,15 @@ async function resetContentBlock(cid){
 
 /* ---------- Admin panel: Notices ---------- */
 async function renderAdminNoticesList(){
-  const notices = await fetchCollection('notices');
+  const live = await fetchCollection('notices');
+  const drafts = (await fetchCollection('notice_drafts')).map(n => ({ ...n, draft:true, __src:'notice_drafts' }));
+  const notices = drafts.concat(live);
   const list = document.getElementById('noticesList');
   if(!notices.length){ list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No notices yet.</p>`; return; }
   list.innerHTML = notices.map(n => `
     <div class="card admin-row">
       <div>
-        <span class="pill" style="font-size:.7rem; margin-bottom:6px; display:inline-block;">${n.type} · ${n.style} ${n.active ? '' : '· inactive'}</span>
+        <span class="pill" style="font-size:.7rem; margin-bottom:6px; display:inline-block;">${n.type} · ${n.style} ${n.active ? '' : '· inactive'}${n.draft ? ' · draft' : ''}</span>
         <p style="margin:4px 0 0; font-weight:600;">${n.title_en || '(no title)'}</p>
         <p style="margin:2px 0 0; font-size:.85rem; color:var(--muted);">${n.body_en || ''}</p>
       </div>
@@ -1050,9 +1072,12 @@ async function renderAdminNoticesList(){
     </div>`).join('');
 }
 async function editNotice(id){
-  const n = (await fetchCollection('notices')).find(x=>x.id===id);
+  let src = 'notices';
+  let n = (await fetchCollection('notices')).find(x=>x.id===id);
+  if(!n){ n = (await fetchCollection('notice_drafts')).find(x=>x.id===id); src = 'notice_drafts'; }
   if(!n) return;
   document.getElementById('noticeId').value = n.id;
+  document.getElementById('noticeSource').value = src;
   document.getElementById('noticeType').value = n.type;
   document.getElementById('noticeStyle').value = n.style;
   document.getElementById('noticeTitleEn').value = n.title_en||'';
@@ -1066,8 +1091,9 @@ async function editNotice(id){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 async function removeNotice(id){
-  if(!(await admConfirm('Delete this notice? This cannot be undone.'))) return;
-  await deleteFromCollection('notices', id);
+  if(!(await admConfirm('Delete this notice? You can bring it back from Change History.'))) return;
+  const isDraft = (localCache.notice_drafts || []).some(x => x.id === id);
+  await deleteFromCollection(isDraft ? 'notice_drafts' : 'notices', id);
   renderAdminNoticesList();
 }
 
@@ -2100,6 +2126,7 @@ async function publishChangeNotice(slug){
   document.getElementById('noticeCancelBtn').addEventListener('click', ()=>{
     document.getElementById('noticeForm').reset();
     document.getElementById('noticeId').value = '';
+    document.getElementById('noticeSource').value = 'notices';
   });
 
 
@@ -2861,9 +2888,16 @@ async function publishChangeNotice(slug){
       return;
     }
     if(!notice.id) delete notice.id;
-    await saveToCollection('notices', notice);
+    // Drafts live in the staff-only notice_drafts collection, so their text is
+    // never readable by visitors. Moving between the two keeps the same id.
+    const src = (document.getElementById('noticeSource') || {}).value || 'notices';
+    const dest = notice.draft ? 'notice_drafts' : 'notices';
+    await saveToCollection(dest, notice);
+    if(notice.id && src !== dest){ try{ await deleteFromCollection(src, notice.id); }catch(e){} }
+    admToast(notice.draft ? 'Draft saved. It does not show on the site.' : 'Notice saved.');
     document.getElementById('noticeForm').reset();
     document.getElementById('noticeId').value = '';
+    document.getElementById('noticeSource').value = 'notices';
     renderAdminNoticesList();
     renderPublicNotices();
   });
@@ -3127,4 +3161,241 @@ async function renderAdminDashboard(){
   }finally{
     ADM_DASH_BUSY = false;
   }
+}
+
+/* ======================================================================
+   Change history (Step 7)
+   Every admin save and delete records one entry in admin_history: which
+   collection and document, what happened, who did it, when, and the document
+   as it was BEFORE the change. Restore puts that earlier version back, and the
+   restore is itself recorded, so nothing is ever lost by restoring.
+
+   Entries are append-only in the security rules (no edit, no delete).
+   ADM_HISTORY_ON stays false until the admin_history rule is published: before
+   that every history write would be refused, so recording is switched off and
+   the History tab says so, rather than failing on each save.
+   ====================================================================== */
+const ADM_HISTORY_ON = true;
+const ADM_HISTORY_SKIP = new Set(['admin_history']);
+const ADM_HISTORY_MAX_BEFORE = 800000; // characters; Firestore caps a document at 1 MiB
+
+async function admReadDocForHistory(name, id){
+  if(!firebaseReady || !id) return null;
+  try{
+    const fs = window.__fbFirestore;
+    const snap = await fs.getDoc(fs.doc(fbDb, name, id));
+    return snap.exists() ? snap.data() : null;
+  }catch(e){ return undefined; } // undefined = could not read; null = did not exist
+}
+async function admRecordHistory(entry){
+  if(!ADM_HISTORY_ON || !firebaseReady) return;
+  try{
+    const fs = window.__fbFirestore;
+    const by = (adminUser && adminUser.email ? adminUser.email : '').toLowerCase();
+    let before = entry.before;
+    let before_omitted = false;
+    if(before !== undefined && before !== null){
+      try{ if(JSON.stringify(before).length > ADM_HISTORY_MAX_BEFORE){ before = null; before_omitted = true; } }
+      catch(e){ before = null; before_omitted = true; }
+    }
+    await fs.addDoc(fs.collection(fbDb, 'admin_history'), {
+      collection: entry.collection,
+      doc_id: entry.doc_id || '',
+      action: entry.action,
+      by,
+      at: new Date().toISOString(),
+      before: before === undefined ? null : before,
+      before_known: before !== undefined,
+      before_omitted,
+      restored_from: entry.restored_from || null
+    });
+  }catch(e){
+    console.warn('[CJHQ] history entry not recorded:', e);
+    if(!admRecordHistory.warned){ admRecordHistory.warned = true; admToast('Saved, but the change history entry could not be recorded.', 'error'); }
+  }
+}
+(function admWrapWritesForHistory(){
+  const origSave = saveToCollection, origDelete = deleteFromCollection;
+  saveToCollection = async function(name, record){
+    if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origSave(name, record);
+    const had = !!(record && record.id);
+    const before = had ? await admReadDocForHistory(name, record.id) : null;
+    const out = await origSave(name, record);
+    await admRecordHistory({ collection:name, doc_id: out && out.id, action: (had && before) ? 'update' : 'create', before });
+    return out;
+  };
+  deleteFromCollection = async function(name, id){
+    if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origDelete(name, id);
+    const before = await admReadDocForHistory(name, id);
+    await origDelete(name, id);
+    await admRecordHistory({ collection:name, doc_id:id, action:'delete', before });
+  };
+})();
+
+const ADM_COLLECTION_LABELS = {
+  notices:'Notices & Popups', partners:'Partners', partner_overrides:'Partners', resources:'Resource Links',
+  resource_overrides:'Resource Links', events:'Calendar', settings:'Site Settings', content_overrides:'Page Content',
+  custom_pages:'Pages', page_settings:'Publishing', reviewed_overrides:'Reviewed dates',
+  pending_change_notices:'Change notices', contact_submissions:'Messages', error_reports:'Error reports',
+  staff:'Staff Access', ask_sources:'Ask CJHQ', link_audits:'Link Audit', resources_master:'Resource Links',
+  content_drafts:'Page Content drafts'
+};
+function admEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function admHistorySummary(before){
+  if(!before) return '';
+  const t = before.title_en || before.name_en || before.title || before.name || before.label_en || before.en || before.email || '';
+  return String(t).replace(/<[^>]*>/g,'').slice(0, 90);
+}
+async function renderAdminHistory(){
+  const list = document.getElementById('historyList');
+  const note = document.getElementById('historyOffNote');
+  if(!list) return;
+  if(note) note.hidden = ADM_HISTORY_ON;
+  if(!ADM_HISTORY_ON){ list.innerHTML = ''; return; }
+  list.innerHTML = '<p style="color:var(--muted); font-size:.88rem;">Loading…</p>';
+  let rows = [];
+  try{
+    const fs = window.__fbFirestore;
+    const q = fs.query(fs.collection(fbDb, 'admin_history'), fs.orderBy('at','desc'), fs.limit(200));
+    const snap = await fs.getDocs(q);
+    rows = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  }catch(e){
+    list.innerHTML = '<p style="color:#A23B3B; font-size:.88rem;">Could not load the change history.</p>';
+    return;
+  }
+  const filter = (document.getElementById('historyFilter') || {}).value || '';
+  if(filter) rows = rows.filter(r => r.collection === filter);
+  if(!rows.length){ list.innerHTML = '<p style="color:var(--muted); font-size:.88rem;">No changes recorded yet.</p>'; return; }
+  window.__admHistoryRows = Object.fromEntries(rows.map(r => [r.id, r]));
+  const verb = { create:'Added', update:'Edited', delete:'Deleted', restore:'Restored' };
+  list.innerHTML = rows.map(r => {
+    const when = r.at ? new Date(r.at).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short' }) : '';
+    const canRestore = r.before_known && !r.before_omitted && r.action !== 'restore' ? true : (r.action === 'restore' && r.before_known);
+    const sum = admHistorySummary(r.before);
+    return `<div class="card admin-row" style="padding:10px 14px;">
+      <div style="min-width:0;">
+        <p style="margin:0; font-weight:600;">${admEsc(verb[r.action] || r.action)} · ${admEsc(ADM_COLLECTION_LABELS[r.collection] || r.collection)}</p>
+        <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">${admEsc(when)} · ${admEsc(r.by)}${sum ? ' · "' + admEsc(sum) + '"' : ''}</p>
+        ${r.before_omitted ? '<p style="margin:2px 0 0; font-size:.78rem; color:var(--muted);">Earlier version too large to keep; cannot restore.</p>' : ''}
+      </div>
+      <div style="flex-shrink:0;">${canRestore ? `<button class="admin-small-btn" onclick="admRestoreHistory('${admEsc(r.id)}')">Restore earlier version</button>` : ''}</div>
+    </div>`;
+  }).join('');
+}
+async function admRestoreHistory(historyId){
+  const r = (window.__admHistoryRows || {})[historyId];
+  if(!r) return;
+  const label = ADM_COLLECTION_LABELS[r.collection] || r.collection;
+  const msg = r.before
+    ? `Put back the version of this ${label} item from before this change? The current version is kept in the history.`
+    : `This change added the item. Restoring removes it again. The current version is kept in the history. Continue?`;
+  if(!(await admConfirm(msg))) return;
+  try{
+    const fs = window.__fbFirestore;
+    const current = await admReadDocForHistory(r.collection, r.doc_id);
+    if(r.before){ await fs.setDoc(fs.doc(fbDb, r.collection, r.doc_id), r.before); }
+    else { await fs.deleteDoc(fs.doc(fbDb, r.collection, r.doc_id)); }
+    await admRecordHistory({ collection:r.collection, doc_id:r.doc_id, action:'restore', before: current, restored_from: historyId });
+    admToast('Restored. Visitors see the earlier version now.');
+    renderAdminHistory();
+  }catch(e){
+    reportSaveFailure(r.collection, e);
+  }
+}
+
+/* The shared save-failure message used a browser alert(). In the admin it now
+   uses the same toast as everything else; the wording is unchanged. */
+reportSaveFailure = function(name, err){
+  const denied = err && (err.code === 'permission-denied' || /permission/i.test(err.message || ''));
+  const msg = denied
+    ? 'Could not save: the database rejected the change. Your session may have expired. Sign out and sign back in with your CJHQ staff account, then try again. Your change has NOT been saved - copy anything you typed before leaving this page.'
+    : 'Could not save: ' + ((err && err.message) || 'unknown error') + '. Your change has NOT been saved.';
+  console.error('[CJHQ] save failed for "' + name + '":', err);
+  try{ admToast(msg, 'error'); }catch(e){}
+};
+
+
+/* ======================================================================
+   Roles (Step 6, owner's choice A)
+   Owner: everything, including the staff list. Editor: everything except
+   the staff list. The security rules enforce this; the screens follow it so
+   an editor is not shown controls that would be refused.
+   Built-in (break-glass) accounts are always owners. A staff record with no
+   role is an owner - that is how everyone on the list before roles existed
+   keeps exactly the access they had. New people added here start as editor.
+   ====================================================================== */
+let ADM_OWN_ROLE = null;
+function admRoleOf(rec){ return (rec && rec.role === 'editor') ? 'editor' : 'owner'; }
+async function admLoadOwnRole(){
+  if(!adminUser || !adminUser.email){ ADM_OWN_ROLE = null; return null; }
+  try{
+    const hash = await sha256Hex(staffDocId(adminUser.email));
+    if(STAFF_EMAIL_HASHES.includes(hash)){ ADM_OWN_ROLE = 'owner'; admApplyRoleToUI(); return ADM_OWN_ROLE; }
+  }catch(e){}
+  try{
+    const fs = window.__fbFirestore;
+    const snap = await fs.getDoc(fs.doc(fbDb, 'staff', staffDocId(adminUser.email)));
+    ADM_OWN_ROLE = snap.exists() ? admRoleOf(snap.data()) : 'editor';
+  }catch(e){ ADM_OWN_ROLE = 'editor'; }
+  admApplyRoleToUI();
+  return ADM_OWN_ROLE;
+}
+function admApplyRoleToUI(){
+  const editor = ADM_OWN_ROLE === 'editor';
+  const addForm = document.getElementById('staffAddForm');
+  if(addForm) addForm.style.display = editor ? 'none' : '';
+  let note = document.getElementById('staffEditorNote');
+  const list = document.getElementById('staffList');
+  if(editor && !note && list){
+    note = document.createElement('p');
+    note.id = 'staffEditorNote';
+    note.className = 'card';
+    note.style.fontSize = '.88rem';
+    note.textContent = 'You are an Editor, so you can see the staff list but not change it. Ask an Owner to add or remove people.';
+    list.parentNode.insertBefore(note, list);
+  }
+  if(note) note.style.display = editor ? '' : 'none';
+  const who = document.getElementById('adminSignedInAs');
+  if(who && ADM_OWN_ROLE && adminUser){ who.textContent = adminUser.email + ' (' + (editor ? 'Editor' : 'Owner') + ')'; }
+}
+document.addEventListener('change', async (e)=>{
+  const sel = e.target && e.target.closest && e.target.closest('select[data-staff-role]');
+  if(!sel) return;
+  const email = sel.getAttribute('data-staff-role');
+  const role = sel.value === 'editor' ? 'editor' : 'owner';
+  const ok = await admConfirm(role === 'owner'
+    ? 'Make ' + email + ' an Owner? Owners can add and remove staff.'
+    : 'Make ' + email + ' an Editor? Editors can change everything except the staff list.');
+  if(!ok){ renderStaffList(); return; }
+  try{
+    const fs = window.__fbFirestore;
+    const before = await admReadDocForHistory('staff', email);
+    await fs.setDoc(fs.doc(fbDb, 'staff', email), { role }, { merge:true });
+    await admRecordHistory({ collection:'staff', doc_id:email, action:'update', before });
+    admToast(email + ' is now ' + (role === 'owner' ? 'an Owner.' : 'an Editor.'));
+  }catch(err){ reportSaveFailure('staff', err); }
+  renderStaffList();
+});
+
+
+/* ======================================================================
+   Drafts (Step 8)
+   A draft is saved to a staff-only collection, so its text cannot be read
+   by visitors or through the database before it is published. Publishing
+   is an ordinary save into the public collection, followed by removing the
+   draft. Public pages never read the draft collections.
+   ====================================================================== */
+async function admSaveContentDraft(cid){
+  const enVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="en"]`).value;
+  const frVal = document.querySelector(`textarea[data-cid="${cid}"][data-lang="fr"]`).value;
+  await saveToCollection('content_drafts', { id: cid, cid, en: enVal, fr: frVal,
+    saved_by: (adminUser && adminUser.email) || '', saved_at: new Date().toISOString() });
+  admToast('Draft saved. Visitors still see the current wording until you publish.');
+  renderContentBlocksList();
+}
+async function admDiscardContentDraft(cid){
+  if(!(await admConfirm('Discard this draft? The live wording is not affected.'))) return;
+  await deleteFromCollection('content_drafts', cid);
+  admToast('Draft discarded.');
+  renderContentBlocksList();
 }

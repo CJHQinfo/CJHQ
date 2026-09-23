@@ -120,6 +120,7 @@
             <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
             <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
             <button class="admin-tab-btn" data-tab="staff">Staff Access</button>
+            <button class="admin-tab-btn" data-tab="history">Change History</button>
           </nav>
           <div class="adm-who">
             <p>Signed in as <span id="adminSignedInAs"></span></p>
@@ -314,6 +315,27 @@
           <div id="contentBlocksList" style="margin-top:16px;"></div>
         </div>
 
+        <!-- ===== TAB: CHANGE HISTORY ===== -->
+        <div class="admin-tab-panel" id="tab-history" style="display:none;">
+          <h2 style="font-size:1.2rem;">Change History</h2>
+          <p style="font-size:.88rem; color:var(--muted);">Every save and delete made in this admin, newest first, with who made it. "Restore earlier version" puts back what was there before that change; the restore is recorded too, so nothing is lost.</p>
+          <p id="historyOffNote" class="card" style="font-size:.88rem;">Change history is not switched on yet. It starts recording once its database rule is published.</p>
+          <label class="admin-label" style="margin-top:10px;">Show</label>
+          <select id="historyFilter" class="admin-input" onchange="renderAdminHistory()">
+            <option value="">All sections</option>
+            <option value="custom_pages">Pages</option>
+            <option value="content_overrides">Page Content</option>
+            <option value="notices">Notices &amp; Popups</option>
+            <option value="resources">Resource Links</option>
+            <option value="partners">Partners</option>
+            <option value="events">Calendar</option>
+            <option value="settings">Site Settings</option>
+            <option value="page_settings">Publishing</option>
+            <option value="staff">Staff Access</option>
+          </select>
+          <div id="historyList" style="margin-top:14px;"></div>
+        </div>
+
         <!-- ===== TAB: NOTICES & POPUPS ===== -->
         <div class="admin-tab-panel" id="tab-notices" style="display:none;">
           <h2 style="font-size:1.2rem;">Site Notices &amp; Popups</h2>
@@ -321,6 +343,7 @@
 
           <form id="noticeForm" class="card" style="margin:16px 0;">
             <input type="hidden" id="noticeId">
+            <input type="hidden" id="noticeSource" value="notices">
             <label class="admin-label">Type</label>
             <select id="noticeType" class="admin-input">
               <option value="banner">Banner (top of every page)</option>
