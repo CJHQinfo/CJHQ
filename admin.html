@@ -13031,8 +13031,9 @@ async function publishChangeNotice(slug){
     // never readable by visitors. Moving between the two keeps the same id.
     const src = (document.getElementById('noticeSource') || {}).value || 'notices';
     const dest = notice.draft ? 'notice_drafts' : 'notices';
+    const existingId = notice.id || null;   // saveToCollection fills in an id for new notices
     await saveToCollection(dest, notice);
-    if(notice.id && src !== dest){ try{ await deleteFromCollection(src, notice.id); }catch(e){} }
+    if(existingId && src !== dest){ try{ await deleteFromCollection(src, existingId); }catch(e){} }
     admToast(notice.draft ? 'Draft saved. It does not show on the site.' : 'Notice saved.');
     document.getElementById('noticeForm').reset();
     document.getElementById('noticeId').value = '';
@@ -13367,6 +13368,7 @@ async function admRecordHistory(entry){
     if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origDelete(name, id);
     const before = await admReadDocForHistory(name, id);
     await origDelete(name, id);
+    if(before === null) return; // nothing was there, so nothing changed
     await admRecordHistory({ collection:name, doc_id:id, action:'delete', before });
   };
 })();
@@ -13377,7 +13379,7 @@ const ADM_COLLECTION_LABELS = {
   custom_pages:'Pages', page_settings:'Publishing', reviewed_overrides:'Reviewed dates',
   pending_change_notices:'Change notices', contact_submissions:'Messages', error_reports:'Error reports',
   staff:'Staff Access', ask_sources:'Ask CJHQ', link_audits:'Link Audit', resources_master:'Resource Links',
-  content_drafts:'Page Content drafts'
+  content_drafts:'Page Content drafts', notice_drafts:'Notice drafts'
 };
 function admEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function admHistorySummary(before){
@@ -13408,7 +13410,7 @@ async function renderAdminHistory(){
   window.__admHistoryRows = Object.fromEntries(rows.map(r => [r.id, r]));
   const verb = { create:'Added', update:'Edited', delete:'Deleted', restore:'Restored' };
   list.innerHTML = rows.map(r => {
-    const when = r.at ? new Date(r.at).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short' }) : '';
+    const when = r.at ? new Date(r.at).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' }) : '';
     const canRestore = r.before_known && !r.before_omitted && r.action !== 'restore' ? true : (r.action === 'restore' && r.before_known);
     const sum = admHistorySummary(r.before);
     return `<div class="card admin-row" style="padding:10px 14px;">
@@ -13417,7 +13419,7 @@ async function renderAdminHistory(){
         <p style="margin:2px 0 0; font-size:.8rem; color:var(--muted);">${admEsc(when)} · ${admEsc(r.by)}${sum ? ' · "' + admEsc(sum) + '"' : ''}</p>
         ${r.before_omitted ? '<p style="margin:2px 0 0; font-size:.78rem; color:var(--muted);">Earlier version too large to keep; cannot restore.</p>' : ''}
       </div>
-      <div style="flex-shrink:0;">${canRestore ? `<button class="admin-small-btn" onclick="admRestoreHistory('${admEsc(r.id)}')">Restore earlier version</button>` : ''}</div>
+      <div style="flex-shrink:0;">${canRestore ? `<button class="admin-small-btn" onclick="admRestoreHistory('${admEsc(r.id)}')">${r.action === 'restore' ? 'Undo this restore' : 'Restore earlier version'}</button>` : ''}</div>
     </div>`;
   }).join('');
 }
@@ -13538,6 +13540,13 @@ async function admDiscardContentDraft(cid){
   admToast('Draft discarded.');
   renderContentBlocksList();
 }
+
+/* Know the signed-in person's role as soon as the panel opens, not only when
+   the Staff tab is visited. */
+(function(){
+  const orig = showAdminPanel;
+  showAdminPanel = function(){ const r = orig.apply(this, arguments); try{ admLoadOwnRole(); }catch(e){} return r; };
+})();
 
 
 function checkCurrentPath(opts){
