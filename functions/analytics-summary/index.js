@@ -13,6 +13,10 @@
  * covers the last 1-3 days) and cached in Firestore analytics/clarity, which
  * the public site never reads.
  *
+ * Visitor location (city + country) and, when the property collects them
+ * (Google Signals), age and gender are cached in Firestore
+ * analytics/demographics<days> for 6 hours.
+ *
  * Query: days=7|28|90 (default 28).
  * Environment: GA_PROPERTY (numeric GA4 property ID), STAFF_EMAILS (optional
  * comma-separated fallback staff list), CLARITY_TOKEN (optional).
@@ -107,6 +111,52 @@ async function gaSummary(days) {
   };
 }
 
+
+// Where visitors are, plus age/gender when the property collects them
+// (Google Signals). Demographics rows only exist when Signals is on; when it
+// is off the API returns nothing usable, so the lists come back empty and the
+// admin tab simply skips those cards. Cached in Firestore per day-range,
+// mirroring the Clarity cache, so GA quota stays flat.
+const DEMO_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+async function demographicsSummary(days) {
+  const ref = db.collection('analytics').doc('demographics' + days);
+  const snap = await ref.get();
+  const cached = snap.exists ? snap.data() : null;
+  if (cached && cached.fetchedAt && Date.now() - Date.parse(cached.fetchedAt) < DEMO_MAX_AGE_MS) return cached;
+  try {
+    const byUsers = { orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }] };
+    const [cities, countries] = await Promise.all([
+      report(days, ['city', 'country'], ['activeUsers'], { ...byUsers, limit: 20 }),
+      report(days, ['country'], ['activeUsers'], { ...byUsers, limit: 20 }),
+    ]);
+    // Age/gender only exist when Google Signals is on; when it is off these
+    // return nothing usable (or fail), which must not sink the location data.
+    let ages = [], genders = [];
+    try {
+      [ages, genders] = await Promise.all([
+        report(days, ['userAgeBracket'], ['activeUsers'], byUsers),
+        report(days, ['userGender'], ['activeUsers'], byUsers),
+      ]);
+    } catch (e) {
+      console.error('signals demographics', e);
+    }
+    const known = v => v && v !== '(not set)' && v !== 'unknown';
+    const doc = {
+      fetchedAt: new Date().toISOString(),
+      days,
+      cities: cities.filter(c => known(c.city) && known(c.country)).map(c => ({ place: c.city + ', ' + c.country, visitors: c.activeUsers })),
+      countries: countries.filter(c => known(c.country)).map(c => ({ country: c.country, visitors: c.activeUsers })),
+      ages: ages.filter(a => known(a.userAgeBracket)).map(a => ({ bracket: a.userAgeBracket, visitors: a.activeUsers })),
+      genders: genders.filter(g => known(g.userGender)).map(g => ({ gender: g.userGender, visitors: g.activeUsers })),
+    };
+    await ref.set(doc);
+    return doc;
+  } catch (e) {
+    console.error('demographics', e);
+    return cached ? { ...cached, stale: true } : { error: String(e.message || e).slice(0, 200) };
+  }
+}
+
 async function claritySummary() {
   const token = process.env.CLARITY_TOKEN || '';
   if (!token) return null;
@@ -154,9 +204,9 @@ exports.analyticsSummary = async (req, res) => {
     let gaData;
     if (hit && Date.now() - hit.at < CACHE_MS) gaData = hit.data;
     else { gaData = await gaSummary(days); cache.set(key, { at: Date.now(), data: gaData }); }
-    const clarity = await claritySummary();
+    const [clarity, demographics] = await Promise.all([claritySummary(), demographicsSummary(days)]);
     res.set('Cache-Control', 'private, no-store');
-    return json(res, 200, { ok: true, generatedAt: new Date().toISOString(), ga: gaData, clarity });
+    return json(res, 200, { ok: true, generatedAt: new Date().toISOString(), ga: gaData, clarity, demographics });
   } catch (e) {
     console.error(e);
     return json(res, 500, { error: String(e.message || e).slice(0, 300) });

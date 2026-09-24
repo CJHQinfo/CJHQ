@@ -13907,6 +13907,39 @@ async function renderAnalytics(){
           { cls:'n', f: x => anaFmtSecs(x.avgSecondsOnPage) },
         ])
       + '</table></section></section>';
+    const dm = data.demographics;
+    if(dm && !dm.error){
+      const locRows = (dm.cities && dm.cities.length) || (dm.countries && dm.countries.length);
+      if(locRows){
+        html += '<div class="adm-dash" style="margin-bottom:18px;">';
+        html += '<section><h3>Where visitors are (top cities)</h3><table class="ana-table"><tr><th>Place</th><th style="text-align:right">Visitors</th></tr>'
+          + rows((dm.cities || []).slice(0, 15), [
+              { f: x => esc(x.place) },
+              { cls:'n', f: x => anaFmtNum(x.visitors) },
+            ]) + '</table></section>';
+        html += '<section><h3>Top countries</h3><table class="ana-table"><tr><th>Country</th><th style="text-align:right">Visitors</th></tr>'
+          + rows((dm.countries || []).slice(0, 15), [
+              { f: x => esc(x.country) },
+              { cls:'n', f: x => anaFmtNum(x.visitors) },
+            ]) + '</table></section>';
+        html += '</div>';
+      }
+      const hasAges = dm.ages && dm.ages.length, hasGenders = dm.genders && dm.genders.length;
+      if(hasAges || hasGenders){
+        html += '<div class="adm-dash" style="margin-bottom:18px;">';
+        if(hasAges) html += '<section><h3>Age</h3><table class="ana-table"><tr><th>Age group</th><th style="text-align:right">Visitors</th></tr>'
+          + rows(dm.ages, [
+              { f: x => esc(x.bracket) },
+              { cls:'n', f: x => anaFmtNum(x.visitors) },
+            ]) + '</table></section>';
+        if(hasGenders) html += '<section><h3>Gender</h3><table class="ana-table"><tr><th>Gender</th><th style="text-align:right">Visitors</th></tr>'
+          + rows(dm.genders, [
+              { f: x => esc(x.gender) },
+              { cls:'n', f: x => anaFmtNum(x.visitors) },
+            ]) + '</table></section>';
+        html += '</div>';
+      }
+    }
     html += '<div class="adm-dash" style="margin-bottom:18px;">';
     html += '<section><h3>What visitors did</h3><table class="ana-table">'
       + rows(g.events, [
