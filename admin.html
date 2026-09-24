@@ -2451,6 +2451,22 @@
   #page-admin .ana-table td.p{word-break:break-all;}
   #page-admin .ana-chart{display:flex; align-items:flex-end; gap:2px; height:90px; margin:6px 0 4px;}
   #page-admin .ana-chart div{flex:1; background:var(--c-blue); opacity:.8; min-height:1px; border-radius:2px 2px 0 0;}
+  #page-admin .ana-print-head{display:none;}
+  #page-admin .ana-trk-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:6px 0; border-top:1px solid var(--bg-alt); font-size:.86rem;}
+  #page-admin .ana-trk-row code{word-break:break-all; background:var(--bg-alt); padding:2px 6px; border-radius:4px;}
+  /* Print / Save as PDF from the Analytics tab: only the report prints. The
+     class is set just for that print, so no other page's print is affected. */
+  @media print{
+    body.ana-printing *{visibility:hidden !important;}
+    body.ana-printing #tab-analytics, body.ana-printing #tab-analytics *{visibility:visible !important;}
+    body.ana-printing #tab-analytics{position:absolute; left:0; top:0; width:100%; display:block !important;}
+    body.ana-printing #tab-analytics .ana-actions, body.ana-printing #tab-analytics .ana-links-box,
+    body.ana-printing #tab-analytics .adm-sub, body.ana-printing #anaRefresh, body.ana-printing #anaDays,
+    body.ana-printing #anaCustom, body.ana-printing label[for="anaDays"]{display:none !important;}
+    body.ana-printing #page-admin .ana-print-head{display:block; margin:0 0 12px; font-size:.9rem;}
+    body.ana-printing #page-admin .adm-dash section, body.ana-printing #page-admin .ana-kpi{break-inside:avoid;}
+    body.ana-printing #page-admin .ana-chart div{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
   #page-admin .adm-dash{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;}
   #page-admin .adm-dash section{border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:var(--paper);}
   #page-admin .adm-dash h3{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:.95rem; margin:0 0 8px;}
@@ -3039,14 +3055,46 @@
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:10px 0 16px;">
             <label for="anaDays" style="font-size:.86rem;">Period</label>
             <select id="anaDays" style="padding:6px 8px;">
+              <option value="24h">Last 24 hours</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
               <option value="7">Last 7 days</option>
               <option value="28" selected>Last 28 days</option>
               <option value="90">Last 90 days</option>
+              <option value="custom">Custom dates&hellip;</option>
             </select>
+            <span id="anaCustom" style="display:none; gap:6px; align-items:center;">
+              <input type="date" id="anaStart" aria-label="From" style="padding:5px 6px;">
+              <span style="font-size:.86rem;">to</span>
+              <input type="date" id="anaEnd" aria-label="To" style="padding:5px 6px;">
+              <button class="admin-small-btn" id="anaApply" type="button">Show</button>
+            </span>
             <button class="admin-small-btn" id="anaRefresh" type="button">Refresh</button>
             <span id="anaStatus" class="adm-muted" style="font-size:.82rem;"></span>
           </div>
+          <div class="ana-actions" style="display:flex; gap:8px; flex-wrap:wrap; margin:-6px 0 16px;">
+            <button class="admin-small-btn" id="anaPrint" type="button">Print / Save as PDF</button>
+            <button class="admin-small-btn" id="anaCsv" type="button">Download spreadsheet (CSV)</button>
+            <button class="admin-small-btn" id="anaShare" type="button">Share</button>
+            <span id="anaExportMsg" class="adm-muted" style="font-size:.82rem;"></span>
+          </div>
+          <div id="anaPrintHead" class="ana-print-head"></div>
           <div id="anaBody"><p class="adm-muted">Loading&hellip;</p></div>
+
+          <section class="ana-links-box" style="border-top:1px solid var(--line); margin-top:24px; padding-top:16px;">
+            <h3 style="font-size:1rem; margin:0 0 4px;">Tracking links</h3>
+            <p class="adm-sub" style="margin:0 0 10px;">Make a separate link for each person, group or platform. Everyone lands on the same page; the Analytics card "Visits by tracking link" shows how many came through each one.</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <label for="trkPage" style="font-size:.86rem;">Page</label>
+              <input id="trkPage" list="trkPageList" placeholder="/uci" style="padding:6px 8px; width:170px;">
+              <datalist id="trkPageList"></datalist>
+              <label for="trkLabel" style="font-size:.86rem;">Name / platform</label>
+              <input id="trkLabel" placeholder="facebook, yossi, whatsapp-group" maxlength="40" style="padding:6px 8px; width:220px;">
+              <button class="admin-small-btn" id="trkMake" type="button">Make link</button>
+              <span id="trkMsg" class="adm-muted" style="font-size:.82rem;"></span>
+            </div>
+            <div id="trkList" style="margin-top:12px;"></div>
+          </section>
         </div>
 
         <div class="admin-tab-panel" id="tab-messages" style="display:none;">
@@ -4825,12 +4873,32 @@ function goPage(name, opts){
 // Report a view to GA4 after the URL and the title are both settled. Wrapped
 // so an ad blocker, an offline visitor or a failed gtag load can never break
 // navigation - analytics must not be able to take the site down.
+// Tracking links made in the admin look like cjhq.org/uci?r=facebook. On the
+// first view only, the label is handed to GA4 as the visit's source (medium
+// "cjhq_link", campaign = the page), which the admin's "Visits by tracking
+// link" card reads. If the address already has any utm_ tag, it is left alone.
+let CJHQ_TRK_DONE = false;
+function trackedLocation(){
+  const href = location.href;
+  if(CJHQ_TRK_DONE) return href;
+  CJHQ_TRK_DONE = true;
+  try{
+    const u = new URL(href);
+    const r = (u.searchParams.get('r') || '').toLowerCase();
+    if(!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(r) || [...u.searchParams.keys()].some(k => /^utm_/i.test(k))) return href;
+    const path = u.pathname.length > 1 ? u.pathname.replace(/\/+$/, '') : '/';
+    u.searchParams.set('utm_source', r);
+    u.searchParams.set('utm_medium', 'cjhq_link');
+    u.searchParams.set('utm_campaign', path);
+    return u.toString();
+  }catch(e){ return href; }
+}
 function trackPageView(){
   try{
     if(typeof gtag !== 'function') return;
     gtag('event', 'page_view', {
       page_title: document.title,
-      page_location: location.href,
+      page_location: trackedLocation(),
       page_path: location.pathname
     });
   }catch(e){ /* analytics is never allowed to break routing */ }
@@ -13861,29 +13929,201 @@ const ANALYTICS_EVENT_LABELS = {
   view_search_results: 'Site searches',
 };
 
+let ANA_LAST = null;
+let ANA_LINKS = [];
+
+// "20260924" -> 2026-09-24, "2026092414" -> 2026-09-24 14:00
+function anaFmtBucket(k){
+  k = String(k || '');
+  const d = k.slice(0,4) + '-' + k.slice(4,6) + '-' + k.slice(6,8);
+  return k.length >= 10 ? d + ' ' + k.slice(8,10) + ':00' : d;
+}
+
+/* ---------- Export: print / PDF, spreadsheet, share ---------- */
+function anaCsv(){
+  const d = ANA_LAST; if(!d || !d.ga) return '';
+  const g = d.ga, t = g.totals || {};
+  const q = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const out = [];
+  const line = (...a) => out.push(a.map(q).join(','));
+  const block = (title, head, list, f) => { out.push(''); line(title); line(...head); (list || []).forEach(x => line(...f(x))); };
+  line('CJHQ website analytics', g.label || '');
+  line('Generated', new Date(d.generatedAt).toLocaleString('en-CA', { timeZone:'America/Toronto' }));
+  out.push('');
+  line('Totals');
+  [['Visitors', t.visitors], ['Visits', t.visits], ['Page views', t.pageViews], ['Time on site per visitor (seconds)', t.avgEngagedSecondsPerVisitor],
+   ['Engaged visits (%)', Math.round((t.engagementRate || 0) * 100)], ['New visitors', t.newVisitors], ['Events', t.events]].forEach(r => line(...r));
+  block(g.hourly ? 'Visitors per hour' : 'Visitors per day', [g.hourly ? 'Hour' : 'Date', 'Visitors', 'Page views'], g.daily, x => [anaFmtBucket(x.date), x.visitors, x.pageViews]);
+  block('Pages', ['Page', 'Views', 'Visitors', 'Avg. seconds on page'], g.pages, x => [x.path, x.views, x.visitors, x.avgSecondsOnPage]);
+  block('Visits by tracking link', ['Name / platform', 'Page', 'Visits', 'Visitors'], g.tracked, x => [x.label, x.page, x.visits, x.visitors]);
+  const dm = d.demographics || {};
+  block('Top cities', ['Place', 'Visitors'], dm.cities, x => [x.place, x.visitors]);
+  block('Top countries', ['Country', 'Visitors'], dm.countries, x => [x.country, x.visitors]);
+  block('What visitors did', ['Action', 'Count'], g.events, x => [ANALYTICS_EVENT_LABELS[x.name] || x.name, x.count]);
+  block('Links clicked to other sites', ['Link', 'Clicks'], g.links, x => [x.url, x.clicks]);
+  block('Where visitors came from', ['Source / medium', 'Visits'], g.sources, x => [x.source, x.visits]);
+  block('Devices', ['Device', 'Visitors'], g.devices, x => [x.device, x.visitors]);
+  return '\ufeff' + out.join('\r\n');
+}
+function anaFileName(){
+  const g = (ANA_LAST && ANA_LAST.ga) || {};
+  const day = new Date().toLocaleDateString('en-CA', { timeZone:'America/Toronto' });
+  return 'cjhq-analytics-' + String(g.range || 'report').replace(/[^a-z0-9_-]/gi, '') + '-' + day + '.csv';
+}
+function anaDownload(name, text){
+  const url = URL.createObjectURL(new Blob([text], { type:'text/csv;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function anaSummaryText(){
+  const g = (ANA_LAST && ANA_LAST.ga) || {}, t = g.totals || {};
+  const top = (g.pages || []).slice(0, 3).map(p => p.path + ' (' + p.views + ')').join(', ');
+  return 'CJHQ website - ' + (g.label || '') + ': ' + anaFmtNum(t.visitors) + ' visitors, ' + anaFmtNum(t.visits) + ' visits, '
+    + anaFmtNum(t.pageViews) + ' page views.' + (top ? ' Top pages: ' + top + '.' : '');
+}
+function anaWireExports(){
+  const msg = document.getElementById('anaExportMsg');
+  const need = () => { if(ANA_LAST) return true; cjhqFlashMsg(msg, 'Wait for the numbers to load first.', true); return false; };
+  const pr = document.getElementById('anaPrint');
+  if(pr) pr.addEventListener('click', () => {
+    if(!need()) return;
+    document.body.classList.add('ana-printing');
+    const done = () => { document.body.classList.remove('ana-printing'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    setTimeout(() => { window.print(); setTimeout(done, 1500); }, 50);
+  });
+  const csv = document.getElementById('anaCsv');
+  if(csv) csv.addEventListener('click', () => { if(need()) anaDownload(anaFileName(), anaCsv()); });
+  const sh = document.getElementById('anaShare');
+  if(sh) sh.addEventListener('click', async () => {
+    if(!need()) return;
+    const text = anaSummaryText();
+    try{
+      const file = new File([anaCsv()], anaFileName(), { type:'text/csv' });
+      if(navigator.canShare && navigator.canShare({ files:[file] })){ await navigator.share({ title:'CJHQ website analytics', text, files:[file] }); return; }
+      if(navigator.share){ await navigator.share({ title:'CJHQ website analytics', text }); return; }
+    }catch(e){ if(e && e.name === 'AbortError') return; }
+    const ok = await cjhqCopyText(text);
+    anaDownload(anaFileName(), anaCsv());
+    cjhqFlashMsg(msg, ok ? 'Summary copied and spreadsheet downloaded - paste the summary and attach the file.' : 'Spreadsheet downloaded.', false);
+  });
+}
+
+/* ---------- Tracking links (?r=<label>) ---------- */
+function anaTrkUrl(l){ return 'https://cjhq.org' + (l.path === '/' ? '/' : l.path) + '?r=' + encodeURIComponent(l.label); }
+function anaRenderTrackingList(){
+  const box = document.getElementById('trkList'); if(!box) return;
+  const esc = cjhqEscapeHtml;
+  const g = (ANA_LAST && ANA_LAST.ga) || {};
+  const dl = document.getElementById('trkPageList');
+  if(dl){
+    const paths = new Set(['/']);
+    (g.pages || []).forEach(p => { if(p.path && !/^\/admin/.test(p.path)) paths.add(p.path); });
+    ANA_LINKS.forEach(l => paths.add(l.path));
+    dl.innerHTML = [...paths].slice(0, 80).map(p => `<option value="${esc(p)}">`).join('');
+  }
+  const counts = {};
+  (g.tracked || []).forEach(x => { counts[x.label + '|' + x.page] = x; });
+  if(!ANA_LINKS.length){ box.innerHTML = '<p class="adm-muted" style="font-size:.84rem;">No tracking links yet.</p>'; return; }
+  box.innerHTML = ANA_LINKS.map((l, i) => {
+    const c = counts[l.label + '|' + l.path];
+    return `<div class="ana-trk-row"><b>${esc(l.label)}</b><code>${esc(anaTrkUrl(l))}</code>`
+      + `<span class="adm-muted">${c ? anaFmtNum(c.visits) + ' visits' : '0 visits'} (${esc(g.label || 'selected period')})</span>`
+      + `<button class="admin-small-btn" type="button" data-trk="copy" data-i="${i}">Copy</button>`
+      + `<button class="admin-small-btn" type="button" data-trk="wa" data-i="${i}">WhatsApp</button>`
+      + `<button class="admin-small-btn" type="button" data-trk="del" data-i="${i}">Remove</button></div>`;
+  }).join('');
+}
+async function anaLinksCall(body){
+  const token = await adminUser.getIdToken();
+  const r = await fetch(ANALYTICS_URL + (body ? '' : '?links=1'), body
+    ? { method:'POST', headers:{ authorization:'Bearer ' + token, 'content-type':'application/json' }, body: JSON.stringify(body) }
+    : { headers:{ authorization:'Bearer ' + token } });
+  const data = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  ANA_LINKS = data.links || [];
+  anaRenderTrackingList();
+}
+function anaWireTrackingLinks(){
+  const msg = document.getElementById('trkMsg');
+  const make = document.getElementById('trkMake');
+  if(make) make.addEventListener('click', async () => {
+    let path = ((document.getElementById('trkPage')||{}).value || '').trim();
+    const label = ((document.getElementById('trkLabel')||{}).value || '').trim().toLowerCase().replace(/\s+/g, '-');
+    path = path.replace(/^https?:\/\/(www\.)?cjhq\.org/i, '').split(/[?#]/)[0] || '/';
+    if(!path.startsWith('/')) path = '/' + path;
+    if(path.length > 1) path = path.replace(/\/+$/, '');
+    if(!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(label)){ cjhqFlashMsg(msg, 'Name: letters, numbers, - or _ only (e.g. facebook, yossi).', true); return; }
+    try{
+      await anaLinksCall({ op:'add', label, path });
+      const ok = await cjhqCopyText(anaTrkUrl({ label, path }));
+      cjhqFlashMsg(msg, ok ? 'Link made and copied.' : 'Link made.', false);
+      const lb = document.getElementById('trkLabel'); if(lb) lb.value = '';
+    }catch(e){ cjhqFlashMsg(msg, 'Could not save: ' + ((e && e.message) || e), true); }
+  });
+  const box = document.getElementById('trkList');
+  if(box) box.addEventListener('click', async ev => {
+    const b = ev.target.closest('button[data-trk]'); if(!b) return;
+    const l = ANA_LINKS[Number(b.dataset.i)]; if(!l) return;
+    if(b.dataset.trk === 'copy'){ const ok = await cjhqCopyText(anaTrkUrl(l)); cjhqFlashMsg(msg, ok ? 'Link copied' : 'Could not copy', !ok); }
+    else if(b.dataset.trk === 'wa'){ window.open('https://wa.me/?text=' + encodeURIComponent(anaTrkUrl(l)), '_blank', 'noopener'); }
+    else if(b.dataset.trk === 'del'){
+      if(!(await admConfirm('Remove the "' + l.label + '" link from this list? Visits already counted stay in Google Analytics.'))) return;
+      try{ await anaLinksCall({ op:'delete', label:l.label, path:l.path }); }catch(e){ cjhqFlashMsg(msg, 'Could not remove: ' + ((e && e.message) || e), true); }
+    }
+  });
+  if(adminUser) anaLinksCall(null).catch(() => {});
+}
+
 async function renderAnalytics(){
   const body = document.getElementById('anaBody');
   const status = document.getElementById('anaStatus');
   const sel = document.getElementById('anaDays');
   const btn = document.getElementById('anaRefresh');
   if(!body) return;
+  const custom = document.getElementById('anaCustom');
   if(btn && !btn.dataset.wired){
     btn.dataset.wired = '1';
     btn.addEventListener('click', renderAnalytics);
-    if(sel) sel.addEventListener('change', renderAnalytics);
+    if(sel) sel.addEventListener('change', ()=>{
+      const isCustom = sel.value === 'custom';
+      if(custom) custom.style.display = isCustom ? 'inline-flex' : 'none';
+      if(isCustom){
+        const s = document.getElementById('anaStart'), e = document.getElementById('anaEnd');
+        const today = new Date().toLocaleDateString('en-CA', { timeZone:'America/Toronto' });
+        if(e && !e.value) e.value = today;
+        if(s && !s.value) s.value = admAddDaysISO(today, -6);
+        if(e) e.max = today; if(s) s.max = today;
+        return;
+      }
+      renderAnalytics();
+    });
+    const apply = document.getElementById('anaApply');
+    if(apply) apply.addEventListener('click', renderAnalytics);
+    anaWireExports();
+    anaWireTrackingLinks();
   }
   if(!adminUser){ body.innerHTML = '<p class="adm-muted">Sign in to see analytics.</p>'; return; }
   if(ANALYTICS_BUSY) return;
+  const range = sel ? sel.value : '28';
+  let qs = '?range=' + encodeURIComponent(range);
+  if(range === 'custom'){
+    const a = (document.getElementById('anaStart')||{}).value || '', b = (document.getElementById('anaEnd')||{}).value || '';
+    if(!a || !b || a > b){ if(status) status.textContent = 'Pick a start date on or before the end date.'; return; }
+    qs += '&start=' + encodeURIComponent(a) + '&end=' + encodeURIComponent(b);
+  }
   ANALYTICS_BUSY = true;
-  const days = sel ? sel.value : '28';
   if(status) status.textContent = 'Loading…';
   const esc = cjhqEscapeHtml;
   try{
     const token = await adminUser.getIdToken();
-    const r = await fetch(ANALYTICS_URL + '?days=' + encodeURIComponent(days), { headers: { authorization: 'Bearer ' + token } });
+    const r = await fetch(ANALYTICS_URL + qs, { headers: { authorization: 'Bearer ' + token } });
     const data = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
     const g = data.ga, t = g.totals;
+    ANA_LAST = data;
+    anaRenderTrackingList();
     const maxDay = Math.max(1, ...g.daily.map(d => d.visitors));
     const kpi = (v, l) => `<div class="ana-kpi"><b>${v}</b><span>${l}</span></div>`;
     const rows = (list, cols) => list.length ? list.map(x => '<tr>' + cols.map(c => `<td class="${c.cls||''}">${c.f(x)}</td>`).join('') + '</tr>').join('') : `<tr><td colspan="${cols.length}" class="adm-muted">Nothing recorded yet.</td></tr>`;
@@ -13896,8 +14136,8 @@ async function renderAnalytics(){
       + kpi(Math.round((t.engagementRate || 0) * 100) + '%', 'Engaged visits')
       + kpi(anaFmtNum(t.newVisitors), 'New visitors')
       + '</div>';
-    html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Visitors per day</h3><div class="ana-chart">'
-      + g.daily.map(d => `<div title="${esc(d.date.slice(0,4)+'-'+d.date.slice(4,6)+'-'+d.date.slice(6))}: ${d.visitors} visitors, ${d.pageViews} views" style="height:${Math.round(d.visitors / maxDay * 100)}%"></div>`).join('')
+    html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>' + (g.hourly ? 'Visitors per hour' : 'Visitors per day') + '</h3><div class="ana-chart">'
+      + g.daily.map(d => `<div title="${esc(anaFmtBucket(d.date))}: ${d.visitors} visitors, ${d.pageViews} views" style="height:${Math.round(d.visitors / maxDay * 100)}%"></div>`).join('')
       + '</div></section></section>';
     html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Pages</h3><table class="ana-table"><tr><th>Page</th><th style="text-align:right">Views</th><th style="text-align:right">Visitors</th><th style="text-align:right">Avg. time on page</th></tr>'
       + rows(g.pages, [
@@ -13940,6 +14180,14 @@ async function renderAnalytics(){
         html += '</div>';
       }
     }
+    html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Visits by tracking link</h3><table class="ana-table"><tr><th>Name / platform</th><th>Page</th><th style="text-align:right">Visits</th><th style="text-align:right">Visitors</th></tr>'
+      + ((g.tracked && g.tracked.length) ? rows(g.tracked, [
+          { f: x => esc(x.label) },
+          { cls:'p', f: x => esc(x.page) },
+          { cls:'n', f: x => anaFmtNum(x.visits) },
+          { cls:'n', f: x => anaFmtNum(x.visitors) },
+        ]) : '<tr><td colspan="4" class="adm-muted">No visits through tracking links in this period yet. Make links below.</td></tr>')
+      + '</table></section></section>';
     html += '<div class="adm-dash" style="margin-bottom:18px;">';
     html += '<section><h3>What visitors did</h3><table class="ana-table">'
       + rows(g.events, [
@@ -13975,7 +14223,9 @@ async function renderAnalytics(){
     }
     html += '<p class="adm-muted" style="font-size:.8rem;">Heatmaps and visit recordings: <a href="https://clarity.microsoft.com/projects/view/yn69ejs5t6/dashboard" target="_blank" rel="noopener">Microsoft Clarity</a>. Full reports: <a href="https://analytics.google.com/analytics/web/#/a241425776p545788245/reports/intelligenthome" target="_blank" rel="noopener">Google Analytics</a>.</p>';
     body.innerHTML = html;
-    if(status) status.textContent = 'Updated ' + new Date(data.generatedAt).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
+    const ph = document.getElementById('anaPrintHead');
+    if(ph) ph.innerHTML = '<b>CJHQ website analytics</b> &mdash; ' + esc(g.label || '') + ' &mdash; generated ' + esc(new Date(data.generatedAt).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' }));
+    if(status) status.textContent = (g.hourly ? 'Recent hours can take a few hours to show up in Google Analytics. ' : '') + 'Updated ' + new Date(data.generatedAt).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
   }catch(e){
     body.innerHTML = '<p class="adm-muted">Analytics could not be loaded: ' + esc(String((e && e.message) || e)) + '</p>';
     if(status) status.textContent = '';

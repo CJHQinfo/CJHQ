@@ -30,6 +30,22 @@
   #page-admin .ana-table td.p{word-break:break-all;}
   #page-admin .ana-chart{display:flex; align-items:flex-end; gap:2px; height:90px; margin:6px 0 4px;}
   #page-admin .ana-chart div{flex:1; background:var(--c-blue); opacity:.8; min-height:1px; border-radius:2px 2px 0 0;}
+  #page-admin .ana-print-head{display:none;}
+  #page-admin .ana-trk-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:6px 0; border-top:1px solid var(--bg-alt); font-size:.86rem;}
+  #page-admin .ana-trk-row code{word-break:break-all; background:var(--bg-alt); padding:2px 6px; border-radius:4px;}
+  /* Print / Save as PDF from the Analytics tab: only the report prints. The
+     class is set just for that print, so no other page's print is affected. */
+  @media print{
+    body.ana-printing *{visibility:hidden !important;}
+    body.ana-printing #tab-analytics, body.ana-printing #tab-analytics *{visibility:visible !important;}
+    body.ana-printing #tab-analytics{position:absolute; left:0; top:0; width:100%; display:block !important;}
+    body.ana-printing #tab-analytics .ana-actions, body.ana-printing #tab-analytics .ana-links-box,
+    body.ana-printing #tab-analytics .adm-sub, body.ana-printing #anaRefresh, body.ana-printing #anaDays,
+    body.ana-printing #anaCustom, body.ana-printing label[for="anaDays"]{display:none !important;}
+    body.ana-printing #page-admin .ana-print-head{display:block; margin:0 0 12px; font-size:.9rem;}
+    body.ana-printing #page-admin .adm-dash section, body.ana-printing #page-admin .ana-kpi{break-inside:avoid;}
+    body.ana-printing #page-admin .ana-chart div{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
   #page-admin .adm-dash{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;}
   #page-admin .adm-dash section{border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:var(--paper);}
   #page-admin .adm-dash h3{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:.95rem; margin:0 0 8px;}
@@ -618,14 +634,46 @@
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:10px 0 16px;">
             <label for="anaDays" style="font-size:.86rem;">Period</label>
             <select id="anaDays" style="padding:6px 8px;">
+              <option value="24h">Last 24 hours</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
               <option value="7">Last 7 days</option>
               <option value="28" selected>Last 28 days</option>
               <option value="90">Last 90 days</option>
+              <option value="custom">Custom dates&hellip;</option>
             </select>
+            <span id="anaCustom" style="display:none; gap:6px; align-items:center;">
+              <input type="date" id="anaStart" aria-label="From" style="padding:5px 6px;">
+              <span style="font-size:.86rem;">to</span>
+              <input type="date" id="anaEnd" aria-label="To" style="padding:5px 6px;">
+              <button class="admin-small-btn" id="anaApply" type="button">Show</button>
+            </span>
             <button class="admin-small-btn" id="anaRefresh" type="button">Refresh</button>
             <span id="anaStatus" class="adm-muted" style="font-size:.82rem;"></span>
           </div>
+          <div class="ana-actions" style="display:flex; gap:8px; flex-wrap:wrap; margin:-6px 0 16px;">
+            <button class="admin-small-btn" id="anaPrint" type="button">Print / Save as PDF</button>
+            <button class="admin-small-btn" id="anaCsv" type="button">Download spreadsheet (CSV)</button>
+            <button class="admin-small-btn" id="anaShare" type="button">Share</button>
+            <span id="anaExportMsg" class="adm-muted" style="font-size:.82rem;"></span>
+          </div>
+          <div id="anaPrintHead" class="ana-print-head"></div>
           <div id="anaBody"><p class="adm-muted">Loading&hellip;</p></div>
+
+          <section class="ana-links-box" style="border-top:1px solid var(--line); margin-top:24px; padding-top:16px;">
+            <h3 style="font-size:1rem; margin:0 0 4px;">Tracking links</h3>
+            <p class="adm-sub" style="margin:0 0 10px;">Make a separate link for each person, group or platform. Everyone lands on the same page; the Analytics card "Visits by tracking link" shows how many came through each one.</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <label for="trkPage" style="font-size:.86rem;">Page</label>
+              <input id="trkPage" list="trkPageList" placeholder="/uci" style="padding:6px 8px; width:170px;">
+              <datalist id="trkPageList"></datalist>
+              <label for="trkLabel" style="font-size:.86rem;">Name / platform</label>
+              <input id="trkLabel" placeholder="facebook, yossi, whatsapp-group" maxlength="40" style="padding:6px 8px; width:220px;">
+              <button class="admin-small-btn" id="trkMake" type="button">Make link</button>
+              <span id="trkMsg" class="adm-muted" style="font-size:.82rem;"></span>
+            </div>
+            <div id="trkList" style="margin-top:12px;"></div>
+          </section>
         </div>
 
         <div class="admin-tab-panel" id="tab-messages" style="display:none;">
