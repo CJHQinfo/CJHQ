@@ -215,6 +215,9 @@
   /* page routing */
   main#mainContent{display:block; margin:0; padding:0;}
   .page{display:none;}
+  /* Deep link (e.g. /travel-guide): keep the homepage hidden until routing settles so it never flashes. */
+  html.route-pending #page-home{display:none !important;}
+  .route-loading{padding:40px 0; color:var(--muted); font-size:1rem;}
   .page.active{display:block;}
 
   /* ===== HEADER ===== */
@@ -1123,6 +1126,10 @@
         l.pathname.slice(0, -1) + decoded + l.hash
       );
     }
+    // Any address other than the bare root is a deep link: hide the homepage
+    // until the router has picked the right page (see route-pending CSS).
+    var rp = window.location.pathname.replace(/\/+$/, '');
+    if(rp && !/^\/index\.html?$/i.test(rp)) document.documentElement.classList.add('route-pending');
   }(window.location));
 </script>
 <div id="siteNoticeBanner" style="display:none;"></div>
@@ -4699,6 +4706,7 @@ function goPage(name, opts){
   }
   const builtIn = document.getElementById('page-'+name);
   if(builtIn){
+    document.documentElement.classList.remove('route-pending');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     builtIn.classList.add('active');
     highlightActiveNav(name);
@@ -4723,6 +4731,7 @@ function goPage(name, opts){
       `<div data-en>${cjhqRenderPageBody(custom.body_en, custom.body_format)}</div>` +
       `<div data-fr>${cjhqRenderPageBody(custom.body_fr, custom.body_format)}</div>`;
     cjhqWireOnThisPage(document.getElementById('customPageBody'));
+    document.documentElement.classList.remove('route-pending');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-custom').classList.add('active');
     highlightActiveNav(name);
@@ -4732,7 +4741,15 @@ function goPage(name, opts){
     return;
   }
   // Nothing matches -> 404
-  if(opts.deferUnknown){ window.__routeDeferred = true; return; }
+  if(opts.deferUnknown){
+    window.__routeDeferred = true;
+    document.getElementById('customPageTitle').innerHTML = '';
+    document.getElementById('customPageBody').innerHTML =
+      '<p class="route-loading"><span data-en>Loading…</span><span data-fr>Chargement…</span></p>';
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-custom').classList.add('active');
+    return;
+  }
   if(typeof show404 === 'function') show404(name, opts);
 }
 // Report a view to GA4 after the URL and the title are both settled. Wrapped
@@ -13796,6 +13813,7 @@ function show404(attemptedName, opts){
     if(location.pathname !== path) history.pushState({page:'404'}, '', path);
   }
   window.__last404Path = location.pathname;
+  document.documentElement.classList.remove('route-pending');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-404').classList.add('active');
   highlightActiveNav('404');
@@ -14039,6 +14057,16 @@ checkCurrentPath({deferUnknown:true});
 (async function initBackend(){
   try{
     await initFirebase();
+    // A deep link to an admin-created page (e.g. /travel-guide) is waiting on
+    // the pages collection. Fetch it first and show the page now, instead of
+    // after the ten steps below. The full load at the end still runs as before.
+    if(window.__routeDeferred){
+      try{
+        await enhancePagesFromBackend();
+        window.__routeDeferred = false;
+        checkCurrentPath({skipHistory:true});
+      }catch(err){ console.warn('Early page fetch failed, will retry below:', err); window.__routeDeferred = true; }
+    }
     await renderPublicNotices();
     const settings = await fetchSettingsDoc();
     if(settings) applySettingsToSite(settings);
