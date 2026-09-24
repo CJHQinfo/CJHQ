@@ -13696,7 +13696,7 @@ function buildImageUploader(box){
  * writes link_audits documents, which renderLinkAuditList() shows under
  * Flagged Items. The monthly run is a Cloud Scheduler job - same function.
  * ================================================================ */
-const AI_CHECK_URL = 'https://instructioncheck-qu3jib66wa-ue.a.run.app';
+const AI_CHECK_URL = 'https://instructioncheck-qu3jib66wa-ue.a.run.app/?go=1'; // trailing query: the bare URL's CORS preflight intermittently fails in some browsers (redirect-class fetch failure); a query string avoids it
 
 async function runAiInstructionCheck(btn){
   const statusEl = document.getElementById('aiCheckStatus');
