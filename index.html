@@ -4011,6 +4011,14 @@ function goPage(name, opts){
   // draft, a page whose start date has not arrived, and an expired page all
   // fall through to the 404 below, including when the URL is typed directly.
   const custom = CUSTOM_PAGES_PUBLIC[name];
+  const pre = window.__CJHQ_PRERENDER;
+  if(custom && pre && pre.slug === name && pre.title_en === custom.title_en && pre.title_fr === custom.title_fr
+     && pre.body_en === custom.body_en && pre.body_fr === custom.body_fr && pre.body_format === custom.body_format
+     && document.getElementById('page-custom').classList.contains('active')){
+    // Baked copy matches the live record: leave it alone (no re-render, no scroll jump).
+    document.documentElement.classList.remove('route-pending');
+    return;
+  }
   if(custom){
     document.getElementById('customPageTitle').innerHTML =
       `<span data-en>${cjhqEscapeHtml(custom.title_en)}</span><span data-fr>${cjhqEscapeHtml(custom.title_fr)}</span>`;
@@ -4030,6 +4038,19 @@ function goPage(name, opts){
   // Nothing matches -> 404
   if(opts.deferUnknown){
     window.__routeDeferred = true;
+    // A baked notice page (tools/generate-notice-pages.py) already carries its
+    // content in the static file: keep it on screen, just wire its buttons.
+    // Firestore still re-checks it below, so an expired page still turns 404.
+    const pre = window.__CJHQ_PRERENDER;
+    if(pre && pre.slug === name){
+      document.documentElement.classList.remove('route-pending');
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-custom').classList.add('active');
+      cjhqWireOnThisPage(document.getElementById('customPageBody'));
+      highlightActiveNav(name);
+      trackPageView();
+      return;
+    }
     document.getElementById('customPageTitle').innerHTML = '';
     document.getElementById('customPageBody').innerHTML =
       '<p class="route-loading"><span data-en>Loading…</span><span data-fr>Chargement…</span></p>';

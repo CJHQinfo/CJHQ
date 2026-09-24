@@ -97,7 +97,9 @@
       var m = /[?&]p=([^&#]*)/.exec(location.search);
       var slug = m ? decodeURIComponent(m[1]).trim().toLowerCase() : '';
       var ok = /^[a-z0-9][a-z0-9-]{0,60}$/.test(slug);
-      location.replace(ok ? base + '?/' + slug : base);
+      // Straight to the baked static page at /<slug>/ (no trip through the
+      // homepage). If it is not generated yet, 404.html bridges into the SPA.
+      location.replace(ok ? base + slug + '/' : base);
     }catch(e){
       location.replace(base);
     }

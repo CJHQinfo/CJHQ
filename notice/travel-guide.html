@@ -45,7 +45,7 @@
     var base = '/';
     try{
       base = location.pathname.replace(/\/(notice\/)?[a-z0-9-]+(\.html|\/index\.html)?\/?$/i, '') + '/';
-      location.replace(base + '?/' + 'travel-guide');
+      location.replace(base + 'travel-guide/');
     }catch(e){ location.replace(base); }
   })();
 </script>
