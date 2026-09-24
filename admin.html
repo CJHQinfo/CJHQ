@@ -36,6 +36,18 @@
     anonymize_ip: true
   });
 </script>
+<!-- Microsoft Clarity (heatmaps, scroll depth, session replays). Disclosed in
+     the Privacy Policy (privacy-analytics-5). The project is set to Strict
+     masking in the Clarity console, so on-screen text and anything typed into
+     forms is masked before it leaves the browser. Not loaded on the admin
+     panel: staff screens are not analytics. The project ID is public by design. -->
+<script>
+  if(!/^\/admin(\.html)?\/?$/i.test(location.pathname)){
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","yn69ejs5t6");
+  }
+</script>
 <link rel="apple-touch-icon" href="/favicon.ico">
 
 <!-- Open Graph -->
@@ -1719,8 +1731,8 @@
         <span data-fr>Politique de confidentialité</span>
       </h1>
       <p data-cid="privacy-2" style="font-size:.85rem; color:var(--muted);">
-        <span data-en><strong>Effective Date:</strong> July 19, 2026</span>
-        <span data-fr><strong>Date d'entrée en vigueur :</strong> 19 juillet 2026</span>
+        <span data-en><strong>Effective Date:</strong> September 24, 2026</span>
+        <span data-fr><strong>Date d'entrée en vigueur :</strong> 24 septembre 2026</span>
       </p>
       <p data-cid="privacy-3">
         <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting the privacy of all individuals who visit our website or communicate with us.</span>
@@ -1821,6 +1833,10 @@
       <p data-cid="privacy-analytics-4">
         <span data-en>Google Analytics is configured so that advertising features and cross-site profiling are turned off. Information is processed by Google and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block analytics through their browser settings or by installing Google's opt-out browser add-on.</span>
         <span data-fr>Google Analytics est configuré de façon à désactiver les fonctions publicitaires et le profilage entre sites. Les renseignements sont traités par Google et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent bloquer les statistiques au moyen des paramètres de leur navigateur ou en installant le module complémentaire de désactivation offert par Google.</span>
+      </p>
+      <p data-cid="privacy-analytics-5">
+        <span data-en>This website also uses Microsoft Clarity, a service provided by Microsoft, to understand how visitors use each page: where they click, how far they scroll and how long they stay. Clarity produces heatmaps and replays of visits that help us find parts of the site that are hard to use. Anything typed into forms is hidden and never recorded. Clarity uses cookies, and its information is processed by Microsoft and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block it through their browser settings.</span>
+        <span data-fr>Ce site Web utilise également Microsoft Clarity, un service fourni par Microsoft, afin de comprendre comment les visiteurs utilisent chaque page : où ils cliquent, jusqu'où ils font défiler la page et combien de temps ils y restent. Clarity produit des cartes de chaleur et des reprises de visites qui nous aident à repérer les parties du site difficiles à utiliser. Tout ce qui est saisi dans les formulaires est masqué et n'est jamais enregistré. Clarity utilise des témoins; ses renseignements sont traités par Microsoft et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent le bloquer au moyen des paramètres de leur navigateur.</span>
       </p>
 
       <h2 data-cid="privacy-16" style="font-size:1.2rem; margin-top:36px;">
@@ -3703,7 +3719,7 @@ const CONTENT_MANIFEST = [
   {cid:'terms-20', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'CJHQ may update these Terms of Use from time to time.', default_en:'CJHQ may update these Terms of Use from time to time.', default_fr:'Le CJHQ peut mettre à jour les présentes conditions d\'utilisation périodiquement.'},
   {cid:'terms-21', page:'page-terms', pageLabel:'Terms of Use', tag:'p', label:'Continued use of this website constitutes acceptance of the updated Te', default_en:'Continued use of this website constitutes acceptance of the updated Terms.', default_fr:'L\'utilisation continue de ce site Web constitue une acceptation des conditions mises à jour.'},
   {cid:'privacy-1', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h1', label:'Privacy Policy', default_en:'Privacy Policy', default_fr:'Politique de confidentialité'},
-  {cid:'privacy-2', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Effective Date: July 19, 2026', default_en:'<strong>Effective Date:</strong> July 19, 2026', default_fr:'<strong>Date d\'entrée en vigueur :</strong> 19 juillet 2026'},
+  {cid:'privacy-2', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Effective Date: September 24, 2026', default_en:'<strong>Effective Date:</strong> September 24, 2026', default_fr:'<strong>Date d\'entrée en vigueur :</strong> 24 septembre 2026'},
   {cid:'privacy-3', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting', default_en:'The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting the privacy of all individuals who visit our website or communicate with us.', default_fr:'Le Conseil des Juifs Hassidiques du Québec (CJHQ) s\'engage à protéger la vie privée de toutes les personnes qui visitent notre site Web ou communiquent avec nous.'},
   {cid:'privacy-4', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This Privacy Policy explains what information may be collected through', default_en:'This Privacy Policy explains what information may be collected through this website, how it is used, and how it is protected.', default_fr:'La présente politique de confidentialité explique quels renseignements peuvent être recueillis par ce site Web, comment ils sont utilisés et comment ils sont protégés.'},
   {cid:'privacy-5', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Information We Collect', default_en:'Information We Collect', default_fr:'Renseignements que nous recueillons'},
@@ -3721,6 +3737,7 @@ const CONTENT_MANIFEST = [
   {cid:'privacy-analytics-2', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website uses Google Analytics, a web analytics service provided b', default_en:'This website uses Google Analytics, a web analytics service provided by Google, to understand how visitors use the site. It records information such as the pages viewed, the approximate region a visit comes from, the type of device and browser used, and how visitors arrived at the site.', default_fr:"Ce site Web utilise Google Analytics, un service d'analyse Web fourni par Google, afin de comprendre comment les visiteurs utilisent le site. Ce service enregistre des renseignements tels que les pages consultées, la région approximative d'où provient la visite, le type d'appareil et de navigateur utilisé, ainsi que la façon dont les visiteurs sont arrivés sur le site."},
   {cid:'privacy-analytics-3', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ uses this information only to improve the website and to understan', default_en:'CJHQ uses this information only to improve the website and to understand which community resources are most needed. We do not use it to identify individual visitors, and we do not combine it with any information you send us through the contact form or the newsletter.', default_fr:"Le CJHQ utilise ces renseignements uniquement pour améliorer le site Web et pour comprendre quelles ressources communautaires sont les plus utiles. Nous ne les utilisons pas pour identifier des visiteurs en particulier, et nous ne les combinons pas avec les renseignements que vous nous transmettez par le formulaire de contact ou l'infolettre."},
   {cid:'privacy-analytics-4', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Google Analytics is configured so that advertising features and cross-s', default_en:"Google Analytics is configured so that advertising features and cross-site profiling are turned off. Information is processed by Google and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block analytics through their browser settings or by installing Google's opt-out browser add-on.", default_fr:"Google Analytics est configuré de façon à désactiver les fonctions publicitaires et le profilage entre sites. Les renseignements sont traités par Google et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent bloquer les statistiques au moyen des paramètres de leur navigateur ou en installant le module complémentaire de désactivation offert par Google."},
+  {cid:'privacy-analytics-5', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'This website also uses Microsoft Clarity, a service provided by Microsof', default_en:"This website also uses Microsoft Clarity, a service provided by Microsoft, to understand how visitors use each page: where they click, how far they scroll and how long they stay. Clarity produces heatmaps and replays of visits that help us find parts of the site that are hard to use. Anything typed into forms is hidden and never recorded. Clarity uses cookies, and its information is processed by Microsoft and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block it through their browser settings.", default_fr:"Ce site Web utilise également Microsoft Clarity, un service fourni par Microsoft, afin de comprendre comment les visiteurs utilisent chaque page : où ils cliquent, jusqu'où ils font défiler la page et combien de temps ils y restent. Clarity produit des cartes de chaleur et des reprises de visites qui nous aident à repérer les parties du site difficiles à utiliser. Tout ce qui est saisi dans les formulaires est masqué et n'est jamais enregistré. Clarity utilise des témoins; ses renseignements sont traités par Microsoft et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent le bloquer au moyen des paramètres de leur navigateur."},
   {cid:'privacy-16', page:'page-privacy', pageLabel:'Privacy Policy', tag:'h2', label:'Third-Party Links', default_en:'Third-Party Links', default_fr:'Liens vers des sites tiers'},
   {cid:'privacy-17', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'Our website contains links to official government websites and other t', default_en:'Our website contains links to official government websites and other trusted resources.', default_fr:'Notre site Web contient des liens vers des sites gouvernementaux officiels et d\'autres ressources fiables.'},
   {cid:'privacy-18', page:'page-privacy', pageLabel:'Privacy Policy', tag:'p', label:'CJHQ is not responsible for the privacy practices or content of extern', default_en:'CJHQ is not responsible for the privacy practices or content of external websites.', default_fr:'Le CJHQ n\'est pas responsable des pratiques de confidentialité ou du contenu des sites externes.'},

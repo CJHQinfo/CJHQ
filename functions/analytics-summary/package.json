@@ -1,0 +1,13 @@
+{
+  "name": "cjhq-analytics-summary",
+  "version": "1.0.0",
+  "description": "CJHQ admin Analytics tab: reads Google Analytics 4 (and Microsoft Clarity, when configured) for signed-in staff only. Runs under its own service account, which has Viewer access to the GA4 property - no key file exists anywhere.",
+  "main": "index.js",
+  "scripts": { "start": "functions-framework --target=analyticsSummary" },
+  "engines": { "node": "22" },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "@google-analytics/data": "^4.12.0",
+    "@google-cloud/functions-framework": "^3.4.5"
+  }
+}
