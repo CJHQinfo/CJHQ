@@ -4091,12 +4091,32 @@ function goPage(name, opts){
 // Report a view to GA4 after the URL and the title are both settled. Wrapped
 // so an ad blocker, an offline visitor or a failed gtag load can never break
 // navigation - analytics must not be able to take the site down.
+// Tracking links made in the admin look like cjhq.org/uci?r=facebook. On the
+// first view only, the label is handed to GA4 as the visit's source (medium
+// "cjhq_link", campaign = the page), which the admin's "Visits by tracking
+// link" card reads. If the address already has any utm_ tag, it is left alone.
+let CJHQ_TRK_DONE = false;
+function trackedLocation(){
+  const href = location.href;
+  if(CJHQ_TRK_DONE) return href;
+  CJHQ_TRK_DONE = true;
+  try{
+    const u = new URL(href);
+    const r = (u.searchParams.get('r') || '').toLowerCase();
+    if(!/^[a-z0-9][a-z0-9_-]{0,39}$/.test(r) || [...u.searchParams.keys()].some(k => /^utm_/i.test(k))) return href;
+    const path = u.pathname.length > 1 ? u.pathname.replace(/\/+$/, '') : '/';
+    u.searchParams.set('utm_source', r);
+    u.searchParams.set('utm_medium', 'cjhq_link');
+    u.searchParams.set('utm_campaign', path);
+    return u.toString();
+  }catch(e){ return href; }
+}
 function trackPageView(){
   try{
     if(typeof gtag !== 'function') return;
     gtag('event', 'page_view', {
       page_title: document.title,
-      page_location: location.href,
+      page_location: trackedLocation(),
       page_path: location.pathname
     });
   }catch(e){ /* analytics is never allowed to break routing */ }
