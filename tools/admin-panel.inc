@@ -19,6 +19,17 @@
   #page-admin .adm-sub{margin:4px 0 18px; font-size:.85rem; color:var(--muted);}
   #page-admin .adm-muted{color:var(--muted); font-size:.88rem;}
   /* Dashboard: plain sections, no decorative numbers. */
+  #page-admin .ana-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px;}
+  #page-admin .ana-kpi{border:1px solid var(--line); border-radius:6px; padding:12px 14px; background:var(--paper);}
+  #page-admin .ana-kpi b{display:block; font-size:1.5rem; line-height:1.2;}
+  #page-admin .ana-kpi span{font-size:.8rem; color:var(--muted);}
+  #page-admin .ana-table{width:100%; border-collapse:collapse; font-size:.86rem;}
+  #page-admin .ana-table th{text-align:left; font-weight:600; color:var(--muted); border-bottom:1px solid var(--line); padding:6px 8px;}
+  #page-admin .ana-table td{border-top:1px solid var(--bg-alt); padding:6px 8px; vertical-align:top;}
+  #page-admin .ana-table td.n{text-align:right; white-space:nowrap;}
+  #page-admin .ana-table td.p{word-break:break-all;}
+  #page-admin .ana-chart{display:flex; align-items:flex-end; gap:2px; height:90px; margin:6px 0 4px;}
+  #page-admin .ana-chart div{flex:1; background:var(--c-blue); opacity:.8; min-height:1px; border-radius:2px 2px 0 0;}
   #page-admin .adm-dash{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;}
   #page-admin .adm-dash section{border:1px solid var(--line); border-radius:6px; padding:14px 16px; background:var(--paper);}
   #page-admin .adm-dash h3{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:.95rem; margin:0 0 8px;}
@@ -116,6 +127,7 @@
             <p class="adm-group">Inbox</p>
             <button class="admin-tab-btn" data-tab="messages">Messages</button>
             <button class="admin-tab-btn" data-tab="linkaudit">Link Audit &amp; Reports</button>
+            <button class="admin-tab-btn" data-tab="analytics">Analytics</button>
             <p class="adm-group">Settings</p>
             <button class="admin-tab-btn" data-tab="settings">Site Settings</button>
             <button class="admin-tab-btn" data-tab="visibility">Publishing</button>
@@ -596,6 +608,26 @@
         </div>
 
         <!-- ===== TAB: MESSAGES ===== -->
+        <!-- ===== TAB: ANALYTICS =====
+             Read-only. Numbers come from Google Analytics 4 (and Microsoft
+             Clarity) through the analyticssummary Cloud Function, which only
+             answers signed-in staff. Nothing here writes anything. -->
+        <div class="admin-tab-panel" id="tab-analytics" style="display:none;">
+          <h2 class="adm-h2">Analytics</h2>
+          <p class="adm-sub">Who visits the site, which pages they read, how long they stay and what they click. Updated about every 10 minutes.</p>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:10px 0 16px;">
+            <label for="anaDays" style="font-size:.86rem;">Period</label>
+            <select id="anaDays" style="padding:6px 8px;">
+              <option value="7">Last 7 days</option>
+              <option value="28" selected>Last 28 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            <button class="admin-small-btn" id="anaRefresh" type="button">Refresh</button>
+            <span id="anaStatus" class="adm-muted" style="font-size:.82rem;"></span>
+          </div>
+          <div id="anaBody"><p class="adm-muted">Loading&hellip;</p></div>
+        </div>
+
         <div class="admin-tab-panel" id="tab-messages" style="display:none;">
           <h2 style="font-size:1.2rem;">Contact Form Messages</h2>
           <p style="font-size:.88rem; color:var(--muted);">

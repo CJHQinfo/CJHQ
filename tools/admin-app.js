@@ -643,6 +643,7 @@ function switchAdminTab(tab){
   admCloseMenu();
   if(tab === 'home') renderAdminDashboard();
   if(tab === 'history') renderAdminHistory();
+  if(tab === 'analytics') renderAnalytics();
   // Read the staff list when the tab is opened rather than on every panel
   // load: it is one collection read, and most sessions never look at it.
   if(tab === 'staff'){ showStaffMsg('', false); renderStaffList(); }
@@ -3581,4 +3582,121 @@ async function renderAiCheckSummary(){
     const when = new Date(d.lastRun).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
     el.textContent = 'Last check ' + when + ': ' + d.checked + ' pages compared - ' + d.changed + ' changed, ' + d.unclear + ' unclear, ' + d.errors + ' could not be read.';
   }catch(e){ /* summary is best-effort */ }
+}
+
+
+/* ================================================================
+ * Analytics tab (read-only)
+ * ----------------------------------------------------------------
+ * Calls the analyticssummary Cloud Function with the signed-in staff
+ * member's Firebase ID token. The function reads Google Analytics 4 as
+ * its own service account (Viewer on the property) and, when configured,
+ * Microsoft Clarity. Deep dives: analytics.google.com and
+ * clarity.microsoft.com (project yn69ejs5t6).
+ * ================================================================ */
+const ANALYTICS_URL = 'https://analyticssummary-158970385688.us-east1.run.app/';
+let ANALYTICS_BUSY = false;
+
+function anaFmtSecs(s){
+  s = Math.round(s || 0);
+  if(s < 60) return s + 's';
+  const m = Math.floor(s / 60), r = s % 60;
+  return m + 'm ' + (r < 10 ? '0' : '') + r + 's';
+}
+function anaFmtNum(n){ return Number(n || 0).toLocaleString('en-CA'); }
+const ANALYTICS_EVENT_LABELS = {
+  page_view: 'Page views', user_engagement: 'Engaged moments', scroll: 'Scrolled to the bottom',
+  click: 'Clicks on links to other sites', file_download: 'File downloads', session_start: 'Visits started',
+  first_visit: 'First-time visitors', form_start: 'Started a form', form_submit: 'Submitted a form',
+  view_search_results: 'Site searches',
+};
+
+async function renderAnalytics(){
+  const body = document.getElementById('anaBody');
+  const status = document.getElementById('anaStatus');
+  const sel = document.getElementById('anaDays');
+  const btn = document.getElementById('anaRefresh');
+  if(!body) return;
+  if(btn && !btn.dataset.wired){
+    btn.dataset.wired = '1';
+    btn.addEventListener('click', renderAnalytics);
+    if(sel) sel.addEventListener('change', renderAnalytics);
+  }
+  if(!adminUser){ body.innerHTML = '<p class="adm-muted">Sign in to see analytics.</p>'; return; }
+  if(ANALYTICS_BUSY) return;
+  ANALYTICS_BUSY = true;
+  const days = sel ? sel.value : '28';
+  if(status) status.textContent = 'Loading…';
+  const esc = cjhqEscapeHtml;
+  try{
+    const token = await adminUser.getIdToken();
+    const r = await fetch(ANALYTICS_URL + '?days=' + encodeURIComponent(days), { headers: { authorization: 'Bearer ' + token } });
+    const data = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const g = data.ga, t = g.totals;
+    const maxDay = Math.max(1, ...g.daily.map(d => d.visitors));
+    const kpi = (v, l) => `<div class="ana-kpi"><b>${v}</b><span>${l}</span></div>`;
+    const rows = (list, cols) => list.length ? list.map(x => '<tr>' + cols.map(c => `<td class="${c.cls||''}">${c.f(x)}</td>`).join('') + '</tr>').join('') : `<tr><td colspan="${cols.length}" class="adm-muted">Nothing recorded yet.</td></tr>`;
+    let html = '';
+    html += '<div class="ana-kpis">'
+      + kpi(anaFmtNum(t.visitors), 'Visitors')
+      + kpi(anaFmtNum(t.visits), 'Visits')
+      + kpi(anaFmtNum(t.pageViews), 'Page views')
+      + kpi(anaFmtSecs(t.avgEngagedSecondsPerVisitor), 'Time on site per visitor')
+      + kpi(Math.round((t.engagementRate || 0) * 100) + '%', 'Engaged visits')
+      + kpi(anaFmtNum(t.newVisitors), 'New visitors')
+      + '</div>';
+    html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Visitors per day</h3><div class="ana-chart">'
+      + g.daily.map(d => `<div title="${esc(d.date.slice(0,4)+'-'+d.date.slice(4,6)+'-'+d.date.slice(6))}: ${d.visitors} visitors, ${d.pageViews} views" style="height:${Math.round(d.visitors / maxDay * 100)}%"></div>`).join('')
+      + '</div></section></section>';
+    html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Pages</h3><table class="ana-table"><tr><th>Page</th><th style="text-align:right">Views</th><th style="text-align:right">Visitors</th><th style="text-align:right">Avg. time on page</th></tr>'
+      + rows(g.pages, [
+          { cls:'p', f: x => `<a href="${esc(location.origin + x.path)}" target="_blank" rel="noopener">${esc(x.path)}</a>` },
+          { cls:'n', f: x => anaFmtNum(x.views) },
+          { cls:'n', f: x => anaFmtNum(x.visitors) },
+          { cls:'n', f: x => anaFmtSecs(x.avgSecondsOnPage) },
+        ])
+      + '</table></section></section>';
+    html += '<div class="adm-dash" style="margin-bottom:18px;">';
+    html += '<section><h3>What visitors did</h3><table class="ana-table">'
+      + rows(g.events, [
+          { f: x => esc(ANALYTICS_EVENT_LABELS[x.name] || x.name) },
+          { cls:'n', f: x => anaFmtNum(x.count) },
+        ]) + '</table></section>';
+    html += '<section><h3>Links clicked to other sites</h3><table class="ana-table">'
+      + rows(g.links, [
+          { cls:'p', f: x => esc(x.url) },
+          { cls:'n', f: x => anaFmtNum(x.clicks) },
+        ]) + '</table></section>';
+    html += '<section><h3>Where visitors came from</h3><table class="ana-table">'
+      + rows(g.sources, [
+          { f: x => esc(x.source) },
+          { cls:'n', f: x => anaFmtNum(x.visits) },
+        ]) + '</table></section>';
+    html += '<section><h3>Devices</h3><table class="ana-table">'
+      + rows(g.devices, [
+          { f: x => esc(x.device) },
+          { cls:'n', f: x => anaFmtNum(x.visitors) },
+        ]) + '</table></section>';
+    html += '</div>';
+    const c = data.clarity;
+    if(c && c.metrics){
+      const m = c.metrics, pick = (k, f) => (m[k] && m[k][f] != null) ? m[k][f] : null;
+      const items = [
+        ['Sessions (last 3 days)', pick('Traffic','totalSessionCount')],
+        ['Average scroll depth', pick('ScrollDepth','averageScrollDepth') != null ? Math.round(pick('ScrollDepth','averageScrollDepth')) + '%' : null],
+        ['Rage clicks (% of sessions)', pick('RageClickCount','sessionsWithMetricPercentage') != null ? pick('RageClickCount','sessionsWithMetricPercentage') + '%' : null],
+        ['Dead clicks (% of sessions)', pick('DeadClickCount','sessionsWithMetricPercentage') != null ? pick('DeadClickCount','sessionsWithMetricPercentage') + '%' : null],
+      ].filter(x => x[1] != null);
+      if(items.length) html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Clicks and scrolling (Clarity)</h3><ul>' + items.map(x => `<li><span>${esc(x[0])}</span><span>${esc(String(x[1]))}</span></li>`).join('') + '</ul></section></section>';
+    }
+    html += '<p class="adm-muted" style="font-size:.8rem;">Heatmaps and visit recordings: <a href="https://clarity.microsoft.com/projects/view/yn69ejs5t6/dashboard" target="_blank" rel="noopener">Microsoft Clarity</a>. Full reports: <a href="https://analytics.google.com/analytics/web/#/a241425776p545788245/reports/intelligenthome" target="_blank" rel="noopener">Google Analytics</a>.</p>';
+    body.innerHTML = html;
+    if(status) status.textContent = 'Updated ' + new Date(data.generatedAt).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
+  }catch(e){
+    body.innerHTML = '<p class="adm-muted">Analytics could not be loaded: ' + esc(String((e && e.message) || e)) + '</p>';
+    if(status) status.textContent = '';
+  }finally{
+    ANALYTICS_BUSY = false;
+  }
 }
