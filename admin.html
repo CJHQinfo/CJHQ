@@ -163,7 +163,11 @@
      near-identical documents a distinct machine-readable identity. -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Start the font request early, without holding up the first paint. The
+     normal stylesheet is restored on load; noscript covers JS-off visitors. -->
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --ink:#0E2149;
@@ -1149,7 +1153,7 @@
 <header>
   <div class="header-inner">
     <a class="brand" href="/" data-page="home">
-      <img class="brand-mark" id="brandLogoImg" src="/assets/cjhq-brand-mark.webp" width="1000" height="563" decoding="async" alt="CJHQ">
+      <img class="brand-mark" id="brandLogoImg" src="/assets/cjhq-brand-mark-256.webp" srcset="/assets/cjhq-brand-mark-256.webp 256w, /assets/cjhq-brand-mark-448.webp 448w" sizes="(max-width:860px) 114px, 199px" width="448" height="252" decoding="async" alt="CJHQ">
     </a>
 
     <nav class="main-nav" id="mainNav" aria-label="Main">
@@ -6684,14 +6688,24 @@ async function initFirebase(){
   try{
     const appMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js');
     const fsMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
-    const authMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js');
     const app = appMod.initializeApp(FIREBASE_CONFIG);
     fbDb = fsMod.getFirestore(app);
     window.__fbFirestore = fsMod;
-    window.__fbAuth = authMod;
     window.__fbApp = app;
-    fbAuth = authMod.getAuth(app);
     firebaseReady = true;
+
+    // The admin panel is injected into admin.html only. Public pages still
+    // need Firestore to render live content, but do not need Firebase Auth or
+    // its iframe. Keep the admin auth state listener on the admin route.
+    if(document.getElementById('page-admin')){
+      const authMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js');
+      window.__fbAuth = authMod;
+      fbAuth = authMod.getAuth(app);
+      authMod.onAuthStateChanged(fbAuth, (user) => {
+        adminUser = user || null;
+        if(typeof syncAdminAuthUI === 'function') syncAdminAuthUI();
+      });
+    }
 
     // App Check is NOT initialized here. It used to be, which meant every
     // visitor to every page loaded reCAPTCHA Enterprise for a feature only
@@ -6702,16 +6716,6 @@ async function initFirebase(){
     // Unenforced in the Firebase console (verified 2026-09-02). If either is
     // ever set to Enforced, public pages will need a token again and this
     // decision must be revisited.
-
-    // Firestore rules require request.auth != null for every write. Drive the
-    // admin panel from the real auth state rather than a client-side flag, so
-    // the UI can never show an editable panel that Firestore will reject.
-    authMod.onAuthStateChanged(fbAuth, (user) => {
-      adminUser = user || null;
-      // The admin app (tools/admin-app.js) is injected into admin.html only.
-      // On public pages there is no panel to sync, so there is nothing to call.
-      if(typeof syncAdminAuthUI === 'function') syncAdminAuthUI();
-    });
   }catch(e){
     console.warn('Firebase init failed, running in local-only mode:', e);
     firebaseReady = false;
@@ -7069,7 +7073,7 @@ function applySettingsToSite(s){
   if(s.facebook){ const el=document.getElementById('footerFacebookLink'); if(el) el.href=s.facebook; }
   if(s.x_url){ const el=document.getElementById('footerXLink'); if(el) el.href=s.x_url; }
   if(s.instagram){ const el=document.getElementById('footerInstagramLink'); if(el) el.href=s.instagram; }
-  if(s.logo_url){ const el=document.getElementById('brandLogoImg'); if(el) el.src=s.logo_url; }
+  if(s.logo_url){ const el=document.getElementById('brandLogoImg'); if(el){ el.removeAttribute('srcset'); el.removeAttribute('sizes'); el.src=s.logo_url; } }
   if(s.color_primary){ document.documentElement.style.setProperty('--ink', s.color_primary); document.documentElement.style.setProperty('--burgundy', s.color_primary); }
   if(s.color_accent){ document.documentElement.style.setProperty('--bronze', s.color_accent); }
 }
