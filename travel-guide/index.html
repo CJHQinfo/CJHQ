@@ -114,7 +114,7 @@
       "url": "https://cjhq.org/",
       "logo": "https://cjhq.org/cjhq-logo.png",
       "description": "The Jewish Hasidic Council of Quebec (CJHQ) is a community organization dedicated to serving, supporting, and representing Quebec's Hasidic Jewish communities.",
-      "disambiguatingDescription": "CJHQ is the council representing Quebec's Hasidic Jewish communities, including the Tosh community in Boisbriand, and the Hasidic Jewish community in Montreal and Outremont.",
+      "disambiguatingDescription": "CJHQ serves Quebec's Hasidic Jewish communities, including Tosh (Kiryas Tosh) in Boisbriand and communities in Montreal and Outremont.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "1040 Van Horne Ave",
@@ -795,7 +795,7 @@
   .fb-page span{width:100% !important; max-width:100%; display:block !important;}
   .fb-page iframe{width:100% !important; max-width:100%;}
   @media (max-width:860px){
-    #socialEmbedGrid{display:none;}
+    #socialEmbedGrid{max-width:100%;}
   }
 
   /* search box */
@@ -1697,11 +1697,13 @@
         <span data-fr>Je suis :</span>
       </p>
         <div class="cat-toggle" id="catToggle"></div>
-        <form id="contactForm" action="https://formspree.io/f/xbdndzzd" method="POST" enctype="multipart/form-data">
+        <form id="contactForm" method="POST">
           <input type="hidden" name="inquiry_type" id="inquiryTypeField" value="Community Member">
           <input type="hidden" name="_subject" value="New message from the CJHQ website">
           <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
           <div id="dynamicFields"></div>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAFF5Ea_KoJTbJcUg"></div>
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
           <button class="btn dark" type="submit" id="contactSubmitBtn"><span data-en>Send Message</span><span data-fr>Envoyer le message</span></button>
           <p id="contactFormStatus" style="margin-top:12px; font-size:.88rem; display:none;"></p>
         </form>
@@ -3859,18 +3861,18 @@ renderCoreValues();
 let PARTNERS_DATA = [
   {type:'img', src:"/assets/renewal-canada.webp", w:320, h:111, alt:"Renewal Canada", url:"https://www.renewalcanada.org/"},
   {type:'img', src:"/assets/yaldei.webp", w:320, h:213, alt:"Yaldei", url:"https://www.yaldei.org/"},
-  {type:'img', src:"/assets/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
+  {type:'img', src:"/assets/optimized/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
   {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
-  {type:'img', src:"/assets/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
-  {type:'img', src:"/assets/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
+  {type:'img', src:"/assets/optimized/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
+  {type:'img', src:"/assets/optimized/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
   {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:"https://www.ktshomrim.com/"},
-  {type:'img', src:"/assets/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
-  {type:'img', src:"/assets/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
-  {type:'img', src:"/assets/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
+  {type:'img', src:"/assets/optimized/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
+  {type:'img', src:"/assets/optimized/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
+  {type:'img', src:"/assets/optimized/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
   {type:'img', src:"/assets/yad-ve-ezer.webp", w:320, h:164, alt:"Yad Ve'ezer", url:"https://yadvaezer.ca/"},
-  {type:'img', src:"/assets/tzum-gezunt.webp", w:562, h:158, alt:"Tzum Gezunt", url:"https://tzumgezunt.ca/"},
+  {type:'img', src:"/assets/optimized/tzum-gezunt.webp", w:562, h:158, alt:"Tzum Gezunt", url:"https://tzumgezunt.ca/"},
   {type:'img', src:"/assets/chai-lifeline-montreal.webp", w:801, h:220, alt:"Chai Lifeline Montreal", url:"https://chailifelinecanada.org/"},
-  {type:'img', src:"/assets/misaskim-montreal.webp", w:396, h:220, alt:"Misaskim Montreal", url:"https://misaskimmtl.org/"},
+  {type:'img', src:"/assets/optimized/misaskim-montreal.webp", w:396, h:220, alt:"Misaskim Montreal", url:"https://misaskimmtl.org/"},
   {type:'img', src:"/assets/bonei-olam-montreal.webp", w:166, h:159, alt:"Bonei Olam Montreal", url:"https://www.boneiolam.org/"},
   {type:'img', src:"/assets/interstate-chaverim.webp", w:220, h:210, alt:"Interstate Chaverim", url:"https://www.interstatechaverim.com/"}
 ];
@@ -4030,6 +4032,7 @@ function goPage(name, opts){
     document.documentElement.classList.remove('route-pending');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     builtIn.classList.add('active');
+    if(name === 'resources' && firebaseReady) requestResourceBackend();
     highlightActiveNav(name);
     if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
     if(name === 'child-travel-consent' && typeof window.__ctcOnOpen === 'function'){
@@ -4152,21 +4155,21 @@ const PAGE_META = {
   '404':        { en:'Page Not Found — CJHQ',                          fr:'Page introuvable — CJHQ',
                   desc_en:'The link you followed may be outdated, or the page may have moved.',
                   desc_fr:'Le lien que vous avez suivi est peut-être désuet, ou la page a été déplacée.' },
-  home:         { en:'CJHQ — Jewish Hasidic Council of Quebec',       fr:'CJHQ — Conseil des Juifs Hassidiques du Québec',
-                  desc_en:'The Jewish Hasidic Council of Quebec serves, supports, and represents Quebec\'s Hasidic Jewish communities — practical assistance, advocacy, and resources.',
-                  desc_fr:'Le Conseil des Juifs Hassidiques du Québec sert, soutient et représente les communautés juives hassidiques du Québec.' },
+  home:         { en:'Jewish Hasidic Communities in Quebec | CJHQ', fr:'Communautés juives hassidiques du Québec | CJHQ',
+                  desc_en:'Contact CJHQ for community assistance and advocacy in Quebec, including Montreal, Outremont and the Tosh community in Boisbriand.',
+                  desc_fr:'Communiquez avec le CJHQ pour les communautés juives hassidiques du Québec, notamment à Montréal, Outremont et Tosh, à Boisbriand.' },
   resources:    { en:'Community Resource Centre — CJHQ',               fr:'Centre de ressources communautaires — CJHQ',
                   desc_en:'Government services, travel documents, NEXUS, border crossing, immigration, family benefits, healthcare, and municipal resources for Quebec\'s Hasidic Jewish communities.',
                   desc_fr:'Services gouvernementaux, documents de voyage, NEXUS, passage frontalier, immigration, prestations familiales, soins de santé et ressources municipales.' },
   'stay-informed':{ en:'News & Updates — CJHQ',                        fr:'Actualités — CJHQ',
                   desc_en:'Official statements, public announcements, and community information updates from CJHQ — Quebec\'s Hasidic Jewish communities.',
                   desc_fr:'Déclarations officielles, annonces publiques et mises à jour communautaires du CJHQ.' },
-  contact:      { en:'Contact CJHQ',                                   fr:'Contacter le CJHQ',
-                  desc_en:'Contact the Jewish Hasidic Council of Quebec for assistance, inquiries, media requests, or community matters.',
-                  desc_fr:'Communiquer avec le Conseil des Juifs Hassidiques du Québec pour de l\'aide, des demandes ou des enjeux communautaires.' },
-  about:        { en:'About CJHQ — Jewish Hasidic Council of Quebec',  fr:'À propos du CJHQ — Conseil des Juifs Hassidiques du Québec',
-                  desc_en:'About the Jewish Hasidic Council of Quebec — our mission, values, and how we serve Quebec\'s Hasidic Jewish communities.',
-                  desc_fr:'À propos du Conseil des Juifs Hassidiques du Québec — notre mission, nos valeurs et notre façon de servir les communautés juives hassidiques.' },
+  contact:      { en:'Contact CJHQ | Montreal, Outremont & Quebec Hasidic Communities', fr:'Contacter le CJHQ | Communautés hassidiques de Montréal et du Québec',
+                  desc_en:'Contact the Jewish Hasidic Council of Quebec about community matters in Montreal, Outremont or Tosh/Kiryas Tosh in Boisbriand. Inquiries and media requests welcome.',
+                  desc_fr:'Contactez le CJHQ pour les questions communautaires hassidiques à Montréal, Outremont et Tosh (Kiryas Tosh), à Boisbriand, au Québec.' },
+  about:        { en:'About CJHQ | Quebec Hasidic Jewish Communities', fr:'À propos du CJHQ | Communautés hassidiques du Québec',
+                  desc_en:'Learn how CJHQ serves Hasidic Jewish communities in Quebec, including Montreal, Outremont and Tosh in Boisbriand, through support and advocacy.',
+                  desc_fr:'Découvrez comment le CJHQ soutient les communautés juives hassidiques de Montréal, d’Outremont et de Tosh à Boisbriand, au Québec.' },
   privacy:      { en:'Privacy Policy — CJHQ',                          fr:'Politique de confidentialité — CJHQ',
                   desc_en:'Privacy Policy of the Jewish Hasidic Council of Quebec.',
                   desc_fr:'Politique de confidentialité du Conseil des Juifs Hassidiques du Québec.' },
@@ -4515,7 +4518,10 @@ setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
   });
 })();
 
-// ---------- CONTACT FORM (Formspree) ----------
+// ---------- CONTACT FORM (verified server intake) ----------
+// Replace the two deployment markers only after the server, secrets and
+// Firestore rules are deployed and tested. Leaving them unset fails closed.
+const CONTACT_INTAKE_URL = 'https://contact-intake-qu3jib66wa-ue.a.run.app';
 const contactForm = document.getElementById('contactForm');
 if(contactForm){
   const resetContactStatus = () => {
@@ -4524,45 +4530,36 @@ if(contactForm){
   };
   resetContactStatus();
   window.addEventListener('pageshow', resetContactStatus);
-  contactForm.addEventListener('submit', function(e){
+  contactForm.addEventListener('submit', async function(e){
     e.preventDefault();
     const statusEl = document.getElementById('contactFormStatus');
     const btn = document.getElementById('contactSubmitBtn');
     const isFr = document.documentElement.classList.contains('lang-fr');
     btn.disabled = true;
-    const formData = new FormData(contactForm);
-    // Save a copy to our own admin panel, independent of whether Formspree succeeds
-    try{
-      const plain = {};
-      formData.forEach((v,k) => { if(typeof v === 'string') plain[k] = v; });
-      if(typeof saveToCollection === 'function'){
-        saveToCollection('contact_submissions', { ...plain, submittedAt: new Date().toISOString(), lang: isFr?'fr':'en' });
-      }
-    }catch(err){ console.warn('Could not save local copy of contact submission:', err); }
-    fetch(contactForm.action, {
-      method: 'POST',
-      body: formData,
-      headers: { 'Accept': 'application/json' }
-    }).then(response => {
-      if(response.ok){
-        statusEl.textContent = isFr
-          ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
-          : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
-        statusEl.style.color = '#2E7D32';
-        statusEl.style.display = 'block';
-        contactForm.reset();
-      } else {
-        throw new Error('submit failed');
-      }
-    }).catch(() => {
+    try {
+      if(CONTACT_INTAKE_URL.startsWith('__') || !window.turnstile) throw new Error('intake unavailable');
+      const plain = Object.fromEntries(new FormData(contactForm));
+      plain.lang = isFr ? 'fr' : 'en';
+      const response = await fetch(CONTACT_INTAKE_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(plain)
+      });
+      if(!response.ok) throw new Error('intake rejected');
+      statusEl.textContent = isFr
+        ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
+        : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
+      statusEl.style.color = '#2E7D32';
+      contactForm.reset();
+    } catch(err) {
       statusEl.textContent = isFr
         ? 'Une erreur est survenue. Veuillez réessayer ou nous écrire directement à info@cjhq.org.'
         : 'Something went wrong. Please try again, or email us directly at info@cjhq.org.';
       statusEl.style.color = '#B3261E';
+    } finally {
+      if(window.turnstile) window.turnstile.reset();
       statusEl.style.display = 'block';
-    }).finally(() => {
       btn.disabled = false;
-    });
+    }
   });
 }
 
@@ -5907,7 +5904,9 @@ async function initFirebase(){
   }
   try{
     const appMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js');
-    const fsMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+    // Public and admin paths use one-shot reads/writes only. Lite speaks directly
+    // to Firestore without opening the full SDK's Listen/channel transport.
+    const fsMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore-lite.js');
     const app = appMod.initializeApp(FIREBASE_CONFIG);
     fbDb = fsMod.getFirestore(app);
     window.__fbFirestore = fsMod;
@@ -7062,12 +7061,33 @@ window.addEventListener('popstate', ()=>checkCurrentPath({skipHistory:true}));
 
 checkCurrentPath({deferUnknown:true});
 
+// Core public data remains live: notices, site settings/visibility, partners,
+// content overrides and custom-page routing. Resource-only collections can wait
+// until the visitor opens Resources, instead of holding up the homepage.
+let resourcesBackendReady = false;
+let resourcesBackendPromise = null;
+async function loadResourceBackend(){
+  if(resourcesBackendReady) return;
+  if(resourcesBackendPromise) return resourcesBackendPromise;
+  if(!firebaseReady) return;
+  resourcesBackendPromise = (async () => {
+    await enhanceResourcesFromBackend();
+    await enhanceResourceMetaFromBackend();
+    await applyResourceOverrides();
+    resourcesBackendReady = true;
+  })().finally(() => { resourcesBackendPromise = null; });
+  return resourcesBackendPromise;
+}
+function requestResourceBackend(){
+  loadResourceBackend().catch(e => console.warn('Resource update failed:', e));
+}
+
 (async function initBackend(){
   try{
     await initFirebase();
     // A deep link to an admin-created page (e.g. /travel-guide) is waiting on
-    // the pages collection. Fetch it first and show the page now, instead of
-    // after the ten steps below. The full load at the end still runs as before.
+    // the pages collection. Fetch it first and show the page now, rather than
+    // after the other backend reads.
     if(window.__routeDeferred){
       try{
         await enhancePagesFromBackend();
@@ -7079,38 +7099,29 @@ checkCurrentPath({deferUnknown:true});
     const settings = await fetchSettingsDoc();
     if(settings) applySettingsToSite(settings);
     await enhancePartnersFromBackend();
-    await enhanceResourcesFromBackend();
-    await enhanceResourceMetaFromBackend();
     await applyContentOverrides();
-    await applyResourceOverrides();
     await applyPartnerOverrides();
-    await enhancePagesFromBackend();
+    if(!window.__routeDeferred) await enhancePagesFromBackend();
+    // The resource page needs its live additions and reviewed flags. On other
+    // routes, a later navigation starts this load at the moment it is needed.
+    if(document.getElementById('page-resources').classList.contains('active') || document.getElementById('page-admin')){
+      await loadResourceBackend();
+    }
   }catch(e){
     console.warn('Backend init step failed, continuing with routing regardless:', e);
   }finally{
-    // Visibility is loaded in finally, never inside the try: if Firebase is
-    // unreachable the flag stays at its default - hidden - and the gate still
-    // runs. Putting this in the try meant one network failure left an
-    // unpublished section on screen.
+    // Visibility is loaded in finally: if Firebase fails, the unpublished
+    // section stays hidden and this gate still runs.
     try{
       await loadSectionVisibility();
     }catch(err){
-      __sectionVisibility = {};       // fail closed
+      __sectionVisibility = {};
     }
-
-    // Routing must never be blocked by a backend hiccup — the visitor
-    // should always land on the right page even if Firestore is slow,
-    // unreachable, or a single step above throws. The first pass above
-    // already resolved every built-in route, so only re-run when it could
-    // not resolve the path (custom page, or a genuine 404).
     const active = document.querySelector('.page.active');
     if(window.__routeDeferred || !active || active.id === 'page-404'){
       window.__routeDeferred = false;
       checkCurrentPath({skipHistory:true});
     }
-
-    // Enforced LAST, after routing has settled. Running it earlier meant the
-    // re-route above resolved /special-information again and undid the gate.
     applySectionVisibility();
   }
 })();
@@ -7190,29 +7201,15 @@ checkCurrentPath({deferUnknown:true});
 </script>
 <!-- End Constant Contact Active Forms -->
 
-<!-- Social embed loaders - deferred until the embeds are actually needed.
-     Previously both SDKs loaded on every view of every route, including on
-     mobile, where #socialEmbedGrid is display:none below 860px - so mobile
-     visitors downloaded and executed two third-party tracking SDKs to render
-     markup they could never see.
-
-     Now they load only when the embed grid is genuinely on screen. If the grid
-     is hidden or absent (every route except the one carrying it, and every
-     viewport under 860px) neither SDK is requested at all. Nothing about the
-     embeds changes: when the grid appears, the same scripts load with the same
-     parameters and render the same way.
-
-     Performance and third-party-exposure only. No functionality removed, no
-     consent mechanism added - that decision is documented separately. -->
+<!-- Load the Facebook Page SDK only when the feed is visible.
+     No X timeline widget is embedded. -->
 <script>
 (function deferSocialEmbeds(){
   function loaders(){
     var locale = document.documentElement.classList.contains('lang-fr') ? 'fr_CA' : 'en_US';
     return [
       { id:'cjhq-fb-sdk', src:'https://connect.facebook.net/' + locale + '/sdk.js#xfbml=1&version=v19.0',
-        attrs:{ crossOrigin:'anonymous' } },
-      { id:'cjhq-x-widgets', src:'https://platform.x.com/widgets.js',
-        attrs:{ charset:'utf-8' } }
+        attrs:{ crossOrigin:'anonymous' } }
     ];
   }
   var loaded = false;
@@ -7234,16 +7231,15 @@ checkCurrentPath({deferUnknown:true});
     if(!grid) return;                        // route carries no embeds
     if(!('IntersectionObserver' in window)){
       // No observer support: fall back to a visibility check. getClientRects()
-      // is empty for a display:none element, which is exactly the mobile case.
+      // is empty when the route is hidden.
       if(grid.getClientRects().length) load();
       return;
     }
     if(observing) return;
     observing = true;
     // Observe unconditionally rather than pre-checking visibility. A
-    // display:none element is never "intersecting", so the mobile case is
-    // still covered - and an early check was checking too soon: on a route
-    // where this script runs before the router marks the page active, the
+    // A hidden route is never intersecting. A pre-check was too soon when
+    // this script ran before the router marked the page active: the
     // grid had no client rects yet and the SDKs never loaded at all.
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){ if(e.isIntersecting){ load(); io.disconnect(); } });
