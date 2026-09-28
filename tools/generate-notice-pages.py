@@ -11,7 +11,9 @@ link /notice/<slug> previews with the page's actual headline.
 
 Access model: it reads Firestore over the public REST API with the same
 publishable web apiKey the site's own JavaScript uses - no credentials, no
-admin access. The security rules already decide what is public: a page that is
+admin access. The key is read from the checked-out index.html at runtime
+(see load_api_key) so this file stores no key of its own, and requests send
+the site origin as Referer to match the key's website restriction. The security rules already decide what is public: a page that is
 unpublished, not yet started or expired answers permission-denied, exactly as
 it does for an anonymous visitor, and no file is written for it. Files for
 pages that have left the live window are deleted on the next run.
@@ -29,7 +31,23 @@ import html, json, os, re, shutil, sys, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT = 'cjhqinfo'
-API_KEY = 'AIzaSyDPzTFbsiOtJ4LOKiFjL0aVtSKhl21zwuc'  # public web key, same as index.html
+def load_api_key():
+    """The site's publishable Firebase web key.
+
+    Read from the checked-out index.html (its FIREBASE_CONFIG) so this file
+    stores no key of its own. Set FIREBASE_WEB_API_KEY to override when
+    running without a full checkout."""
+    key = os.environ.get('FIREBASE_WEB_API_KEY')
+    if key:
+        return key
+    src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    m = re.search(r'apiKey:\s*"([^"]+)"', src)
+    if not m:
+        sys.exit('firebase apiKey not found in index.html')
+    return m.group(1)
+
+
+API_KEY = load_api_key()
 BASE = f'https://firestore.googleapis.com/v1/projects/{PROJECT}/databases/(default)/documents'
 ORIGIN = 'https://cjhq.org'
 SLUG_RE = re.compile(r'^[a-z0-9][a-z0-9-]{0,60}$')
@@ -37,7 +55,8 @@ SLUG_RE = re.compile(r'^[a-z0-9][a-z0-9-]{0,60}$')
 
 def get(path):
     req = urllib.request.Request(f'{BASE}/{path}?key={API_KEY}',
-                                 headers={'User-Agent': 'cjhq-notice-pages/1.0'})
+                                 headers={'User-Agent': 'cjhq-notice-pages/1.0',
+                                          'Referer': ORIGIN + '/'})
     with urllib.request.urlopen(req, timeout=20) as r:
         return json.load(r)
 
