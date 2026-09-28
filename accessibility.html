@@ -798,7 +798,7 @@
   .fb-page span{width:100% !important; max-width:100%; display:block !important;}
   .fb-page iframe{width:100% !important; max-width:100%;}
   @media (max-width:860px){
-    #socialEmbedGrid{display:none;}
+    #socialEmbedGrid{max-width:100%;}
   }
 
   /* search box */
@@ -1700,11 +1700,13 @@
         <span data-fr>Je suis :</span>
       </p>
         <div class="cat-toggle" id="catToggle"></div>
-        <form id="contactForm" action="https://formspree.io/f/xbdndzzd" method="POST" enctype="multipart/form-data">
+        <form id="contactForm" method="POST">
           <input type="hidden" name="inquiry_type" id="inquiryTypeField" value="Community Member">
           <input type="hidden" name="_subject" value="New message from the CJHQ website">
           <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
           <div id="dynamicFields"></div>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAFF5Ea_KoJTbJcUg"></div>
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
           <button class="btn dark" type="submit" id="contactSubmitBtn"><span data-en>Send Message</span><span data-fr>Envoyer le message</span></button>
           <p id="contactFormStatus" style="margin-top:12px; font-size:.88rem; display:none;"></p>
         </form>
@@ -4506,7 +4508,10 @@ setLang(window.__CJHQ_LANG === 'fr' ? 'fr' : 'en');
   });
 })();
 
-// ---------- CONTACT FORM (Formspree) ----------
+// ---------- CONTACT FORM (verified server intake) ----------
+// Replace the two deployment markers only after the server, secrets and
+// Firestore rules are deployed and tested. Leaving them unset fails closed.
+const CONTACT_INTAKE_URL = '__CONTACT_INTAKE_URL__';
 const contactForm = document.getElementById('contactForm');
 if(contactForm){
   const resetContactStatus = () => {
@@ -4515,45 +4520,36 @@ if(contactForm){
   };
   resetContactStatus();
   window.addEventListener('pageshow', resetContactStatus);
-  contactForm.addEventListener('submit', function(e){
+  contactForm.addEventListener('submit', async function(e){
     e.preventDefault();
     const statusEl = document.getElementById('contactFormStatus');
     const btn = document.getElementById('contactSubmitBtn');
     const isFr = document.documentElement.classList.contains('lang-fr');
     btn.disabled = true;
-    const formData = new FormData(contactForm);
-    // Save a copy to our own admin panel, independent of whether Formspree succeeds
-    try{
-      const plain = {};
-      formData.forEach((v,k) => { if(typeof v === 'string') plain[k] = v; });
-      if(typeof saveToCollection === 'function'){
-        saveToCollection('contact_submissions', { ...plain, submittedAt: new Date().toISOString(), lang: isFr?'fr':'en' });
-      }
-    }catch(err){ console.warn('Could not save local copy of contact submission:', err); }
-    fetch(contactForm.action, {
-      method: 'POST',
-      body: formData,
-      headers: { 'Accept': 'application/json' }
-    }).then(response => {
-      if(response.ok){
-        statusEl.textContent = isFr
-          ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
-          : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
-        statusEl.style.color = '#2E7D32';
-        statusEl.style.display = 'block';
-        contactForm.reset();
-      } else {
-        throw new Error('submit failed');
-      }
-    }).catch(() => {
+    try {
+      if(CONTACT_INTAKE_URL.startsWith('__') || !window.turnstile) throw new Error('intake unavailable');
+      const plain = Object.fromEntries(new FormData(contactForm));
+      plain.lang = isFr ? 'fr' : 'en';
+      const response = await fetch(CONTACT_INTAKE_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(plain)
+      });
+      if(!response.ok) throw new Error('intake rejected');
+      statusEl.textContent = isFr
+        ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
+        : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
+      statusEl.style.color = '#2E7D32';
+      contactForm.reset();
+    } catch(err) {
       statusEl.textContent = isFr
         ? 'Une erreur est survenue. Veuillez réessayer ou nous écrire directement à info@cjhq.org.'
         : 'Something went wrong. Please try again, or email us directly at info@cjhq.org.';
       statusEl.style.color = '#B3261E';
+    } finally {
+      if(window.turnstile) window.turnstile.reset();
       statusEl.style.display = 'block';
-    }).finally(() => {
       btn.disabled = false;
-    });
+    }
   });
 }
 
@@ -7181,29 +7177,15 @@ checkCurrentPath({deferUnknown:true});
 </script>
 <!-- End Constant Contact Active Forms -->
 
-<!-- Social embed loaders - deferred until the embeds are actually needed.
-     Previously both SDKs loaded on every view of every route, including on
-     mobile, where #socialEmbedGrid is display:none below 860px - so mobile
-     visitors downloaded and executed two third-party tracking SDKs to render
-     markup they could never see.
-
-     Now they load only when the embed grid is genuinely on screen. If the grid
-     is hidden or absent (every route except the one carrying it, and every
-     viewport under 860px) neither SDK is requested at all. Nothing about the
-     embeds changes: when the grid appears, the same scripts load with the same
-     parameters and render the same way.
-
-     Performance and third-party-exposure only. No functionality removed, no
-     consent mechanism added - that decision is documented separately. -->
+<!-- Load the Facebook Page SDK only when the feed is visible.
+     No X timeline widget is embedded. -->
 <script>
 (function deferSocialEmbeds(){
   function loaders(){
     var locale = document.documentElement.classList.contains('lang-fr') ? 'fr_CA' : 'en_US';
     return [
       { id:'cjhq-fb-sdk', src:'https://connect.facebook.net/' + locale + '/sdk.js#xfbml=1&version=v19.0',
-        attrs:{ crossOrigin:'anonymous' } },
-      { id:'cjhq-x-widgets', src:'https://platform.x.com/widgets.js',
-        attrs:{ charset:'utf-8' } }
+        attrs:{ crossOrigin:'anonymous' } }
     ];
   }
   var loaded = false;
@@ -7225,16 +7207,15 @@ checkCurrentPath({deferUnknown:true});
     if(!grid) return;                        // route carries no embeds
     if(!('IntersectionObserver' in window)){
       // No observer support: fall back to a visibility check. getClientRects()
-      // is empty for a display:none element, which is exactly the mobile case.
+      // is empty when the route is hidden.
       if(grid.getClientRects().length) load();
       return;
     }
     if(observing) return;
     observing = true;
     // Observe unconditionally rather than pre-checking visibility. A
-    // display:none element is never "intersecting", so the mobile case is
-    // still covered - and an early check was checking too soon: on a route
-    // where this script runs before the router marks the page active, the
+    // A hidden route is never intersecting. A pre-check was too soon when
+    // this script ran before the router marked the page active: the
     // grid had no client rects yet and the SDKs never loaded at all.
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){ if(e.isIntersecting){ load(); io.disconnect(); } });
