@@ -3850,18 +3850,18 @@ renderCoreValues();
 let PARTNERS_DATA = [
   {type:'img', src:"/assets/renewal-canada.webp", w:320, h:111, alt:"Renewal Canada", url:"https://www.renewalcanada.org/"},
   {type:'img', src:"/assets/yaldei.webp", w:320, h:213, alt:"Yaldei", url:"https://www.yaldei.org/"},
-  {type:'img', src:"/assets/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
+  {type:'img', src:"/assets/optimized/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
   {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
-  {type:'img', src:"/assets/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
-  {type:'img', src:"/assets/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
+  {type:'img', src:"/assets/optimized/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
+  {type:'img', src:"/assets/optimized/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
   {type:'img', src:"/assets/shomrim-tosh.webp", w:92, h:92, alt:"Shomrim Tosh", url:"https://www.ktshomrim.com/"},
-  {type:'img', src:"/assets/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
-  {type:'img', src:"/assets/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
-  {type:'img', src:"/assets/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
+  {type:'img', src:"/assets/optimized/hatzolah-tosh.webp", w:738, h:124, alt:"Hatzolah Tosh", url:"https://hatzolaht.com/"},
+  {type:'img', src:"/assets/optimized/eruv-montreal.webp", w:252, h:192, alt:"Eruv Montreal", url:"https://montrealeruv.ca/"},
+  {type:'img', src:"/assets/optimized/bikur-cholim-montreal.webp", w:320, h:320, alt:"Bikur Cholim Montreal", url:null},
   {type:'img', src:"/assets/yad-ve-ezer.webp", w:320, h:164, alt:"Yad Ve'ezer", url:"https://yadvaezer.ca/"},
-  {type:'img', src:"/assets/tzum-gezunt.webp", w:562, h:158, alt:"Tzum Gezunt", url:"https://tzumgezunt.ca/"},
+  {type:'img', src:"/assets/optimized/tzum-gezunt.webp", w:562, h:158, alt:"Tzum Gezunt", url:"https://tzumgezunt.ca/"},
   {type:'img', src:"/assets/chai-lifeline-montreal.webp", w:801, h:220, alt:"Chai Lifeline Montreal", url:"https://chailifelinecanada.org/"},
-  {type:'img', src:"/assets/misaskim-montreal.webp", w:396, h:220, alt:"Misaskim Montreal", url:"https://misaskimmtl.org/"},
+  {type:'img', src:"/assets/optimized/misaskim-montreal.webp", w:396, h:220, alt:"Misaskim Montreal", url:"https://misaskimmtl.org/"},
   {type:'img', src:"/assets/bonei-olam-montreal.webp", w:166, h:159, alt:"Bonei Olam Montreal", url:"https://www.boneiolam.org/"},
   {type:'img', src:"/assets/interstate-chaverim.webp", w:220, h:210, alt:"Interstate Chaverim", url:"https://www.interstatechaverim.com/"}
 ];
@@ -4021,6 +4021,7 @@ function goPage(name, opts){
     document.documentElement.classList.remove('route-pending');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     builtIn.classList.add('active');
+    if(name === 'resources' && firebaseReady) requestResourceBackend();
     highlightActiveNav(name);
     if(!opts.skipScroll) window.scrollTo({top:0, behavior:'instant'});
     if(name === 'child-travel-consent' && typeof window.__ctcOnOpen === 'function'){
@@ -5892,7 +5893,9 @@ async function initFirebase(){
   }
   try{
     const appMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js');
-    const fsMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js');
+    // Public and admin paths use one-shot reads/writes only. Lite speaks directly
+    // to Firestore without opening the full SDK's Listen/channel transport.
+    const fsMod = await import('https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore-lite.js');
     const app = appMod.initializeApp(FIREBASE_CONFIG);
     fbDb = fsMod.getFirestore(app);
     window.__fbFirestore = fsMod;
@@ -7047,12 +7050,33 @@ window.addEventListener('popstate', ()=>checkCurrentPath({skipHistory:true}));
 
 checkCurrentPath({deferUnknown:true});
 
+// Core public data remains live: notices, site settings/visibility, partners,
+// content overrides and custom-page routing. Resource-only collections can wait
+// until the visitor opens Resources, instead of holding up the homepage.
+let resourcesBackendReady = false;
+let resourcesBackendPromise = null;
+async function loadResourceBackend(){
+  if(resourcesBackendReady) return;
+  if(resourcesBackendPromise) return resourcesBackendPromise;
+  if(!firebaseReady) return;
+  resourcesBackendPromise = (async () => {
+    await enhanceResourcesFromBackend();
+    await enhanceResourceMetaFromBackend();
+    await applyResourceOverrides();
+    resourcesBackendReady = true;
+  })().finally(() => { resourcesBackendPromise = null; });
+  return resourcesBackendPromise;
+}
+function requestResourceBackend(){
+  loadResourceBackend().catch(e => console.warn('Resource update failed:', e));
+}
+
 (async function initBackend(){
   try{
     await initFirebase();
     // A deep link to an admin-created page (e.g. /travel-guide) is waiting on
-    // the pages collection. Fetch it first and show the page now, instead of
-    // after the ten steps below. The full load at the end still runs as before.
+    // the pages collection. Fetch it first and show the page now, rather than
+    // after the other backend reads.
     if(window.__routeDeferred){
       try{
         await enhancePagesFromBackend();
@@ -7064,38 +7088,29 @@ checkCurrentPath({deferUnknown:true});
     const settings = await fetchSettingsDoc();
     if(settings) applySettingsToSite(settings);
     await enhancePartnersFromBackend();
-    await enhanceResourcesFromBackend();
-    await enhanceResourceMetaFromBackend();
     await applyContentOverrides();
-    await applyResourceOverrides();
     await applyPartnerOverrides();
-    await enhancePagesFromBackend();
+    if(!window.__routeDeferred) await enhancePagesFromBackend();
+    // The resource page needs its live additions and reviewed flags. On other
+    // routes, a later navigation starts this load at the moment it is needed.
+    if(document.getElementById('page-resources').classList.contains('active') || document.getElementById('page-admin')){
+      await loadResourceBackend();
+    }
   }catch(e){
     console.warn('Backend init step failed, continuing with routing regardless:', e);
   }finally{
-    // Visibility is loaded in finally, never inside the try: if Firebase is
-    // unreachable the flag stays at its default - hidden - and the gate still
-    // runs. Putting this in the try meant one network failure left an
-    // unpublished section on screen.
+    // Visibility is loaded in finally: if Firebase fails, the unpublished
+    // section stays hidden and this gate still runs.
     try{
       await loadSectionVisibility();
     }catch(err){
-      __sectionVisibility = {};       // fail closed
+      __sectionVisibility = {};
     }
-
-    // Routing must never be blocked by a backend hiccup — the visitor
-    // should always land on the right page even if Firestore is slow,
-    // unreachable, or a single step above throws. The first pass above
-    // already resolved every built-in route, so only re-run when it could
-    // not resolve the path (custom page, or a genuine 404).
     const active = document.querySelector('.page.active');
     if(window.__routeDeferred || !active || active.id === 'page-404'){
       window.__routeDeferred = false;
       checkCurrentPath({skipHistory:true});
     }
-
-    // Enforced LAST, after routing has settled. Running it earlier meant the
-    // re-route above resolved /special-information again and undid the gate.
     applySectionVisibility();
   }
 })();
