@@ -88,6 +88,11 @@ function stripHreflang(doc){
 }
 
 const checkOnly = process.argv.includes('--check');
+// Published copies can be minified; compare their semantic source by
+// regenerating the same minified form as an alternative to plain HTML.
+const minifyHtml = checkOnly ? (await import('./minify-routes.mjs')).minifyHtml : null;
+const matches = async (current, built, file) =>
+  current === built || (checkOnly && current === await minifyHtml(built, file));
 
 if (!existsSync(SRC)) {
   console.error('index.html not found at', SRC);
@@ -354,7 +359,7 @@ for (const route of ROUTES) {
   const current = existsSync(target) ? readFileSync(target, 'utf8') : null;
 
   if (checkOnly) {
-    if (current !== built) { console.error(`DRIFT: ${route}.html is out of date`); drift++; }
+    if (!await matches(current, built, `${route}.html`)) { console.error(`DRIFT: ${route}.html is out of date`); drift++; }
     else console.log(`ok: ${route}.html`);
   } else if (current === built) {
     console.log(`unchanged: ${route}.html`);
@@ -405,7 +410,7 @@ for (const [name, doc] of extras) {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   const current = existsSync(target) ? readFileSync(target, 'utf8') : null;
   if (checkOnly) {
-    if (current !== doc) { console.error(`DRIFT: ${name} is out of date`); drift++; }
+    if (!await matches(current, doc, name)) { console.error(`DRIFT: ${name} is out of date`); drift++; }
     else console.log(`ok: ${name}`);
   } else if (current === doc) {
     console.log(`unchanged: ${name}`);

@@ -6,14 +6,18 @@
 import {readFileSync, writeFileSync} from 'node:fs';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
 import {minify} from 'terser';
 import {transform} from 'lightningcss';
 const root=join(dirname(fileURLToPath(import.meta.url)), '..');
 const routes=['admin.html','about.html','accessibility.html','child-travel-consent.html','contact.html','privacy.html','resources.html','stay-informed.html','terms.html','fr/index.html','fr/ressources.html','fr/actualites.html','fr/a-propos.html','fr/contact.html','fr/politique-de-confidentialite.html','fr/conditions-utilisation.html','fr/accessibilite.html','fr/consentement-voyage-enfant.html'];
 const check=process.argv.includes('--check');
+const changed=process.argv.includes('--changed');
+const changedFiles=changed ? new Set(execFileSync('git',['diff','--name-only'],{cwd:root,encoding:'utf8'}).trim().split('\n')) : null;
 let drift=0;
 if(import.meta.url === `file://${process.argv[1]}`){
   for(const file of routes){
+    if(changed && !changedFiles.has(file)) continue;
     let src=readFileSync(join(root,file),'utf8');
     let out=await minifyHtml(src,file);
     if(out!==src){

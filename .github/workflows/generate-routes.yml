@@ -54,23 +54,33 @@ jobs:
       - name: Verify the shared Ask CJHQ core is in sync with index.html
         run: node tools/sync-ask-core.mjs --check
 
+      - name: Install build dependencies
+        run: npm ci
+
       - name: Generate route files from index.html
         run: node tools/generate-routes.mjs
+
+      - name: Minify generated copies
+        run: node tools/minify-routes.mjs --changed
+
+      - name: Verify generated artifacts are in sync
+        run: node tools/generate-routes.mjs --check
 
       - name: Commit regenerated routes
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The generator writes ten files: eight ROUTES plus the two extras
-          # (admin.html and fr/index.html). Only seven were staged, so
-          # child-travel-consent.html, admin.html and fr/index.html were
-          # regenerated on every run and never committed - they happened to be
-          # in sync, but a future index.html push would have left them stale
-          # with no signal that anything had drifted.
+          # The generator writes eight English routes, admin.html, and nine
+          # French routes. Stage them all so a change to index.html cannot
+          # leave French copies drifting in the published tree.
           git add resources.html stay-informed.html contact.html about.html \
                   privacy.html terms.html accessibility.html \
-                  child-travel-consent.html admin.html fr/index.html
+                  child-travel-consent.html admin.html fr/index.html \
+                  fr/ressources.html fr/actualites.html fr/a-propos.html \
+                  fr/contact.html fr/politique-de-confidentialite.html \
+                  fr/conditions-utilisation.html fr/accessibilite.html \
+                  fr/consentement-voyage-enfant.html
           if git diff --staged --quiet; then
             echo "Route files already up to date - nothing to commit."
           else
