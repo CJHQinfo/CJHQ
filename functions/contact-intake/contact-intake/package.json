@@ -1,1 +1,0 @@
-{"name":"cjhq-contact-intake","version":"1.0.0","private":true,"main":"index.js","scripts":{"start":"functions-framework --target=contactIntake","test":"node --test test.js"},"engines":{"node":"22"},"dependencies":{"firebase-admin":"^12.6.0","@google-cloud/functions-framework":"^3.4.5"}}
