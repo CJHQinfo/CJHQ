@@ -1706,7 +1706,7 @@ async function renderMessagesList(){
     const d = v ? new Date(v) : null;
     return (d && !isNaN(d.getTime())) ? esc(d.toLocaleString()) : '';
   };
-  const skipKeys = new Set(['id','submittedAt','lang']);
+  const skipKeys = new Set(['id','submittedAt','lang','notificationStatus']);
   list.innerHTML = filtered.map(m => {
     const fields = Object.entries(m).filter(([k,v]) => !skipKeys.has(k) && v);
     const nameField = fields.find(([k]) => /name/i.test(k));
@@ -1718,7 +1718,7 @@ async function renderMessagesList(){
         <div style="margin:6px 0 0; font-size:.82rem; color:var(--ink-soft); line-height:1.6;">
           ${fields.map(([k,v]) => `<div><strong>${esc(String(k).replace(/_/g,' '))}:</strong> ${esc(v)}</div>`).join('')}
         </div>
-        <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">${when(m.submittedAt)}</p>
+        <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">${when(m.submittedAt)}${m.notificationStatus==='pending' ? ' · Email notice unconfirmed; message is saved here' : ''}</p>
       </div>
       <button class="admin-small-btn" type="button" data-del-message="${esc(m.id == null ? '' : m.id)}">Delete</button>
     </div>`;

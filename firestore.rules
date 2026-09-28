@@ -1,0 +1,201 @@
+rules_version = '2';
+
+// CJHQ website — Firestore security rules
+// (header comments unchanged from the deployed version; only the anonymous-write
+//  inbox rules below were hardened — see R1/R2.)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ---- Who is staff -------------------------------------------------
+       Two sources, in this order:
+
+       1. BREAK_GLASS - addresses written into these rules. They cannot be
+          removed from the admin panel, only by editing this file in the
+          Firebase console. This is the recovery path: if the staff
+          collection is emptied, corrupted or mis-edited, these accounts can
+          still sign in and repair it. Never reduce this list to zero.
+
+       2. The `staff` collection - one document per address, doc id = the
+          lowercased email. Managed from the admin panel's Staff tab.
+
+       Order matters for cost as well as safety: a break-glass address is
+       decided from the token alone and never reaches the exists() call, so
+       it costs no document read.
+
+       exists() inside rules is a privileged read - it does NOT re-evaluate
+       these rules - so there is no recursion through match /staff below.
+
+       email_verified is required in both branches. An unverified address is
+       not proof of control of the mailbox, and the whole scheme keys on the
+       address. */
+    function breakGlass() {
+      return request.auth.token.email.lower() in [
+               'mendel@capitalnutrition.ca',
+               'mendelhart@gmail.com',
+               'sam@cjhq.org',
+               'shragem@gmail.com',
+               'mordechai@kehilasbelz.ca',
+               'mem6027@gmail.com'
+             ];
+    }
+
+    function inStaffCollection() {
+      return exists(/databases/$(database)/documents/staff/$(request.auth.token.email.lower()));
+    }
+
+    function isStaff() {
+      return request.auth != null
+          && request.auth.token.email != null
+          && request.auth.token.email_verified == true
+          && (breakGlass() || inStaffCollection());
+    }
+
+    function signedIn() { return isStaff(); }
+
+    /* ---- Roles (added 2026-09-23, owner's choice "A") ------------------
+       A staff document may carry role: 'owner' or 'editor'. A document with
+       no role counts as owner, so everyone who was staff before roles
+       existed keeps exactly what they had. Break-glass addresses are always
+       owners. Only owners can change the staff list; editors can do
+       everything else. */
+    function staffRole() {
+      return get(/databases/$(database)/documents/staff/$(request.auth.token.email.lower())).data.get('role', 'owner');
+    }
+    function isOwner() {
+      return isStaff() && (breakGlass() || staffRole() == 'owner');
+    }
+
+    // ---- R1/R2: anonymous-write payload limits --------------------------
+    // `request.resource.data.size()` counts FIELDS, not bytes, so the old
+    // `size() < 100` let a single field carry a ~1 MiB document. On a STRING,
+    // `.size()` is the character count — that is the check that actually caps
+    // the payload. Every field below is one the deployed form really writes;
+    // the caps are far above any legitimate submission.
+    function str(field, max) {
+      return !(field in request.resource.data)
+          || (request.resource.data[field] is string
+              && request.resource.data[field].size() <= max);
+    }
+
+    match /notices/{doc}            { allow read: if true; allow write: if signedIn(); }
+    match /partners/{doc}           { allow read: if true; allow write: if signedIn(); }
+    match /partner_overrides/{doc}  { allow read: if true; allow write: if signedIn(); }
+    match /resources/{doc}          { allow read: if true; allow write: if signedIn(); }
+    match /resource_overrides/{doc} { allow read: if true; allow write: if signedIn(); }
+    match /events/{doc}             { allow read: if true; allow write: if signedIn(); }
+    match /settings/{doc}           { allow read: if true; allow write: if signedIn(); }
+    match /content_overrides/{doc}  { allow read: if true; allow write: if signedIn(); }
+
+    /* Custom pages carry a public window. An expired or unpublished page must
+       stop being SERVED, not merely stop being shown - a client-side gate still
+       hands the body to the browser and still leaves it readable through the
+       REST endpoint.
+
+       READ IS SPLIT ON PURPOSE, and the reason is not obvious.
+
+       Firestore evaluates a `list` rule against the QUERY, not against the
+       documents the query would return: it must prove from the query's own
+       constraints that nothing forbidden can come back. It can prove that for
+       `published == true`. It cannot prove it for a comparison against
+       `request.time`, because all the client can put in a query is a number it
+       chose, and nothing tells the engine that number is the current time. So a
+       rule with a request.time inequality refuses EVERY query, no matter how
+       exactly the query mirrors it. An earlier version of this file granted
+       `read` on that condition and had the public client query for precisely
+       the permitted set; the query was refused every time, and no custom page
+       was visible to anyone who was not signed in.
+
+       `get` has no such problem: a single-document read is evaluated against
+       the document, where request.time behaves normally.
+
+       So: visitors read page_settings/public_pages (a plain public document
+       listing the slugs), then fetch each page by id. Listing this collection
+       stays staff-only. An out-of-window page is refused on its `get`, which is
+       exactly the intended outcome - the body never leaves the database.
+
+       `public_until_ms` is the last instant of the end date in Montreal, as
+       epoch milliseconds, written by the admin on save. A page with no end date
+       stores a far-future sentinel. NOTE: the start date is enforced in the
+       client only. A not-yet-started page is content about to be published
+       rather than content being withdrawn, so that remains a documented
+       follow-up rather than an oversight. */
+    function pageIsPublicNow() {
+      return resource.data.published == true
+          && resource.data.public_until_ms is number
+          && resource.data.public_until_ms >= request.time.toMillis();
+    }
+    match /custom_pages/{doc} {
+      allow get:   if signedIn() || pageIsPublicNow();
+      allow list:  if signedIn();
+      allow write: if signedIn();
+    }
+    match /page_settings/{doc}      { allow read: if true; allow write: if signedIn(); }
+    match /reviewed_overrides/{doc}     { allow read: if true; allow write: if signedIn(); }
+    match /pending_change_notices/{doc} { allow read: if true; allow write: if signedIn(); }
+
+    // Contact intake is server-owned: only the Cloud Function Admin SDK writes
+    // accepted submissions. Staff may read/delete historical and new messages.
+    match /contact_submissions/{doc} {
+      allow read, update, delete: if signedIn();
+      allow create: if false;
+    }
+
+    // Operational counters and reject reasons are private to the server SDK.
+    match /contact_rate_limits/{doc} { allow read, write: if false; }
+    match /contact_intake_audit/{doc} { allow read, write: if false; }
+
+    // error_reports — fixed shape written by submitErrorReport().
+    match /error_reports/{doc} {
+      allow create: if request.resource.data.keys().hasOnly([
+              'type','attemptedUrl','message','referrer','userAgent','lang','reportedAt'
+            ])
+        && str('type',40)       && str('attemptedUrl',2048) && str('message',2000)
+        && str('referrer',2048) && str('userAgent',512)
+        && str('lang',5)        && str('reportedAt',40);
+      allow read, update, delete: if signedIn();
+    }
+
+    /* The staff list itself.
+
+       `get` is deliberately wider than `list`: any signed-in account may read
+       the ONE document whose id is its own address, because that is how the
+       admin panel decides whether to open. It learns only about itself.
+       Enumerating the collection, and every write, stays staff-only - so a
+       stranger who signs in cannot harvest the staff roster.
+
+       A staff member can add and remove any other staff member. That is the
+       authority model the site owner chose; the break-glass list above is the
+       backstop, and it is not removable from the panel. */
+    match /staff/{email} {
+      allow get:   if request.auth != null
+                   && request.auth.token.email != null
+                   && request.auth.token.email.lower() == email;
+      allow list:  if isStaff();
+      allow write: if isOwner();
+    }
+
+    /* Change history (added 2026-09-23). Append-only: staff add entries and
+       read them; nobody edits or deletes one. Each entry must name the
+       signed-in account that made it. */
+    match /admin_history/{doc} {
+      allow read:           if signedIn();
+      allow create:         if signedIn()
+                            && request.resource.data.by == request.auth.token.email.lower();
+      allow update, delete: if false;
+    }
+
+    /* Drafts (added 2026-09-23). Unpublished text lives here, staff-only,
+       so it cannot be read before it is published. Publishing copies it
+       into content_overrides / notices as a normal save. */
+    match /content_drafts/{doc} { allow read, write: if signedIn(); }
+    match /notice_drafts/{doc}  { allow read, write: if signedIn(); }
+
+    match /ask_sources/{doc}      { allow read, write: if signedIn(); }
+    match /link_audits/{doc}      { allow read, write: if signedIn(); }
+    match /resources_master/{doc} { allow read, write: if signedIn(); }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
+
