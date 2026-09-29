@@ -11,8 +11,8 @@
  * <head> metadata for that route baked in. Every route then answers 200 with
  * the correct title, description and canonical even before JavaScript runs.
  *
- * It invents nothing: every title and description is read out of the PAGE_META
- * object already inside index.html. No visible page content is altered - the
+ * It invents nothing: every title and description is read out of PAGE_META
+ * in assets/site-core.js. No visible page content is altered - the
  * <body> of each generated file is byte-identical to index.html, and the SPA
  * router still resolves the page from location.pathname exactly as it does now.
  *
@@ -116,7 +116,7 @@ function readPageMeta(source) {
   return Function('"use strict"; return (' + source.slice(open, end + 1) + ');')();
 }
 
-const META = readPageMeta(html);
+const META = readPageMeta(readFileSync(join(ROOT, 'assets', 'site-core.js'), 'utf8'));
 
 /* ---- html escaping for attribute/text insertion ---- */
 const esc = (v) =>
@@ -370,7 +370,7 @@ for (const route of ROUTES) {
 }
 
 /* ---- index.html (served copy), admin.html, fr/index.html ---- */
-// index.html carries the home reciprocal tags in source.
+// index.html carries the home reciprocal tags in source; route metadata lives in assets/site-core.js.
 for(const tag of hreflangFor('home').split('\n')){
   if(!html.includes(tag)) throw new Error(`index.html: missing ${tag}`);
 }

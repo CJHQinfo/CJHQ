@@ -11,7 +11,7 @@ link /notice/<slug> previews with the page's actual headline.
 
 Access model: it reads Firestore over the public REST API with the same
 publishable web apiKey the site's own JavaScript uses - no credentials, no
-admin access. The key is read from the checked-out index.html at runtime
+admin access. The key is read from the checked-out assets/site-core.js at runtime
 (see load_api_key) so this file stores no key of its own, and requests send
 the site origin as Referer to match the key's website restriction. The security rules already decide what is public: a page that is
 unpublished, not yet started or expired answers permission-denied, exactly as
@@ -34,16 +34,16 @@ PROJECT = 'cjhqinfo'
 def load_api_key():
     """The site's publishable Firebase web key.
 
-    Read from the checked-out index.html (its FIREBASE_CONFIG) so this file
+    Read from the checked-out assets/site-core.js (its FIREBASE_CONFIG) so this file
     stores no key of its own. Set FIREBASE_WEB_API_KEY to override when
     running without a full checkout."""
     key = os.environ.get('FIREBASE_WEB_API_KEY')
     if key:
         return key
-    src = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    src = open(os.path.join(ROOT, 'assets', 'site-core.js'), encoding='utf-8').read()
     m = re.search(r'apiKey:\s*"([^"]+)"', src)
     if not m:
-        sys.exit('firebase apiKey not found in index.html')
+        sys.exit('firebase apiKey not found in assets/site-core.js')
     return m.group(1)
 
 

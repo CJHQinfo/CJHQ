@@ -2,7 +2,7 @@
 /* Monthly link check for cjhq.org.
    Run by .github/workflows/link-audit.yml on the 1st of each month (and on
    demand). It reads every outbound link the site publishes - the resource
-   entries in index.html (main link plus each "official link") and plain
+   entries in assets/site-core.js (main link plus each "official link") and plain
    external links in the static pages - visits each one, and writes the result
    to data/link-audit.json. The admin Link Audit tab reads that file.
 
@@ -35,8 +35,8 @@ function add(url, where){
   if(!rec.used_by.some(w => w.slug === where.slug && w.label === where.label)) rec.used_by.push(where);
 }
 
-// 1. Resource entries: one per line in index.html, each carrying slug:'...'.
-const index = readFileSync(join(ROOT, 'index.html'), 'utf8');
+// 1. Resource entries: one per line in assets/site-core.js, each carrying slug:'...'.
+const index = readFileSync(join(ROOT, 'assets', 'site-core.js'), 'utf8');
 for(const line of index.split('\n')){
   const slug = (line.match(/slug:'([^']+)'/) || [])[1];
   if(!slug || !/url:\s*["']https?:/.test(line)) continue;
@@ -130,7 +130,7 @@ const report = {
 // "Last reviewed by CJHQ" dates. A resource gets the current month only when
 // every outbound link it uses checked OK this run. A resource with a broken or
 // unconfirmed link keeps its old date (and shows in the Link Audit tab), and a
-// resource with no outbound links is left alone. Only index.html is edited
+// resource with no outbound links is left alone. Only assets/site-core.js is edited
 // here; the workflow then regenerates the copies. The sitemap is never touched.
 const month = new Date().toLocaleDateString('en-US', { month:'long', year:'numeric', timeZone:'America/Toronto' });
 const bySlug = new Map();
@@ -147,7 +147,7 @@ const newIndex = index.split('\n').map(line => {
   refreshed.push(slug);
   return line.replace(/reviewed:'[^']*'/, "reviewed:'" + month + "'");
 }).join('\n');
-if(newIndex !== index) writeFileSync(join(ROOT, 'index.html'), newIndex);
+if(newIndex !== index) writeFileSync(join(ROOT, 'assets', 'site-core.js'), newIndex);
 report.reviewed = { month, refreshed: refreshed.length, kept_old_date: kept.sort() };
 
 mkdirSync(dirname(OUT), { recursive:true });

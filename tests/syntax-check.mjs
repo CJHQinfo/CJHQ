@@ -30,5 +30,7 @@ for(const f of FILES){
     catch(e){ bad++; console.log('SYNTAX ERROR in ' + f + ' script #' + (i-1) + '\n' + String(e.stderr).slice(0,600)); }
   }
 }
+try{ execFileSync('node', ['--check', SITE + 'assets/site-core.js'], {stdio:'pipe'}); n++; }
+catch(e){ bad++; console.log('SYNTAX ERROR in assets/site-core.js\n' + String(e.stderr).slice(0,600)); }
 console.log('\n=== syntax === ' + n + ' inline scripts parsed, ' + bad + ' failed');
 process.exit(bad ? 1 : 0);

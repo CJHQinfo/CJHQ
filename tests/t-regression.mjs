@@ -72,7 +72,7 @@ export default async function run(){
   const idxFile = readFileSync(SITE + 'index.html', 'utf8');
   const engineFile = existsSync(SITE + 'tools/ask-engine.js')
     ? readFileSync(SITE + 'tools/ask-engine.js', 'utf8') : '';
-  const idx = idxFile + '\n' + engineFile;
+  const idx = idxFile + '\n' + readFileSync(SITE + 'assets/site-core.js', 'utf8') + '\n' + engineFile;
   for(const marker of ['<!DOCTYPE html>', 'renderAccordion', 'askCommunityAssistant', 'ASK CJHQ',
                        '===== BROWSER AI ADAPTER: BEGIN', '===== SHARED ASK CORE: END']){
     t.check('the site source still contains ' + JSON.stringify(marker), idx.indexOf(marker) >= 0);
@@ -93,7 +93,7 @@ export default async function run(){
   }
 
   // ---- Gemini configuration is untouched -----------------------------------
-  const oldIdx = readFileSync(LIVE + 'index.html', 'utf8');
+  const oldIdx = readFileSync(LIVE + 'index.html', 'utf8') + '\n' + readFileSync(LIVE + 'tools/ask-engine.js', 'utf8');
   const cfg = s => (s.match(/const ASK_AI_CONFIG = \{[\s\S]*?\};/) || [''])[0];
   t.check('ASK_AI_CONFIG is byte-identical (model, temperature, tokens, timeout, throttle)',
     cfg(idx) === cfg(oldIdx), cfg(idx));

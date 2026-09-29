@@ -41,13 +41,14 @@ jobs:
         run: |
           node tools/sync-ask-core.mjs
           node tools/generate-routes.mjs
+          node tools/minify-routes.mjs --changed
 
       - name: Save the results
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/link-audit.json index.html ask-data.mjs ask-core.mjs admin.html '*.html'
+          git add data/link-audit.json index.html assets/site-core.js ask-data.mjs ask-core.mjs admin.html '*.html'
           git diff --staged --quiet -- sitemap.xml || { echo "sitemap must not change"; exit 1; }
           if git diff --staged --quiet; then
             echo "No change."

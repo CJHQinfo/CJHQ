@@ -11,13 +11,14 @@ name: Generate static route files
 #
 # It never edits index.html and never touches page content: the generator copies
 # index.html and rewrites only the <head> metadata, reading the values from the
-# PAGE_META object already inside the file.
+# PAGE_META object in assets/site-core.js.
 
 on:
   push:
     branches: [main]
     paths:
       - 'index.html'
+      - 'assets/site-core.js'
       - 'tools/generate-routes.mjs'
       - '.github/workflows/generate-routes.yml'
   workflow_dispatch:
@@ -43,15 +44,15 @@ jobs:
           node-version: '20'
 
       # Fails the run before anything is regenerated or committed. ask-core.mjs
-      # and ask-data.mjs are generated from index.html and are imported by the
-      # external WhatsApp bridge, so if an index.html edit leaves them stale the
+      # and ask-data.mjs are generated from assets/site-core.js and are imported by the
+      # external WhatsApp bridge, so if an site-core.js edit leaves them stale the
       # bridge would answer from a different engine than the website. Failing
       # here is the point: a red run is recoverable, silent drift between the
       # two callers is not.
       #
       # To fix a failure: run `node tools/sync-ask-core.mjs` locally and commit
       # the regenerated modules alongside the index.html change.
-      - name: Verify the shared Ask CJHQ core is in sync with index.html
+      - name: Verify the shared Ask CJHQ core is in sync with assets/site-core.js
         run: node tools/sync-ask-core.mjs --check
 
       - name: Install build dependencies
