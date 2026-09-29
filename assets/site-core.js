@@ -805,7 +805,12 @@ async function submitErrorReport(extra){
     lang: document.documentElement.classList.contains('lang-fr') ? 'fr' : 'en',
     reportedAt: new Date().toISOString(),
   };
-  try{ await saveToCollection('error_reports', report); }catch(e){ console.warn('Could not save error report:', e); }
+  try{
+    const response = await fetch('https://error-intake-158970385688.us-east1.run.app/', {
+      method:'POST', mode:'cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(report)
+    });
+    if(!response.ok) console.warn('Could not save error report:', response.status);
+  }catch(e){ console.warn('Could not save error report:', e); }
   return report;
 }
 
