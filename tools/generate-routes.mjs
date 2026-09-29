@@ -23,6 +23,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resourceItems } from './resource-detail-routes.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'index.html');
@@ -377,6 +378,55 @@ function buildFrenchRoute(route) {
   return out;
 }
 
+// Resource detail URLs already exist as SPA share links. A generated HTML file
+// makes each one a real HTTP 200 with its own crawl/share metadata; the body is
+// the existing resource route, and the existing router opens the same popup.
+function detailDocument(item, lang){
+  const isFr = lang === 'fr', slug = item.slug;
+  const title = isFr ? item.fr : item.en;
+  const desc = isFr ? item.desc_fr : item.desc_en;
+  if(!title || !desc) throw new Error(`Missing resource metadata: ${slug}`);
+  const url = `${ORIGIN}/${isFr ? 'fr/ressources' : 'resources'}/${slug}`;
+  const base = isFr ? buildFrenchRoute('resources') : buildRoute('resources');
+  let doc = base;
+  const replaceHead = (pattern, value, label) => {
+    const at = doc.indexOf('</head>');
+    const head = replaceOnce(doc.slice(0, at), pattern, value, `${slug}: ${label}`);
+    doc = head + doc.slice(at);
+  };
+  replaceHead(/<title id="pageTitle">[^<]*<\/title>/,
+    `<title id="pageTitle">${esc(title)} | CJHQ</title>`, 'title');
+  replaceHead(/<meta name="description" content="[^"]*">/,
+    `<meta name="description" content="${esc(desc)}">`, 'description');
+  replaceHead(/<link rel="canonical" id="canonicalTag" href="[^"]*">/,
+    `<link rel="canonical" id="canonicalTag" href="${url}">`, 'canonical');
+  const en = `${ORIGIN}/resources/${slug}`, fr = `${ORIGIN}/fr/ressources/${slug}`;
+  doc = doc.replace(/\n<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g, '');
+  replaceHead(/<link rel="canonical" id="canonicalTag" href="[^"]*">/,
+    `<link rel="canonical" id="canonicalTag" href="${url}">\n`+
+    `<link rel="alternate" hreflang="en" href="${en}">\n`+
+    `<link rel="alternate" hreflang="fr" href="${fr}">\n`+
+    `<link rel="alternate" hreflang="x-default" href="${en}">`, 'hreflang');
+  const values = [
+    ['property','og:url',url],['property','og:title',`${title} | CJHQ`],
+    ['property','og:description',desc],['property','og:image:alt',`${title} — CJHQ`],
+    ['name','twitter:title',`${title} | CJHQ`],['name','twitter:description',desc],
+    ['name','twitter:image:alt',`${title} — CJHQ`]
+  ];
+  for(const [attr,key,value] of values){
+    replaceHead(new RegExp(`<meta ${attr}="${key}" id="[^"]+" content="[^"]*">`),
+      `<meta ${attr}="${key}" id="${key.split(':').map((x,i)=>i?x[0].toUpperCase()+x.slice(1):x).join('')}" content="${esc(value)}">`, key);
+  }
+  // Preserve the source's image choice, which already has a verified asset.
+  const card = /<meta property="og:image" id="ogImage" content="([^"]*)">/.exec(base)?.[1];
+  if(!card || !card.startsWith(`${ORIGIN}/assets/`)) throw new Error('Missing resource share image');
+  doc = replacePageSchema(doc, url, `${title} | CJHQ`, desc, card,
+    isFr ? 'fr-CA' : 'en-CA', `${slug}: WebPage schema`);
+  if(doc.slice(doc.indexOf('</head>')) !== base.slice(base.indexOf('</head>')))
+    throw new Error(`${slug}: visible body drift`);
+  return doc;
+}
+const resources = resourceItems(ROOT);
 let drift = 0;
 for (const route of ROUTES) {
   const target = join(ROOT, `${route}.html`);
@@ -445,6 +495,21 @@ for (const [name, doc] of extras) {
   }
 }
 
+for(const item of resources){
+  for(const [lang, prefix] of [['en','resources'],['fr','fr/ressources']]){
+    const name = `${prefix}/${item.slug}.html`;
+    const target = join(ROOT, name);
+    const built = detailDocument(item, lang);
+    const current = existsSync(target) ? readFileSync(target, 'utf8') : null;
+    if(checkOnly){
+      if(!await matches(current, built, name)){ console.error(`DRIFT: ${name}`); drift++; }
+    }else if(current !== built){
+      mkdirSync(dirname(target), {recursive:true});
+      writeFileSync(target, built);
+      console.log(`written: ${name}`);
+    }
+  }
+}
 if (checkOnly && drift > 0) {
   console.error(`\n${drift} route file(s) out of date. Run: node tools/generate-routes.mjs`);
   process.exit(1);

@@ -15,7 +15,7 @@ for file in ROOT.glob('*.html'):
     shutil.copy2(file, DEST / file.name)
 for name in ('404.html','.nojekyll','CNAME','robots.txt','sitemap.xml','favicon.ico','cjhq-logo.png','og-image.png','69be9b8d02d572fe658fbc689179e521.txt'):
     shutil.copy2(ROOT/name, DEST/name)
-for name in ('fr','notice','travel-guide','uci','data'):
+for name in ('fr','resources','notice','travel-guide','uci','data'):
     shutil.copytree(ROOT/name, DEST/name)
 for file in (ROOT/'assets').rglob('*'):
     if file.is_file() and file.suffix.lower() in {'.js','.css','.png','.jpg','.jpeg','.webp','.svg','.woff2','.ico'}:
