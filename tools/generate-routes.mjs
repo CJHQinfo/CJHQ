@@ -352,7 +352,7 @@ function buildFrenchRoute(route) {
     out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
       `<meta ${attr}="${key}" id="${id}" content="${cardUrl}">`, `${route}: ${id}`);
   }
-  const cardAlt = `${meta.fr.replace(/\s*[—-]\s*CJHQ$/, '')} — CJHQ`;
+  const cardAlt = route === 'home' ? meta.fr : `${meta.fr.replace(/\s*[—-]\s*CJHQ$/, '')} — CJHQ`;
   for (const [id, attr, key] of [['ogImageAlt','property','og:image:alt'],
     ['twitterImageAlt','name','twitter:image:alt']]) {
     out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
