@@ -1,0 +1,35 @@
+name: Publish public-only Pages artifact
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: public-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Verify generated routes and shared Ask source
+        run: |
+          node tools/sync-ask-core.mjs --check
+          node tools/generate-routes.mjs --check
+      - name: Stage only public files
+        run: python3 tools/build-pages-artifact.py "$RUNNER_TEMP/cjhq-pages"
+      - name: Verify artifact assets and exclusions
+        run: |
+          python3 tools/verify-pages-artifact.py "$RUNNER_TEMP/cjhq-pages"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/cjhq-pages
+      - id: deployment
+        uses: actions/deploy-pages@v4
