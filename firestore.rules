@@ -145,16 +145,14 @@ service cloud.firestore {
     match /contact_rate_limits/{doc} { allow read, write: if false; }
     match /contact_intake_audit/{doc} { allow read, write: if false; }
 
-    // error_reports — fixed shape written by submitErrorReport().
+    // The public error intake runs server-side and writes through the Admin SDK.
+    // Browsers cannot write reports directly, even if they are signed in.
     match /error_reports/{doc} {
-      allow create: if request.resource.data.keys().hasOnly([
-              'type','attemptedUrl','message','referrer','userAgent','lang','reportedAt'
-            ])
-        && str('type',40)       && str('attemptedUrl',2048) && str('message',2000)
-        && str('referrer',2048) && str('userAgent',512)
-        && str('lang',5)        && str('reportedAt',40);
-      allow read, update, delete: if signedIn();
+      allow create, update: if false;
+      allow read, delete: if signedIn();
     }
+    match /error_report_rate_limits/{doc} { allow read, write: if false; }
+    match /error_report_intake_audit/{doc} { allow read, write: if false; }
 
     /* The staff list itself.
 

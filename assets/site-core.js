@@ -805,7 +805,12 @@ async function submitErrorReport(extra){
     lang: document.documentElement.classList.contains('lang-fr') ? 'fr' : 'en',
     reportedAt: new Date().toISOString(),
   };
-  try{ await saveToCollection('error_reports', report); }catch(e){ console.warn('Could not save error report:', e); }
+  try{
+    const response = await fetch('https://error-intake-158970385688.us-east1.run.app/', {
+      method:'POST', mode:'cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(report)
+    });
+    if(!response.ok) console.warn('Could not save error report:', response.status);
+  }catch(e){ console.warn('Could not save error report:', e); }
   return report;
 }
 
@@ -1723,13 +1728,13 @@ const PAGE_META = {
                   desc_en:'Contact CJHQ for community assistance and advocacy in Quebec, including Montreal, Outremont and the Tosh community in Boisbriand.',
                   desc_fr:'Communiquez avec le CJHQ pour les communautés juives hassidiques du Québec, notamment à Montréal, Outremont et Tosh, à Boisbriand.' },
   resources:    { en:'Community Resource Centre — CJHQ',               fr:'Centre de ressources communautaires — CJHQ',
-                  desc_en:'Government services, travel documents, NEXUS, border crossing, immigration, family benefits, healthcare, and municipal resources for Quebec\'s Hasidic Jewish communities.',
+                  desc_en:'Government services, travel documents, NEXUS, border crossing, immigration, benefits, healthcare, and municipal resources for Quebec\'s Hasidic Jewish communities.',
                   desc_fr:'Services gouvernementaux, documents de voyage, NEXUS, passage frontalier, immigration, prestations familiales, soins de santé et ressources municipales.' },
   'stay-informed':{ en:'News & Updates — CJHQ',                        fr:'Actualités — CJHQ',
                   desc_en:'Official statements, public announcements, and community information updates from CJHQ — Quebec\'s Hasidic Jewish communities.',
                   desc_fr:'Déclarations officielles, annonces publiques et mises à jour communautaires du CJHQ.' },
-  contact:      { en:'Contact CJHQ | Montreal, Outremont & Quebec Hasidic Communities', fr:'Contacter le CJHQ | Communautés hassidiques de Montréal et du Québec',
-                  desc_en:'Contact the Jewish Hasidic Council of Quebec about community matters in Montreal, Outremont or Tosh/Kiryas Tosh in Boisbriand. Inquiries and media requests welcome.',
+  contact:      { en:'Contact CJHQ | Montreal & Quebec Hasidic Communities', fr:'Contacter le CJHQ | Communautés hassidiques de Montréal et du Québec',
+                  desc_en:'Contact CJHQ about community matters in Montreal, Outremont or Tosh/Kiryas Tosh in Boisbriand. Inquiries and media requests welcome.',
                   desc_fr:'Contactez le CJHQ pour les questions communautaires hassidiques à Montréal, Outremont et Tosh (Kiryas Tosh), à Boisbriand, au Québec.' },
   about:        { en:'CJHQ | Hasidic Community Council for Montreal & Boisbriand', fr:'CJHQ | Conseil hassidique pour Montréal et Boisbriand',
                   desc_en:'CJHQ is a Jewish Hasidic community council serving Montreal, Outremont and Tosh (Kiryas Tosh) in Boisbriand, Quebec through assistance and advocacy.',

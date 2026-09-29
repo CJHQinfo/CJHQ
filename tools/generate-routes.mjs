@@ -211,7 +211,7 @@ function buildRoute(route) {
   const cardFile = existsSync(join(ROOT, cardV2)) ? cardV2 : cardV1;
   if (existsSync(join(ROOT, cardFile))) {
     const cardUrl = `${ORIGIN}/${cardFile}`;
-    const alt = `${title} — CJHQ`;
+    const alt = `${meta.en.replace(/\s*[—-]\s*CJHQ$/, '')} — CJHQ`;
     out = replaceOnce(out, /<meta property="og:image" id="ogImage" content="[^"]*">/,
       `<meta property="og:image" id="ogImage" content="${cardUrl}">`, `${route}: og:image`);
     out = replaceOnce(out, /<meta property="og:image:alt" id="ogImageAlt" content="[^"]*">/,
@@ -351,7 +351,7 @@ function buildFrenchRoute(route) {
     out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
       `<meta ${attr}="${key}" id="${id}" content="${cardUrl}">`, `${route}: ${id}`);
   }
-  const cardAlt = `${title} — CJHQ`;
+  const cardAlt = `${meta.fr.replace(/\s*[—-]\s*CJHQ$/, '')} — CJHQ`;
   for (const [id, attr, key] of [['ogImageAlt','property','og:image:alt'],
     ['twitterImageAlt','name','twitter:image:alt']]) {
     out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
