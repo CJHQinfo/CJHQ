@@ -9,7 +9,7 @@ root = Path(sys.argv[1])
 assert root.is_dir()
 for name in ('functions','tools','tests','.github','firestore.rules','ask-core.mjs','package.json'):
     assert not (root/name).exists(), f'internal source leaked: {name}'
-for name in ('index.html','admin.html','404.html','CNAME','.nojekyll','fr/index.html','fr/ressources.html','travel-guide/index.html','uci/index.html','notice/travel-guide.html','notice/uci.html','data/link-audit.json'):
+for name in ('index.html','admin.html','404.html','CNAME','.nojekyll','fr/index.html','fr/ressources.html','resources/find-a-family-doctor.html','fr/ressources/find-a-family-doctor.html','travel-guide/index.html','uci/index.html','notice/travel-guide.html','notice/uci.html','data/link-audit.json'):
     assert (root/name).is_file(), f'missing required public file: {name}'
 links = []
 class Links(HTMLParser):
@@ -28,3 +28,16 @@ for value in links:
         missing.append(value)
 assert not missing, f'{len(missing)} missing local links, examples {missing[:10]}'
 print(f'Checked {sum(f.is_file() for f in root.rglob("*"))} public files and {len(links)} rooted links')
+
+# The build is expected to stage every resource share route in both languages.
+import re
+slugs=set(re.findall(r"slug:'([a-z0-9-]+)'", (Path(__file__).parent.parent/'assets/site-core.js').read_text()))
+assert len(slugs)==67, f'Expected 67 distinct resource slugs, got {len(slugs)}'
+for slug in slugs:
+    for prefix in ('resources','fr/ressources'):
+        f=root/prefix/(slug+'.html')
+        assert f.is_file(), f'Missing detail route {f}'
+        html=f.read_text()
+        url='https://cjhq.org/'+prefix+'/'+slug
+        assert f'<link rel="canonical" id="canonicalTag" href="{url}">' in html, f'Wrong canonical {f}'
+        assert url+'#webpage' in html, f'Wrong WebPage schema {f}'

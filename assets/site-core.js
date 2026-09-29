@@ -1761,17 +1761,22 @@ function updatePageMeta(name){
   // page's canonical and og:url to the English homepage - telling Google the two
   // are the same page and collapsing /fr/ out of the index. The raw HTML is
   // correct; only this runtime update needed to respect the route.
-  const url = (name === '404')
+  const resourceDetail = name === 'resources'
+    && /^\/(?:fr\/ressources|resources)\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(location.pathname)
+    && RESOURCE_BY_SLUG[location.pathname.split('/').pop()];
+  const url = (name === '404' || resourceDetail)
     ? (location.origin + location.pathname)
     : (location.origin + pathForPage(name, isFr ? 'fr' : 'en'));
-  document.getElementById('pageTitle').textContent = title;
-  document.title = title;
+  const detailTitle = resourceDetail ? ((isFr ? resourceDetail.fr : resourceDetail.en) + ' | CJHQ') : title;
+  const detailDesc = resourceDetail ? (isFr ? resourceDetail.desc_fr : resourceDetail.desc_en) : desc;
+  document.getElementById('pageTitle').textContent = detailTitle;
+  document.title = detailTitle;
   const setMeta = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
-  setMeta('ogTitle', title);
-  setMeta('ogDescription', desc);
+  setMeta('ogTitle', detailTitle);
+  setMeta('ogDescription', detailDesc);
   setMeta('ogUrl', url);
-  setMeta('twitterTitle', title);
-  setMeta('twitterDescription', desc);
+  setMeta('twitterTitle', detailTitle);
+  setMeta('twitterDescription', detailDesc);
   const canon = document.getElementById('canonicalTag');
   if(canon) canon.setAttribute('href', url);
   // Three cases, deliberately distinct:
@@ -1792,7 +1797,7 @@ function updatePageMeta(name){
       : 'index, follow');
   }
   // Also update on lang switch
-  document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', desc));
+  document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', detailDesc));
 }
 
 // Footer "Subscribe" link. The Constant Contact form is injected
