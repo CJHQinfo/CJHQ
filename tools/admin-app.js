@@ -1643,18 +1643,8 @@ async function renderLinkAuditList(){
     </div>`).join('');
 }
 
-/* error_reports is written by ANY visitor - the Firestore rules allow
-   anonymous create so the 404 page's "Report This Broken Link" button works
-   without a sign-in. That is deliberate and stays. It does mean every field
-   below is attacker-controlled, and so is the document id: an anonymous
-   create may choose its own id via setDoc.
-
-   Before this, attemptedUrl / message / referrer went into innerHTML raw and
-   the id went into an inline onclick. A report containing
-   <img src="/missing.png" onerror="..."> executed inside the authenticated
-   staff session - the one session that can write every collection. Escaped
-   throughout now, and the id is carried in a data attribute read by a
-   delegated listener, never parsed as JavaScript. */
+/* Error reports arrive through the bounded Cloud Run intake. The admin view
+   still treats fields as untrusted and escapes them on output. */
 async function renderErrorReportsList(){
   const reports = await fetchCollection('error_reports');
   const sorted = reports.slice().sort((a,b) => (b.reportedAt||'').localeCompare(a.reportedAt||'')).slice(0, 30);
