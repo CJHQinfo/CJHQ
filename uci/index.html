@@ -9,8 +9,8 @@
 <meta name="description" content="CJHQ Community Notice · Updated September 17, 2026 Montréal is hosting the UCI Road World Championships from September 19 to 27 . Races loop around Mount Royal,">
 <meta name="robots" content="noindex, follow">
 <link rel="canonical" id="canonicalTag" href="https://cjhq.org/uci">
-<!-- Reciprocal with /fr/, the one crawlable French URL. The other routes have
-     no French equivalent, so the route generator strips these from them. -->
+<!-- Homepage language alternates. The route generator sets reciprocal alternates
+     for each English and French counterpart. -->
 
 <!-- Favicon. favicon.ico carries 16/32/48px; browsers also request /favicon.ico
      from the site root automatically, so this works even without these tags. -->
@@ -229,6 +229,8 @@
     margin:0 0 .5em 0;
   }
   h1{font-size:clamp(2.2rem,5vw,3.4rem); font-weight:500;}
+  .ctc-preview-heading{font-weight:500;}
+  .resource-static-fallback{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
   h2{font-size:clamp(1.5rem,3vw,2rem);}
   h3{font-size:1.15rem; font-weight:600;}
   p{margin:0 0 1em 0;}
@@ -1420,6 +1422,7 @@
         <span data-fr>Notre objectif est simple : vous faire gagner du temps en vous dirigeant directement vers l'information ou la demande dont vous avez besoin. Dans la mesure du possible, chaque lien de cette page mène directement à la demande, au service en ligne ou au formulaire gouvernemental officiel — et non simplement à une page d'accueil gouvernementale.</span>
       </p>
 
+      <a href="/child-travel-consent" data-page="child-travel-consent" class="resource-static-fallback" aria-label="Child Travel Consent Letter">Child Travel Consent Letter</a>
       <div class="res-search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input type="text" id="resourceSearch" data-en-ph="Search resources (passport, RAMQ, NEXUS, parking...)" data-fr-ph="Rechercher (passeport, RAMQ, NEXUS...)" placeholder="Search resources (passport, RAMQ, NEXUS, parking...)">
@@ -2363,9 +2366,9 @@
       </div>
 
       <div class="ctc-screen" id="ctcPreviewScreen" hidden>
-        <h1 style="font-size:clamp(1.8rem,3.6vw,2.4rem);">
+        <h2 class="ctc-preview-heading" style="font-size:clamp(1.8rem,3.6vw,2.4rem);">
           <span data-en>Your Child Travel Consent Letter</span><span data-fr>Votre lettre de consentement au voyage</span>
-        </h1>
+        </h2>
         <p style="color:var(--muted); margin-top:4px;">
           <span data-en>Please review the information before downloading.</span>
           <span data-fr>Veuillez vérifier les renseignements avant de télécharger.</span>
@@ -3400,6 +3403,17 @@ function checkCurrentPath(opts){
   // slug to the existing SPA page without removing any page containers.
   if(/^\/fr(?:\/|$)/i.test(path)){
     const frPath = path.replace(/^\/fr\/?/i, '').replace(/\/index\.html?$/i, '').replace(/\.html?$/i, '').replace(/\/$/, '');
+    // Resource detail pages share the existing resource popup and require no new UI.
+    const detail = /^ressources\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(frPath);
+    if(detail){
+      setLang('fr');
+      goPage('resources', {skipHistory:true, skipScroll:opts.skipScroll});
+      setTimeout(()=>{
+        if(RESOURCE_BY_SLUG[detail[1]]) openResourcePopup(detail[1], {skipHistory:true});
+        else show404(path, {skipHistory:true});
+      }, 150);
+      return;
+    }
     const pageName = PAGE_BY_FRENCH_ROUTE[frPath];
     if(pageName){
       setLang('fr');
