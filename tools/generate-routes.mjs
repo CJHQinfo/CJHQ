@@ -394,6 +394,8 @@ function detailDocument(item, lang){
     const head = replaceOnce(doc.slice(0, at), pattern, value, `${slug}: ${label}`);
     doc = head + doc.slice(at);
   };
+  replaceHead(/<meta name="robots" content="[^"]*">/,
+    '<meta name="robots" content="noindex, follow">', 'robots');
   replaceHead(/<title id="pageTitle">[^<]*<\/title>/,
     `<title id="pageTitle">${esc(title)} | CJHQ</title>`, 'title');
   replaceHead(/<meta name="description" content="[^"]*">/,

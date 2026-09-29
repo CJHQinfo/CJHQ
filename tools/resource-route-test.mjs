@@ -9,6 +9,7 @@ for(const item of items){
     const url=`https://cjhq.org/${prefix}/${item.slug}`;
     const title=lang==='fr'?item.fr:item.en, desc=lang==='fr'?item.desc_fr:item.desc_en;
     const head=html.split('</head>')[0];
+    if(!head.includes('<meta name="robots" content="noindex, follow">')) throw new Error(`${name}: robots`);
     if(!head.includes(`href="${url}"`) || !head.includes(`content="${url}"`)) throw new Error(`${name}: URL`);
     if(!head.includes(`"@id": "${url}#webpage"`)) throw new Error(`${name}: schema`);
     if(!head.includes(`"description": ${JSON.stringify(desc)}`)) throw new Error(`${name}: description`);

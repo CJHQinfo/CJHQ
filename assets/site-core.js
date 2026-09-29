@@ -421,8 +421,10 @@ function renderAccordion(){
       // Enter/Space. The <li> stays the grid cell (the search filter hides it by
       // id), and all card styling moved to .res-item-btn, so the rendered result
       // is unchanged.
+      const cardHref = effective.internalPage ? pathForPage(effective.internalPage) : (effective.url || resourceDeepLink(effective.slug));
+      const externalAttrs = effective.internalPage ? '' : ' target="_blank" rel="noopener noreferrer"';
       return `<li class="res-item" data-slug="${escAttr(effective.slug)}">
-          <a class="res-item-btn" href="${escAttr(effective.url || resourceDeepLink(effective.slug))}" target="_blank" rel="noopener noreferrer">
+          <a class="res-item-btn" href="${escAttr(cardHref)}"${externalAttrs}>
             <span class="res-item-text">
               <span class="res-link-title" data-en>${cjhqEscapeHtml(effective.en)}</span>
               <span class="res-link-title" data-fr>${cjhqEscapeHtml(effective.fr)}</span>
@@ -1793,7 +1795,7 @@ function updatePageMeta(name){
   if(robots){
     robots.setAttribute('content',
       name === 'admin' ? 'noindex, nofollow'
-      : name === '404' ? 'noindex, follow'
+      : name === '404' || resourceDetail ? 'noindex, follow'
       : 'index, follow');
   }
   // Also update on lang switch
@@ -2121,10 +2123,6 @@ if(contactForm){
         body:JSON.stringify(plain)
       });
       if(!response.ok) throw new Error('intake rejected');
-      statusEl.textContent = isFr
-        ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
-        : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
-      statusEl.style.color = '#2E7D32';
       const successEl = document.getElementById('contactSuccess');
       if(successEl) successEl.hidden = false;
       contactForm.reset();
@@ -2133,11 +2131,11 @@ if(contactForm){
         ? 'Une erreur est survenue. Veuillez réessayer ou nous écrire directement à info@cjhq.org.'
         : 'Something went wrong. Please try again, or email us directly at info@cjhq.org.';
       statusEl.style.color = '#B3261E';
+      statusEl.style.display = 'block';
       const successEl = document.getElementById('contactSuccess');
       if(successEl) successEl.hidden = true;
     } finally {
       if(window.turnstile) window.turnstile.reset();
-      statusEl.style.display = 'block';
       btn.disabled = false;
     }
   });

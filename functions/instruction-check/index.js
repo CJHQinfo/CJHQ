@@ -37,6 +37,7 @@ async function isStaffCaller(req) {
   if (!h.startsWith('Bearer ')) return false;
   try {
     const decoded = await admin.auth().verifyIdToken(h.slice(7));
+    if (decoded.email_verified !== true) return false;
     const email = (decoded.email || '').toLowerCase();
     if (!email) return false;
     const extra = (process.env.STAFF_EMAILS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
