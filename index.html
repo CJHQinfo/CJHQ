@@ -3392,6 +3392,17 @@ function checkCurrentPath(opts){
   // slug to the existing SPA page without removing any page containers.
   if(/^\/fr(?:\/|$)/i.test(path)){
     const frPath = path.replace(/^\/fr\/?/i, '').replace(/\/index\.html?$/i, '').replace(/\.html?$/i, '').replace(/\/$/, '');
+    // Resource detail pages share the existing resource popup and require no new UI.
+    const detail = /^ressources\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(frPath);
+    if(detail){
+      setLang('fr');
+      goPage('resources', {skipHistory:true, skipScroll:opts.skipScroll});
+      setTimeout(()=>{
+        if(RESOURCE_BY_SLUG[detail[1]]) openResourcePopup(detail[1], {skipHistory:true});
+        else show404(path, {skipHistory:true});
+      }, 150);
+      return;
+    }
     const pageName = PAGE_BY_FRENCH_ROUTE[frPath];
     if(pageName){
       setLang('fr');
