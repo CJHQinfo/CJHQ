@@ -27,7 +27,8 @@ manual dispatch); can also be run locally with `pip install pillow`.
 
     python3 tools/generate-notice-pages.py
 """
-import html, json, os, re, shutil, sys, urllib.request
+import datetime, html, json, os, re, shutil, sys, urllib.request
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT = 'cjhqinfo'
@@ -64,6 +65,16 @@ def get(path):
 def field(doc, name, default=''):
     v = doc.get('fields', {}).get(name, {})
     return v.get('stringValue', default)
+
+
+def page_is_live(doc, now=None):
+    """Independent lifecycle gate: never bake a page outside Montreal dates."""
+    f = doc.get('fields', {})
+    if f.get('published', {}).get('booleanValue') is not True:
+        return False
+    today = (now or datetime.datetime.now(ZoneInfo('America/Toronto'))).date().isoformat()
+    start, end = field(doc, 'start_date').strip(), field(doc, 'end_date').strip()
+    return (not start or start <= today) and (not end or today <= end)
 
 
 def strip_html(s):
@@ -244,6 +255,9 @@ def main():
             doc = get(f'custom_pages/{slug}')
         except Exception:
             skipped.append(slug)  # outside its window or unpublished: rules deny, so no file
+            continue
+        if not page_is_live(doc):
+            skipped.append(slug)
             continue
         title = field(doc, 'title_en') or 'CJHQ Community Notice'
         body_txt = strip_html(field(doc, 'body_en'))

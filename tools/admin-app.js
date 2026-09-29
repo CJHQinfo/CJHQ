@@ -716,7 +716,7 @@ async function renderCustomPagesList(){
    line. It is offered as a button rather than done silently: it changes stored
    data, and the editor should know it happened. Defaults preserve exactly what
    those pages did before - published, no dates, not promoted. */
-function cjhqPageNeedsBackfill(p){ return typeof p.public_until_ms !== 'number'; }
+function cjhqPageNeedsBackfill(p){ return typeof p.public_until_ms !== 'number' || typeof p.public_from_ms !== 'number'; }
 
 async function backfillCustomPageLifecycle(){
   const stale = Object.values(CUSTOM_PAGES_CACHE).filter(cjhqPageNeedsBackfill);
@@ -731,6 +731,7 @@ async function backfillCustomPageLifecycle(){
       end_date: p.end_date || '',
       show_on_home: !!p.show_on_home,
       home_style: p.home_style || 'tile',
+      public_from_ms: cjhqStartOfDayMs(p.start_date),
       public_until_ms: cjhqEndOfDayMs(p.end_date)
     }));
   }
@@ -1618,7 +1619,7 @@ async function renderLinkAuditList(){
   renderAiCheckSummary();
   document.getElementById('linkAuditSetupWarning').style.display = firebaseReady ? 'none' : 'block';
   const audits = await fetchCollection('link_audits');
-  const flagged = audits.filter(a => a.slug && a.slug !== '_run_summary' && a.status && a.status !== 'ok');
+  const flagged = audits.filter(a => a.slug && a.slug !== '_run_summary' && a.status && (a.status !== 'ok' || (a.source === 'ai_instruction_check' && a.reviewRequired !== false)));
   const list = document.getElementById('linkAuditList');
   if(!flagged.length){
     list.innerHTML = `<p style="color:var(--muted); font-size:.88rem;">No flagged items. Once the monthly checker has run at least once, anything needing attention will show up here.</p>`;
@@ -1629,11 +1630,11 @@ async function renderLinkAuditList(){
     <div class="card" style="margin-bottom:10px;">
       <div class="admin-row">
         <div>
-          <span class="pill" style="font-size:.7rem; background:${statusColor[a.status]||'#6B7280'}; color:#fff; border:none;">${a.status}</span>
-          <p style="margin:6px 0 0; font-weight:600;">${a.title || a.slug}</p>
-          <p style="margin:4px 0 0; font-size:.85rem; color:var(--muted);">${a.summary || ''}</p>
-          ${a.announcedFutureChange ? `<p style="margin:6px 0 0; font-size:.85rem; color:#7A5B0E;"><strong>Announced future change:</strong> ${a.announcedFutureChange}</p>` : ''}
-          <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">Last checked: ${a.lastChecked ? new Date(a.lastChecked).toLocaleDateString() : '—'} · <a href="${a.url}" target="_blank" rel="noopener">View live page</a></p>
+          <span class="pill" style="font-size:.7rem; background:${statusColor[a.status]||'#6B7280'}; color:#fff; border:none;">${a.source === 'ai_instruction_check' ? 'AI candidate: ' + cjhqEscapeHtml(a.status) : cjhqEscapeHtml(a.status)}</span>
+          <p style="margin:6px 0 0; font-weight:600;">${cjhqEscapeHtml(a.title || a.slug)}</p>
+          <p style="margin:4px 0 0; font-size:.85rem; color:var(--muted);">${cjhqEscapeHtml(a.summary || '')}</p>
+          ${a.announcedFutureChange ? `<p style="margin:6px 0 0; font-size:.85rem; color:#7A5B0E;"><strong>Announced future change:</strong> ${cjhqEscapeHtml(a.announcedFutureChange)}</p>` : ''}
+          <p style="margin:6px 0 0; font-size:.72rem; color:var(--muted);">${a.source === 'ai_instruction_check' ? 'AI suggestion - verify against the official page. ' : ''}Last checked: ${a.lastChecked ? new Date(a.lastChecked).toLocaleDateString() : '—'} · <a href="${a.url}" target="_blank" rel="noopener">View live page</a></p>
         </div>
         <div style="display:flex; flex-direction:column; gap:6px; flex-shrink:0;">
           <button class="admin-small-btn" onclick="markResourceReviewed('${a.slug}')">Mark Reviewed</button>
@@ -1941,6 +1942,7 @@ async function publishChangeNotice(slug){
     // document breaks the rule. So the end of the window is also stored as a
     // number the rules and the public query can both use, and the public query
     // asks for exactly what the rules allow.
+    page.public_from_ms = cjhqStartOfDayMs(page.start_date);
     page.public_until_ms = cjhqEndOfDayMs(page.end_date);
     // An end date before the start date would make the page permanently
     // unreachable without ever saying so.
@@ -3143,7 +3145,7 @@ async function renderAdminDashboard(){
       linkItems = [];
       const monthAgo = admAddDaysISO(today, -30);
       const rep = (reports||[]).filter(r => (r.reportedAt||'').slice(0,10) >= monthAgo);
-      const flagged = (audits||[]).filter(a => a.slug && a.slug !== '_run_summary' && a.status && a.status !== 'ok');
+      const flagged = (audits||[]).filter(a => a.slug && a.slug !== '_run_summary' && a.status && (a.status !== 'ok' || (a.source === 'ai_instruction_check' && a.reviewRequired !== false)));
       if(rep.length) linkItems.push(li(`${rep.length} visitor report${rep.length===1?'':'s'} (broken links / errors, last 30 days)`, ''));
       if(flagged.length) linkItems.push(li(`${flagged.length} resource link${flagged.length===1?'':'s'} flagged by the audit`, ''));
     }

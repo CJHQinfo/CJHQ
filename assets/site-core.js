@@ -741,6 +741,15 @@ function cjhqRenderPageBody(body, format){
    UTC-5 in winter and UTC-4 in summer, so the offset is read from the date
    itself rather than assumed - an hour's error here would expire a page early
    or late on its final day. */
+// First instant of the start day in Montreal. Undated pages have no lower bound.
+const CJHQ_NO_START_MS = 0;
+function cjhqStartOfDayMs(startDate){
+  const d = String(startDate || '').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return CJHQ_NO_START_MS;
+  const midnightUtc = Date.parse(d + 'T00:00:00Z');
+  const offsetMin = cjhqMontrealOffsetMinutes(new Date(midnightUtc));
+  return midnightUtc + offsetMin * 60000;
+}
 const CJHQ_NO_EXPIRY_MS = 253402300799000;   // 9999-12-31T23:59:59Z
 function cjhqEndOfDayMs(endDate){
   const d = String(endDate || '').trim();
@@ -777,8 +786,8 @@ async function applyContentOverrides(){
     if(!el) return;
     const enSpan = el.querySelector('span[data-en]');
     const frSpan = el.querySelector('span[data-fr]');
-    if(enSpan && o.en) enSpan.innerHTML = o.en;
-    if(frSpan && o.fr) frSpan.innerHTML = o.fr;
+    if(enSpan && o.en) enSpan.innerHTML = cjhqSanitizeHtml(o.en);
+    if(frSpan && o.fr) frSpan.innerHTML = cjhqSanitizeHtml(o.fr);
   });
 }
 function newerReviewed(a, b){

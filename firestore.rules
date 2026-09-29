@@ -114,16 +114,23 @@ service cloud.firestore {
        stays staff-only. An out-of-window page is refused on its `get`, which is
        exactly the intended outcome - the body never leaves the database.
 
-       `public_until_ms` is the last instant of the end date in Montreal, as
-       epoch milliseconds, written by the admin on save. A page with no end date
-       stores a far-future sentinel. NOTE: the start date is enforced in the
-       client only. A not-yet-started page is content about to be published
-       rather than content being withdrawn, so that remains a documented
-       follow-up rather than an oversight. */
+       `public_from_ms` is the first instant of the start date in Montreal;
+       `public_until_ms` is the last instant of the end date. Both are written
+       by the admin on save. Two previously published pages (travel-guide and
+       uci) have 2026-09-16 start dates and no public_from_ms. The bounded
+       legacy branch keeps already-started pages public without a data write;
+       future-dated legacy pages stay private until saved by the updated admin. */
     function pageIsPublicNow() {
       return resource.data.published == true
           && resource.data.public_until_ms is number
-          && resource.data.public_until_ms >= request.time.toMillis();
+          && resource.data.public_until_ms >= request.time.toMillis()
+          && ((('public_from_ms' in resource.data)
+                 && resource.data.public_from_ms is number
+                 && resource.data.public_from_ms <= request.time.toMillis())
+              || (!('public_from_ms' in resource.data)
+                  && ('start_date' in resource.data)
+                  && resource.data.start_date is string
+                  && resource.data.start_date <= '2026-09-29'));
     }
     match /custom_pages/{doc} {
       allow get:   if signedIn() || pageIsPublicNow();
