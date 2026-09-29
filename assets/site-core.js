@@ -2090,7 +2090,9 @@ const contactForm = document.getElementById('contactForm');
 if(contactForm){
   const resetContactStatus = () => {
     const statusEl = document.getElementById('contactFormStatus');
+    const successEl = document.getElementById('contactSuccess');
     if(statusEl){ statusEl.textContent = ''; statusEl.style.display = 'none'; }
+    if(successEl) successEl.hidden = true;
   };
   resetContactStatus();
   window.addEventListener('pageshow', resetContactStatus);
@@ -2113,12 +2115,16 @@ if(contactForm){
         ? 'Merci — votre message a été envoyé. Nous vous répondrons sous peu.'
         : 'Thank you — your message has been sent. We\'ll get back to you shortly.';
       statusEl.style.color = '#2E7D32';
+      const successEl = document.getElementById('contactSuccess');
+      if(successEl) successEl.hidden = false;
       contactForm.reset();
     } catch(err) {
       statusEl.textContent = isFr
         ? 'Une erreur est survenue. Veuillez réessayer ou nous écrire directement à info@cjhq.org.'
         : 'Something went wrong. Please try again, or email us directly at info@cjhq.org.';
       statusEl.style.color = '#B3261E';
+      const successEl = document.getElementById('contactSuccess');
+      if(successEl) successEl.hidden = true;
     } finally {
       if(window.turnstile) window.turnstile.reset();
       statusEl.style.display = 'block';
