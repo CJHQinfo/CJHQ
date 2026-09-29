@@ -337,9 +337,34 @@ function buildFrenchRoute(route) {
     '<meta property="og:locale" content="fr_CA">', `${route}: locale`);
   out = replaceOnce(out, /<meta property="og:locale:alternate" content="[^"]*">/,
     '<meta property="og:locale:alternate" content="en_CA">', `${route}: alternate locale`);
+  // The bilingual cards already exist. Reuse each route's current card for
+  // French shares instead of the generic site card; all four image locations
+  // (Open Graph, Twitter and schema) must agree.
+  const cardV2 = `assets/og-${route}-v2.png`;
+  const cardV1 = `assets/og-${route}.png`;
+  const cardFile = route === 'home' ? 'assets/og-image-v2.png' :
+    existsSync(join(ROOT, cardV2)) ? cardV2 :
+    existsSync(join(ROOT, cardV1)) ? cardV1 : 'assets/og-image-v2.png';
+  const cardUrl = `${ORIGIN}/${cardFile}`;
+  for (const [id, attr, key] of [['ogImage','property','og:image'],
+    ['twitterImage','name','twitter:image']]) {
+    out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
+      `<meta ${attr}="${key}" id="${id}" content="${cardUrl}">`, `${route}: ${id}`);
+  }
+  const cardAlt = `${title} — CJHQ`;
+  for (const [id, attr, key] of [['ogImageAlt','property','og:image:alt'],
+    ['twitterImageAlt','name','twitter:image:alt']]) {
+    out = replaceOnce(out, new RegExp(`<meta ${attr}="${key}" id="${id}" content="[^"]*">`),
+      `<meta ${attr}="${key}" id="${id}" content="${esc(cardAlt)}">`, `${route}: ${id}`);
+  }
   out = replacePageSchema(out, url, meta.fr, meta.desc_fr,
-    route === 'home' ? `${ORIGIN}/og-image.png` : `${ORIGIN}/assets/og-${route}.png`,
-    'fr-CA', `${route}: French WebPage schema`);
+    cardUrl, 'fr-CA', `${route}: French WebPage schema`);
+  // Static French documents must point crawlers to other French documents
+  // without requiring the runtime's href rewrite.
+  out = out.replace(/(<a\b[^>]*\bdata-page="([^"]+)"[^>]*\bhref=")[^"]*(")/g,
+    (_match, before, target, after) => before + routeUrl(target, 'fr').slice(ORIGIN.length) + after);
+  out = out.replace(/(<a\b[^>]*\bhref=")[^"]*("[^>]*\bdata-page="([^"]+)"[^>]*>)/g,
+    (_match, before, after, target) => before + routeUrl(target, 'fr').slice(ORIGIN.length) + after);
   const pageId = `page-${route}`;
   if(route !== 'home'){
     out = replaceOnce(out, /<div class="page active" id="page-home"/,
