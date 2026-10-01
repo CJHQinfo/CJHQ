@@ -3894,7 +3894,16 @@ async function renderAnalytics(){
         ['Dead clicks (% of sessions)', pick('DeadClickCount','sessionsWithMetricPercentage') != null ? pick('DeadClickCount','sessionsWithMetricPercentage') + '%' : null],
       ].filter(x => x[1] != null);
       if(items.length) html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Clicks and scrolling (Clarity)</h3><ul>' + items.map(x => `<li><span>${esc(x[0])}</span><span>${esc(String(x[1]))}</span></li>`).join('') + '</ul></section></section>';
+    }    const ch = data.clarityHistory;
+    if(ch && Array.isArray(ch.rows) && ch.rows.length){
+      const rs = ch.rows, mx = Math.max(1, ...rs.map(r => r.sessions));
+      const tot = rs.reduce((a, r) => a + r.sessions, 0);
+      const sw = tot ? rs.reduce((a, r) => a + r.scroll * r.sessions, 0) / tot : 0;
+      const bars = rs.map(r => '<div title="' + esc(r.date) + ': ' + r.sessions + ' sessions" style="flex:1 1 0;min-width:2px;background:currentColor;opacity:.55;height:' + Math.max(3, Math.round(r.sessions / mx * 100)) + '%"></div>').join('');
+      const last = rs.slice(-14).reverse();
+      html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Clarity history (daily)</h3><p class="adm-muted" style="font-size:.85rem;">' + rs.length + ' day' + (rs.length === 1 ? '' : 's') + ' saved (from ' + esc(rs[0].date) + '). Sessions ' + anaFmtNum(tot) + ', average scroll depth ' + Math.round(sw) + '%. Collection started on Oct 1, 2026, so this grows each day (up to 90 days).</p><div style="display:flex;align-items:flex-end;gap:2px;height:80px;margin:8px 0 12px;">' + bars + '</div><table class="ana-table"><tr><th>Day</th><th class="n">Sessions</th><th class="n">Scroll</th><th class="n">Dead clicks</th><th class="n">Rage clicks</th></tr>' + last.map(r => '<tr><td>' + esc(r.date) + '</td><td class="n">' + anaFmtNum(r.sessions) + '</td><td class="n">' + Math.round(r.scroll) + '%</td><td class="n">' + r.dead + '%</td><td class="n">' + r.rage + '%</td></tr>').join('') + '</table></section></section>';
     }
+
     html += '<p class="adm-muted" style="font-size:.8rem;">Heatmaps and visit recordings: <a href="https://clarity.microsoft.com/projects/view/yn69ejs5t6/dashboard" target="_blank" rel="noopener">Microsoft Clarity</a>. Full reports: <a href="https://analytics.google.com/analytics/web/#/a241425776p545788245/reports/intelligenthome" target="_blank" rel="noopener">Google Analytics</a>.</p>';
     body.innerHTML = html;
     const ph = document.getElementById('anaPrintHead');
