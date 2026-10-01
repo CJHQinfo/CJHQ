@@ -3596,6 +3596,33 @@ function anaFmtSecs(s){
   return m + 'm ' + (r < 10 ? '0' : '') + r + 's';
 }
 function anaFmtNum(n){ return Number(n || 0).toLocaleString('en-CA'); }
+function clrPaint(card, d){
+  const rows = window.__clrRows || [];
+  if(!card || !rows.length) return;
+  const k = Math.min(d, rows.length), last = rows.slice(-k);
+  const num = (v) => Number(v) || 0;
+  const tot = last.reduce((a, r) => a + num(r.sessions), 0);
+  const wavg = (key) => tot ? last.reduce((a, r) => a + num(r[key]) * num(r.sessions), 0) / tot : 0;
+  const tile = (v, label) => '<div class="ana-kpi"><b>' + v + '</b><span>' + label + '</span></div>';
+  card.querySelector('.clr-kpis').innerHTML =
+    tile(anaFmtNum(Math.round(tot / k * 10) / 10), 'Sessions per day (avg)') +
+    tile(anaFmtNum(tot), 'Sessions, total') +
+    tile(Math.round(wavg('scroll')) + '%', 'Scroll depth (avg)') +
+    tile(k + (k < d ? ' of ' + d : ''), k === 1 ? 'Day counted' : 'Days counted') +
+    tile(wavg('dead').toFixed(1) + '%', 'Dead clicks (avg)') +
+    tile(wavg('rage').toFixed(1) + '%', 'Rage clicks (avg)');
+  const e = cjhqEscapeHtml;
+  card.querySelector('.clr-note').textContent = (k === 1 ? 'Showing the latest saved day (' + last[0].date + ').' : (k < d ? 'Showing the last ' + k + ' of ' + d + ' days.' : 'Showing the last ' + d + ' days.')) + ' ' + rows.length + ' day' + (rows.length === 1 ? '' : 's') + ' saved so far (from ' + rows[0].date + ').';
+  const mx = Math.max(1, ...rows.map(r => num(r.sessions)));
+  card.querySelector('.clr-bars').innerHTML = '<div style="display:flex;align-items:flex-end;gap:2px;height:80px;margin:8px 0 6px;">' + rows.map((r, i) => '<div title="' + e(r.date) + ': ' + num(r.sessions) + ' sessions" style="flex:1 1 0;min-width:2px;max-width:22px;background:currentColor;opacity:' + (i >= rows.length - k ? '.85' : '.25') + ';height:' + Math.max(3, Math.round(num(r.sessions) / mx * 100)) + '%"></div>').join('') + '</div>';
+  card.querySelectorAll('.clr-per button').forEach(b => b.classList.toggle('on', Number(b.dataset.d) === d));
+}
+function clrWire(root){
+  const card = root.querySelector('.clr-card');
+  if(!card) return;
+  card.querySelectorAll('.clr-per button').forEach(b => b.addEventListener('click', () => clrPaint(card, Number(b.dataset.d))));
+  clrPaint(card, 7);
+}
 const ANALYTICS_EVENT_LABELS = {
   page_view: 'Page views', user_engagement: 'Engaged moments', scroll: 'Scrolled to the bottom',
   click: 'Clicks on links to other sites', file_download: 'File downloads', session_start: 'Visits started',
@@ -3894,18 +3921,16 @@ async function renderAnalytics(){
         ['Dead clicks (% of sessions)', pick('DeadClickCount','sessionsWithMetricPercentage') != null ? pick('DeadClickCount','sessionsWithMetricPercentage') + '%' : null],
       ].filter(x => x[1] != null);
       if(items.length) html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Clicks and scrolling (Clarity)</h3><ul>' + items.map(x => `<li><span>${esc(x[0])}</span><span>${esc(String(x[1]))}</span></li>`).join('') + '</ul></section></section>';
-    }    const ch = data.clarityHistory;
+    }
+    const ch = data.clarityHistory;
     if(ch && Array.isArray(ch.rows) && ch.rows.length){
-      const rs = ch.rows, mx = Math.max(1, ...rs.map(r => r.sessions));
-      const tot = rs.reduce((a, r) => a + r.sessions, 0);
-      const sw = tot ? rs.reduce((a, r) => a + r.scroll * r.sessions, 0) / tot : 0;
-      const bars = rs.map(r => '<div title="' + esc(r.date) + ': ' + r.sessions + ' sessions" style="flex:1 1 0;min-width:2px;max-width:22px;background:currentColor;opacity:.55;height:' + Math.max(3, Math.round(r.sessions / mx * 100)) + '%"></div>').join('');
-      const last = rs.slice(-14).reverse();
-      html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>Clarity history (daily)</h3><p class="adm-muted" style="font-size:.85rem;">' + rs.length + ' day' + (rs.length === 1 ? '' : 's') + ' saved (from ' + esc(rs[0].date) + '). Sessions ' + anaFmtNum(tot) + ', average scroll depth ' + Math.round(sw) + '%. Collection started on Oct 1, 2026, so this grows each day (up to 90 days).</p><div style="display:flex;align-items:flex-end;gap:2px;height:80px;margin:8px 0 12px;">' + bars + '</div><table class="ana-table"><tr><th>Day</th><th class="n">Sessions</th><th class="n">Scroll</th><th class="n">Dead clicks</th><th class="n">Rage clicks</th></tr>' + last.map(r => '<tr><td>' + esc(r.date) + '</td><td class="n">' + anaFmtNum(r.sessions) + '</td><td class="n">' + Math.round(r.scroll) + '%</td><td class="n">' + r.dead + '%</td><td class="n">' + r.rage + '%</td></tr>').join('') + '</table></section></section>';
+      window.__clrRows = ch.rows;
+      html += '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section class="clr-card"><h3>Clarity history (daily)</h3><div class="clr-per" role="group" aria-label="Period">' + [1, 7, 30, 90].map(d => '<button type="button" data-d="' + d + '">' + d + (d === 1 ? ' day' : ' days') + '</button>').join('') + '</div><p class="adm-muted clr-note" style="font-size:.85rem;margin:0 0 8px;"></p><div class="ana-kpis clr-kpis"></div><div class="clr-bars"></div><p class="adm-muted" style="font-size:.78rem;margin:0;">Darker bars are the days in the selected period. Collection started on Oct 1, 2026, and up to 90 days are kept.</p></section></section>';
     }
 
     html += '<p class="adm-muted" style="font-size:.8rem;">Heatmaps and visit recordings: <a href="https://clarity.microsoft.com/projects/view/yn69ejs5t6/dashboard" target="_blank" rel="noopener">Microsoft Clarity</a>. Full reports: <a href="https://analytics.google.com/analytics/web/#/a241425776p545788245/reports/intelligenthome" target="_blank" rel="noopener">Google Analytics</a>.</p>';
     body.innerHTML = html;
+    clrWire(body);
     const ph = document.getElementById('anaPrintHead');
     if(ph) ph.innerHTML = '<b>CJHQ website analytics</b> &mdash; ' + esc(g.label || '') + ' &mdash; generated ' + esc(new Date(data.generatedAt).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' }));
     if(status) status.textContent = (g.hourly ? 'Recent hours can take a few hours to show up in Google Analytics. ' : '') + 'Updated ' + new Date(data.generatedAt).toLocaleString('en-CA', { dateStyle:'medium', timeStyle:'short', timeZone:'America/Toronto' });
