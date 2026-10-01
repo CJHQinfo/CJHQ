@@ -31,7 +31,11 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+          cache: npm
+
+      - name: Install build tools (terser, lightningcss)
+        run: npm ci --no-audit --no-fund
 
       - name: Check every outbound link
         # Larger header limit: some government sites send very large headers.
