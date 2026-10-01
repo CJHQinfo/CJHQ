@@ -22,7 +22,8 @@
  * "24h" filters GA's hourly data (dateHour) to the last 24 full or partial
  * hours in the property's time zone, so visitors are de-duplicated properly.
  * Environment: GA_PROPERTY (numeric GA4 property ID), STAFF_EMAILS (optional
- * comma-separated fallback staff list), CLARITY_TOKEN (optional).
+ * comma-separated fallback staff list), CLARITY_TOKEN (optional),
+ * CLARITY_HISTORY_URL and CLARITY_HISTORY_KEY (optional, daily Clarity history).
  */
 const admin = require('firebase-admin');
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
@@ -242,6 +243,29 @@ async function claritySummary() {
   }
 }
 
+// Daily Clarity history kept in the owner's Google Sheet (collector script). The collector's
+// web app returns the saved rows when given the history key, which lives only in this
+// function's environment (CLARITY_HISTORY_URL + CLARITY_HISTORY_KEY). Cached 30 minutes.
+let historyCache = null;
+async function clarityHistory() {
+  const url = process.env.CLARITY_HISTORY_URL || '';
+  const key = process.env.CLARITY_HISTORY_KEY || '';
+  if (!url || !key) return null;
+  if (historyCache && Date.now() - historyCache.at < 30 * 60 * 1000) return historyCache.data;
+  try {
+    const r = await fetch(url + '?hkey=' + encodeURIComponent(key), { redirect: 'follow' });
+    if (!r.ok) throw new Error('History HTTP ' + r.status);
+    const j = await r.json();
+    if (!j || j.error || !Array.isArray(j.rows)) throw new Error('History unavailable');
+    const data = { days: j.rows.length, rows: j.rows.slice(-90) };
+    historyCache = { at: Date.now(), data };
+    return data;
+  } catch (e) {
+    console.error('clarity history', e);
+    return historyCache ? historyCache.data : null;
+  }
+}
+
 // Tracking links the staff made in the admin, kept in Firestore
 // analytics/tracking_links (written only here, never read by the public site).
 const LABEL_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/;
@@ -295,9 +319,9 @@ exports.analyticsSummary = async (req, res) => {
     let gaData;
     if (hit && Date.now() - hit.at < CACHE_MS) gaData = hit.data;
     else { gaData = await gaSummary(rng); cache.set(key, { at: Date.now(), data: gaData }); }
-    const [clarity, demographics] = await Promise.all([claritySummary(), demographicsSummary(rng)]);
+    const [clarity, demographics, clarityHist] = await Promise.all([claritySummary(), demographicsSummary(rng), clarityHistory()]);
     res.set('Cache-Control', 'private, no-store');
-    return json(res, 200, { ok: true, generatedAt: new Date().toISOString(), ga: gaData, clarity, demographics });
+    return json(res, 200, { ok: true, generatedAt: new Date().toISOString(), ga: gaData, clarity, clarityHistory: clarityHist, demographics });
   } catch (e) {
     console.error(e);
     return json(res, 500, { error: String(e.message || e).slice(0, 300) });
