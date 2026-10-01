@@ -1,8 +1,20 @@
 {
-  "checked_at": "2026-09-23T15:44:43.519Z",
+  "checked_at": "2026-10-01T19:22:31.790Z",
   "total": 83,
-  "ok": 70,
-  "broken": [],
+  "ok": 66,
+  "broken": [
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/register",
+      "used_by": [
+        {
+          "slug": "apply-for-ramq",
+          "label": "Apply for RAMQ"
+        }
+      ],
+      "status": 0,
+      "error": "Address does not exist (DNS)"
+    }
+  ],
   "unsure": [
     {
       "url": "https://dmv.ny.gov/driver-license/enhanced-or-real-id",
@@ -80,6 +92,28 @@
       "error": ""
     },
     {
+      "url": "https://www.etatcivil.gouv.qc.ca/en/birth/declaration_birth.html",
+      "used_by": [
+        {
+          "slug": "birth-registration",
+          "label": "Birth Registration"
+        }
+      ],
+      "status": 0,
+      "error": "UND_ERR_CONNECT_TIMEOUT"
+    },
+    {
+      "url": "https://www.etatcivil.gouv.qc.ca/en/certificate-copy.html",
+      "used_by": [
+        {
+          "slug": "birth-certificate",
+          "label": "Birth Certificate"
+        }
+      ],
+      "status": 0,
+      "error": "UND_ERR_CONNECT_TIMEOUT"
+    },
+    {
       "url": "https://www.facebook.com/CJHQinfo",
       "used_by": [
         {
@@ -132,6 +166,274 @@
         },
         {
           "slug": "",
+          "label": "Page: /fr/ressources/adult-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/apply-for-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/apply-for-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/birth-certificate.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/birth-registration.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/border-wait-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/building-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canada-border-services-agency-cbsa.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canada-child-benefit.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canada-pension-plan-cpp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canadian-citizenship-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canadian-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/child-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/child-travel-consent-letter.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/childcare-registration-cpe-subsidized-daycare.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/children-born-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/children-travelling.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/consular-report-of-birth-abroad-crba.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/consular-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/disability-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/duty-free-allowances.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/embassy-consulate-appointments.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/employment-insurance-ei.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/explore-immigration-programs.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/express-entry-skilled-workers.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/family-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/family-sponsorship.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/find-a-family-doctor.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/find-a-passport-office.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/find-an-enrolment-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/first-us-passport-for-a-child.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/guaranteed-income-supplement-gis.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/info-sante-811.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/le-plateau-mont-royal-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/local-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/lost-stolen-or-damaged-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/manulife-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/new-york-enhanced-drivers-license.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/nexus-fee-credit-cards.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/old-age-security-oas.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/outdoor-public-events-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/outremont-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/outremont-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/passport-processing-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/passport-renewal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/plateau-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/prescription-drug-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/property-taxes.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/public-transit-stm.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/quebec-family-allowance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/quebec-parental-insurance-plan-qpip.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/quebec-selection-certificate-csq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/register-a-newborn-with-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/registration-of-canadians-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/renew-or-replace-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/replace-or-renew-your-health-card.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/report-a-problem-311.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/schedule-your-interview.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/snow-removal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/social-security-number.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/tugo-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/tzum-gezunt-health-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/urgent-express-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/us-customs-border-protection-cbp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/us-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/voting-from-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/waste-collection.html"
+        },
+        {
+          "slug": "",
           "label": "Page: /fr/ressources.html"
         },
         {
@@ -144,6 +446,274 @@
         },
         {
           "slug": "",
+          "label": "Page: /resources/adult-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/apply-for-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/apply-for-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/birth-certificate.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/birth-registration.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/border-wait-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/building-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canada-border-services-agency-cbsa.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canada-child-benefit.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canada-pension-plan-cpp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canadian-citizenship-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canadian-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/child-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/child-travel-consent-letter.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/childcare-registration-cpe-subsidized-daycare.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/children-born-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/children-travelling.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/consular-report-of-birth-abroad-crba.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/consular-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/disability-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/duty-free-allowances.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/embassy-consulate-appointments.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/employment-insurance-ei.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/explore-immigration-programs.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/express-entry-skilled-workers.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/family-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/family-sponsorship.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/find-a-family-doctor.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/find-a-passport-office.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/find-an-enrolment-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/first-us-passport-for-a-child.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/guaranteed-income-supplement-gis.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/info-sante-811.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/le-plateau-mont-royal-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/local-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/lost-stolen-or-damaged-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/manulife-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/new-york-enhanced-drivers-license.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/nexus-fee-credit-cards.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/old-age-security-oas.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/outdoor-public-events-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/outremont-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/outremont-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/passport-processing-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/passport-renewal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/plateau-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/prescription-drug-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/property-taxes.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/public-transit-stm.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/quebec-family-allowance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/quebec-parental-insurance-plan-qpip.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/quebec-selection-certificate-csq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/register-a-newborn-with-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/registration-of-canadians-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/renew-or-replace-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/replace-or-renew-your-health-card.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/report-a-problem-311.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/schedule-your-interview.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/snow-removal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/social-security-number.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/tugo-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/tzum-gezunt-health-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/urgent-express-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/us-customs-border-protection-cbp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/us-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/voting-from-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/waste-collection.html"
+        },
+        {
+          "slug": "",
           "label": "Page: /resources.html"
         },
         {
@@ -153,6 +723,22 @@
         {
           "slug": "",
           "label": "Page: /terms.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /travel-guide/index.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /travel-guide.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /uci/index.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /uci.html"
         }
       ],
       "status": 400,
@@ -160,7 +746,84 @@
       "final_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2FCJHQinfo"
     },
     {
-      "url": "https://www.instagram.com/cjhqinfo/",
+      "url": "https://www.manulife-travel.ca/dist/home.html?as=wllebovits",
+      "used_by": [
+        {
+          "slug": "manulife-travel-insurance",
+          "label": "Manulife Travel Insurance"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.quebec.ca/en/family-and-support-for-individuals/childhood/childcare-centres/registration-portal",
+      "used_by": [
+        {
+          "slug": "childcare-registration-cpe-subsidized-daycare",
+          "label": "Childcare Registration (Childcare Services Registration Portal, formerly La Place 0-5)"
+        }
+      ],
+      "status": 0,
+      "error": "UND_ERR_CONNECT_TIMEOUT"
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/birth-adoption",
+      "used_by": [
+        {
+          "slug": "register-a-newborn-with-ramq",
+          "label": "Register a Newborn with RAMQ"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/obtain-new-card",
+      "used_by": [
+        {
+          "slug": "replace-or-renew-your-health-card",
+          "label": "Replace or Renew Your Health Card"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.ramq.gouv.qc.ca/en/citizens/prescription-drug-insurance",
+      "used_by": [
+        {
+          "slug": "prescription-drug-insurance",
+          "label": "Prescription Drug Insurance"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://www.rqap.gouv.qc.ca/en",
+      "used_by": [
+        {
+          "slug": "quebec-parental-insurance-plan-qpip",
+          "label": "Quebec Parental Insurance Plan (QPIP)"
+        }
+      ],
+      "status": 0,
+      "error": "UND_ERR_CONNECT_TIMEOUT"
+    },
+    {
+      "url": "https://www.ssa.gov/number-card",
+      "used_by": [
+        {
+          "slug": "social-security-number",
+          "label": "Social Security Number (SSN)"
+        }
+      ],
+      "status": 403,
+      "error": ""
+    },
+    {
+      "url": "https://x.com/CJHQinfo",
       "used_by": [
         {
           "slug": "",
@@ -212,6 +875,274 @@
         },
         {
           "slug": "",
+          "label": "Page: /fr/ressources/adult-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/apply-for-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/apply-for-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/birth-certificate.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/birth-registration.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/border-wait-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/building-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canada-border-services-agency-cbsa.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canada-child-benefit.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canada-pension-plan-cpp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canadian-citizenship-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/canadian-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/child-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/child-travel-consent-letter.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/childcare-registration-cpe-subsidized-daycare.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/children-born-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/children-travelling.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/consular-report-of-birth-abroad-crba.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/consular-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/disability-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/duty-free-allowances.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/embassy-consulate-appointments.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/employment-insurance-ei.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/explore-immigration-programs.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/express-entry-skilled-workers.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/family-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/family-sponsorship.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/find-a-family-doctor.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/find-a-passport-office.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/find-an-enrolment-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/first-us-passport-for-a-child.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/guaranteed-income-supplement-gis.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/info-sante-811.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/le-plateau-mont-royal-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/local-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/lost-stolen-or-damaged-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/manulife-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/new-york-enhanced-drivers-license.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/nexus-fee-credit-cards.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/old-age-security-oas.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/outdoor-public-events-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/outremont-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/outremont-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/passport-processing-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/passport-renewal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/plateau-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/prescription-drug-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/property-taxes.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/public-transit-stm.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/quebec-family-allowance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/quebec-parental-insurance-plan-qpip.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/quebec-selection-certificate-csq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/register-a-newborn-with-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/registration-of-canadians-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/renew-or-replace-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/replace-or-renew-your-health-card.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/report-a-problem-311.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/schedule-your-interview.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/snow-removal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/social-security-number.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/tugo-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/tzum-gezunt-health-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/urgent-express-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/us-customs-border-protection-cbp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/us-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/voting-from-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /fr/ressources/waste-collection.html"
+        },
+        {
+          "slug": "",
           "label": "Page: /fr/ressources.html"
         },
         {
@@ -224,6 +1155,274 @@
         },
         {
           "slug": "",
+          "label": "Page: /resources/adult-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/apply-for-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/apply-for-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/birth-certificate.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/birth-registration.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/border-wait-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/building-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canada-border-services-agency-cbsa.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canada-child-benefit.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canada-pension-plan-cpp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canadian-citizenship-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/canadian-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/child-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/child-travel-consent-letter.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/childcare-registration-cpe-subsidized-daycare.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/children-born-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/children-travelling.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/consular-report-of-birth-abroad-crba.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/consular-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/disability-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/duty-free-allowances.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/embassy-consulate-appointments.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/employment-insurance-ei.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/explore-immigration-programs.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/express-entry-skilled-workers.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/family-benefits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/family-sponsorship.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/find-a-family-doctor.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/find-a-passport-office.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/find-an-enrolment-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/first-us-passport-for-a-child.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/guaranteed-income-supplement-gis.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/info-sante-811.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/le-plateau-mont-royal-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/local-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/lost-stolen-or-damaged-passport.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/manulife-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/new-york-enhanced-drivers-license.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/nexus-fee-credit-cards.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/old-age-security-oas.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/outdoor-public-events-permits.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/outremont-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/outremont-visitor-parking.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/passport-processing-times.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/passport-renewal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/plateau-borough-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/prescription-drug-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/property-taxes.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/public-transit-stm.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/quebec-family-allowance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/quebec-parental-insurance-plan-qpip.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/quebec-selection-certificate-csq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/register-a-newborn-with-ramq.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/registration-of-canadians-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/renew-or-replace-nexus.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/replace-or-renew-your-health-card.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/report-a-problem-311.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/schedule-your-interview.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/snow-removal.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/social-security-number.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/tugo-travel-insurance.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/tzum-gezunt-health-centre.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/urgent-express-passport-services.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/us-customs-border-protection-cbp.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/us-passport-application.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/voting-from-abroad.html"
+        },
+        {
+          "slug": "",
+          "label": "Page: /resources/waste-collection.html"
+        },
+        {
+          "slug": "",
           "label": "Page: /resources.html"
         },
         {
@@ -233,77 +1432,52 @@
         {
           "slug": "",
           "label": "Page: /terms.html"
-        }
-      ],
-      "status": 429,
-      "error": "",
-      "final_url": "https://www.instagram.com/accounts/login/?next=https%3A%2F%2Fwww.instagram.com%2Fcjhqinfo%2F&is_from_rle"
-    },
-    {
-      "url": "https://www.manulife-travel.ca/dist/home.html?as=wllebovits",
-      "used_by": [
+        },
         {
-          "slug": "manulife-travel-insurance",
-          "label": "Manulife Travel Insurance"
-        }
-      ],
-      "status": 403,
-      "error": ""
-    },
-    {
-      "url": "https://www.ramq.gouv.qc.ca/en/citizens/birth-adoption",
-      "used_by": [
+          "slug": "",
+          "label": "Page: /travel-guide/index.html"
+        },
         {
-          "slug": "register-a-newborn-with-ramq",
-          "label": "Register a Newborn with RAMQ"
-        }
-      ],
-      "status": 403,
-      "error": ""
-    },
-    {
-      "url": "https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/obtain-new-card",
-      "used_by": [
+          "slug": "",
+          "label": "Page: /travel-guide.html"
+        },
         {
-          "slug": "replace-or-renew-your-health-card",
-          "label": "Replace or Renew Your Health Card"
-        }
-      ],
-      "status": 403,
-      "error": ""
-    },
-    {
-      "url": "https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/register",
-      "used_by": [
+          "slug": "",
+          "label": "Page: /uci/index.html"
+        },
         {
-          "slug": "apply-for-ramq",
-          "label": "Apply for RAMQ"
-        }
-      ],
-      "status": 403,
-      "error": ""
-    },
-    {
-      "url": "https://www.ramq.gouv.qc.ca/en/citizens/prescription-drug-insurance",
-      "used_by": [
-        {
-          "slug": "prescription-drug-insurance",
-          "label": "Prescription Drug Insurance"
-        }
-      ],
-      "status": 403,
-      "error": ""
-    },
-    {
-      "url": "https://www.ssa.gov/number-card",
-      "used_by": [
-        {
-          "slug": "social-security-number",
-          "label": "Social Security Number (SSN)"
+          "slug": "",
+          "label": "Page: /uci.html"
         }
       ],
       "status": 403,
       "error": ""
     }
-  ]
+  ],
+  "reviewed": {
+    "month": "October 2026",
+    "refreshed": 47,
+    "kept_old_date": [
+      "adult-passport-application",
+      "apply-for-ramq",
+      "birth-certificate",
+      "birth-registration",
+      "child-passport",
+      "childcare-registration-cpe-subsidized-daycare",
+      "consular-report-of-birth-abroad-crba",
+      "find-a-passport-office",
+      "first-us-passport-for-a-child",
+      "lost-stolen-or-damaged-passport",
+      "manulife-travel-insurance",
+      "new-york-enhanced-drivers-license",
+      "passport-renewal",
+      "prescription-drug-insurance",
+      "quebec-parental-insurance-plan-qpip",
+      "register-a-newborn-with-ramq",
+      "replace-or-renew-your-health-card",
+      "social-security-number",
+      "urgent-express-passport-services",
+      "us-passport-application"
+    ]
+  }
 }
