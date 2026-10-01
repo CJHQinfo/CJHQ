@@ -28,6 +28,13 @@
   #page-admin .ana-table td{border-top:1px solid var(--bg-alt); padding:6px 8px; vertical-align:top;}
   #page-admin .ana-table td.n{text-align:right; white-space:nowrap;}
   #page-admin .ana-table td.p{word-break:break-all;}
+  #page-admin .clr-card .clr-per{display:flex; gap:6px; margin:4px 0 12px;}
+  #page-admin .clr-card .clr-per button{flex:1; padding:8px 0; font-size:.85rem; font-weight:600; border:1px solid var(--line); background:var(--paper); border-radius:6px; cursor:pointer;}
+  #page-admin .clr-card .clr-per button.on{background:var(--c-blue); color:#fff; border-color:var(--c-blue);}
+  #page-admin .clr-card .ana-kpis{grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin:0 0 10px;}
+  #page-admin .clr-card .ana-kpi{padding:10px 12px;}
+  #page-admin .clr-card .ana-kpi b{font-size:1.25rem;}
+  @media (max-width:600px){ #page-admin .clr-card .ana-kpis{grid-template-columns:1fr 1fr;} }
   #page-admin .ana-chart{display:flex; align-items:flex-end; gap:2px; height:90px; margin:6px 0 4px;}
   #page-admin .ana-chart div{flex:1; background:var(--c-blue); opacity:.8; min-height:1px; border-radius:2px 2px 0 0;}
   #page-admin .ana-print-head{display:none;}
