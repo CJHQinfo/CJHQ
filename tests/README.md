@@ -64,3 +64,19 @@ Or point somewhere else:  `CJHQ_BASELINE=/path/to/main/ node run-all.mjs`
 
 Both must pass. Never hand-edit `ask-core.mjs`, `ask-data.mjs` or the route
 files — they are generated from `index.html`.
+
+## October 2 readiness review
+
+Use an untouched checkout of commit `cbea31f` as the baseline, with a trailing
+slash in `CJHQ_BASELINE`. Old before/after tests assumed French indexing was
+absent and the NEXUS credit-card record was new. Current main already contains
+both; those tests now check retention against main instead of asserting a
+historical deployment was broken. The breadth reference now includes the
+already-shipped action pass. Differential exceptions are limited to explicit
+U.S. passport corrections and the removed passport-duration false match.
+
+`t-readiness.mjs` tests zero-AI browser gating, exact URL checks and compact
+phone-number checks. `browser-admin-qa.cjs` runs the actual Ask admin initializer
+in a controlled Chromium DOM with deferred test answers to exercise races.
+It requires Playwright in a test-only environment and Google Chrome installed.
+Neither browser test logs in or reads/writes Firestore.

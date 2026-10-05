@@ -2484,28 +2484,21 @@ async function publishChangeNotice(slug){
   let askTurns = [];          // in-memory only
   let showSources = true;
   let lastAnswer = '';
+  let askGeneration = 0;
+  let askSending = false;
+  let failedQuestion = "";
+  const requestStatus = text => { const el = $a("askRequestStatus"); if(el) el.textContent = text; };
+  const retryState = q => { failedQuestion=q; const el=$a("askRetry"); if(el) el.hidden=!q; };
 
   function backendStatus(){
-    const wired = (typeof ASK_BACKEND !== 'undefined') && ASK_BACKEND && typeof ASK_BACKEND.ask === 'function';
-    const ready = wired && firebaseReady && appCheckReady;
-    let msg;
-    if(ready){
-      msg = 'AI: <b>connected</b> \u00b7 model <b>' + ASK_AI_CONFIG.model + '</b> '
-          + '(free tier 15 req/min, 500/day) \u00b7 App Check <b>active</b>.';
-    }else if(wired && !appCheckReady){
-      msg = 'AI: <b>ready</b> \u2014 App Check initializes on the first question. '
-          + 'Answers still come from CJHQ\u2019s verified information.';
-    }else if(wired && !firebaseReady){
-      msg = 'AI: <b>Firebase not ready</b>. Answers come from CJHQ\u2019s verified information.';
-    }else{
-      msg = 'AI: <b>not connected</b>. Structured sources and the resource matcher answer directly.';
-    }
+    const msg = 'Answers: <b>CJHQ structured information</b>. AI phrasing is <b>disabled</b> pending a separate cost and provider review. No AI or App Check requests are made.';
     $a('askBackendStatus').innerHTML = msg + ' Public flag: <b>' + (ASK_CJHQ_PUBLIC ? 'ON' : 'OFF') + '</b>.';
   }
 
 
   function renderLog(){
     const log = $a('askLog');
+    $a('askCopy').disabled = !lastAnswer;
     if(!askTurns.length){
       log.innerHTML = '<p class="ask-empty">No messages yet.</p>';
       return;
@@ -2524,6 +2517,7 @@ async function publishChangeNotice(slug){
       const bub = document.createElement('div');
       bub.className = 'ask-bubble';
       bub.textContent = t.res.answer;
+      bub.dir = /^(he|yi)$/.test(t.res.lang || '') ? 'rtl' : 'auto';
       wrap.appendChild(bub);
 
       if(t.res.actions && t.res.actions.length){
@@ -2584,32 +2578,60 @@ async function publishChangeNotice(slug){
   async function send(){
     const input = $a('askInput');
     const q = input.value.trim();
-    if(!q) return;
+    if(!q || askSending) return;
+    if(q.length > 2000){ requestStatus('Please keep the question under 2,000 characters.'); return; }
+    retryState('');
+    requestStatus('Preparing an answer...');
+    $a('askLog').setAttribute('aria-busy','true');
+    askSending = true;
+    const generation = askGeneration;
     askTurns.push({ role:'user', text:q });
+    askTurns = askTurns.slice(-40);
     input.value = '';
     renderLog();
     $a('askSend').disabled = true;
     try{
-      const res = await askCommunityAssistant(q);
-      lastAnswer = res ? res.answer : '';
+      const res = await askCommunityAssistant(q, { useAI:false });
+      if(generation !== askGeneration) return;
+      if(!res || typeof res.answer !== 'string' || !res.answer.trim()) throw new Error('empty-answer');
+      lastAnswer = res.answer;
+      retryState('');
+      requestStatus('Answer ready.');
       askTurns.push({ role:'bot', res });
     }catch(err){
+      if(generation !== askGeneration) return;
       console.warn('[CJHQ] Ask CJHQ failed:', err);
+      retryState(q);
+      requestStatus('The answer could not be prepared. Retry the question or start again.');
       askTurns.push({ role:'bot', res:{ answer:'Something went wrong preparing that answer.', sources:[], actions:[], handler:'error' }});
     }finally{
-      $a('askSend').disabled = false;
-      renderLog();
+      if(generation === askGeneration){
+        askSending = false;
+        $a('askLog').setAttribute('aria-busy','false');
+        $a('askSend').disabled = false;
+        renderLog();
+      }
     }
   }
 
   $a('askForm').addEventListener('submit', (e)=>{ e.preventDefault(); send(); });
-  $a('askNew').addEventListener('click', ()=>{ askTurns = []; lastAnswer=''; renderLog(); $a('askInput').focus(); });
-  $a('askClear').addEventListener('click', ()=>{ askTurns = []; lastAnswer=''; renderLog(); });
-  $a('askCopy').addEventListener('click', ()=>{
+  function resetConversation(){
+    askGeneration++; askSending=false; $a('askSend').disabled=false;
+    askTurns=[]; lastAnswer=''; retryState(''); $a('askInput').value='';
+    $a('askLog').setAttribute('aria-busy','false'); requestStatus('Conversation cleared.');
+    renderLog(); $a('askInput').focus();
+  }
+  $a('askNew').addEventListener('click', resetConversation);
+  $a('askClear').addEventListener('click', resetConversation);
+  if($a('askRetry')) $a('askRetry').addEventListener('click', ()=>{
+    if(failedQuestion && !askSending){ $a('askInput').value=failedQuestion; send(); }
+  });
+  $a('askCopy').addEventListener('click', async ()=>{
     if(!lastAnswer){ admToast('No response to copy yet.'); return; }
-    navigator.clipboard.writeText(lastAnswer)
-      .then(()=> admToast('Response copied.'))
-      .catch(()=> admToast('Could not copy. Select the text manually.'));
+    try{
+      if(!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('clipboard-unavailable');
+      await navigator.clipboard.writeText(lastAnswer); admToast('Response copied.');
+    }catch(e){ admToast('Could not copy. Select the text manually.'); }
   });
   $a('askToggleSources').addEventListener('click', ()=>{
     showSources = !showSources;
@@ -2727,7 +2749,7 @@ async function publishChangeNotice(slug){
      Deterministic layer by default: useAI:false, so a review reads the CJHQ
      wording itself rather than Gemini's paraphrase of it. "Run with AI
      phrasing" is the separate button, because that is a different thing to
-     review and it consumes free-tier quota.
+     review and requires a separate provider and cost review.
 
      Nothing is written to Firestore and nothing is logged. */
   const LANG_BENCH = [
@@ -2760,11 +2782,14 @@ async function publishChangeNotice(slug){
   ];
   const LANG_NAME = { en:'English', fr:'French', he:'Hebrew', yi:'Yiddish' };
   let __benchRows = [];
+  let __benchGeneration = 0;
 
   async function runLangBench(useAI){
     const out = document.getElementById('langBenchResults');
     const st  = document.getElementById('langBenchStatus');
     if(!out || !st) return;
+    if(useAI){ st.textContent='AI phrasing is disabled pending a separate cost and provider review.'; return; }
+    const generation = ++__benchGeneration;
     __benchRows = [];
     out.innerHTML = '';
     st.textContent = 'Running ' + LANG_BENCH.length + ' questions'
@@ -2776,6 +2801,7 @@ async function publishChangeNotice(slug){
       try{
         res = await askCommunityAssistant(c.q, { useAI: !!useAI });
       }catch(e){ err = String((e && e.message) || e); }
+      if(generation !== __benchGeneration) return;
       const ms = Date.now() - t0;
       const detected = res ? res.lang : '';
       const row = {
@@ -2829,8 +2855,9 @@ async function publishChangeNotice(slug){
   const _bCopy  = document.getElementById('langBenchCopy');
   const _bClear = document.getElementById('langBenchClear');
   if(_bRun)   _bRun.addEventListener('click',   ()=> runLangBench(false));
-  if(_bRunAI) _bRunAI.addEventListener('click', ()=> runLangBench(true));
+  if(_bRunAI){ _bRunAI.disabled = true; _bRunAI.title = 'AI disabled pending cost and provider review'; }
   if(_bClear) _bClear.addEventListener('click', ()=>{
+    __benchGeneration++;
     __benchRows = [];
     document.getElementById('langBenchResults').innerHTML = '';
     document.getElementById('langBenchStatus').textContent = 'Cleared.';

@@ -1,0 +1,31 @@
+const {chromium}=require('playwright');
+const AxeBuilder=require('@axe-core/playwright').default;
+const fs=require('fs'),assert=require('assert'),path=require('path');
+const root=path.join(__dirname,'..');
+(async()=>{
+ const browser=await chromium.launch({...(process.env.CJHQ_QA_CHROME==='playwright'?{}:{executablePath:'/usr/bin/google-chrome'}),headless:true,args:['--no-sandbox']});
+ const context=await browser.newContext(); const page=await context.newPage(); let requests=0;
+ await page.route('**/*',r=>{requests++;r.abort();});
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ const css=[...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m=>m[1]).join('\n');
+ const partial=fs.readFileSync(path.join(root,'tools/admin-panel.inc'),'utf8');
+ const panel=partial.slice(partial.indexOf('<div class="admin-tab-panel" id="tab-askcjhq"'),partial.indexOf('<!-- ===== TAB: ERROR LOG',partial.indexOf('<div class="admin-tab-panel" id="tab-askcjhq"')) > 0 ? partial.indexOf('<!-- ===== TAB: ERROR LOG',partial.indexOf('<div class="admin-tab-panel" id="tab-askcjhq"')) : undefined);
+ await page.setContent('<!doctype html><html lang="en"><head><title>Ask CJHQ admin review</title><style>'+css+'\n#tab-askcjhq{display:block!important;}#page-admin{display:block!important;padding:20px;max-width:1000px;margin:auto;}</style></head><body><main id="page-admin">'+panel+'</main></body></html>');
+ await page.evaluate(()=>{window.ASK_CJHQ_PUBLIC=false;window.cjhqEscapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));window.cjhqSafeUrl=s=>/^\/(?!\/)|^https:\/\//.test(s||'')?s:'';window.admToast=t=>window.lastToast=t;window.admForm=()=>{};window.requests=[];window.askCommunityAssistant=(q,opts)=>new Promise((resolve,reject)=>requests.push({q,opts,resolve,reject}));});
+ const src=fs.readFileSync(path.join(root,'tools/admin-app.js'),'utf8');const start=src.indexOf('(function initAskCjhq(){');const end=src.indexOf('\n})();',start)+7;await page.addScriptTag({content:src.slice(start,end)});
+ assert(await page.locator('#askCopy').isDisabled());assert(!await page.locator('#askRetry').isVisible());
+ await page.fill('#askInput','   ');await page.press('#askInput','Enter');assert.equal(await page.evaluate(()=>requests.length),0);
+ await page.fill('#askInput','How do I renew my RAMQ?');await page.press('#askInput','Enter');assert(await page.locator('#askSend').isDisabled());assert.equal(await page.locator('#askLog').getAttribute('aria-busy'),'true');
+ await page.evaluate(()=>requests[0].reject(new Error('test failure')));await page.waitForSelector('#askRetry:not([hidden])');
+ await page.click('#askRetry');assert.equal(await page.evaluate(()=>requests[1].q),'How do I renew my RAMQ?');
+ await page.evaluate(()=>requests[1].resolve(null));await page.waitForSelector('#askRetry:not([hidden])');
+ await page.click('#askRetry');await page.evaluate(()=>requests[2].resolve({answer:'<script>window.injected=true</script>\n'+ 'LongAnswer'.repeat(100),lang:'en',actions:[{label:'Blocked',url:'javascript:alert(1)'},{label:'Official health card service',url:'https://www.ramq.gouv.qc.ca/en/citizens/health-insurance/obtain-new-card'}],sources:[{name:'RAMQ',url:'https://www.ramq.gouv.qc.ca',type:'official'}],handler:'CJHQ Resources'}));
+ await page.waitForSelector('.ask-bubble');assert(!await page.locator('#askRetry').isVisible());assert.equal(await page.evaluate(()=>window.injected),undefined);assert.equal(await page.locator('a.ask-act').count(),1);assert.equal(await page.locator('#askLog').getAttribute('aria-busy'),'false');
+ await page.click('#askToggleSources');assert.equal(await page.locator('.ask-srcbox').count(),0);assert.equal(await page.locator('.ask-metabox').count(),3);await page.click('#askToggleSources');
+ await page.click('#askCopy');assert(await page.evaluate(()=>lastToast.includes('Could not copy')||lastToast.includes('copied')));
+ for(const width of [1280,390,320]){await page.setViewportSize({width,height:900});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'overflow '+width);if(width===1280||width===390)await page.screenshot({path:'/downloads/ask-admin-'+width+'.png',fullPage:true});}
+ const axe=await new AxeBuilder({page}).include('#tab-askcjhq').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();console.log('AXE',JSON.stringify(axe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))));
+ assert.equal(axe.violations.length,0);
+ await page.click('#askClear');assert.equal(await page.inputValue('#askInput'),'');assert(await page.locator('#askCopy').isDisabled());assert.equal(await page.evaluate(()=>document.activeElement.id),'askInput');
+ assert.equal(requests,0,'no external requests');console.log('Complete admin feature QA passed: keyboard/empty input, busy state, error/null retry, safe output/links, source toggle, clipboard fallback, Clear/focus, 1280/390/320px overflow, WCAG automated scan, zero network.');await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

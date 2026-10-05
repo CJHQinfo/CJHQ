@@ -131,7 +131,19 @@ export default async function run(opts){
   const nexusCcInsert = changed.filter(isNexusCcInsertion);
   console.log('  of which are the new NEXUS credit-card candidate: ' + nexusCcInsert.length);
 
-  const preExisting = changed.filter(c => !namesNewRecord(c.q) && !isManulifeHostFix(c) && !isNexusCcInsertion(c));
+  // Readiness correction: body-only unrelated match is now an honest no-answer.
+  const topicGuardFix = c => c.q === 'How long does a passport take?'
+    && c.after.handler === 'none' && c.after.handled === false
+    && c.after.actions.length === 1 && c.after.actions[0].includes('|/resources|');
+  const usPassportFix = c => /(?:U\.S\.|\bUS\b|American|United States).*passport|passport.*(?:U\.S\.|\bUS\b|American|United States)/i.test(c.q)
+    && !/canad/i.test(c.q) && c.after.sources.every(s => !/adult-passport-application|passport-renewal\|/.test(s))
+    && c.after.actions.every(a => !/\|\/resources\/(adult-passport-application|passport-renewal)\|/.test(a));
+  const corrected = changed.filter(topicGuardFix);
+  console.log('  of which correct explicit U.S. passport jurisdiction: ' + changed.filter(usPassportFix).length);
+  console.log('  of which remove the unrelated passport-duration answer: ' + corrected.length);
+  const ramqFix = c => /ramq/i.test(c.q) && /renew|renouvel/i.test(c.q) && c.after.actions.every(a => !/passport|nexus/i.test(a));
+  console.log("  RAMQ renewal corrections: " + changed.filter(ramqFix).length);
+  const preExisting = changed.filter(c => !ramqFix(c) && !usPassportFix(c) && !topicGuardFix(c) && !namesNewRecord(c.q) && !isManulifeHostFix(c) && !isNexusCcInsertion(c));
   const newRecordQs = changed.filter(c => namesNewRecord(c.q));
   console.log('  of which name a new record: ' + newRecordQs.length
             + '   pre-existing: ' + preExisting.length);

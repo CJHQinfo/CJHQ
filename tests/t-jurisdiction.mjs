@@ -42,9 +42,9 @@ export default async function run(){
   for(const q of US_AFFECTED){
     const r = await askRun(q, { useAI:false });
     const ctx = askBuildContext(r);
-    t.eq('no sibling context for ' + JSON.stringify(q.slice(0,44)), (r.related||[]).length, 0);
-    t.check('no RELATED block in the context for ' + JSON.stringify(q.slice(0,44)),
-      !ctx.includes('RELATED VERIFIED RESOURCES'));
+    t.check('U.S. passport answer never cites Canadian sources: '+q, (r.sources||[]).every(s => s.category === 'United States Citizens'));
+    t.check('U.S. passport answer never includes Canadian adult instructions: '+q, !/Canadian adult passport/.test(r.answer));
+    t.check('only U.S. siblings: '+q, (r.related||[]).every(x => x.category === 'United States Citizens'));
     t.check('still offers a next step: ' + JSON.stringify(q.slice(0,44)),
       (r.actions||[]).length >= 1, JSON.stringify((r.actions||[]).map(a=>a.url)));
   }

@@ -30,31 +30,19 @@
 const ASK_ASSISTANT_NAME = 'Ask CJHQ';
 const ASK_ASSISTANT_SUB  = 'Your Jewish Community Assistant';
 
-/* ---- Model / provider configuration ----
-   Switching model or provider is these three lines and nothing else. The
-   frontend never holds a key: AI_GATEWAY_URL points at the CJHQ-controlled
-   gateway, which holds the credential and forwards to whichever OpenAI-
-   compatible endpoint is configured there.
-
-   Because every candidate model is served behind an OpenAI-compatible API,
-   moving between Qwen, Gemma, Mistral, DeepSeek, or a self-hosted Ollama box
-   is a value change here plus one variable in the gateway. No code rewrite. */
-/* Firebase AI Logic, Gemini Developer API, on the Spark plan.
-
-   There is NO API key here and none is needed: with the Developer API the key
-   lives in Google's proxy, and the browser authenticates via App Check. Do not
-   add a Gemini key to this file - it would be public within one deploy.
-
-   Model choice: gemini-3.5-flash-lite gives 15 RPM / 500 RPD on the free tier,
-   against 5 RPM / 20 RPD for the full Flash models. Twenty requests a day is
-   not enough to test with, let alone serve the community - that limit, not the
-   free tier itself, is what produced the earlier 429s. */
+/* ---- Optional browser phrasing adapter ----
+   Retained for a future approved integration, not used by the zero-AI build.
+   Provider/model availability, pricing, App Check and abuse protection must
+   be verified separately before enabling it. Old free-tier quota comments
+   were not evidence of this project's current billing state. */
 /* ===== BROWSER AI ADAPTER: BEGIN =====================================
    Everything between these two fences is browser-only: it needs window.__fbApp,
    App Check attestation and a dynamic import from gstatic. tools/sync-ask-core.mjs
    strips this span when it generates ask-core.mjs, so the shared core carries no
    Firebase, gstatic or App Check dependency. Do not put deterministic logic here
    and do not reference anything from here inside a handler.                  */
+// Disabled until CJHQ separately approves provider availability and cost.
+const ASK_BROWSER_AI_ENABLED = false;
 const ASK_AI_CONFIG = {
   model:       'gemini-3.5-flash-lite',
   temperature: 0.2,     // low: this assistant reports facts, it does not invent
@@ -87,6 +75,7 @@ const ASK_AI_CONFIG = {
    Ask CJHQ is disabled, the rest of the site is unaffected. */
 let __appCheckPromise = null;
 function ensureAppCheck(){
+  if(!ASK_BROWSER_AI_ENABLED) return Promise.resolve(false);
   if(__appCheckPromise) return __appCheckPromise;
   __appCheckPromise = (async () => {
     if(!firebaseReady || !window.__fbApp) return false;
@@ -115,6 +104,7 @@ let __askModel = null;
 let __askLastCall = 0;
 
 async function askGetModel(){
+  if(!ASK_BROWSER_AI_ENABLED) throw new Error('ai-disabled');
   if(__askModel) return __askModel;
   if(!firebaseReady || !window.__fbApp) throw new Error('firebase-not-ready');
   // Initializes reCAPTCHA Enterprise on first use. Same provider, same site
@@ -170,6 +160,7 @@ const ASK_SYSTEM_PROMPT = [
 
 const ASK_BACKEND = {
   async ask(question, context){
+    if(!ASK_BROWSER_AI_ENABLED) throw new Error('ai-disabled');
     // Throttle rather than retry.
     const since = Date.now() - __askLastCall;
     if(since < ASK_AI_CONFIG.minGapMs){
@@ -474,10 +465,17 @@ function askMatchResources(question, limit){
     .map(w => w.replace(/[^a-z0-9]/g,''))
     .filter(w => w.length > 2 && !STOP.has(w) && !(isYi && YI_STOP.has(w)));
   if(!words.length) return [];
+  const ramqOnly = /\bramq\b/i.test(String(question || '')) &&
+    !/\b(?:passport|passeport|nexus)\b/i.test(String(question || ''));
+  const ramqRenewal = ramqOnly && /\brenew(?:al)?\b|renouvel|replace|remplac/i.test(String(question || ''));
   const out = [];
   (typeof categories !== 'undefined' ? categories : []).forEach(cat=>{
     (cat.groups || []).forEach(g=>{
       (g.items || []).forEach(it=>{
+        // RAMQ is an explicit topic, not a reason to offer passport/NEXUS.
+        // The existing health-card record is the verified renewal route.
+        if(ramqOnly && cat.en !== 'Healthcare') return;
+        if(ramqRenewal && it.slug !== 'replace-or-renew-your-health-card') return;
         // Every English body field is joined by its French twin, the same way
         // askQuestionBreadth's bodyOf() already does it. The titles were made
         // bilingual earlier; the bodies were not, so a French question could
@@ -539,6 +537,24 @@ function askMatchResources(question, limit){
       });
     });
   });
+  // A named topic must survive retrieval, even when generic body words
+  // score on a different topic. No new factual content is introduced.
+  const anchors = words.filter(w => ['passport','passeport','passports','passeports','nexus','ramq'].includes(w));
+  if(anchors.length && !out.some(h => h.titleHits > 0)){
+    for(let i = out.length - 1; i >= 0; i--){
+      const title = cjhqNormalizeSearch((out[i].item.en + ' ' + out[i].item.fr).toLowerCase());
+      if(!anchors.some(w => askTitleHasWord(title, w))) out.splice(i, 1);
+    }
+  }
+  // Explicit U.S. passport intent must never receive Canadian instructions.
+  // 'us passport' is a noun phrase; the ordinary pronoun 'help us' is not.
+  if(/passport|passeport|דרכון/i.test(String(question || '')) &&
+      (ASK_US_MARK_ANY.test(question) || ASK_US_MARK_CASE.test(question) || /\bus\s+passport\b/i.test(question)) &&
+      !ASK_CA_MARK.test(question)){
+    for(let i = out.length - 1; i >= 0; i--){
+      if(out[i].category !== 'United States Citizens') out.splice(i, 1);
+    }
+  }
   out.sort((a,b)=> b.score - a.score);
   // Relevance floor. Being the third-best match is not the same as being
   // relevant: a NEXUS question was pulling in RAMQ, and a RAMQ question was
@@ -2558,13 +2574,17 @@ function askVerifyPhrasing(phrased, question, res, context){
   const urls = p.match(/https?:\/\/[^\s<>")']+/g) || [];
   for(const u of urls){
     const bare = u.replace(/[.,;:)]+$/, '');
-    if(allowed.indexOf(bare) < 0) return 'invented-link';
+    const exactUrls = (allowed.match(/https?:\/\/[^\s<>"')]+/g) || []).map(x => x.replace(/[.,;:)]+$/, ''));
+    if(!exactUrls.includes(bare)) return 'invented-link';
   }
 
   // 2. Invented phone numbers. The highest-consequence hallucination this
   //    assistant could produce, so it is checked separately from links.
-  const nums = p.match(/\b(?:\+?1[-. ]?)?\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}\b/g) || [];
-  for(const n of nums){ if(allowed.indexOf(n) < 0) return 'invented-number'; }
+  const phonePattern = /(?<![\d])(?:\+?1[-. ]?)?\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}(?![\d])/g;
+  const phoneKey = n => String(n).replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+  const allowedPhones = new Set((allowed.match(phonePattern) || []).map(phoneKey));
+  const nums = p.match(phonePattern) || [];
+  for(const n of nums){ if(!allowedPhones.has(phoneKey(n))) return 'invented-number'; }
 
   // 3. Unnecessary refusal. CJHQ has a verified answer in hand; declining to
   //    give it is a failure of the phrasing pass, not a safety behaviour.
@@ -2768,11 +2788,11 @@ const ASK_BROWSER_AI = {
   // first Gemini call initializes App Check. askGetModel() awaits
   // ensureAppCheck() and still throws appcheck-not-ready on failure, so the
   // guarantee is unchanged - it just moved to the moment it is needed.
-  ready(){ return !!(ASK_BACKEND && firebaseReady); },
+  ready(){ return ASK_BROWSER_AI_ENABLED && !!(ASK_BACKEND && firebaseReady); },
   ask(question, context){ return ASK_BACKEND.ask(question, context); }
 };
 
 /* Kept so every existing call site in the admin panel works unchanged. */
 async function askCommunityAssistant(question, opts){
-  return askRun(question, opts, ASK_BROWSER_AI);
+  return askRun(question, Object.assign({}, opts, { useAI: ASK_BROWSER_AI_ENABLED && !!(opts && opts.useAI === true) }), ASK_BROWSER_AI);
 }

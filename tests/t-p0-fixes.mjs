@@ -82,6 +82,16 @@ function legacyBreadth(question, item, dropStop){
     if(!titleHas(primary, w)) continue;
     if(sibT.filter(t => titleHas(t, w)).length * 2 <= sibT.length) return { verdict:'narrow', by:w };
   }
+  // Later shipped behavior: an action may choose a route using sibling bodies.
+  const action = new Set(['apply','application','applications','applying','demande','demandes','demander',
+    'get','getting','obtain','obtaining','obtenir','submit','submitting','soumettre']);
+  const body = x => cjhqNormalizeSearch([x.en,x.fr,x.desc_en,x.desc_fr,x.what_en,x.what_fr,
+    x.steps_en,x.steps_fr,(x.steps_list_en||[]).join(' '),(x.steps_list_fr||[]).join(' ')]
+    .filter(Boolean).join(' ').toLowerCase());
+  for(const w of words){
+    if(!action.has(w) || !titleHas(primary,w)) continue;
+    if(sibs.filter(x=>titleHas(body(x.item),w)).length * 2 <= sibs.length) return {verdict:'narrow',by:w};
+  }
   return { verdict:'broad', by:'(none)' };
 }
 

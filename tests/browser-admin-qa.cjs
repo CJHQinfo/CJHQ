@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');
+const fs=require('fs'),assert=require('assert');
+(async()=>{const browser=await chromium.launch({...(process.env.CJHQ_QA_CHROME==='playwright'?{}:{executablePath:'/usr/bin/google-chrome'}),headless:true,args:['--no-sandbox']});const page=await browser.newPage();
+ await page.setContent('<div id="page-admin"><div id="askLog"></div><div id="askBackendStatus"></div><form id="askForm"><input id="askInput"><button id="askSend">Send</button></form>'+['askNew','askClear','askCopy','askToggleSources','askAddSource','askSeedSources','langBenchRun','langBenchRunAI','langBenchCopy','langBenchClear'].map(id=>`<button id="${id}">${id}</button>`).join('')+'<div id="askSourcesList"></div><div id="langBenchStatus"></div><div id="langBenchResults"></div></div>');
+ const src=fs.readFileSync(require('path').join(__dirname,'../tools/admin-app.js'),'utf8');const start=src.indexOf('(function initAskCjhq(){');const end=src.indexOf('\n})();',start)+7;
+ await page.evaluate(()=>{window.ASK_CJHQ_PUBLIC=false;window.cjhqEscapeHtml=s=>String(s);window.cjhqSafeUrl=s=>s;window.admToast=()=>{};window.admForm=()=>{};window.requests=[];window.askCommunityAssistant=(q,opts)=>new Promise(resolve=>requests.push({q,opts,resolve}));});
+ await page.addScriptTag({content:src.slice(start,end)});
+ const submit=()=>page.evaluate(()=>document.querySelector('#askForm').dispatchEvent(new Event('submit',{cancelable:true})));
+ await page.fill('#askInput','first');await submit();await page.fill('#askInput','duplicate');await submit();assert.equal(await page.evaluate(()=>requests.length),1);
+ await page.click('#askClear');await page.evaluate(()=>requests[0].resolve({answer:'STALE ANSWER',lang:'en'}));await page.waitForTimeout(20);assert(!await page.locator('#askLog').innerText().then(t=>t.includes('STALE')));
+ await page.fill('#askInput','new chat');await submit();await page.evaluate(()=>requests[1].resolve({answer:'פריוואטע טעסט',lang:'yi',sources:[],actions:[]}));await page.waitForSelector('.ask-bubble');assert.equal(await page.locator('.ask-bubble').getAttribute('dir'),'rtl');assert.equal(await page.evaluate(()=>requests[1].opts.useAI),false);
+ assert(await page.locator('#langBenchRunAI').isDisabled());
+ await page.click('#langBenchRun');await page.click('#langBenchClear');await page.evaluate(()=>requests[2].resolve({answer:'STALE BENCH',lang:'en',sources:[],actions:[]}));await page.waitForTimeout(20);assert.equal(await page.locator('#langBenchResults').innerText(),'');
+ console.log('Admin UI QA passed: duplicate submit blocked; Clear discards in-flight answer; RTL; zero-AI opts; disabled AI bench; Clear discards in-flight bench.');await browser.close();})().catch(e=>{console.error(e);process.exit(1)});

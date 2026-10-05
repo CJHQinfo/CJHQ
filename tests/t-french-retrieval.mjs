@@ -126,8 +126,8 @@ export default async function run(opts){
   for (const c of CASES) {
     const now = slugsOf(NEW.askMatchResources(c.query, 3));
     const was = slugsOf(OLD.askMatchResources(c.query, 3));
-    t.check(`${c.label} — deployed build retrieved NOTHING`,
-      was.length === 0, 'baseline returned ' + JSON.stringify(was));
+    t.check(`${c.label} — does not lose an already deployed match`,
+      !was.includes(c.expect) || now.includes(c.expect), 'baseline returned ' + JSON.stringify(was));
     t.check(`${c.label} — now retrieves ${c.expect}`,
       now.includes(c.expect), 'got ' + JSON.stringify(now));
   }
@@ -175,7 +175,7 @@ export default async function run(opts){
   const pctWas = testable ? Math.round(reachWas / testable * 100) : 0;
   console.log(`  records reachable by French-only body terms: ` +
               `${reachWas}/${testable} (${pctWas}%) before -> ${reachNow}/${testable} (${pctNow}%) now`);
-  t.check('the deployed build reached almost none of them', pctWas <= 5, pctWas + '%');
+  t.check('French reachability does not regress against current main', pctNow >= pctWas, pctWas + '% -> ' + pctNow + '%');
   t.check('the working copy reaches the large majority', pctNow >= 80, pctNow + '%');
 
   /* ---- English controls: identical to the deployed build ---- */

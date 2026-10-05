@@ -1,1 +1,1 @@
-{"private":true,"scripts":{"build":"node tools/sync-ask-core.mjs && node tools/generate-routes.mjs && node tools/minify-routes.mjs"},"devDependencies":{"lightningcss":"1.33.0","terser":"5.51.2"}}
+{"private":true,"scripts":{"build":"node tools/sync-ask-core.mjs && node tools/generate-routes.mjs && node tools/minify-routes.mjs","test":"node tests/run-all.mjs"},"devDependencies":{"lightningcss":"1.33.0","terser":"5.51.2"}}
