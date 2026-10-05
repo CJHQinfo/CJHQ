@@ -32,7 +32,7 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/ask-qa" --ignore-scripts --no-audit --no-fund playwright@1.63.0 @axe-core/playwright@4.13.0
           "$RUNNER_TEMP/ask-qa/node_modules/.bin/playwright" install --with-deps chromium
-          mkdir -p /downloads
+          sudo mkdir -p /downloads && sudo chown "$(id -u):$(id -g)" /downloads
           NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-qa.cjs
           NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-complete.cjs
       - name: Public artifact unchanged outside admin
