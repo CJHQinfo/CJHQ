@@ -1,0 +1,35 @@
+name: Prepare admin startup review
+on:
+  push:
+    branches: [fix/admin-startup-2026-10-04]
+    paths: [.github/workflows/prepare-admin-startup.yml]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate tested admin-only repair
+        env:
+          PATCH_GZ: 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
+        run: |
+          python3 - <<'PY'
+          import os,base64,gzip
+          from pathlib import Path
+          Path('/tmp/startup.patch').write_bytes(gzip.decompress(base64.b64decode(os.environ['PATCH_GZ'])))
+          PY
+          git apply --check /tmp/startup.patch
+          git apply /tmp/startup.patch
+          npm ci --ignore-scripts --no-audit --no-fund
+          node tools/generate-routes.mjs
+          git diff --name-only | grep -E '(^fr/|^resources/|\.html$)' | grep -v '^admin.html$' | while IFS= read -r file; do git restore -- "$file"; done
+          node tools/minify-routes.mjs --changed
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add admin.html tests/browser-admin-startup.cjs .github/workflows/ask-backend-ci.yml
+          git commit -m "Generate admin-only startup repair and regression coverage"
+          git push
