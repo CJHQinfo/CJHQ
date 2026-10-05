@@ -35,6 +35,7 @@ jobs:
           sudo mkdir -p /downloads && sudo chown "$(id -u):$(id -g)" /downloads
           NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-qa.cjs
           NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-complete.cjs
+          NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-startup.cjs
       - name: Public artifact unchanged outside admin
         run: |
           python3 tools/build-pages-artifact.py "$RUNNER_TEMP/ask-after"
