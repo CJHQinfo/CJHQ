@@ -24,12 +24,13 @@ jobs:
           PY
           git apply --check /tmp/startup.patch
           git apply /tmp/startup.patch
+          git restore .github/workflows/ask-backend-ci.yml
           npm ci --ignore-scripts --no-audit --no-fund
           node tools/generate-routes.mjs
           git diff --name-only | grep -E '(^fr/|^resources/|\.html$)' | grep -v '^admin.html$' | while IFS= read -r file; do git restore -- "$file"; done
           node tools/minify-routes.mjs --changed
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add admin.html tests/browser-admin-startup.cjs .github/workflows/ask-backend-ci.yml
+          git add admin.html tests/browser-admin-startup.cjs
           git commit -m "Generate admin-only startup repair and regression coverage"
           git push
