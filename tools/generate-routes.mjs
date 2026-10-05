@@ -286,6 +286,20 @@ function buildAdmin() {
   if (!out.includes(ADMIN_PLACEHOLDER)) throw new Error('admin: placeholder not found in index.html');
   out = out.replace(ADMIN_PLACEHOLDER, panel);
 
+  // Admin-only startup repair. Keep the public shared asset byte-identical.
+  // Its initial resource render can call pathForPage in saved French before
+  // the route constants initialize. Embed the same source with only those
+  // declarations moved ahead of their first use; no auth/data logic changes.
+  let adminCore = readFileSync(join(ROOT, 'assets/site-core.js'), 'utf8');
+  const routeStart = adminCore.indexOf('const FRENCH_ROUTE_BY_PAGE = {');
+  const routeEnd = adminCore.indexOf('function pathForPage(', routeStart);
+  if (routeStart < 0 || routeEnd < 0) throw new Error('admin: route declarations not found');
+  const routeDeclarations = adminCore.slice(routeStart, routeEnd);
+  adminCore = routeDeclarations + adminCore.slice(0, routeStart) + adminCore.slice(routeEnd);
+  if (/<\/script/i.test(adminCore)) throw new Error('admin: shared script contains an HTML closing tag');
+  out = replaceOnce(out, /<script src="\/assets\/site-core\.js"><\/script>/,
+    '<script>' + adminCore + '</script>', 'admin: ordered shared startup');
+
   // Put the admin app back, for admin.html only.
   if (!existsSync(ADMIN_APP)) throw new Error('tools/admin-app.js is missing');
   if (out.split(ADMIN_APP_PLACEHOLDER).length !== 2) throw new Error('admin: admin-app placeholder must appear exactly once in index.html');
