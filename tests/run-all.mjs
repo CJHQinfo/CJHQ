@@ -9,8 +9,9 @@ import mu from './t-municipal.mjs';
 import pc from './t-primary-context.mjs';
 import fr from './t-french-retrieval.mjs';
 import frRoutes from './t-french-routes.mjs';
+import readiness from './t-readiness.mjs';
 const out = [];
-for(const f of [aq, cl, p0, jg, mu, pc, fr, frRoutes, rg, df]) out.push(await f({}));
+for(const f of [readiness, aq, cl, p0, jg, mu, pc, fr, frRoutes, rg, df]) out.push(await f({}));
 try{ execFileSync('node', ['syntax-check.mjs'], { cwd: new URL('.', import.meta.url).pathname, stdio:'inherit' });
      out.push({ name:'inline script syntax', pass:1, fail:0 }); }
 catch(e){ out.push({ name:'inline script syntax', pass:0, fail:1 }); }

@@ -700,13 +700,16 @@
         <div class="admin-tab-panel" id="tab-askcjhq" style="display:none;">
           <div class="ask-banner" role="status">
             <strong>ADMIN TEST MODE — NOT PUBLIC.</strong>
-            Ask CJHQ is not launched. Visitors cannot see or reach it.
+            Ask CJHQ is not launched. There is no public Ask page or navigation. Staff sign-in is required to use this panel.
           </div>
 
+          <style>#tab-askcjhq [hidden]{display:none!important;}#tab-askcjhq .ask-msg{overflow-wrap:anywhere;}#tab-askcjhq .ask-input-row .admin-input{min-width:0}</style>
           <h2 class="ask-title">Ask CJHQ</h2>
           <p class="ask-sub">Your Jewish Community Assistant</p>
 
           <div class="ask-status" id="askBackendStatus"></div>
+          <p class="ask-help" id="askScope">Name the topic in each question. Follow-up pronouns are not resolved. Answers use existing CJHQ records, not live service updates. Questions stay in this tab only and are cleared on reload.</p>
+          <div id="askRequestStatus" role="status" aria-live="polite"></div>
 
           <div class="ask-shell">
             <div class="ask-log" id="askLog" role="log" aria-live="polite" aria-label="Conversation"></div>
@@ -714,7 +717,7 @@
   
             <form class="ask-input-row" id="askForm">
               <label class="visually-hidden" for="askInput">What can I help you with?</label>
-              <input type="text" id="askInput" class="admin-input" autocomplete="off"
+              <input type="text" id="askInput" class="admin-input" autocomplete="off" maxlength="2000" aria-describedby="askScope askRequestStatus"
                      placeholder="What can I help you with?">
               <button type="submit" class="btn dark" id="askSend">Send</button>
             </form>
@@ -722,7 +725,8 @@
             <div class="ask-actions">
               <button type="button" class="btn admin-btn-outline" id="askNew">New Conversation</button>
               <button type="button" class="btn admin-btn-outline" id="askClear">Clear</button>
-              <button type="button" class="btn admin-btn-outline" id="askCopy">Copy Response</button>
+              <button type="button" class="btn admin-btn-outline" id="askRetry" hidden>Retry Last Question</button>
+              <button type="button" class="btn admin-btn-outline" id="askCopy" disabled>Copy Response</button>
               <button type="button" class="btn admin-btn-outline" id="askToggleSources" aria-pressed="true">Hide Sources</button>
             </div>
           </div>
@@ -749,8 +753,8 @@
 
           <h3 class="ask-h3">Knowledge Sources</h3>
           <p class="ask-help">
-            The registry the assistant draws on. Stored in Firestore and editable here, so sources can be
-            added or retired without a code change.
+            Source planning registry, stored in Firestore. Editing this list does not change the engine
+            or connect a live service. The engine uses the bundled CJHQ resource records and structured handlers.
           </p>
           <div id="askSourcesList"></div>
           <button type="button" class="btn admin-btn-outline" id="askAddSource" style="margin-top:10px;">Add Source</button>

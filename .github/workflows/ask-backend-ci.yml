@@ -1,0 +1,52 @@
+name: Ask backend CI
+on:
+  pull_request:
+    paths:
+      - 'admin.html'
+      - 'ask-core.mjs'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/ask-backend-ci.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: cbea31fd485fa814400bec995f1a5fef7b55665b
+          path: .baseline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Core tests and generated-file drift
+        run: |
+          CJHQ_BASELINE="$GITHUB_WORKSPACE/.baseline/" npm test
+          node tools/sync-ask-core.mjs --check
+          node tools/generate-routes.mjs --check
+      - name: Chromium feature tests
+        run: |
+          npm install --prefix "$RUNNER_TEMP/ask-qa" --ignore-scripts --no-audit --no-fund playwright@1.63.0 @axe-core/playwright@4.13.0
+          "$RUNNER_TEMP/ask-qa/node_modules/.bin/playwright" install --with-deps chromium
+          sudo mkdir -p /downloads && sudo chown "$(id -u):$(id -g)" /downloads
+          NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-qa.cjs
+          NODE_PATH="$RUNNER_TEMP/ask-qa/node_modules" CJHQ_QA_CHROME=playwright node tests/browser-admin-complete.cjs
+      - name: Public artifact unchanged outside admin
+        run: |
+          python3 tools/build-pages-artifact.py "$RUNNER_TEMP/ask-after"
+          python3 tools/verify-pages-artifact.py "$RUNNER_TEMP/ask-after"
+          python3 .baseline/tools/build-pages-artifact.py "$RUNNER_TEMP/ask-before"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          before=Path(os.environ['RUNNER_TEMP'])/'ask-before'
+          after=Path(os.environ['RUNNER_TEMP'])/'ask-after'
+          paths=set(p.relative_to(before) for p in before.rglob('*') if p.is_file())|set(p.relative_to(after) for p in after.rglob('*') if p.is_file())
+          changed=sorted(str(p) for p in paths if not (before/p).exists() or not (after/p).exists() or (before/p).read_bytes()!=(after/p).read_bytes())
+          print('Changed deployed files:',changed)
+          assert changed == ['admin.html'], changed
+          PY
