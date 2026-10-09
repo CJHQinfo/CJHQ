@@ -9,8 +9,16 @@ root = Path(sys.argv[1])
 assert root.is_dir()
 for name in ('functions','tools','tests','.github','firestore.rules','ask-core.mjs','package.json'):
     assert not (root/name).exists(), f'internal source leaked: {name}'
-for name in ('index.html','admin.html','404.html','CNAME','.nojekyll','fr/index.html','fr/ressources.html','resources/find-a-family-doctor.html','fr/ressources/find-a-family-doctor.html','travel-guide/index.html','uci/index.html','notice/travel-guide.html','notice/uci.html','data/link-audit.json'):
+for name in ('index.html','admin.html','404.html','CNAME','.nojekyll','fr/index.html','fr/ressources.html','resources/find-a-family-doctor.html','fr/ressources/find-a-family-doctor.html','data/link-audit.json'):
     assert (root/name).is_file(), f'missing required public file: {name}'
+# Preserve any temporary-page output present in the source; expired pages
+# need not exist. Never require named temporary pages to stay published.
+source = Path(__file__).resolve().parent.parent
+for directory in ('notice','travel-guide','uci'):
+    for file in (source/directory).rglob('*'):
+        if file.is_file():
+            staged = root/file.relative_to(source)
+            assert staged.is_file() and staged.read_bytes() == file.read_bytes(), f'temporary page changed or missing: {file}'
 links = []
 class Links(HTMLParser):
     def handle_starttag(self,tag,attrs):
