@@ -787,9 +787,10 @@
     font-size:.78rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
   }
 
-  /* constant contact embed */
-  .ctct-inline-form{width:100%;}
-  .ctct-inline-form iframe{width:100% !important; max-width:100%;}
+  /* Mailjet signup embed */
+  .cjhq-mailjet-form{width:100%;position:relative;}
+  .cjhq-mailjet-language[hidden]{display:none !important;}
+  .cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;}
 
   /* social embeds */
   .social-embed-grid{display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; max-width:500px; margin:0 auto;}
@@ -1603,9 +1604,16 @@
         <span data-en>If you are part of Quebec's Hasidic Jewish community, we encourage you to subscribe to ensure you receive important updates as they are issued.</span>
         <span data-fr>Si vous faites partie de la communauté juive hassidique du Québec, nous vous encourageons à vous abonner afin de recevoir les mises à jour importantes dès leur diffusion.</span>
       </p>
-        <!-- Begin Constant Contact Inline Form Code -->
-        <div class="ctct-inline-form" data-form-id="f52c7ae1-68b7-490b-8505-b139b4d247f6" style="width:100%;"></div>
-        <!-- End Constant Contact Inline Form Code -->
+        <!-- Begin Mailjet bilingual form -->
+        <div class="cjhq-mailjet-form" style="width:100%;">
+          <div class="cjhq-mailjet-language" data-form-language="en">
+            <iframe title="CJHQ Updates signup" data-w-type="embedded" data-form-src="https://159pj.mjt.lu/wgt/159pj/swus/form?c=3dfffef4" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" style="height:0;"></iframe>
+          </div>
+          <div class="cjhq-mailjet-language" data-form-language="fr" hidden>
+            <iframe title="Inscription aux Mises à jour du CJHQ" data-w-type="embedded" data-form-src="https://159pj.mjt.lu/wgt/159pj/swum/form?c=524df13c" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" style="height:0;"></iframe>
+          </div>
+        </div>
+        <!-- End Mailjet bilingual form -->
       </div>
     </div>
   </section>
@@ -3741,78 +3749,66 @@ function requestResourceBackend(){
 </script>
 
 
-<!-- Begin Constant Contact Active Forms - loaded only where the form is shown.
-     The widget used to load on every route. It is a single script tag, but
-     jQuery, Underscore, reCAPTCHA, its own stylesheet and a config request all
-     come in behind it - close to a megabyte of third-party code, and a Google tracker,
-     on pages that carry no form at all.
-
-     The inline form lives on one route. But this is a single-page app: every
-     route file ships every page div and only the active one is rendered, so
-     the form element is PRESENT in the DOM everywhere. Testing for presence
-     would load the widget everywhere, which is the bug. The test below is
-     whether the element is actually RENDERED - getClientRects() is empty for
-     anything inside a display:none page - and the enclosing page's class
-     attribute is watched, so arriving at the form's route through a
-     client-side navigation loads it at that moment.
-
-     Nothing about the form changes: when its route is shown the same script
-     loads with the same account id and renders the same way. Performance and
-     third-party exposure only. No functionality removed, no consent mechanism
-     added - that decision is documented separately. -->
+<!-- Mailjet: load only when the signup route is visible. -->
 <script>
-(function deferConstantContact(){
-  var ACCOUNT = "e9166a9e087397b9011843b153dfb1d3";
-  var SRC = '//static.ctctcdn.com/js/signup-form-widget/current/signup-form-widget.min.js';
-  var loaded = false;
-  function load(){
-    // Two guards rather than one: the flag covers this closure, the id lookup
-    // covers anything that appended the script by other means.
-    if(loaded || document.getElementById('signupScript')) return;
-    loaded = true;
-    // The widget reads this global as it initialises, so it has to be set
-    // before the script is appended - the same order the two inline tags had.
-    window._ctct_m = ACCOUNT;
-    var el = document.createElement('script');
-    el.id = 'signupScript';
-    el.async = true; el.defer = true;
-    el.src = SRC;
-    document.body.appendChild(el);
-  }
-  // display:none anywhere up the tree - which is every inactive route - yields
-  // no client rects. Rendered but scrolled out of view still does, so the form
-  // loads as soon as its route is shown rather than waiting to be scrolled to.
-  function rendered(el){ return !!(el && el.getClientRects().length); }
-  var mo = null;
-  function watch(){
-    if(loaded) return;
-    var form = document.querySelector('.ctct-inline-form');
-    if(!form) return;                         // no form in this build at all
-    if(rendered(form)){ load(); return; }     // direct load of the form's route
-    if(mo) return;
-    var page = form.closest ? form.closest('.page') : null;
-    if(!page) return;
-    // The router reveals a route by putting `active` on its page div, so that
-    // attribute is the signal. It also fires for pushState navigation, which
-    // popstate does not. If the class changes but the form still is not
-    // rendered, keep watching rather than giving up.
-    mo = new MutationObserver(function(){
-      if(!rendered(form)) return;
-      mo.disconnect(); mo = null;
-      load();
+(function deferMailjetForm(){
+  var scriptPromise;
+  function library(){
+    if(window.iFrameResize) return Promise.resolve();
+    if(!scriptPromise) scriptPromise = new Promise(function(resolve,reject){
+      var script=document.createElement('script');
+      script.src='https://app.mailjet.com/pas-nc-embedded-v2.js';
+      script.onload=resolve; script.onerror=function(){scriptPromise=null;script.remove();reject(new Error('Mailjet embed did not load'));};
+      document.body.appendChild(script);
     });
-    mo.observe(page, { attributes:true, attributeFilter:['class','style','hidden'] });
+    return scriptPromise;
   }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', watch);
-  }else{
+  function watch(){
+    var holder=document.querySelector('.cjhq-mailjet-form');
+    if(!holder || !holder.getClientRects().length) return;
+    var lang=document.documentElement.classList.contains('lang-fr')?'fr':'en';
+    holder.querySelectorAll('[data-form-language]').forEach(function(container){
+      container.hidden=container.dataset.formLanguage!==lang;
+    });
+    var frame=holder.querySelector('[data-form-language="'+lang+'"] iframe');
+    if(!frame.getAttribute('src')) frame.src=frame.dataset.formSrc;
+    library().then(function(){
+      if(!frame.iFrameResizer) window.iFrameResize({checkOrigin:['https://159pj.mjt.lu']},frame);
+      else { frame.iFrameResizer.resize(); requestAnimationFrame(function(){frame.iFrameResizer.resize();}); }
+    }).catch(function(error){
+      console.warn(error.message);
+      frame.style.height='1100px'; frame.setAttribute('scrolling','yes');
+      var container=frame.parentElement;
+      if(!container.querySelector('.cjhq-form-fallback')){
+        var link=document.createElement('a');link.className='cjhq-form-fallback';
+        link.href=frame.dataset.formSrc;link.target='_blank';link.rel='noopener';
+        link.textContent=lang==='fr'?"Ouvrir le formulaire d'inscription":'Open the signup form';
+        container.insertBefore(link,frame);
+      }
+    });
+  }
+  function start(){
+    var holder=document.querySelector('.cjhq-mailjet-form');
+    if(!holder) return;
+    var page=holder.closest('.page');
+    if(page) new MutationObserver(watch).observe(page,{attributes:true,attributeFilter:['class','style','hidden']});
     watch();
   }
-  window.addEventListener('popstate', function(){ setTimeout(watch, 60); });
-  window.__cjhqWatchSignupForm = watch;
+  window.addEventListener('message',function(event){
+    if(event.origin!=='https://159pj.mjt.lu') return;
+    document.querySelectorAll('.cjhq-mailjet-form iframe').forEach(function(frame){
+      if(event.source!==frame.contentWindow) return;
+      if(event.data && event.data.type==='CAPTCHA_OPEN') frame.style.minHeight='650px';
+      if(event.data && event.data.type==='CAPTCHA_CLOSE') frame.style.minHeight='0px';
+    });
+  });
+  document.addEventListener('cjhq:langchange',watch);
+  window.addEventListener('popstate',watch);
+  window.__cjhqWatchSignupForm=watch;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start);else start();
 })();
 </script>
-<!-- End Constant Contact Active Forms -->
+<!-- End Mailjet form loader -->
 
 <!-- Load the Facebook Page SDK only when the feed is visible.
      No X timeline widget is embedded. -->

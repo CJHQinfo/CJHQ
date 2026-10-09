@@ -1822,7 +1822,7 @@ function updatePageMeta(name){
 // sticky header. Falls back to scrolling anyway if the widget never loads.
 function goToSubscribeForm(){
   goPage('stay-informed');
-  const holder = document.querySelector('.ctct-inline-form');
+  const holder = document.querySelector('.cjhq-mailjet-form');
   if(!holder) return;
   const target = holder.closest('.card') || holder;
   const doScroll = () => {
@@ -1833,7 +1833,7 @@ function goToSubscribeForm(){
   };
   const started = Date.now();
   (function waitForForm(){
-    const frame = holder.querySelector('iframe');
+    const frame = holder.querySelector('[data-form-language]:not([hidden]) iframe');
     const ready = frame && frame.getBoundingClientRect().height > 40;
     if(ready || Date.now() - started > 4000){ doScroll(); return; }
     requestAnimationFrame(waitForForm);
@@ -1934,7 +1934,7 @@ function setLang(lang){
   document.querySelectorAll('[data-en-label]').forEach(el=>{
     el.setAttribute('aria-label', lang==='fr' ? (el.dataset.frLabel || el.dataset.enLabel) : el.dataset.enLabel);
   });
-  translateCtctForm(lang);
+  if(window.__cjhqWatchSignupForm) window.__cjhqWatchSignupForm();
   // Refresh per-page meta tags for the new language
   const activePage = document.querySelector('.page.active');
   if(activePage){
@@ -1946,67 +1946,6 @@ function setLang(lang){
   // ever fired the event, so a language switch left that text in the old
   // language until the form was resubmitted.
   document.dispatchEvent(new CustomEvent('cjhq:langchange', { detail:{ lang } }));
-}
-// Translates the Constant Contact signup form's labels/notice/button between
-// English and French. Stores each element's original English text in a
-// data-attribute the first time it's seen, so switching back to English
-// always restores the exact original — nothing is ever permanently
-// overwritten. Runs on every language switch (not just to French), which
-// is what makes the "stays French when switching back" bug impossible.
-// Retries a few times since Constant Contact's widget can finish rendering
-// at different times depending on network speed.
-const CTCT_LABEL_TRANSLATIONS = {
-  'Email': 'Courriel',
-  'First Name': 'Prénom',
-  'Last Name': 'Nom de famille',
-  'Phone': 'Téléphone',
-  'Email Lists': "Listes d'envoi",
-};
-const CTCT_LEGAL_MARKER = 'By submitting this form';
-const CTCT_LEGAL_FR = 'En soumettant ce formulaire, vous consentez à recevoir des courriels promotionnels de la part de : CJHQ, 1040, avenue Van Horne, Outremont, QC, H2V 1J5, CA. Vous pouvez révoquer votre consentement à recevoir des courriels en tout temps en utilisant le lien de désabonnement SafeUnsubscribe®, situé au bas de chaque courriel. Les courriels sont gérés par Constant Contact.';
-function translateCtctForm(lang){
-  function apply(){
-    document.querySelectorAll('label, legend, span, div, p, small, h4, h3').forEach(function(el){
-      if(el.children.length > 0) return; // leaf text nodes only
-      const text = el.textContent.trim();
-      if(!el.dataset.ctctOriginalEn){
-        const knownMatch = Object.keys(CTCT_LABEL_TRANSLATIONS).find(k => k.toLowerCase() === text.toLowerCase());
-        if(knownMatch){
-          el.dataset.ctctOriginalEn = knownMatch;
-        } else if(text.indexOf(CTCT_LEGAL_MARKER) !== -1){
-          el.dataset.ctctOriginalEn = text;
-          el.dataset.ctctIsLegal = '1';
-        }
-      }
-      if(el.dataset.ctctOriginalEn){
-        if(lang === 'fr'){
-          el.textContent = el.dataset.ctctIsLegal ? CTCT_LEGAL_FR : CTCT_LABEL_TRANSLATIONS[el.dataset.ctctOriginalEn];
-        } else {
-          el.textContent = el.dataset.ctctOriginalEn;
-        }
-      }
-    });
-    document.querySelectorAll("button,input[type='submit']").forEach(function(btn){
-      const isInput = btn.tagName === 'INPUT';
-      const current = (isInput ? btn.value : btn.innerHTML).trim();
-      if(!btn.dataset.ctctOriginalEn && (current === 'Sign Up!' || current === "S'inscrire")){
-        btn.dataset.ctctOriginalEn = 'Sign Up!';
-      }
-      if(btn.dataset.ctctOriginalEn){
-        const newText = lang === 'fr' ? "S'inscrire" : btn.dataset.ctctOriginalEn;
-        if(isInput) btn.value = newText; else btn.innerHTML = newText;
-      }
-    });
-  }
-  // Multiple attempts: the widget can render well after the language
-  // switch, especially on a slower connection or first page load.
-  // Cancel any pending attempts from a previous call first — otherwise a
-  // stale retry from an earlier language switch can fire after this one
-  // and silently revert the more recent, correct result.
-  if(window.__ctctTranslateTimers){
-    window.__ctctTranslateTimers.forEach(t => clearTimeout(t));
-  }
-  window.__ctctTranslateTimers = [800, 1800, 3000, 5000].map(delay => setTimeout(apply, delay));
 }
 // Persist ONLY on an explicit click. A geographic first-visit default is
 // deliberately not written to storage, so "saved" always means "the visitor
