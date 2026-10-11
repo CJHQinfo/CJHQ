@@ -810,6 +810,12 @@
   .cjhq-mailjet-form,
   .cjhq-mailjet-language{overflow:hidden;}
   .cjhq-mailjet-form iframe{margin-bottom:-168px;}
+  /* On narrow screens the badge shrinks with the iframe. Keep the crop
+     proportional so the signup button remains fully visible. */
+  @media(max-width:600px){
+    .cjhq-mailjet-language{container-type:inline-size;}
+    .cjhq-mailjet-form iframe{margin-bottom:calc(-80px - min(72px, 20.4545cqw - 10.227px));}
+  }
   /* The captcha opens inside the frame and can extend to its bottom edge, so
      the clip is lifted for as long as it is on screen (CAPTCHA_OPEN below). */
   .cjhq-mailjet-form.cjhq-captcha-open iframe{margin-bottom:0;}
