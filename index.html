@@ -792,6 +792,28 @@
   .cjhq-mailjet-language[hidden]{display:none !important;}
   .cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;}
 
+  /* The embedded form ends with Mailjet's "Powered by Mailjet" badge. It lives
+     inside a cross-origin iframe, so it cannot be hidden with a selector - the
+     only lever this page has is how much of the frame it shows.
+
+     Both forms were measured against the live embeds on 2026-10-11. The badge
+     is the last block in the document, 72px tall, and sits 30px below the Sign
+     up button in each: the English form needs the bottom 156px removed, the
+     French form 162px. 168px clears both and still leaves the button 18px /
+     24px of space beneath it. The badge image is 352x72 with max-width:100%,
+     so on a narrow screen it scales DOWN and the clip eats a little more of
+     that 30px gap - never the button, which is 35px tall. Re-measure if
+     Mailjet changes the template.
+
+     overflow:hidden sits on both the holder and the per-language wrapper so
+     the clipped strip cannot paint over the card below it. */
+  .cjhq-mailjet-form,
+  .cjhq-mailjet-language{overflow:hidden;}
+  .cjhq-mailjet-form iframe{margin-bottom:-168px;}
+  /* The captcha opens inside the frame and can extend to its bottom edge, so
+     the clip is lifted for as long as it is on screen (CAPTCHA_OPEN below). */
+  .cjhq-mailjet-form.cjhq-captcha-open iframe{margin-bottom:0;}
+
   /* social embeds */
   .social-embed-grid{display:flex; flex-direction:column; align-items:center; text-align:center; width:100%; max-width:500px; margin:0 auto;}
   .fb-page{width:100% !important; max-width:100%; display:block;}
@@ -3798,8 +3820,12 @@ function requestResourceBackend(){
     if(event.origin!=='https://159pj.mjt.lu') return;
     document.querySelectorAll('.cjhq-mailjet-form iframe').forEach(function(frame){
       if(event.source!==frame.contentWindow) return;
-      if(event.data && event.data.type==='CAPTCHA_OPEN') frame.style.minHeight='650px';
-      if(event.data && event.data.type==='CAPTCHA_CLOSE') frame.style.minHeight='0px';
+      // The bottom of the frame is clipped to hide Mailjet's badge (see the
+      // .cjhq-mailjet-form rules). Lift the clip while the captcha is open so
+      // nothing the visitor has to interact with can fall inside the clip.
+      var box=frame.closest('.cjhq-mailjet-form');
+      if(event.data && event.data.type==='CAPTCHA_OPEN'){ frame.style.minHeight='650px'; if(box) box.classList.add('cjhq-captcha-open'); }
+      if(event.data && event.data.type==='CAPTCHA_CLOSE'){ frame.style.minHeight='0px'; if(box) box.classList.remove('cjhq-captcha-open'); }
     });
   });
   document.addEventListener('cjhq:langchange',watch);

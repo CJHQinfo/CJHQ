@@ -72,16 +72,21 @@ jobs:
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The generator writes eight English routes, admin.html, and nine
-          # French routes. Stage them all so a change to index.html cannot
-          # leave French copies drifting in the published tree.
+          # The generator writes eight English routes, admin.html, nine French
+          # routes, and the 134 resource detail pages (resources/<slug>.html
+          # and fr/ressources/<slug>.html). Stage them all so a change to
+          # index.html cannot leave copies drifting in the published tree.
+          # The detail pages matter as much as the rest: they are regenerated
+          # on every run, and leaving them uncommitted makes the next
+          # deploy-pages run fail its `generate-routes.mjs --check`.
           git add resources.html stay-informed.html contact.html about.html \
                   privacy.html terms.html accessibility.html \
                   child-travel-consent.html admin.html fr/index.html \
                   fr/ressources.html fr/actualites.html fr/a-propos.html \
                   fr/contact.html fr/politique-de-confidentialite.html \
                   fr/conditions-utilisation.html fr/accessibilite.html \
-                  fr/consentement-voyage-enfant.html
+                  fr/consentement-voyage-enfant.html \
+                  resources fr/ressources
           if git diff --staged --quiet; then
             echo "Route files already up to date - nothing to commit."
           else
