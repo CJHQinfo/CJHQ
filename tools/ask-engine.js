@@ -1490,7 +1490,7 @@ const ASK_ORG_SERVICES = [
    organization: askOrganizations answers about partners, this answers about
    CJHQ. A partner's number is never CJHQ's number and vice versa. */
 const ASK_CJHQ_CONTACT = {
-  phone: '(514) 819-9440',
+  phone: '(514) 844-2121',
   email: 'info@cjhq.org',
   address: '1040 Van Horne Ave, Outremont, QC'
 };
