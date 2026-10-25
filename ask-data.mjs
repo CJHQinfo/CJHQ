@@ -287,3 +287,13 @@ export const PARTNERS_DATA = [
   {type:'img', src:"/assets/bonei-olam-montreal.webp", w:166, h:159, alt:"Bonei Olam Montreal", url:"https://www.boneiolam.org/"},
   {type:'img', src:"/assets/interstate-chaverim.webp", w:220, h:210, alt:"Interstate Chaverim", url:"https://www.interstatechaverim.com/"}
 ];
+
+// Section publish switch for askSpecialInfo. null = unmanaged static dataset
+// (engine keeps historical behavior); the bot sync mount overwrites this with
+// the settings/site sectionVisibility map when it regenerates ask-data.
+export const SPECIAL_INFO_SECTION_VISIBILITY = null;
+
+// Temporary/custom pages. Empty in the static site-generated dataset; the bot
+// sync mount overwrites this with the pushed pages (window evaluated by the
+// engine at answer time).
+export const CUSTOM_PAGES = [];

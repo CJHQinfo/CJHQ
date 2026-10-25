@@ -191,8 +191,15 @@ export default async function run(){
   for(const s of ["Driver's Licence", 'PASSPORT', 'Cachère', "l'enfant"]){
     t.eq('cjhqNormalizeSearch unchanged: ' + s, NEW.cjhqNormalizeSearch(s), OLD.cjhqNormalizeSearch(s));
   }
-  t.eq('handler order unchanged', NEW.askPracticalHandlers().map(f=>f.name).join(','),
-                                  OLD.askPracticalHandlers().map(f=>f.name).join(','));
+  // Reviewed drift (Tab review item 13 / user 2026-10-25 "Temp pages should
+  // sync"): askCustomPages is DELIBERATELY added after askSpecialInfo so
+  // time-bound published pages win over the generic matcher. Everything else
+  // in the order is unchanged; any FURTHER drift fails here.
+  const oldOrder = OLD.askPracticalHandlers().map(f=>f.name);
+  const expectedOrder = [...oldOrder];
+  expectedOrder.splice(oldOrder.indexOf('askSpecialInfo') + 1, 0, 'askCustomPages');
+  t.eq('handler order unchanged apart from reviewed askCustomPages insertion',
+       NEW.askPracticalHandlers().map(f=>f.name).join(','), expectedOrder.join(','));
 
   // ---- two-pass verification: the ceiling holds -----------------------------------
   let calls = 0;

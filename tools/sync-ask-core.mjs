@@ -100,6 +100,16 @@ export ${categories}
 export ${specialInfo}
 
 export ${partners}
+
+// Section publish switch for askSpecialInfo. null = unmanaged static dataset
+// (engine keeps historical behavior); the bot sync mount overwrites this with
+// the settings/site sectionVisibility map when it regenerates ask-data.
+export const SPECIAL_INFO_SECTION_VISIBILITY = null;
+
+// Temporary/custom pages. Empty in the static site-generated dataset; the bot
+// sync mount overwrites this with the pushed pages (window evaluated by the
+// engine at answer time).
+export const CUSTOM_PAGES = [];
 `;
 
 /* ---------------------------------------------------------------- core ---- */
@@ -122,7 +132,7 @@ const EXPORTS = [
   'askT', 'askBuildContext', 'askMatchResources', 'askBridgeTerms', 'askSortSources',
   'askPracticalHandlers', 'askHalachic', 'askEruv', 'askEmergency', 'askZmanim',
   'askCalendar', 'askCommunityDirectory', 'askCjhqResources', 'cjhqNormalizeSearch',
-  'askOrganizations', 'askOrgRegistry', 'askSpecialInfo', 'askFindMtl',
+  'askOrganizations', 'askOrgRegistry', 'askSpecialInfo', 'askCustomPages', 'askFindMtl',
   'ASK_TEMPLATES', 'askSmallTalk', 'ASK_FINDMTL', 'askContactCjhq', 'askChildTravel',
   'askOrgContactState', 'ASK_CJHQ_CONTACT',
   'ASK_SESSION_POLICY', 'askSessionState', 'askSessionShouldClose',
@@ -164,7 +174,7 @@ const coreOut = `/* GENERATED FILE - do not edit.
  * needs the original characters to tell Yiddish from Hebrew. Omit aiAdapter and
  * the deterministic path runs alone, which is what v1 wants.
  */
-import { categories, SPECIAL_INFO_COUNTRIES, PARTNERS_DATA } from './ask-data.mjs';
+import { categories, SPECIAL_INFO_COUNTRIES, SPECIAL_INFO_SECTION_VISIBILITY, CUSTOM_PAGES, PARTNERS_DATA } from './ask-data.mjs';
 
 ${normalize}
 

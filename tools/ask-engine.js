@@ -1042,7 +1042,7 @@ function askPracticalHandlers(){
   // meaning are not resource keywords - the matcher saw only noise.
   return [askContactCjhq, askEruv, askEmergency, askZmanim, askCalendar,
           askOrganizations, askChildTravel, askSpecialInfo,
-          askCommunityDirectory, askCjhqResources, askFindMtl];
+          askCustomPages, askCommunityDirectory, askCjhqResources, askFindMtl];
 }
 
 function askHalachic(q, opts){
@@ -1967,10 +1967,119 @@ function askOrganizations(q, opts){
   return r;
 }
 
+// Montreal-local calendar day, matching the site's cjhqMontrealToday
+// (assets/site-core.js: cjhqPageLifecycle compares date STRINGS in this
+// timezone - expiry is inclusive, ending AFTER the end date).
+function askMontrealTodayISO(){
+  try{
+    return new Intl.DateTimeFormat('en-CA', { timeZone:'America/Toronto',
+      year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+  }catch(e){
+    return new Date().toISOString().slice(0,10);
+  }
+}
+function askWithinDateWindow(startsOn, endsOn){
+  const today = askMontrealTodayISO();
+  const s = String(startsOn || '').trim(), e = String(endsOn || '').trim();
+  if(s && today < s) return false;
+  if(e && today > e) return false;
+  return true;
+}
+
+// Temporary/custom pages pushed by the bot sync. The collection's
+// Firestore rules gate reads on the live
+// window, so these arrive PUSH-only and the lifecycle is evaluated HERE, at
+// answer time, mirroring cjhqPageLifecycle exactly: published===false is a
+// hidden draft, start_date/end_date compare against the Montreal-local day
+// with an inclusive end, a deleted page is simply absent. A window opening
+// or closing has no save event - answer time is the only correct checkpoint.
+function askCustomPages(q){
+  if(typeof CUSTOM_PAGES === 'undefined' || !Array.isArray(CUSTOM_PAGES) || !CUSTOM_PAGES.length) return null;
+  const norm = cjhqNormalizeSearch(String(q || ''));
+  if(!norm) return null;
+  const qTokens = new Set(norm.split(' ').filter(t => t.length > 3));
+  if(!qTokens.size) return null;
+  const today = askMontrealTodayISO();
+  let best = null, bestScore = 0, bestTitleHit = false;
+  for(const p of CUSTOM_PAGES){
+    if(!p || typeof p !== 'object') continue;
+    if(p.published === false) continue;                       // hidden/draft
+    const from = String(p.start_date || '').trim(), to = String(p.end_date || '').trim();
+    if(from && today < from) continue;                        // scheduled
+    if(to && today > to) continue;                            // expired (inclusive end)
+    const titleNorm = cjhqNormalizeSearch([p.title_en, p.title_fr].filter(Boolean).join(' '));
+    const titleTokens = titleNorm.split(' ');
+    const hay = cjhqNormalizeSearch([p.slug, p.title_en, p.title_fr].filter(Boolean).join(' '));
+    let score = 0, titleHit = false;
+    for(const t of hay.split(' ').filter(t => t.length > 3)){
+      // A lone shared term pulls the page in only when it is a DISTINCTIVE
+      // title word (6+ chars) - a common 4-letter noun like "sale" must not.
+      if(qTokens.has(t)){ score++; if(t.length >= 6 && titleTokens.includes(t)) titleHit = true; }
+    }
+    if(score > bestScore || (score === bestScore && score > 0 && titleHit && !bestTitleHit)){
+      best = p; bestScore = score; bestTitleHit = titleHit;
+    }
+  }
+  // Require two matching terms, or one DISTINCTIVE title term (5+ chars) -
+  // a single common word must not pull a page into an unrelated question.
+  if(!best || (bestScore < 2 && !bestTitleHit)) return null;
+
+  const r = askAnswerShape();
+  const L = askRenderLang(askDetectLanguage(String(q || ''))); r.lang = L;
+  r.handler = 'CJHQ Page';
+  r.timeSensitive = true;
+  const title = L === 'fr' ? (best.title_fr || best.title_en) : (best.title_en || best.title_fr);
+  let body = L === 'fr' ? (best.body_fr || best.body_en) : (best.body_en || best.body_fr);
+  body = String(body || '');
+  if(best.body_format !== 'text'){
+    body = body
+      .replace(/<\s*(br|\/p|\/div)\s*>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  }
+  body = body.replace(/\n{3,}/g, '\n\n').trim();
+  const MAX = 1800;
+  if(body.length > MAX){
+    body = body.slice(0, MAX).replace(/\s+\S*$/, '') + '\n\n' + askT({
+      en:'(continued on the CJHQ page linked below)',
+      fr:'(suite sur la page du CJHQ li\u00e9e ci-dessous)',
+      he:'(\u05d4\u05de\u05e9\u05da \u05d1\u05e2\u05de\u05d5\u05d3 CJHQ \u05d4\u05de\u05e7\u05d5\u05e9\u05e8 \u05dc\u05d4\u05dc\u05df)',
+      yi:'(\u05d4\u05de\u05e9\u05da \u05d0\u05d5\u05d9\u05e3 \u05d3\u05e2\u05e8 CJHQ \u05d1\u05dc\u05e2\u05d8\u05e2\u05e8 \u05d0\u05e0\u05d8\u05d8\u05df)'
+    }, L);
+  }
+  if(!body) return null;
+  r.handled = true;
+  r.answer = body;
+  r.actions = [{ label: String(title || 'CJHQ'), url: '/' + String(best.slug || ''), kind: 'internal' }];
+  return r;
+}
+
 function askSpecialInfo(q){
   const s = String(q || '');
   if(!ASK_SPECIAL_ITEMS.test(s) || !ASK_SPECIAL_TRAVEL.test(s)) return null;
   if(typeof SPECIAL_INFO_COUNTRIES === 'undefined') return null;
+  // Section publish switch (present only in sync-managed ask-data): the
+  // holiday-travel section is answerable ONLY while published and inside its
+  // schedule - the site's own fail-closed rule (index.html isSectionPublished:
+  // missing entry or fetch failure = hidden). A legacy static dataset carries
+  // no SPECIAL_INFO_SECTION_VISIBILITY export and behavior is unchanged.
+  if(typeof SPECIAL_INFO_SECTION_VISIBILITY !== 'undefined' && SPECIAL_INFO_SECTION_VISIBILITY){
+    const v = SPECIAL_INFO_SECTION_VISIBILITY['yomim-tovim-travel'];
+    if(!v || v.status !== 'published' || !askWithinDateWindow(v.startsOn, v.endsOn)){
+      const r0 = askAnswerShape();
+      const L0 = askRenderLang(askDetectLanguage(s)); r0.lang = L0;
+      r0.handler = 'Special Information';
+      r0.handled = false;
+      r0.answer = askT({
+        en:'CJHQ is not publishing its holiday travel information section right now. I would rather say that than give you travel rules that may be out of date. The section reappears on cjhq.org when CJHQ republishes it.',
+        fr:'Le CJHQ ne publie pas sa section d\u2019information sur les voyages des f\u00eates en ce moment. Je pr\u00e9f\u00e8re le dire plut\u00f4t que de donner des r\u00e8gles de voyage qui pourraient ne plus \u00eatre \u00e0 jour. La section r\u00e9appara\u00eet sur cjhq.org lorsque le CJHQ la republie.',
+        he:'CJHQ \u05d0\u05d9\u05e0\u05d5 \u05de\u05e4\u05e8\u05e1\u05dd \u05db\u05e8\u05d2\u05e2 \u05d0\u05ea \u05de\u05d3\u05d5\u05e8 \u05de\u05d9\u05d3\u05e2 \u05d4\u05e0\u05e1\u05d9\u05e2\u05d5\u05ea \u05dc\u05d7\u05d2\u05d9\u05dd. \u05e2\u05d3\u05d9\u05e3 \u05dc\u05d5\u05de\u05e8 \u05d6\u05d0\u05ea \u05de\u05dc\u05ea\u05ea \u05db\u05dc\u05dc\u05d9 \u05e0\u05e1\u05d9\u05e2\u05d4 \u05e9\u05e2\u05e9\u05d5\u05d9\u05d9\u05dd \u05dc\u05d0 \u05dc\u05d4\u05d9\u05d5\u05ea \u05de\u05e2\u05d5\u05d3\u05db\u05e0\u05d9\u05dd. \u05d4\u05de\u05d3\u05d5\u05e8 \u05d7\u05d5\u05d6\u05e8 \u05dc-cjhq.org \u05db\u05e9-CJHQ \u05de\u05e4\u05e8\u05e1\u05dd \u05d0\u05d5\u05ea\u05d5 \u05de\u05d7\u05d3\u05e9.',
+        yi:'CJHQ \u05e4\u05d0\u05e8\u05e2\u05e4\u05e0\u05d8\u05dc\u05e2\u05e0\u05d8\u05e7\u05d8 \u05d9\u05e2\u05e6\u05d8 \u05e0\u05d9\u05e9\u05d8 \u05d6\u05d9\u05d9\u05df \u05d9\u05d5\u05dd\u05d8\u05d1\u05d3\u05d9\u05e7\u05e2 \u05e8\u05d9\u05d9\u05d6\u05e2\u05be\u05d0\u05d9\u05e0\u05e4\u05d0\u05e8\u05de\u05d0\u05e6\u05d9\u05e2 \u05d0\u05e4\u05d8\u05e2\u05d9\u05dc\u05d5\u05e0\u05d2. \u05d1\u05e2\u05e1\u05e2\u05e8 \u05e6\u05d5 \u05d6\u05d0\u05d2\u05df \u05d0\u05e3\u05d9\u05dc\u05e2 \u05d5\u05d5\u05d9 \u05e6\u05d5 \u05e8\u05e2\u05d3\u05d5\u05df \u05e8\u05d9\u05d9\u05d6\u05e2\u05be\u05db\u05dc\u05dc\u05d9\u05dd \u05d5\u05d5\u05d0\u05e1 \u05e7\u05e2\u05e0\u05e2\u05df \u05d6\u05d9\u05d9\u05df \u05e4\u05e2\u05e8\u05d0\u05dc\u05d8. \u05d3\u05e2\u05e8 \u05d0\u05e4\u05d8\u05e2\u05d9\u05dc\u05d5\u05e0\u05d2 \u05e7\u05d5\u05dd\u05d8 \u05e6\u05d9\u05e8\u05d5\u05e7 \u05d0\u05d5\u05d9\u05e3 cjhq.org \u05d0\u05d5\u05df CJHQ \u05e4\u05d0\u05e8\u05e2\u05e4\u05e0\u05d8\u05dc\u05e2\u05e0\u05d8 \u05d0\u05d9\u05df \u05d5\u05d9\u05e2\u05d3\u05e2\u05e8.'
+      }, L0);
+      return r0;
+    }
+  }
 
   const r = askAnswerShape();
   const L = askRenderLang(askDetectLanguage(s)); r.lang = L;
