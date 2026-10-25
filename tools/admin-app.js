@@ -1243,7 +1243,7 @@ async function savePartnerContact(key){
   const list = (x) => x.split(',').map(t => t.trim()).filter(Boolean);
 
   const next = {
-    ...existing, id:key, key,
+    id: key, key,
     url:               g('website'),
     address:           g('address'),
     description:       g('description'),
@@ -1258,8 +1258,7 @@ async function savePartnerContact(key){
     languages:         g('languages'),
     contactSource:     g('contactSource'),
     contactVerified:   !!(document.getElementById('pc-contactVerified') || {}).checked,
-    contactVerifiedDate: g('contactVerifiedDate'),
-    hidden:            existing.hidden || false
+    contactVerifiedDate: g('contactVerifiedDate')
   };
 
   // Changed information requires re-verification. If any contact value differs
@@ -1542,7 +1541,7 @@ async function resetExistingResourceOverride(slug){
   const existing = RESOURCE_OVERRIDES_CACHE[slug];
   const hiddenState = existing ? existing.hidden : false;
   if(hiddenState){
-    await saveToCollection('resource_overrides', { id: slug, slug, hidden: true });
+    await saveToCollection('resource_overrides', { id: slug, slug, hidden: true }, { replace: true });
   } else {
     await deleteFromCollection('resource_overrides', slug);
   }
