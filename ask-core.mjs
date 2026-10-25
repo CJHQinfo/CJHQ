@@ -26,7 +26,7 @@
  * needs the original characters to tell Yiddish from Hebrew. Omit aiAdapter and
  * the deterministic path runs alone, which is what v1 wants.
  */
-import { categories, SPECIAL_INFO_COUNTRIES, SPECIAL_INFO_SECTION_VISIBILITY, CUSTOM_PAGES, PARTNERS_DATA } from './ask-data.mjs';
+import { categories, SPECIAL_INFO_COUNTRIES, SPECIAL_INFO_SECTION_VISIBILITY, CUSTOM_PAGES, PARTNERS_DATA, ORG_CONTACT_OVERRIDES } from './ask-data.mjs';
 
 function cjhqNormalizeSearch(str){
   return String(str == null ? '' : str)
@@ -1656,7 +1656,7 @@ function askNameCandidates(norm){
 
 function askOrgRegistry(contacts){
   const raw = (typeof PARTNERS_DATA !== 'undefined') ? PARTNERS_DATA : [];
-  const extra = contacts || (typeof PARTNER_OVERRIDES_CACHE !== 'undefined' ? PARTNER_OVERRIDES_CACHE : null) || {};
+  const extra = contacts || (typeof PARTNER_OVERRIDES_CACHE !== 'undefined' ? PARTNER_OVERRIDES_CACHE : null) || (typeof ORG_CONTACT_OVERRIDES !== 'undefined' ? ORG_CONTACT_OVERRIDES : null) || {};
   return raw.map(p => Object.assign({}, p, extra[(p.alt || p.name || '').trim()] || {}))
     // An admin-hidden partner is never answered, no matter which data path
     // supplied the override (previously only Hatzolah had this guard).
@@ -1866,6 +1866,10 @@ function askOrganizations(q, opts){
 // Montreal-local calendar day, matching the site's cjhqMontrealToday
 // (assets/site-core.js: cjhqPageLifecycle compares date STRINGS in this
 // timezone - expiry is inclusive, ending AFTER the end date).
+// Hard cutover of the rules' bounded legacy branch (firestore.rules:130-133):
+// a page saved before public_from_ms existed stays public only if it had
+// already started by this date.
+const CJHQ_PUBLIC_FROM_CUTOVER = '2026-09-29';
 function askMontrealTodayISO(){
   try{
     return new Intl.DateTimeFormat('en-CA', { timeZone:'America/Toronto',
@@ -1877,32 +1881,40 @@ function askMontrealTodayISO(){
 function askWithinDateWindow(startsOn, endsOn){
   const today = askMontrealTodayISO();
   const s = String(startsOn || '').trim(), e = String(endsOn || '').trim();
-  if(s && today < s) return false;
-  if(e && today > e) return false;
+  // Mirror isWithinSchedule (index.html): a malformed date must not
+  // silently widen the window.
+  const valid = (v)=> /^\d{4}-\d{2}-\d{2}$/.test(v);
+  if(s){ if(!valid(s)) return false; if(today < s) return false; }
+  if(e){ if(!valid(e)) return false; if(today > e) return false; }
   return true;
 }
 
-// Temporary/custom pages pushed by the bot sync. The collection's
-// Firestore rules gate reads on the live
-// window, so these arrive PUSH-only and the lifecycle is evaluated HERE, at
-// answer time, mirroring cjhqPageLifecycle exactly: published===false is a
-// hidden draft, start_date/end_date compare against the Montreal-local day
-// with an inclusive end, a deleted page is simply absent. A window opening
-// or closing has no save event - answer time is the only correct checkpoint.
+// Temporary/custom pages synced by the bot sync. The public site reads a
+// page only while firestore.rules pageIsPublicNow holds (the rules enforce
+// it on every single-doc get), so the lifecycle is evaluated HERE, at answer
+// time, mirroring pageIsPublicNow exactly: published must be true,
+// public_until_ms (absolute ms, no timezone) is the authoritative end, a
+// missing public_from_ms falls back to the bounded legacy start_date branch.
+// A window opening or closing has no save event - answer time is the only
+// correct checkpoint.
 function askCustomPages(q){
   if(typeof CUSTOM_PAGES === 'undefined' || !Array.isArray(CUSTOM_PAGES) || !CUSTOM_PAGES.length) return null;
   const norm = cjhqNormalizeSearch(String(q || ''));
   if(!norm) return null;
   const qTokens = new Set(norm.split(' ').filter(t => t.length > 3));
   if(!qTokens.size) return null;
-  const today = askMontrealTodayISO();
+  const nowMs = Date.now();
   let best = null, bestScore = 0, bestTitleHit = false;
   for(const p of CUSTOM_PAGES){
     if(!p || typeof p !== 'object') continue;
-    if(p.published === false) continue;                       // hidden/draft
-    const from = String(p.start_date || '').trim(), to = String(p.end_date || '').trim();
-    if(from && today < from) continue;                        // scheduled
-    if(to && today > to) continue;                            // expired (inclusive end)
+    if(p.published !== true) continue;                        // hidden/draft/non-boolean
+    if(typeof p.public_until_ms !== 'number' || p.public_until_ms < nowMs) continue;  // expired or unbackfilled
+    if(typeof p.public_from_ms === 'number'){
+      if(p.public_from_ms > nowMs) continue;                  // scheduled
+    }else{
+      const sd = String(p.start_date || '').trim();
+      if(!sd || sd > CJHQ_PUBLIC_FROM_CUTOVER) continue;      // legacy branch bounded at cutover
+    }
     const titleNorm = cjhqNormalizeSearch([p.title_en, p.title_fr].filter(Boolean).join(' '));
     const titleTokens = titleNorm.split(' ');
     const hay = cjhqNormalizeSearch([p.slug, p.title_en, p.title_fr].filter(Boolean).join(' '));

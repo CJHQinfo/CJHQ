@@ -110,6 +110,11 @@ export const SPECIAL_INFO_SECTION_VISIBILITY = null;
 // sync mount overwrites this with the pushed pages (window evaluated by the
 // engine at answer time).
 export const CUSTOM_PAGES = [];
+
+// Partner contact overrides keyed by organization name. Empty in the static
+// dataset; the bot sync mount fills it from partner_overrides. The engine
+// falls back to it when no contacts argument is passed (askOrgRegistry).
+export const ORG_CONTACT_OVERRIDES = {};
 `;
 
 /* ---------------------------------------------------------------- core ---- */
@@ -174,7 +179,7 @@ const coreOut = `/* GENERATED FILE - do not edit.
  * needs the original characters to tell Yiddish from Hebrew. Omit aiAdapter and
  * the deterministic path runs alone, which is what v1 wants.
  */
-import { categories, SPECIAL_INFO_COUNTRIES, SPECIAL_INFO_SECTION_VISIBILITY, CUSTOM_PAGES, PARTNERS_DATA } from './ask-data.mjs';
+import { categories, SPECIAL_INFO_COUNTRIES, SPECIAL_INFO_SECTION_VISIBILITY, CUSTOM_PAGES, PARTNERS_DATA, ORG_CONTACT_OVERRIDES } from './ask-data.mjs';
 
 ${normalize}
 

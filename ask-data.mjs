@@ -297,3 +297,8 @@ export const SPECIAL_INFO_SECTION_VISIBILITY = null;
 // sync mount overwrites this with the pushed pages (window evaluated by the
 // engine at answer time).
 export const CUSTOM_PAGES = [];
+
+// Partner contact overrides keyed by organization name. Empty in the static
+// dataset; the bot sync mount fills it from partner_overrides. The engine
+// falls back to it when no contacts argument is passed (askOrgRegistry).
+export const ORG_CONTACT_OVERRIDES = {};
