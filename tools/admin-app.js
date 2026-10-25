@@ -3984,3 +3984,262 @@ async function renderAnalytics(){
     ANALYTICS_BUSY = false;
   }
 }
+
+// === Bot sync hook v5 (admin.html only) ===
+// After any save/delete that Firestore accepted, the admin queues a notify:
+// "doc X in collection Y changed". The bot server reads the current doc
+// from Firestore with the caller's own token and stores THAT. The outbox
+// holds only {collection, docId} - never content - so a retry after a
+// browser restart cannot confuse an unloaded local cache with a deleted
+// doc: the server always resolves against live Firestore. A sync failure
+// NEVER fails or rolls back the site save - the website stays the source
+// of truth.
+//
+// v5 changes (post-review):
+// - This hook ships ONLY in admin.html (injected from this file). Public
+//   pages no longer carry the sync code or its 30s timer. Trade-off of that
+//   scoping: the per-browser outbox drains only while an admin page is open
+//   in that browser - the badge below says so when entries are waiting.
+// - Per-doc rejection handling. The server applies a pull batch
+//   all-or-nothing and its 409 names the ONE doc it rejected. v4 kept the
+//   whole batch queued and the 30s timer re-POSTed it forever; every
+//   attempt made the server re-read up to SYNC_BATCH_MAX Firestore docs
+//   before rejecting, so one stuck batch billed up to ~28,800 reads/day
+//   per open admin tab for nothing. Now:
+//   * reason "empty-after-allowlist" is DETERMINISTIC (the doc has no
+//     fields the bot may store - no retry can ever apply it): only that
+//     entry is parked, preserved with its reason in SYNC_PARKED_KEY for
+//     review, and the REST of the batch stays queued and is applied -
+//     valid neighboring updates are never dropped.
+//   * reasons "stale" (a per-doc CAS race) and "degraded" (server fault)
+//     are transient: the batch stays queued and backs off.
+// - Transient failures (network, 5xx, transient 409) back off
+//   exponentially: 30s, 60s, 120s, ... capped at 10 minutes, resetting on
+//   any success. The 30s interval remains but is a no-op until the backoff
+//   expires, so an unreachable server costs one localStorage read per
+//   tick, not a fetch.
+const SYNC_ENDPOINT = "https://wa.hartstein.ca/ask-sync";
+const SYNC_COLLECTIONS = { resource_overrides: 1, partner_overrides: 1, resources: 1, partners: 1, custom_pages: 1 };
+const SYNC_OUTBOX_KEY = "cjhq-sync-outbox-v1";
+const SYNC_OVERFLOW_KEY = "cjhq-sync-outbox-overflow";
+const SYNC_PARKED_KEY = "cjhq-sync-parked-v1";
+const SYNC_REPUBLISH_KEY = "cjhq-sync-needs-republish";
+const SYNC_OUTBOX_MAX = 200;  // entries; at the cap the flag is set and Republish All is the repair
+const SYNC_BATCH_MAX = 10;    // notifies per drain - bounds Firestore reads per retry/click
+const SYNC_BACKOFF_CAP_MS = 10 * 60 * 1000;
+
+function syncOutboxLoad() {
+  try { return JSON.parse(localStorage.getItem(SYNC_OUTBOX_KEY)) || []; } catch (e) { return []; }
+}
+function syncOutboxSave(list) {
+  try { localStorage.setItem(SYNC_OUTBOX_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function syncEnqueue(collection, docId) {
+  if (!docId) return;
+  let list = syncOutboxLoad().filter((e) => !(e.collection === collection && e.docId === docId)); // dedupe: latest position
+  if (list.length >= SYNC_OUTBOX_MAX) {
+    // No silent drop, no silent append past the cap: flag it; Republish All
+    // is the documented repair and clears the flag.
+    try { localStorage.setItem(SYNC_OVERFLOW_KEY, String(Date.now())); } catch (e) {}
+    console.warn("bot sync outbox full - run Republish All");
+    return;
+  }
+  list.push({ collection, docId });
+  syncOutboxSave(list);
+  syncRenderBadge();
+}
+
+function syncParkedLoad() {
+  try { return JSON.parse(localStorage.getItem(SYNC_PARKED_KEY)) || []; } catch (e) { return []; }
+}
+// Parked entries are NEVER dropped silently: each is preserved with its
+// server reason so an admin can review exactly which docs the bot could
+// not store. A successful Republish All clears the list (the bot's copy
+// was rebuilt from live site data, so the rejections are moot).
+function syncPark(entries) {
+  const parked = syncParkedLoad();
+  for (const e of entries) {
+    const i = parked.findIndex((p) => p.collection === e.collection && p.docId === e.docId);
+    if (i >= 0) parked[i] = e; else parked.push(e);
+  }
+  try { localStorage.setItem(SYNC_PARKED_KEY, JSON.stringify(parked.slice(-SYNC_OUTBOX_MAX))); } catch (e) {}
+}
+
+function syncNeedsRepublish() {
+  try { return !!localStorage.getItem(SYNC_REPUBLISH_KEY); } catch (e) { return false; }
+}
+function syncSetNeedsRepublish(on) {
+  try {
+    if (on) localStorage.setItem(SYNC_REPUBLISH_KEY, String(Date.now()));
+    else localStorage.removeItem(SYNC_REPUBLISH_KEY);
+  } catch (e) {}
+}
+
+async function syncPost(payload) {
+  if (typeof adminUser === "undefined" || !adminUser) return null;
+  const token = await adminUser.getIdToken();
+  const res = await fetch(SYNC_ENDPOINT, {
+    method: "POST",
+    headers: { authorization: "Bearer " + token, "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { status: res.status, data };
+}
+
+let syncDrainRunning = false;
+let syncFails = 0;       // consecutive transient failures - drives the backoff
+let syncNextTry = 0;     // earliest time the timer may attempt another drain
+function syncBackoffMs() {
+  return Math.min(30000 * Math.pow(2, Math.max(0, syncFails - 1)), SYNC_BACKOFF_CAP_MS);
+}
+
+async function syncDrain(manual) {
+  if (syncDrainRunning) return;
+  if (manual) syncNextTry = 0; // an explicit Retry now is always honored
+  if (Date.now() < syncNextTry) return;
+  const list = syncOutboxLoad();
+  if (!list.length) { syncRenderBadge(); return; }
+  syncDrainRunning = true;
+  try {
+    const batch = list.slice(0, SYNC_BATCH_MAX); // oldest first, bounded
+    const r = await syncPost({ pulls: batch });
+    if (r && r.status === 200) {
+      syncFails = 0;
+      syncOutboxSave(list.slice(batch.length));
+      if (list.length > batch.length) {
+        syncDrainRunning = false;
+        return syncDrain(true); // keep draining while the backlog exists
+      }
+    } else if (r && r.status === 409) {
+      // All-or-nothing server batch: nothing was applied (applied:0), and
+      // the response names the ONE doc whose apply was rejected.
+      const reason = (r.data && r.data.reason) || "";
+      const badId = r.data && r.data.docId;
+      const hit = badId ? batch.find((e) => e.docId === badId) : null;
+      if (hit && reason === "empty-after-allowlist") {
+        // Deterministic: no retry can ever apply this doc. Park ONLY it
+        // (preserved with its reason); the rest of the batch was not
+        // applied but was not rejected either - keep it queued and apply
+        // it now.
+        syncFails = 0;
+        syncPark([{ collection: hit.collection, docId: hit.docId, reason, at: Date.now() }]);
+        syncOutboxSave(list.filter((e) => !(e.collection === hit.collection && e.docId === hit.docId)));
+        syncDrainRunning = false;
+        return syncDrain(true);
+      }
+      // "stale" (per-doc CAS race) / "degraded" (server fault) / unnamed:
+      // transient. Keep the batch queued and back off. Repeated failures
+      // raise the persistent republish flag so the admin sees it.
+      syncFails++;
+      syncNextTry = Date.now() + syncBackoffMs();
+      if (syncFails >= 5) syncSetNeedsRepublish(true);
+      console.warn("bot sync pull rejected (" + (reason || "unknown") + (badId ? ", doc " + badId : "") + ") - retry in " + Math.round(syncBackoffMs() / 1000) + "s");
+    } else {
+      syncFails++;
+      syncNextTry = Date.now() + syncBackoffMs();
+      console.warn("bot sync not applied:", r && r.status, r && r.data, "- retry in " + Math.round(syncBackoffMs() / 1000) + "s");
+    }
+  } catch (e) {
+    syncFails++;
+    syncNextTry = Date.now() + syncBackoffMs();
+    console.warn("bot sync unreachable:", e, "- retry in " + Math.round(syncBackoffMs() / 1000) + "s"); // entries stay queued
+  }
+  syncDrainRunning = false;
+  syncRenderBadge();
+}
+
+// Fire-and-forget from the save chokepoints: the site save must never wait
+// on, or fail because of, the bot.
+function syncNotify(collection, docId) {
+  if (!SYNC_COLLECTIONS[collection] && collection !== "settings") return;
+  try {
+    syncEnqueue(collection, docId);
+    syncDrain();
+  } catch (e) { console.warn("bot sync queue failed:", e); }
+}
+
+// Republish All (recovery + initial seed). The browser sends ONLY the
+// reset declaration - no doc list, no counts, no content - and the server
+// enumerates every synced collection itself from Firestore with the
+// caller's own staff token. A stale browser therefore cannot shrink or
+// reshape the rebuild even by accident; zero browser-side Firestore reads
+// happen here. Any failure leaves the bot's existing data untouched.
+async function syncRepublishAll() {
+  // Refuse to republish from a half-loaded page: publishing a collection
+  // whose load FAILED as if it were empty would wipe the bot's data.
+  for (const name of Object.keys(SYNC_COLLECTIONS)) {
+    if (collectionLoadFailed(name)) {
+      syncShowNotice("Republish All refused: " + name + " failed to load - reload the page first. Publishing from a failed load would wipe the bot's data.");
+      return false;
+    }
+  }
+  try {
+    const r = await syncPost({ reset: true, loadComplete: true });
+    if (r && r.status === 200) {
+      syncOutboxSave([]);
+      syncFails = 0; syncNextTry = 0;
+      try { localStorage.removeItem(SYNC_OVERFLOW_KEY); } catch (e) {}
+      try { localStorage.removeItem(SYNC_PARKED_KEY); } catch (e) {}
+      syncSetNeedsRepublish(false);
+      syncShowNotice("Bot re-synced from the live site data.");
+      return true;
+    }
+    syncShowNotice("Republish All was not applied (" + ((r && r.data && r.data.error) || (r && r.status) || "unreachable") + "). The bot kept its previous data - safe to try again.");
+    return false;
+  } catch (e) {
+    syncShowNotice("Republish All could not reach the sync endpoint. The bot kept its previous data - safe to try again.");
+    return false;
+  }
+}
+
+let syncNoticeText = "";
+function syncShowNotice(msg) {
+  syncNoticeText = String(msg || "");
+  syncRenderBadge();
+  clearTimeout(syncShowNotice._t);
+  syncShowNotice._t = setTimeout(() => { syncNoticeText = ""; syncRenderBadge(); }, 15000);
+}
+
+function syncRenderBadge() {
+  const id = "cjhq-sync-badge";
+  let el = document.getElementById(id);
+  const n = syncOutboxLoad().length;
+  const parked = syncParkedLoad().length;
+  const overflow = !!localStorage.getItem(SYNC_OVERFLOW_KEY);
+  const republish = syncNeedsRepublish();
+  if (!n && !parked && !overflow && !republish && !syncNoticeText) { if (el) el.remove(); return; }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    el.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:9999;background:#fff3cd;border:1px solid #e0a800;border-radius:8px;padding:8px 10px;font:13px/1.4 sans-serif;color:#5a4500;box-shadow:0 2px 8px rgba(0,0,0,.15)";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = "";
+  el.appendChild(document.createTextNode(
+    (syncNoticeText ? syncNoticeText + " " : "") +
+    (republish ? "Bot copy may be behind - run Republish All. " : "") +
+    (parked ? parked + " bot update" + (parked === 1 ? "" : "s") + " skipped (no bot-readable fields) - kept for review. " : "") +
+    (overflow ? "Bot sync outbox full - some changes were not queued. " : "") +
+    (n ? n + " bot update" + (n === 1 ? "" : "s") + " pending (syncs while this admin page stays open). " : "")));
+  if (n) {
+    const retry = document.createElement("button");
+    retry.textContent = "Retry now";
+    retry.style.cssText = "margin-left:6px";
+    retry.onclick = () => syncDrain(true);
+    el.appendChild(retry);
+  }
+  const all = document.createElement("button");
+  all.textContent = "Republish all";
+  all.style.cssText = "margin-left:6px";
+  all.onclick = () => syncRepublishAll();
+  el.appendChild(all);
+}
+
+// Catch up on anything queued by a previous session. The interval costs
+// nothing while the outbox is empty (a localStorage read, no network), and
+// honors the backoff while the server is failing.
+if (typeof window !== "undefined") {
+  window.cjhqSyncRepublishAll = syncRepublishAll;
+  window.addEventListener("load", () => { setTimeout(syncDrain, 3000); setInterval(syncDrain, 30000); });
+}
