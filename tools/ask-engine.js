@@ -1761,7 +1761,10 @@ function askNameCandidates(norm){
 function askOrgRegistry(contacts){
   const raw = (typeof PARTNERS_DATA !== 'undefined') ? PARTNERS_DATA : [];
   const extra = contacts || (typeof PARTNER_OVERRIDES_CACHE !== 'undefined' ? PARTNER_OVERRIDES_CACHE : null) || {};
-  return raw.map(p => Object.assign({}, p, extra[(p.alt || p.name || '').trim()] || {})).map(p => ({
+  return raw.map(p => Object.assign({}, p, extra[(p.alt || p.name || '').trim()] || {}))
+    // An admin-hidden partner is never answered, no matter which data path
+    // supplied the override (previously only Hatzolah had this guard).
+    .filter(p => p.hidden !== true).map(p => ({
     name:        (p.alt || p.name || '').trim(),
     url:         p.url || '',
     phone:       p.phone || '',
