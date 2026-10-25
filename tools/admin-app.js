@@ -4116,7 +4116,13 @@ async function syncDrain(manual) {
       // the response names the ONE doc whose apply was rejected.
       const reason = (r.data && r.data.reason) || "";
       const badId = r.data && r.data.docId;
-      const hit = badId ? batch.find((e) => e.docId === badId) : null;
+      const badColl = r.data && r.data.collection;
+      // 09: newer servers name the collection next to docId. Prefer a
+      // collection+docId match; a response collection that matches NO
+      // queued entry means no hit (fall through to transient backoff),
+      // never a park of the wrong doc. docId-only matching stays as the
+      // fallback for responses without a collection (older servers).
+      const hit = badId ? batch.find((e) => e.docId === badId && (!badColl || e.collection === badColl)) : null;
       if (hit && reason === "empty-after-allowlist") {
         // Deterministic: no retry can ever apply this doc. Park ONLY it
         // (preserved with its reason); the rest of the batch was not
@@ -4182,7 +4188,17 @@ async function syncRepublishAll() {
       try { localStorage.removeItem(SYNC_OVERFLOW_KEY); } catch (e) {}
       try { localStorage.removeItem(SYNC_PARKED_KEY); } catch (e) {}
       syncSetNeedsRepublish(false);
-      syncShowNotice("Bot re-synced from the live site data.");
+      // 08: the server may have SKIPPED docs with no storable bot fields
+      // instead of rejecting the whole reset. Surface them by identity so
+      // the omission is visible, not silent; the republish still succeeded.
+      const skipped = (r.data && Array.isArray(r.data.skipped)) ? r.data.skipped : [];
+      if (skipped.length) {
+        const names = skipped.slice(0, 5).map((x) => ((x && x.collection) || "?") + "/" + ((x && x.docId) || "?"));
+        const more = skipped.length > names.length ? ", and " + (skipped.length - names.length) + " more" : "";
+        syncShowNotice("Bot re-synced. " + skipped.length + " doc(s) had no bot fields and were skipped: " + names.join(", ") + more + ".");
+      } else {
+        syncShowNotice("Bot re-synced from the live site data.");
+      }
       return true;
     }
     syncShowNotice("Republish All was not applied (" + ((r && r.data && r.data.error) || (r && r.status) || "unreachable") + "). The bot kept its previous data - safe to try again.");
