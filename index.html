@@ -2689,6 +2689,11 @@ async function initFirebase(){
 /* ---------- Generic collection helpers ---------- */
 const localCache = { notices: [], partners: [], resources: [], events: [], reviewed_overrides: [], pending_change_notices: [], link_audits: [] };
 
+// Collections whose last load FAILED. Distinct from "legitimately empty":
+// a failed load must never be republished or rendered as if it were empty.
+const __collectionLoadFailed = new Set();
+function collectionLoadFailed(name){ return __collectionLoadFailed.has(name); }
+
 async function fetchCollection(name){
   if(!localCache[name]) localCache[name] = [];
   if(firebaseReady){
@@ -2697,9 +2702,12 @@ async function fetchCollection(name){
       const snap = await fs.getDocs(fs.collection(fbDb, name));
       const data = snap.docs.map(d => ({ id:d.id, ...d.data() }));
       localCache[name] = data;
+      __collectionLoadFailed.delete(name);
       return data;
     }catch(e){
       console.warn(`Firestore fetch (${name}) failed:`, e);
+      __collectionLoadFailed.add(name);
+      if(typeof admToast === 'function') admToast('Some content could not be loaded - lists may be incomplete. Check your connection and reload the page.', 'error');
       return localCache[name];
     }
   }
@@ -2724,7 +2732,168 @@ function reportSaveFailure(name, err){
   try{ alert(msg); }catch(e){}
 }
 
-async function saveToCollection(name, record){
+// === Bot sync hook v4 ===
+// After any save/delete that Firestore accepted, the admin queues a notify:
+// "doc X in collection Y changed". The bot server reads the current doc
+// from Firestore with the caller's own token and stores THAT. The outbox
+// holds only {collection, docId} - never content - so a retry after a
+// browser restart cannot confuse an unloaded local cache with a deleted
+// doc: the server always resolves against live Firestore. A sync failure
+// NEVER fails or rolls back the site save - the website stays the source
+// of truth.
+const SYNC_ENDPOINT = "https://wa.hartstein.ca/ask-sync";
+const SYNC_COLLECTIONS = { resource_overrides: 1, partner_overrides: 1, resources: 1, partners: 1, custom_pages: 1 };
+const SYNC_OUTBOX_KEY = "cjhq-sync-outbox-v1";
+const SYNC_OVERFLOW_KEY = "cjhq-sync-outbox-overflow";
+const SYNC_OUTBOX_MAX = 200;  // entries; at the cap the flag is set and Republish All is the repair
+const SYNC_BATCH_MAX = 10;    // notifies per drain - bounds Firestore reads per retry/click
+
+function syncOutboxLoad() {
+  try { return JSON.parse(localStorage.getItem(SYNC_OUTBOX_KEY)) || []; } catch (e) { return []; }
+}
+function syncOutboxSave(list) {
+  try { localStorage.setItem(SYNC_OUTBOX_KEY, JSON.stringify(list)); } catch (e) {}
+}
+function syncEnqueue(collection, docId) {
+  if (!docId) return;
+  let list = syncOutboxLoad().filter((e) => !(e.collection === collection && e.docId === docId)); // dedupe: latest position
+  if (list.length >= SYNC_OUTBOX_MAX) {
+    // No silent drop, no silent append past the cap: flag it; Republish All
+    // is the documented repair and clears the flag.
+    try { localStorage.setItem(SYNC_OVERFLOW_KEY, String(Date.now())); } catch (e) {}
+    console.warn("bot sync outbox full - run Republish All");
+    return;
+  }
+  list.push({ collection, docId });
+  syncOutboxSave(list);
+  syncRenderBadge();
+}
+
+async function syncPost(payload) {
+  if (typeof adminUser === "undefined" || !adminUser) return null;
+  const token = await adminUser.getIdToken();
+  const res = await fetch(SYNC_ENDPOINT, {
+    method: "POST",
+    headers: { authorization: "Bearer " + token, "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { status: res.status, data };
+}
+
+let syncDrainRunning = false;
+async function syncDrain() {
+  if (syncDrainRunning) return;
+  const list = syncOutboxLoad();
+  if (!list.length) { syncRenderBadge(); return; }
+  syncDrainRunning = true;
+  try {
+    const batch = list.slice(0, SYNC_BATCH_MAX); // oldest first, bounded
+    const r = await syncPost({ pulls: batch });
+    if (r && r.status === 200) {
+      syncOutboxSave(list.slice(batch.length));
+      if (list.length > batch.length) {
+        syncDrainRunning = false;
+        return syncDrain(); // keep draining while the backlog exists
+      }
+    } else if (r && r.status === 409) {
+      syncShowNotice("Saved to the website. The bot copy needs a full re-sync - run Bot > Republish All.");
+    } else {
+      console.warn("bot sync not applied:", r && r.status, r && r.data);
+    }
+  } catch (e) {
+    console.warn("bot sync unreachable:", e); // entries stay queued; next drain retries
+  }
+  syncDrainRunning = false;
+  syncRenderBadge();
+}
+
+// Fire-and-forget from the save chokepoints: the site save must never wait
+// on, or fail because of, the bot.
+function syncNotify(collection, docId) {
+  if (!SYNC_COLLECTIONS[collection] && collection !== "settings") return;
+  try {
+    syncEnqueue(collection, docId);
+    syncDrain();
+  } catch (e) { console.warn("bot sync queue failed:", e); }
+}
+
+// Republish All (recovery + initial seed). The browser sends ONLY the
+// reset declaration - no doc list, no counts, no content - and the server
+// enumerates every synced collection itself from Firestore with the
+// caller's own staff token. A stale browser therefore cannot shrink or
+// reshape the rebuild even by accident; zero browser-side Firestore reads
+// happen here. Any failure leaves the bot's existing data untouched.
+async function syncRepublishAll() {
+  // Refuse to republish from a half-loaded page: publishing a collection
+  // whose load FAILED as if it were empty would wipe the bot's data.
+  for (const name of Object.keys(SYNC_COLLECTIONS)) {
+    if (collectionLoadFailed(name)) {
+      syncShowNotice("Republish All refused: " + name + " failed to load - reload the page first. Publishing from a failed load would wipe the bot's data.");
+      return false;
+    }
+  }
+  try {
+    const r = await syncPost({ reset: true, loadComplete: true });
+    if (r && r.status === 200) {
+      syncOutboxSave([]);
+      try { localStorage.removeItem(SYNC_OVERFLOW_KEY); } catch (e) {}
+      syncShowNotice("Bot re-synced from the live site data.");
+      return true;
+    }
+    syncShowNotice("Republish All was not applied (" + ((r && r.data && r.data.error) || (r && r.status) || "unreachable") + "). The bot kept its previous data - safe to try again.");
+    return false;
+  } catch (e) {
+    syncShowNotice("Republish All could not reach the sync endpoint. The bot kept its previous data - safe to try again.");
+    return false;
+  }
+}
+
+let syncNoticeText = "";
+function syncShowNotice(msg) {
+  syncNoticeText = String(msg || "");
+  syncRenderBadge();
+  clearTimeout(syncShowNotice._t);
+  syncShowNotice._t = setTimeout(() => { syncNoticeText = ""; syncRenderBadge(); }, 15000);
+}
+
+function syncRenderBadge() {
+  const id = "cjhq-sync-badge";
+  let el = document.getElementById(id);
+  const n = syncOutboxLoad().length;
+  const overflow = !!localStorage.getItem(SYNC_OVERFLOW_KEY);
+  if (!n && !overflow && !syncNoticeText) { if (el) el.remove(); return; }
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    el.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:9999;background:#fff3cd;border:1px solid #e0a800;border-radius:8px;padding:8px 10px;font:13px/1.4 sans-serif;color:#5a4500;box-shadow:0 2px 8px rgba(0,0,0,.15)";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = "";
+  el.appendChild(document.createTextNode(
+    (syncNoticeText ? syncNoticeText + " " : "") +
+    (overflow ? "Bot sync outbox full - some changes were not queued. " : "") +
+    (n ? n + " bot update" + (n === 1 ? "" : "s") + " pending. " : "")));
+  const retry = document.createElement("button");
+  retry.textContent = "Retry now";
+  retry.style.cssText = "margin-left:6px";
+  retry.onclick = () => syncDrain();
+  el.appendChild(retry);
+  const all = document.createElement("button");
+  all.textContent = "Republish all";
+  all.style.cssText = "margin-left:6px";
+  all.onclick = () => syncRepublishAll();
+  el.appendChild(all);
+}
+
+// Catch up on anything queued by a previous session. The interval costs
+// nothing while the outbox is empty (a localStorage read, no network).
+if (typeof window !== "undefined") {
+  window.cjhqSyncRepublishAll = syncRepublishAll;
+  window.addEventListener("load", () => { setTimeout(syncDrain, 3000); setInterval(syncDrain, 30000); });
+}
+
+async function saveToCollection(name, record, opts){
   if(!localCache[name]) localCache[name] = [];
   if(firebaseReady){
     const fs = window.__fbFirestore;
@@ -2732,11 +2901,15 @@ async function saveToCollection(name, record){
       if(record.id){
         const ref = fs.doc(fbDb, name, record.id);
         const { id, ...data } = record;
-        await fs.setDoc(ref, data, { merge:true });
+        // opts.replace (history restore only): full-document replace so a
+        // restore brings back the earlier version exactly - a merge would
+        // leave fields that were added after that version in place.
+        await fs.setDoc(ref, data, opts && opts.replace ? undefined : { merge:true });
       } else {
         const ref = await fs.addDoc(fs.collection(fbDb, name), record);
         record.id = ref.id;
       }
+      syncNotify(name, record.id);
     }catch(err){
       reportSaveFailure(name, err);
       throw err;   // stop the caller from reporting success
@@ -2754,12 +2927,13 @@ async function saveToCollection(name, record){
   return record;
 }
 
-async function deleteFromCollection(name, id){
+async function deleteFromCollection(name, id, opts){   // opts: pass-through for wrappers (history restore)
   if(!localCache[name]) localCache[name] = [];
   if(firebaseReady){
     const fs = window.__fbFirestore;
     try{
       await fs.deleteDoc(fs.doc(fbDb, name, id));
+      syncNotify(name, id);
     }catch(err){
       reportSaveFailure(name, err);
       throw err;
@@ -2910,6 +3084,7 @@ async function saveSettingsDoc(data){
   if(firebaseReady){
     const fs = window.__fbFirestore;
     await fs.setDoc(fs.doc(fbDb, 'settings', 'site'), data, { merge:true });
+    syncNotify("settings", "site");
   } else {
     window.__localSettings = data;
   }

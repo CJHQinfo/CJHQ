@@ -1293,14 +1293,23 @@ function togglePartnerLinkEditor(domId){
 
 async function togglePartnerHidden(key){
   const existing = PARTNER_OVERRIDES_CACHE[key] || {};
-  await saveToCollection('partner_overrides', { ...existing, id: key, key, hidden: !existing.hidden });
+  // The button label ('Hide'/'Unhide') is derived from the SAME cache entry,
+  // so bind the written value to the labeled action exactly once: the click
+  // always performs what the button said it would. Field-level write: only
+  // the labeled action's field - other fields (and other admins' concurrent
+  // edits) stay as the server has them.
+  const willHide = !existing.hidden;
+  await saveToCollection('partner_overrides', { id: key, key, hidden: willHide });
+  PARTNER_OVERRIDES_CACHE[key] = { ...existing, hidden: willHide };
+  admToast(willHide ? 'Hidden from visitors.' : 'Visible again.');
   await applyPartnerOverrides();
   renderEmbeddedPartnersList();
 }
 async function savePartnerLinkOverride(key, domId){
   const url = document.getElementById('ov-purl-'+domId).value;
-  const existing = PARTNER_OVERRIDES_CACHE[key] || {};
-  await saveToCollection('partner_overrides', { ...existing, id: key, key, url, hidden: existing.hidden || false });
+  // Only the URL is this action's field. hidden is NOT written here - the
+  // old code rewrote it from cache and could silently un-hide the partner.
+  await saveToCollection('partner_overrides', { id: key, key, url });
   await applyPartnerOverrides();
   renderEmbeddedPartnersList();
 }
@@ -1503,9 +1512,11 @@ async function saveExistingResourceOverride(slug){
     return { label_en: label_en||'', label_fr: label_fr||'', url: url||'' };
   });
   const relatedSlugs = () => v('related').split(',').map(s=>s.trim()).filter(Boolean);
-  const existing = RESOURCE_OVERRIDES_CACHE[slug] || {};
   const record = {
-    id: slug, slug, hidden: existing.hidden || false,
+    id: slug, slug,
+    // hidden intentionally omitted: every other field IS the form, but
+    // hidden belongs to a different action. merge:true keeps the server's
+    // hidden value, so saving an edit can never un-hide the resource.
     title_en: v('title_en'), title_fr: v('title_fr'),
     desc_en: v('desc_en'), desc_fr: v('desc_fr'),
     url: v('url'),
@@ -1540,7 +1551,12 @@ async function resetExistingResourceOverride(slug){
 }
 async function toggleResourceHidden(slug){
   const existing = RESOURCE_OVERRIDES_CACHE[slug] || {};
-  await saveToCollection('resource_overrides', { ...existing, id: slug, slug, hidden: !existing.hidden });
+  // Same labeled-action binding as togglePartnerHidden: the write performs
+  // what the button said, and writes ONLY the hidden field.
+  const willHide = !existing.hidden;
+  await saveToCollection('resource_overrides', { id: slug, slug, hidden: willHide });
+  RESOURCE_OVERRIDES_CACHE[slug] = { ...existing, hidden: willHide };
+  admToast(willHide ? 'Hidden from visitors.' : 'Visible again.');
   await applyResourceOverrides();
   renderExistingResourcesList();
 }
@@ -3241,20 +3257,20 @@ async function admRecordHistory(entry){
 }
 (function admWrapWritesForHistory(){
   const origSave = saveToCollection, origDelete = deleteFromCollection;
-  saveToCollection = async function(name, record){
-    if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origSave(name, record);
+  saveToCollection = async function(name, record, opts){
+    if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origSave(name, record, opts);
     const had = !!(record && record.id);
     const before = had ? await admReadDocForHistory(name, record.id) : null;
-    const out = await origSave(name, record);
-    await admRecordHistory({ collection:name, doc_id: out && out.id, action: (had && before) ? 'update' : 'create', before });
+    const out = await origSave(name, record, opts);
+    await admRecordHistory({ collection:name, doc_id: out && out.id, action: (opts && opts.action) || ((had && before) ? 'update' : 'create'), before, restored_from: (opts && opts.restored_from) || null });
     return out;
   };
-  deleteFromCollection = async function(name, id){
-    if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origDelete(name, id);
+  deleteFromCollection = async function(name, id, opts){
+    if(!ADM_HISTORY_ON || ADM_HISTORY_SKIP.has(name)) return origDelete(name, id, opts);
     const before = await admReadDocForHistory(name, id);
-    await origDelete(name, id);
+    await origDelete(name, id, opts);
     if(before === null) return; // nothing was there, so nothing changed
-    await admRecordHistory({ collection:name, doc_id:id, action:'delete', before });
+    await admRecordHistory({ collection:name, doc_id:id, action: (opts && opts.action) || 'delete', before, restored_from: (opts && opts.restored_from) || null });
   };
 })();
 
@@ -3317,11 +3333,11 @@ async function admRestoreHistory(historyId){
     : `This change added the item. Restoring removes it again. The current version is kept in the history. Continue?`;
   if(!(await admConfirm(msg))) return;
   try{
-    const fs = window.__fbFirestore;
-    const current = await admReadDocForHistory(r.collection, r.doc_id);
-    if(r.before){ await fs.setDoc(fs.doc(fbDb, r.collection, r.doc_id), r.before); }
-    else { await fs.deleteDoc(fs.doc(fbDb, r.collection, r.doc_id)); }
-    await admRecordHistory({ collection:r.collection, doc_id:r.doc_id, action:'restore', before: current, restored_from: historyId });
+    // Route through the chokepoints: the history wrapper records the
+    // "restore" entry (from opts) and the sync hook publishes the restore
+    // to the bot - a restore is just a save of an earlier version.
+    if(r.before){ await saveToCollection(r.collection, { ...r.before, id: r.doc_id }, { action:'restore', restored_from: historyId, replace: true }); }
+    else { await deleteFromCollection(r.collection, r.doc_id, { action:'restore', restored_from: historyId }); }
     admToast('Restored. Visitors see the earlier version now.');
     renderAdminHistory();
   }catch(e){
