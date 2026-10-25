@@ -99,7 +99,7 @@ const ASK_DEFAULT_SOURCES = [
     type:'Eruv', description:'Official Montreal Eruv status and map.',
     active:true, authoritative:true, timeSensitive:true, updateFrequency:'weekly',
     lastChecked:'', lastIndexed:'', integration:'link-only', notes:'Status is never cached. Users are sent to the official page.' },
-  { id:'hatzolah-montreal', name:'Hatzolah Montreal', url:'https://www.hatzolahmontreal.com/',
+  { id:'hatzolah-montreal', name:'Hatzolah Montreal', url:'https://www.hatzoloh.ca/en/', // current published site URL
     type:'Emergency', description:'Volunteer emergency medical service.',
     active:true, authoritative:true, timeSensitive:false, updateFrequency:'as needed',
     lastChecked:'', lastIndexed:'', integration:'link-only', notes:'Never state a phone number that is not verified from the official site.' },
@@ -138,10 +138,10 @@ const ASK_HATZOLAH_RECORD = {
   id:'hatzolah-montreal',
   organization:'Hatzolah Montreal',
   emergencyNumbers:[],      // EMPTY BY DESIGN - never invent an emergency number
-  website:'https://www.hatzolahmontreal.com/',
+  website:'https://www.hatzoloh.ca/en/', // current published site URL
   mapUrl:'',
   serviceArea:'Montreal',
-  source:'hatzolahmontreal.com',
+  source:'hatzoloh.ca',
   lastVerified:'',
   timeSensitive:false,
   note:'Numbers must be entered by an admin from the official site, or fetched live.'
@@ -781,6 +781,15 @@ function askScoreLatinYiddish(s){
   return { score, strong };
 }
 
+/* Product rule for the WhatsApp bot: answers are ALWAYS English, whatever
+   language the question arrived in (typed Yiddish included). The bridge sets
+   outputLang:'en' on every call and askAnswer sets ASK_OUTPUT_LANG around
+   askRun. IMPORTANT: matching still uses the true detected language - the
+   Yiddish stopword handling below keys off askDetectLanguage - so the
+   override is applied ONLY at render sites through askRenderLang, never
+   inside askDetectLanguage itself. */
+let ASK_OUTPUT_LANG = null;
+function askRenderLang(L){ return ASK_OUTPUT_LANG || L; }
 function askDetectLanguage(q){
   const s = String(q || '');
 
@@ -891,7 +900,7 @@ const ASK_FINDMTL_MATCH = [
   { key:'organizations', match:/organi[sz]ation|organisme|\u05d0\u05e8\u05d2\u05d5\u05df|\u05d0\u05e8\u05d2\u05d5\u05e0\u05d9\u05dd|\u05d0\u05e8\u05d2\u05d0\u05e0\u05d9\u05d6\u05d0\u05e6\u05d9/i },
   { key:'countries',     match:/\bcamp\b|\bcamps\b|out of town|out-of-town|out of country|colonie de vacances|\u05e7\u05e2\u05de\u05e4|\u05de\u05d7\u05e0\u05d4|\u05de\u05d7\u05e0\u05d5\u05ea/i },
   { key:'travel',        match:/travel directory|community travel|\u05de\u05d3\u05e8\u05d9\u05da \u05e0\u05e1\u05d9\u05e2\u05d5\u05ea/i },
-  { key:'eruv',          match:/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1/i },
+  { key:'eruv',          match:/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1|\u05e2\u05e8\u05d5\u05d1/i },
   { key:'home',          match:/community directory|directory|listing|\u05de\u05d3\u05e8\u05d9\u05da \u05e7\u05d4\u05d9\u05dc\u05d4|\u05e8\u05e9\u05d9\u05de\u05d4|\u05d3\u05d9\u05e8\u05e2\u05e7\u05d8\u05d0\u05e8\u05d9\u05e2|r\u00e9pertoire/i }
 ];
 
@@ -900,7 +909,7 @@ function askFindMtl(q){
   const hit = ASK_FINDMTL_MATCH.find(m => m.match.test(s));
   if(!hit) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(s); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(s)); r.lang = L;
   r.handler = 'FindMTL';
   r.handled = false;          // this is a hand-off, not a CJHQ answer
   r.timeSensitive = true;
@@ -934,7 +943,7 @@ function askPracticalHandlers(){
 
 function askHalachic(q, opts){
   if(!ASK_HALACHIC_RE.test(String(q || ''))) return null;
-  const L = askDetectLanguage(q);
+  const L = askRenderLang(askDetectLanguage(q));
 
   // Still give the person what CJHQ genuinely knows. The practical handlers
   // run exactly as they normally would; only the presentation changes.
@@ -1040,9 +1049,15 @@ const ASK_TEMPLATES = {
   /* Voice note the bridge could not transcribe. It never claims to have
      understood audio it did not process. */
   voiceNote: {
-    en:'Please send your question as a text message so I can process it accurately.',
+    en:"Sorry, I couldn't understand that voice note clearly enough. Please send a voice note in English, or type your question in English or Yiddish.",
     fr:'Veuillez envoyer votre question sous forme de message texte afin que je puisse la traiter correctement.',
     he:'\u05d0\u05e0\u05d0 \u05e9\u05dc\u05d7\u05d5 \u05d0\u05ea \u05d4\u05e9\u05d0\u05dc\u05d4 \u05d1\u05d4\u05d5\u05d3\u05e2\u05ea \u05d8\u05e7\u05e1\u05d8 \u05db\u05d3\u05d9 \u05e9\u05d0\u05d5\u05db\u05dc \u05dc\u05e2\u05d1\u05d3 \u05d0\u05d5\u05ea\u05d4 \u05d1\u05e6\u05d5\u05e8\u05d4 \u05de\u05d3\u05d5\u05d9\u05e7\u05ea.'
+  },
+  /* Voice note the bridge transcribed with low confidence: the sender
+     confirms the transcript before it is answered. The bridge substitutes
+     {transcript}; answers always render in English. */
+  voiceConfirm: {
+    en:'I heard: "{transcript}". Reply YES for the answer, or send a new voice note or type your question.'
   },
   greeting: {
     en:'Hello! You\u2019re chatting with the CJHQ WhatsApp Assistant. Please tell me what you need help with.',
@@ -1175,9 +1190,9 @@ function askSmallTalk(q){
 
 function askEruv(q){
   // English, French (erouv/érouv) and Hebrew script.
-  if(!/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1|\u05e2\u05d9\u05e8\u05d5\u05d5/i.test(q)) return null;
+  if(!/eruv|eiruv|erouv|\u05e2\u05d9\u05e8\u05d5\u05d1|\u05e2\u05e8\u05d5\u05d5|\u05e2\u05e8\u05d5\u05d1/i.test(q)) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handled = true; r.handler = 'Eruv'; r.timeSensitive = true;
   r.answer = askT({
     en:'Eruv status changes week to week, so I will not state whether it is up. Check the official Montreal Eruv page, which is updated by the people who inspect it.',
@@ -1208,8 +1223,33 @@ function askEmergency(q, opts){
     .filter(o => !/hatzol/i.test(o.name));
   if(namedOther.length && !/hatzol|\u05d4\u05e6\u05dc\u05d4/i.test(String(q || ''))) return null;
   if(!/hatzol|hatzalah|ambulance|emergency|paramedic|urgence|ambulancier|noytfal|\u05d4\u05e6\u05dc\u05d4|\u05e0\u05d5\u05d9\u05d8\u05e4\u05d0\u05dc|\u05d0\u05de\u05d1\u05d5\u05dc\u05d0\u05e0\u05e1/i.test(q)) return null;
+  // Published-truth link: the admin-maintained partner_overrides record beats
+  // the built-in constant. hatzolahmontreal.com lapsed (DNS unresolvable as of
+  // 2026-10-24) while the published override carries the live
+  // https://www.hatzoloh.ca/en/ - following the published website is the
+  // product rule, and it holds on the emergency path most of all. Wording is
+  // unchanged; only the link source and admin suppression change.
+  const hatzOv = (opts && opts.orgContacts && opts.orgContacts['Hatzolah Montreal']) || null;
+  if(hatzOv && hatzOv.hidden === true){
+    // Admin hid Hatzolah: fail closed with the standard refusal rather than
+    // falling through to the generic resource matcher, which mis-routes
+    // "Hatzolah Montreal phone number" to an unrelated record (found in
+    // offline testing: it matched Property Taxes via the word "Montreal").
+    // Text mirrors the askRun fallback refusal exactly - keep them in sync.
+    const rr = askAnswerShape();
+    const LL = askRenderLang(askDetectLanguage(q)); rr.lang = LL;
+    rr.handled = false; rr.handler = 'none';
+    rr.answer = askT({
+      en:'I could not match that to a CJHQ resource or a structured source, so I am not going to guess. Try the Resource Centre, or rephrase using a keyword such as passport, NEXUS, RAMQ, eruv, zmanim or Hatzolah.',
+      fr:'Je n\u2019ai pas pu rattacher cela \u00e0 une ressource CJHQ ni \u00e0 une source structur\u00e9e; je ne vais donc pas deviner. Essayez le Centre de ressources, ou reformulez avec un mot-cl\u00e9 comme passeport, NEXUS, RAMQ, \u00e9rouv, zmanim ou Hatzolah.',
+      he:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d4\u05ea\u05d0\u05d9\u05dd \u05d0\u05ea \u05d6\u05d4 \u05dc\u05de\u05e9\u05d0\u05d1 \u05e9\u05dc CJHQ \u05d0\u05d5 \u05dc\u05de\u05e7\u05d5\u05e8 \u05de\u05d5\u05d1\u05e0\u05d4, \u05dc\u05db\u05df \u05dc\u05d0 \u05d0\u05e0\u05d7\u05e9. \u05e0\u05e1\u05d5 \u05d0\u05ea \u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd.',
+      yi:'\u05d0\u05d9\u05da \u05d4\u05d0\u05d1 \u05d3\u05d0\u05e1 \u05e0\u05d9\u05e9\u05d8 \u05d2\u05e2\u05e7\u05e2\u05e0\u05d8 \u05e6\u05d5\u05e4\u05d0\u05e1\u05df \u05e6\u05d5 \u05e7\u05d9\u05d9\u05df CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05d0\u05d3\u05e2\u05e8 \u05e1\u05d8\u05e8\u05d5\u05e7\u05d8\u05d5\u05e8\u05d9\u05e8\u05d8\u05df \u05de\u05e7\u05d5\u05e8, \u05d3\u05e2\u05e8\u05d9\u05d1\u05e2\u05e8 \u05d5\u05d5\u05e2\u05dc \u05d0\u05d9\u05da \u05e0\u05d9\u05e9\u05d8 \u05d8\u05e8\u05e2\u05e4\u05df. \u05e4\u05e8\u05d5\u05d1\u05d9\u05e8\u05d8 \u05d3\u05e2\u05dd \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05e2\u05e8, \u05d0\u05d3\u05e2\u05e8 \u05e9\u05e8\u05d9\u05d9\u05d1\u05d8 \u05e2\u05e1 \u05d0\u05d9\u05d1\u05e2\u05e8 \u05de\u05d9\u05d8 \u05d0 \u05d5\u05d5\u05d0\u05e8\u05d8 \u05d5\u05d5\u05d9 \u05e4\u05d0\u05e1\u05e4\u05d0\u05e8\u05d8, NEXUS, RAMQ, \u05e2\u05d9\u05e8\u05d5\u05d1, \u05d6\u05de\u05e0\u05d9\u05dd \u05d0\u05d3\u05e2\u05e8 \u05d4\u05e6\u05dc\u05d4.'
+    }, LL);
+    rr.actions = [{ label: askT({en:'CJHQ Resource Centre', fr:'Centre de ressources CJHQ', he:'\u05de\u05e8\u05db\u05d6 \u05d4\u05de\u05e9\u05d0\u05d1\u05d9\u05dd', yi:'CJHQ \u05e8\u05e2\u05e1\u05d5\u05e8\u05e1 \u05e6\u05e2\u05e0\u05d8\u05d9\u05d8\u05e8'}, LL), url:'/resources', kind:'internal' }];
+    return rr;
+  }
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handled = true; r.handler = 'Emergency';
   r.answer = askT({
     en:'If this is a life-threatening emergency, call 911 first.\n\nHatzolah Montreal is the community volunteer emergency medical service. I will not quote a phone number from memory. Use the official site so you get the current one.',
@@ -1220,7 +1260,13 @@ function askEmergency(q, opts){
   // A "Call" button appears only if an admin has entered a verified number.
   // emergencyNumbers is empty by design, so today there is no call action -
   // which is correct: a wrong emergency number is worse than none.
-  const H = ASK_HATZOLAH_RECORD;
+  // Mirror the marquee's override semantics exactly: a non-empty override url
+  // wins, an empty-string override url blanks the link, no override record
+  // keeps the built-in constant.
+  const H = Object.assign({}, ASK_HATZOLAH_RECORD,
+    (hatzOv && typeof hatzOv.url === 'string' && hatzOv.url)
+      ? { website: hatzOv.url, source: hatzOv.url.replace(/^https?:\/\//,'').replace(/\/.*$/,'') }
+      : {});
   r.actions = [];
   (H.emergencyNumbers || []).forEach(n=>{
     r.actions.push({ label: askT({en:'Call ' + H.organization, fr:'Appeler ' + H.organization,
@@ -1231,6 +1277,7 @@ function askEmergency(q, opts){
   r.actions.push({ label: askT({en:H.organization + ' Website', fr:'Site de ' + H.organization,
                                 he:'\u05d0\u05ea\u05e8 ' + H.organization,
                                 yi:H.organization + ' \u05d5\u05d5\u05e2\u05d1\u05d6\u05d9\u05d9\u05d8\u05dc'}, L), url:H.website, kind:'link' });
+  if(hatzOv && typeof hatzOv.url === 'string' && !hatzOv.url) r.actions = r.actions.filter(a => !(a.kind === 'link' && a.url === ASK_HATZOLAH_RECORD.website));
   if(H.mapUrl) r.actions.push({ label: askT({en:'View Map', fr:'Voir la carte', he:'\u05de\u05e4\u05d4', yi:'\u05d6\u05e2\u05d8 \u05d3\u05d9 \u05de\u05d0\u05e4\u05e2'}, L), url:H.mapUrl, kind:'map' });
   r.sources = askSortSources([{ name:H.organization, url:H.website, type:'Emergency',
                                 authoritative:true, timeSensitive:false,
@@ -1243,7 +1290,7 @@ function askZmanim(q){
      && !/(shabbo?s|shabbat|chabbat|\u05e9\u05d1\u05ea).{0,20}(end|finish|out|over|termine|fini)/i.test(q)
      && !/\u05e9\u05e7\u05d9\u05e2\u05d4|\u05d6\u05de\u05df|\u05d6\u05de\u05e0\u05d9\u05dd|\u05d4\u05d3\u05dc\u05e7\u05ea \u05e0\u05e8\u05d5\u05ea|\u05e0\u05e8\u05d5\u05ea|\u05dc\u05d9\u05db\u05d8|\u05d1\u05e0\u05d7\u05df/i.test(q)) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   const loc = askDetectLocation(q);
   r.location = loc.name;
   r.handled = true; r.handler = 'Zmanim'; r.timeSensitive = true;
@@ -1268,7 +1315,7 @@ function askCalendar(q){
   if(!/rosh hashan|roch hachana|yom kippur|kippour|sukkot|succos|souccot|pesach|passover|p\u00e2que|shavuot|shavuos|chavouot|purim|pourim|chanuk|hanukk|hanouca|tisha|hebrew date|jewish calendar|calendrier juif|yom tov|f\u00eate juive|fast day|je\u00fbne/i.test(q)
      && !/\u05e8\u05d0\u05e9 \u05d4\u05e9\u05e0\u05d4|\u05d9\u05d5\u05dd \u05db\u05d9\u05e4\u05d5\u05e8|\u05e1\u05d5\u05db\u05d5\u05ea|\u05e1\u05d5\u05db\u05d5\u05e1|\u05e4\u05e1\u05d7|\u05e9\u05d1\u05d5\u05e2\u05d5\u05ea|\u05e4\u05d5\u05e8\u05d9\u05dd|\u05d7\u05e0\u05d5\u05db\u05d4|\u05dc\u05d5\u05d7 \u05e9\u05e0\u05d4|\u05d9\u05d5\u05dd \u05d8\u05d5\u05d1|\u05d9\u05d5\u05dd\u05d8\u05d5\u05d1/i.test(q)) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handled = true; r.handler = 'Calendar';
   r.answer = askT({
     en:'Holiday dates move every year, so I will not state one until the calendar lookup is connected. Hebcal has the current dates and can add them to your calendar.',
@@ -1417,7 +1464,7 @@ const ASK_CONTACT_RE = new RegExp([
 function askContactCjhq(q){
   if(!ASK_CONTACT_RE.test(String(q || ''))) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handler = 'Contact CJHQ';
   r.handled = true;
   const C = ASK_CJHQ_CONTACT;
@@ -1455,7 +1502,7 @@ function askChildTravel(q){
   const s = String(q || '');
   if(!ASK_CHILD_RE.test(s) || !ASK_CHILD_TRAVEL_RE.test(s)) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(s); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(s)); r.lang = L;
   r.handler = 'Child Travel';
   r.handled = true;
   r.timeSensitive = true;
@@ -1709,7 +1756,7 @@ function askOrganizations(q, opts){
   const hits = askOrgMatch(q, opts && opts.orgContacts);
   if(!hits.length) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handler = 'Organizations';
   r.handled = true;
 
@@ -1819,7 +1866,7 @@ function askSpecialInfo(q){
   if(typeof SPECIAL_INFO_COUNTRIES === 'undefined') return null;
 
   const r = askAnswerShape();
-  const L = askDetectLanguage(s); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(s)); r.lang = L;
   r.handler = 'Special Information';
   r.timeSensitive = true;
 
@@ -1905,7 +1952,7 @@ function askCommunityDirectory(q){
   const isDirectory = /mikvah|mikveh|mikv\u00e9|\u05de\u05e7\u05d5\u05d5\u05d4|\u05de\u05d9\u05e7\u05d5\u05d5\u05d4|minyan|minyen|\u05de\u05e0\u05d9\u05d9\u05df|shul|schul|synagogue|\u05e9\u05d5\u05dc|\u05d1\u05d9\u05ea \u05db\u05e0\u05e1\u05ea|daven|davening|davenen|pray|prier|\u05d3\u05d0\u05d5\u05d5\u05e0\u05e2\u05df|\u05dc\u05d4\u05ea\u05e4\u05dc\u05dc|kosher|casher|kashrut|cacher|cach\u00e8re|cach\u00e8res|\u05db\u05e9\u05e8/i.test(q);
   if(!isDirectory) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handler = 'Community Directory';
 
   // Answer from the registry when CJHQ has verified entries. The registry ships
@@ -2021,7 +2068,7 @@ function askCjhqResources(q){
   const hits = askMatchResources(q, 3);
   if(!hits.length) return null;
   const r = askAnswerShape();
-  const L = askDetectLanguage(q); r.lang = L;
+  const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
   r.handler = 'CJHQ Resources';
   const isFr = (L === 'fr');
   const pick = (en, fr) => (isFr && fr) ? fr : en;
@@ -2574,7 +2621,7 @@ async function askRun(question, opts, aiAdapter){
     // Nothing verified to ground on. Gemini is NOT called here - a model asked
     // to answer with no context is exactly how invented facts appear.
     const r = askAnswerShape();
-    const L = askDetectLanguage(q); r.lang = L;
+    const L = askRenderLang(askDetectLanguage(q)); r.lang = L;
     r.handled = false; r.handler = 'none';
     r.answer = askT({
       en:'I could not match that to a CJHQ resource or a structured source, so I am not going to guess. Try the Resource Centre, or rephrase using a keyword such as passport, NEXUS, RAMQ, eruv, zmanim or Hatzolah.',
@@ -2652,11 +2699,16 @@ async function askAnswer(input){
   // stored here. The core stays stateless, which is what guarantees one
   // WhatsApp chat cannot leak into another: there is nothing to leak from.
   // The bridge owns chat id, the recent-message window, expiry and isolation.
-  const res  = await askRun(text, {
-    useAI: opts.useAI === true,
-    context: Array.isArray(opts.context) ? opts.context.slice(-6) : null,
-    orgContacts: (opts.orgContacts && typeof opts.orgContacts === 'object') ? opts.orgContacts : null
-  }, opts.aiAdapter);
+  ASK_OUTPUT_LANG = (opts.outputLang === 'en' || opts.outputLang === 'fr' ||
+                     opts.outputLang === 'he' || opts.outputLang === 'yi') ? opts.outputLang : null;
+  let res;
+  try {
+    res = await askRun(text, {
+      useAI: opts.useAI === true,
+      context: Array.isArray(opts.context) ? opts.context.slice(-6) : null,
+      orgContacts: (opts.orgContacts && typeof opts.orgContacts === 'object') ? opts.orgContacts : null
+    }, opts.aiAdapter);
+  } finally { ASK_OUTPUT_LANG = null; }
   if(!res){
     return { answer:'', sources:[], actions:[], timeSensitive:false,
              handled:false, handler:'', lang:'en', location:'', halachic:false };
