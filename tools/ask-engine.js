@@ -2013,8 +2013,8 @@ function askCustomPages(q){
     if(!p || typeof p !== 'object') continue;
     if(p.published !== true) continue;                        // hidden/draft/non-boolean
     if(typeof p.public_until_ms !== 'number' || p.public_until_ms < nowMs) continue;  // expired or unbackfilled
-    if(typeof p.public_from_ms === 'number'){
-      if(p.public_from_ms > nowMs) continue;                  // scheduled
+    if('public_from_ms' in p){
+      if(typeof p.public_from_ms !== 'number' || p.public_from_ms > nowMs) continue;  // present-but-wrong-type or scheduled: deny like the rules
     }else{
       const sd = String(p.start_date || '').trim();
       if(!sd || sd > CJHQ_PUBLIC_FROM_CUTOVER) continue;      // legacy branch bounded at cutover
