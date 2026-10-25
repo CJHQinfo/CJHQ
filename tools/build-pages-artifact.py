@@ -18,7 +18,7 @@ for name in ('404.html','.nojekyll','CNAME','robots.txt','sitemap.xml','favicon.
 for name in ('fr','resources','data'):
     shutil.copytree(ROOT/name, DEST/name)
 # Temporary-page output exists only while its custom page is published.
-for name in ('notice','travel-guide','uci'):
+for name in ('notice','travel-guide','uci','local-updates'):
     if (ROOT/name).is_dir():
         shutil.copytree(ROOT/name, DEST/name)
 for file in (ROOT/'assets').rglob('*'):
