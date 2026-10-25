@@ -4170,6 +4170,115 @@ function syncNotify(collection, docId) {
 // caller's own staff token. A stale browser therefore cannot shrink or
 // reshape the rebuild even by accident; zero browser-side Firestore reads
 // happen here. Any failure leaves the bot's existing data untouched.
+/* #6 (Tab patch 16) missed-update reconcile - REPORT ONLY. After a settings
+   save, a synced publish/delete, and on admin load, compare what the admin
+   just wrote with the bot server's VM-local report (GET /ask-sync/detail, no
+   Firestore read on the server) and show a dismissible banner on mismatch.
+   Never triggers Republish All; no polling loop (one GET per check). */
+const SYNC_DETAIL_URL = SYNC_ENDPOINT + "/detail";
+const SYNC_BEHIND_TEXT = "Bot data may be behind - run Republish All to repair.";
+const SYNC_SV_DEFAULT = { status: "hidden", startsOn: "", endsOn: "" };
+function syncCleanSvEntry(v){
+  if(!v || typeof v !== "object") return null;
+  return {
+    status: v.status === "published" ? "published" : "hidden",
+    startsOn: typeof v.startsOn === "string" ? v.startsOn.slice(0, 10) : "",
+    endsOn: typeof v.endsOn === "string" ? v.endsOn.slice(0, 10) : ""
+  };
+}
+function syncSvSame(a, b){
+  a = a || SYNC_SV_DEFAULT;
+  b = b || SYNC_SV_DEFAULT;
+  return a.status === b.status && a.startsOn === b.startsOn && a.endsOn === b.endsOn;
+}
+function syncReconcileCompare(report, expect, pendingKeys, parkedKeys){
+  expect = expect || {};
+  pendingKeys = pendingKeys || new Set();
+  parkedKeys = parkedKeys || new Set();
+  const out = { behind: false, unknown: false, reasons: [] };
+  const d = report && report.detail;
+  if(!report || report.ok !== true || !d){ out.unknown = true; return out; }
+  if(report.degraded === true || (d.store && d.store.degraded === true)) out.reasons.push("store degraded");
+  if(report.seeded !== true) out.reasons.push("store not seeded");
+  if(expect.sectionVisibility && typeof expect.sectionVisibility === "object" && !pendingKeys.has("settings/site")){
+    const have = (d.settings && d.settings.present && d.settings.sectionVisibility) || {};
+    const keys = new Set(Object.keys(expect.sectionVisibility).concat(typeof SECTION_KEYS !== "undefined" ? SECTION_KEYS : []));
+    for(const k of keys){
+      if(!syncSvSame(syncCleanSvEntry(expect.sectionVisibility[k]), syncCleanSvEntry(have[k]))) out.reasons.push("settings " + k);
+    }
+  }
+  for(const e of expect.docs || []){
+    const key = e.collection + "/" + e.docId;
+    if(pendingKeys.has(key) || parkedKeys.has(key)) continue;
+    const present = !!(report.hashes && report.hashes[key]);
+    if(e.deleted && present) out.reasons.push("still in bot data: " + key);
+    else if(!e.deleted && !present) out.reasons.push("missing from bot data: " + key);
+  }
+  out.behind = out.reasons.length > 0;
+  return out;
+}
+async function syncFetchDetail(){
+  if(typeof adminUser === "undefined" || !adminUser) return null;
+  try{
+    const token = await adminUser.getIdToken();
+    const res = await fetch(SYNC_DETAIL_URL, { method: "GET", headers: { authorization: "Bearer " + token } });
+    if(res.status !== 200) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+function syncRenderBehindBanner(show, reasons){
+  const id = "cjhq-sync-behind-banner";
+  let el = document.getElementById(id);
+  if(!show){ if(el) el.remove(); return; }
+  if(!el){
+    el = document.createElement("div");
+    el.id = id;
+    el.setAttribute("role", "status");
+    el.style.cssText = "position:fixed;left:12px;bottom:12px;z-index:9999;background:#fdecea;border:1px solid #d93025;border-radius:8px;padding:8px 10px;font:13px/1.4 sans-serif;color:#5f1410;box-shadow:0 2px 8px rgba(0,0,0,.15);max-width:420px";
+    document.body.appendChild(el);
+  }
+  el.innerHTML = "";
+  el.title = (reasons || []).join("; ");
+  el.appendChild(document.createTextNode(SYNC_BEHIND_TEXT + " "));
+  const x = document.createElement("button");
+  x.type = "button";
+  x.textContent = "Dismiss";
+  x.setAttribute("aria-label", "Dismiss");
+  x.style.cssText = "margin-left:6px";
+  x.onclick = () => syncRenderBehindBanner(false);
+  el.appendChild(x);
+}
+let syncReconcileExpect = null;
+let syncReconcileTimer = null;
+function syncReconcileAfter(expect){
+  if(typeof adminUser === "undefined" || !adminUser) return;
+  const cur = syncReconcileExpect || { docs: [] };
+  if(expect && expect.sectionVisibility) cur.sectionVisibility = expect.sectionVisibility;
+  if(expect && expect.docs) cur.docs = cur.docs.concat(expect.docs);
+  if(expect && expect.onLoad) cur.onLoad = true;
+  syncReconcileExpect = cur;
+  clearTimeout(syncReconcileTimer);
+  syncReconcileTimer = setTimeout(syncReconcileRun, 1500);
+}
+async function syncReconcileRun(){
+  const expect = syncReconcileExpect;
+  syncReconcileExpect = null;
+  if(!expect) return null;
+  for(let i = 0; i < 80 && syncDrainRunning; i++) await new Promise(r => setTimeout(r, 250));
+  if(expect.onLoad && !expect.sectionVisibility){
+    for(let i = 0; i < 40 && !window.__cjhqSvLoaded; i++) await new Promise(r => setTimeout(r, 250));
+    if(window.__cjhqSvLoaded) expect.sectionVisibility = __sectionVisibility;
+  }
+  const pending = new Set(syncOutboxLoad().map(e => e.collection + "/" + e.docId));
+  const parked = new Set(syncParkedLoad().map(e => e.collection + "/" + e.docId));
+  const report = await syncFetchDetail();
+  const res = syncReconcileCompare(report, expect, pending, parked);
+  if(res.unknown) return res;
+  syncRenderBehindBanner(res.behind, res.reasons);
+  if(res.behind) console.warn("[CJHQ] bot data may be behind:", res.reasons.join("; "));
+  return res;
+}
+
 async function syncRepublishAll() {
   // Refuse to republish from a half-loaded page: publishing a collection
   // whose load FAILED as if it were empty would wipe the bot's data.

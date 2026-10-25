@@ -2668,6 +2668,7 @@ async function initFirebase(){
       authMod.onAuthStateChanged(fbAuth, (user) => {
         adminUser = user || null;
         if(typeof syncAdminAuthUI === 'function') syncAdminAuthUI();
+        if(adminUser && typeof syncReconcileAfter === "function") syncReconcileAfter({ onLoad: true });
       });
     }
 
@@ -2749,6 +2750,7 @@ async function saveToCollection(name, record, opts){
         record.id = ref.id;
       }
       if (typeof syncNotify === "function") syncNotify(name, record.id); // defined in admin.html only (tools/admin-app.js)
+      if (typeof syncReconcileAfter === "function" && SYNC_COLLECTIONS[name]) syncReconcileAfter({ docs: [{ collection: name, docId: String(record.id), deleted: false }] });
     }catch(err){
       reportSaveFailure(name, err);
       throw err;   // stop the caller from reporting success
@@ -2773,6 +2775,7 @@ async function deleteFromCollection(name, id, opts){   // opts: pass-through for
     try{
       await fs.deleteDoc(fs.doc(fbDb, name, id));
       if (typeof syncNotify === "function") syncNotify(name, id); // defined in admin.html only (tools/admin-app.js)
+      if (typeof syncReconcileAfter === "function" && SYNC_COLLECTIONS[name]) syncReconcileAfter({ docs: [{ collection: name, docId: String(id), deleted: true }] });
     }catch(err){
       reportSaveFailure(name, err);
       throw err;
@@ -2890,6 +2893,7 @@ async function loadSectionVisibility(){
                  changedAt: (v && v.changedAt) || '', changedBy: (v && v.changedBy) || '' };
     });
     __sectionVisibility = out;
+    window.__cjhqSvLoaded = true;
   }catch(err){
     console.warn('[CJHQ] section visibility unavailable - defaulting to hidden');
     __sectionVisibility = {};   // fail closed
@@ -2924,6 +2928,7 @@ async function saveSettingsDoc(data){
     const fs = window.__fbFirestore;
     await fs.setDoc(fs.doc(fbDb, 'settings', 'site'), data, { merge:true });
     if (typeof syncNotify === "function") syncNotify("settings", "site"); // defined in admin.html only (tools/admin-app.js)
+    if (typeof syncReconcileAfter === "function" && data && data.sectionVisibility) syncReconcileAfter({ sectionVisibility: data.sectionVisibility });
   } else {
     window.__localSettings = data;
   }
@@ -3298,14 +3303,43 @@ async function fetchPublicCustomPages(){
   return reads.filter(Boolean);
 }
 
-/* Keeping the index honest. Draft pages are left out entirely, so an
-   unpublished page's address is not advertised before anyone has decided to
-   publish it. Expired and not-yet-started pages STAY in: the rules refuse them
-   on read anyway, and leaving them means the index never has to be rewritten
-   just because the clock moved. */
-function cjhqPublicIndexSlugs(){
+/* #5 (Tab patch 13): the public custom-pages index lists published===true,
+   non-placeholder pages that are public now OR scheduled (window not yet
+   open); drafts, expired/unbackfilled and placeholder pages are dropped. A
+   listed scheduled page stays unreadable to the public until its window opens
+   (firestore.rules pageIsPublicNow), and appears without an admin visit once
+   it does. Placeholder = titles AND bodies all empty after stripping tags
+   (same rule as the sync server). */
+function cjhqIsPlaceholderText(v){
+  if(v == null) return true;
+  if(typeof v !== "string") return false;
+  return !v.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;|&#160;|&#xa0;/gi, " ")
+    .replace(/[\u00a0\u200b\u200c\u200d\u2060\ufeff]/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
+function cjhqIsPlaceholderPage(p){
+  return !p || (cjhqIsPlaceholderText(p.title_en) && cjhqIsPlaceholderText(p.title_fr)
+    && cjhqIsPlaceholderText(p.body_en) && cjhqIsPlaceholderText(p.body_fr));
+}
+function cjhqPageIsPublicAtMs(p, nowMs){
+  if(!p || p.published !== true) return false;
+  if(typeof p.public_until_ms !== "number" || p.public_until_ms < nowMs) return false;
+  if("public_from_ms" in p) return typeof p.public_from_ms === "number" && p.public_from_ms <= nowMs;
+  return typeof p.start_date === "string" && p.start_date <= CJHQ_PUBLIC_FROM_CUTOVER;
+}
+function cjhqPageIsScheduledAtMs(p, nowMs){
+  return !!p && p.published === true && typeof p.public_until_ms === "number"
+    && p.public_until_ms >= nowMs && typeof p.public_from_ms === "number" && p.public_from_ms > nowMs;
+}
+function cjhqPageListedInPublicIndex(p, nowMs){
+  if(!p || !p.slug || p.published !== true || cjhqIsPlaceholderPage(p)) return false;
+  return cjhqPageIsPublicAtMs(p, nowMs) || cjhqPageIsScheduledAtMs(p, nowMs);
+}
+function cjhqPublicIndexSlugs(nowMs){
+  nowMs = typeof nowMs === "number" ? nowMs : Date.now();
   return Object.values(CUSTOM_PAGES_CACHE)
-    .filter(p => p && p.slug && p.published !== false)
+    .filter(p => cjhqPageListedInPublicIndex(p, nowMs))
     .map(p => String(p.slug))
     .sort();
 }
