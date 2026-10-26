@@ -1,38 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>CJHQ Local Updates - Outremont &amp; Plateau</title>
+<meta name="description" content="A monthly email from CJHQ on what the Outremont and Plateau-Mont-Royal borough councils decided that affects residents: zoning, parking, street closures and construction.">
 <style>
-  body { margin:0; background:#f4f4f4; font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; }
-  .wrap { max-width:640px; margin:40px auto; background:#ffffff; border:1px solid #e0e0e0; border-radius:8px; padding:36px 32px; }
-  .logo { display:block; margin:0 auto 24px auto; width:220px; }
-  h1 { font-family: Georgia, 'Times New Roman', serif; color:#002349; font-size:26px; line-height:1.3; text-align:center; margin:0 0 16px 0; }
-  p.intro { font-size:15px; line-height:1.6; margin:0 0 8px 0; }
-  p.note { font-size:13px; line-height:1.5; color:#555; margin:16px 0 0 0; }
-  .form-area { margin-top:24px; }
-  hr { border:0; border-top:1px solid #e0e0e0; margin:32px 0; }
-  .fr p { font-size:13px; line-height:1.6; color:#333; margin:0; }
-  .footer { text-align:center; font-size:12px; color:#777; margin-top:28px; }
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 700;font-display:swap;src:url('/assets/fonts/inter-normal-latin.woff2') format('woff2');}
+@font-face{font-family:'Lora';font-style:normal;font-weight:400 700;font-display:swap;src:url('/assets/fonts/lora-normal-latin.woff2') format('woff2');}
+:root{
+  --ink:#0E2149; --ink-soft:#1E3A6B; --bronze:#2F4C7A;
+  --paper:#FFFFFF; --bg-alt:#F2F5F9; --charcoal:#20242A;
+  --line:#D8DFE8; --muted:#68707C; --radius:4px; --maxw:1120px;
+  --c-green:#3A7D52; --c-green-bg:#E9F5EC; --c-green-bright:#7FC39B;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;color:var(--charcoal);background:var(--paper);line-height:1.6;-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:'Lora',serif;color:var(--ink);line-height:1.25;margin:0;}
+p{margin:0;}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+.kicker{font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;}
+
+/* header - site chrome without nav */
+header{background:var(--paper);border-bottom:1px solid var(--line);}
+.header-inner{max-width:var(--maxw);margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.brand-mark{height:72px;width:auto;object-fit:contain;}
+.header-tag{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+@media (max-width:860px){.brand-mark{height:52px;}.header-tag{display:none;}}
+
+/* navy hero */
+.hero{background:var(--ink);color:#E9EEF7;padding:72px 0 64px;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--c-green);}
+.hero .kicker{color:var(--c-green-bright);}
+.hero h1{color:#fff;font-size:clamp(2rem,4.5vw,3rem);margin:14px 0 6px;}
+.hero h1 .amp{color:var(--c-green-bright);}
+.hero .sub{max-width:640px;font-size:1.06rem;color:#C7D3E8;margin-top:14px;}
+.hero-rule{width:72px;height:4px;background:var(--c-green);border-radius:2px;margin-top:26px;}
+
+/* area cards */
+.areas{padding:56px 0 8px;}
+.areas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:28px;}
+@media (max-width:860px){.areas-grid{grid-template-columns:1fr;}}
+.area-card{border:1px solid var(--line);border-top:4px solid var(--c-green);border-radius:var(--radius);padding:24px;background:var(--paper);}
+.area-card h3{font-size:1.25rem;margin-bottom:8px;}
+.area-card .freq{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c-green);margin-bottom:10px;}
+.area-card p{font-size:.92rem;color:var(--charcoal);}
+
+/* signup + preview side by side */
+.signup-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start;margin-top:32px;}
+@media (max-width:860px){.signup-grid{grid-template-columns:1fr;gap:28px;}}
+.email-card{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 18px 44px rgba(14,33,73,.14);overflow:hidden;}
+.email-card .clip{max-height:560px;overflow:hidden;position:relative;}
+.email-card .clip::after{content:'';position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff);}
+.email-card img{display:block;width:100%;height:auto;}
+.email-card .cap{padding:12px 18px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted);}
+
+/* signup */
+.signup{background:var(--bg-alt);padding:64px 0 72px;margin-top:56px;}
+.signup-inner{max-width:640px;margin:0 auto;text-align:center;}
+.signup h2{font-size:1.7rem;margin:10px 0 12px;}
+.signup .lede{color:var(--charcoal);font-size:.98rem;margin-bottom:28px;}
+.signup-box{border:1px solid var(--line);border-radius:8px;padding:28px 24px 8px;background:#fff;text-align:left;}
+.optin-note{font-size:.85rem;color:var(--muted);margin-top:18px;text-align:left;}
+.fr-card{margin-top:28px;border-left:4px solid var(--c-green);background:var(--c-green-bg);border-radius:var(--radius);padding:18px 20px;text-align:left;}
+.fr-card .kicker{color:var(--c-green);}
+.fr-card p{font-size:.9rem;margin-top:8px;}
+
+/* Mailjet embed + badge crop (same technique as the main CJHQ Updates form) */
+.cjhq-mailjet-form{width:100%;position:relative;overflow:hidden;}
+.cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;margin-bottom:-155px;}
+.cjhq-mailjet-form.cjhq-captcha-open iframe{margin-bottom:0;}
+
+/* footer - same as cjhq.org */
+footer{background:var(--ink);color:#B9B2A0;padding:48px 24px 32px;}
+.footer-inner{max-width:var(--maxw);margin:0 auto;}
+.footer-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;margin-bottom:32px;}
+footer .brand-name{font-family:'Lora',serif;font-weight:600;font-size:1.15rem;color:var(--paper);letter-spacing:.01em;}
+footer .brand-sub{display:block;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--paper);opacity:.75;font-weight:600;margin-top:1px;}
+footer a{text-decoration:none;color:#B9B2A0;font-size:.88rem;}
+footer nav{display:flex;flex-direction:column;gap:8px;}
+footer .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8FA3C7;}
+.social-row{display:flex;gap:10px;margin-top:16px;}
+.social-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid rgba(246,242,232,.25);border-radius:50%;color:#B9B2A0;}
+.social-icon svg{width:16px;height:16px;}
+.footer-bottom{border-top:1px solid rgba(246,242,232,.15);padding-top:20px;font-size:.78rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <img class="logo" src="https://cjhq.org/cjhq-logo.png" alt="CJHQ">
-    <h1>CJHQ Local Updates - Outremont &amp; Plateau</h1>
-    <p class="intro">A monthly email on what your borough council decided that affects residents: zoning, parking, street closures and construction. Outremont and Plateau are separate emails; choose "Both" to receive each one. We cite the official borough sources, and we always mark what is confirmed and what is not yet final.</p>
-    <div class="form-area">
-      <iframe data-w-type="embedded" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://159pj.mjt.lu/wgt/159pj/sx5j/form?c=69dd03fb" width="100%" style="height: 0;"></iframe>
-      <script type="text/javascript" src="https://app.mailjet.com/pas-nc-embedded-v2.js"></script>
-    </div>
-    <p class="note">After you sign up you will get a confirmation email from CJHQ (info@cjhq.org). Your subscription starts only after you click the confirmation button. You can unsubscribe at any time with one click.</p>
-    <hr>
-    <div class="fr">
-      <p>Un courriel mensuel sur les d&eacute;cisions du conseil d'arrondissement qui touchent les r&eacute;sidents : zonage, stationnement, fermetures de rue et construction. Outremont et Plateau sont deux infolettres distinctes; choisissez &laquo; Both &raquo; pour recevoir les deux. Vous recevrez un courriel de confirmation; votre abonnement commence seulement apr&egrave;s confirmation. D&eacute;sabonnement en tout temps.</p>
-    </div>
-    <p class="footer">CJHQ &middot; info@cjhq.org &middot; 514-844-2121</p>
+
+<header>
+  <div class="header-inner">
+    <a class="brand" href="/">
+      <img class="brand-mark" src="/assets/cjhq-brand-mark-256.webp" width="256" height="144" alt="CJHQ - The Jewish Hasidic Council of Quebec">
+    </a>
+    <span class="header-tag">Local Updates</span>
   </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="kicker">New from CJHQ</span>
+    <h1>Local Updates for<br>Outremont <span class="amp">&amp;</span> Plateau</h1>
+    <p class="sub">A monthly email on what your borough council decided that affects residents: zoning, parking, street closures and construction. Outremont and Plateau are separate emails; choose &ldquo;Both&rdquo; to receive each one. We cite the official borough sources, and we always mark what is confirmed and what is not yet final.</p>
+    <div class="hero-rule"></div>
+  </div>
+</section>
+
+<section class="areas">
+  <div class="wrap">
+    <span class="kicker" style="color:var(--c-green);">Choose your borough</span>
+    <div class="areas-grid">
+      <div class="area-card">
+        <div class="freq">Monthly email</div>
+        <h3>Outremont</h3>
+        <p>What the Outremont borough council decided at its monthly meeting, and what is still only proposed.</p>
+      </div>
+      <div class="area-card">
+        <div class="freq">Monthly email</div>
+        <h3>Plateau</h3>
+        <p>The same service for the Plateau-Mont-Royal borough council - short, sourced, and only what touches residents.</p>
+      </div>
+      <div class="area-card">
+        <div class="freq">Both emails</div>
+        <h3>Both</h3>
+        <p>Live on one border street or active in both boroughs? You get each short email separately.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="signup" id="signup">
+  <div class="wrap">
+    <div style="text-align:center;max-width:640px;margin:0 auto;">
+      <span class="kicker" style="color:var(--c-green);">Free, one click to unsubscribe</span>
+      <h2 style="font-size:1.7rem;margin:10px 0 12px;">Get the next edition</h2>
+      <p style="color:var(--charcoal);font-size:.98rem;">Enter your email and pick your borough. We will never share your address.</p>
+    </div>
+    <div class="signup-grid">
+      <div>
+        <div class="signup-box">
+          <!-- Mailjet form: CJHQ Local Updates - Outremont & Plateau (form ID 82281). Double opt-in ON. -->
+          <div class="cjhq-mailjet-form">
+            <iframe title="CJHQ Local Updates signup" data-w-type="embedded" src="https://159pj.mjt.lu/wgt/159pj/sx5j/form?c=69dd03fb" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" style="height:0;"></iframe>
+          </div>
+          <p class="optin-note">After you sign up you will get a confirmation email from CJHQ (info@cjhq.org). Your subscription starts only after you click the confirmation button. You can unsubscribe at any time with one click.</p>
+        </div>
+        <div class="fr-card">
+          <span class="kicker">En fran&ccedil;ais</span>
+          <p>Un courriel mensuel sur les d&eacute;cisions du conseil d&rsquo;arrondissement qui touchent les r&eacute;sidents&nbsp;: zonage, stationnement, fermetures de rue et construction. Outremont et Plateau sont deux infolettres distinctes; choisissez &laquo;&nbsp;Both&nbsp;&raquo; pour recevoir les deux. Vous recevrez un courriel de confirmation; votre abonnement commence seulement apr&egrave;s confirmation. D&eacute;sabonnement en tout temps.</p>
+        </div>
+      </div>
+      <div class="email-card">
+        <div class="clip"><img src="/local-updates/email-preview.png" alt="Preview of the October 2026 Outremont edition of CJHQ Local Updates"></div>
+        <div class="cap">The October 2026 Outremont edition</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div style="max-width:240px;">
+        <span class="brand-name">CJHQ</span>
+        <span class="brand-sub">The Jewish Hasidic Council of Quebec</span>
+        <div style="font-size:.8rem;color:#C7D3E8;margin-top:6px;">Supporting, Serving, and Representing Quebec's Hasidic Jewish Communities</div>
+        <div class="social-row">
+          <a class="social-icon" id="footerFacebookLink" href="https://www.facebook.com/CJHQinfo" target="_blank" rel="noopener" title="Facebook — @CJHQinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M15.12 5.32H17V2.14A26.11 26.11 0 0 0 14.26 2C11.54 2 9.68 3.66 9.68 6.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.03.29-1.73 1.76-1.73Z"/></svg></a>
+          <a class="social-icon" id="footerXLink" href="https://x.com/CJHQinfo" target="_blank" rel="noopener" title="X (Twitter) — @CJHQinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg></a>
+          <a class="social-icon" id="footerInstagramLink" href="https://www.instagram.com/cjhqinfo/" target="_blank" rel="noopener" title="Instagram — @cjhqinfo"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+        </div>
+      </div>
+      <nav aria-label="Footer">
+        <span class="eyebrow">Quick Links</span>
+        <a href="/" style="margin-top:8px;">Home</a>
+        <a href="/resources">Resources</a>
+        <a href="/stay-informed">News &amp; Updates</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+      </nav>
+      <div>
+        <span class="eyebrow">Contact</span>
+        <div style="font-size:.85rem;margin-top:8px;line-height:1.8;">
+          1040 Van Horne Ave<br>Outremont, QC, H2V 1J5, CANADA<br>
+          <a href="tel:+15148442121">(514) 844-2121</a> &middot; <a href="mailto:info@cjhq.org">info@cjhq.org</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 The Jewish Hasidic Council of Quebec (CJHQ)</span>
+      <span style="display:flex;gap:16px;flex-wrap:wrap;">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Use</a>
+        <a href="/accessibility">Accessibility Statement</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script type="text/javascript" src="https://app.mailjet.com/pas-nc-embedded-v2.js"></script>
+<script>
+// The bottom of the frame is clipped to hide Mailjet's badge. Lift the clip
+// while the captcha is open so nothing interactive is cut off.
+window.addEventListener('message',function(event){
+  if(event.origin!=='https://159pj.mjt.lu') return;
+  var frame=document.querySelector('.cjhq-mailjet-form iframe');
+  if(!frame || event.source!==frame.contentWindow) return;
+  var box=frame.closest('.cjhq-mailjet-form');
+  if(event.data && event.data.type==='CAPTCHA_OPEN'){ frame.style.minHeight='650px'; if(box) box.classList.add('cjhq-captcha-open'); }
+  if(event.data && event.data.type==='CAPTCHA_CLOSE'){ frame.style.minHeight='0px'; if(box) box.classList.remove('cjhq-captcha-open'); }
+});
+</script>
 </body>
 </html>
