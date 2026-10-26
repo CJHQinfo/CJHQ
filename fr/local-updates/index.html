@@ -7,10 +7,10 @@
 <title>Infolettres locales du CJHQ - Outremont et Plateau</title>
 <meta name="description" content="Un courriel mensuel du CJHQ sur ce que les conseils d'arrondissement d'Outremont et du Plateau-Mont-Royal ont décidé et qui touche les résidents : zonage, stationnement, fermetures de rue et construction.">
 <script>(function(){
+  // A /fr/ URL is itself the language declaration on cjhq.org: it renders
+  // French even when the visitor's saved choice is English. The toggle still
+  // navigates to the English version.
   document.documentElement.classList.add('lang-fr');
-  var lang = null;
-  try{ lang = localStorage.getItem('cjhq_language'); }catch(e){}
-  if(lang === 'en'){ location.replace('/local-updates/'); }
 })();</script>
 <style>
 
