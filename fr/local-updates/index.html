@@ -948,9 +948,16 @@
 .email-card img{display:block;width:100%;height:auto;}
 .email-card .cap{padding:12px 18px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted);}
 
-/* Mailjet badge crop - measured for THIS form (same technique as the main site form) */
-.cjhq-mailjet-form{width:100%;position:relative;overflow:hidden;}
-.cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;margin-bottom:-155px;}
+/* Mailjet badge crop - re-measured 2026-10-27 against the new CJHQ Borough Updates
+   embeds at 320-1200px (same technique as the main site form). The crop must
+   sit in a narrow window: below the Sign up button, above the "Powered by
+   Mailjet" badge. Both the badge height and the template's bottom padding
+   shrink with the frame width, so the crop tracks both via container-query
+   units: 27.5px fixed + scaled badge + scaled padding, landing ~6px above the
+   badge top and ~15px below the button at every width. Re-measure if Mailjet
+   changes the template. */
+.cjhq-mailjet-form{width:100%;position:relative;overflow:hidden;container-type:inline-size;}
+.cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;margin-bottom:calc(-1 * min(151px, 68px + 20.67cqw));}
 .cjhq-mailjet-form.cjhq-captcha-open iframe{margin-bottom:0;}
 
 </style>
@@ -1042,7 +1049,6 @@
 <section class="lu-signup" id="signup">
   <div class="wrap">
     <div style="text-align:center;max-width:640px;margin:0 auto;">
-      <span class="kicker" style="color:var(--c-green);">Gratuit, d&eacute;sabonnement en un clic</span>
       <h2 style="font-size:1.7rem;margin:10px 0 12px;">Recevez la prochaine &eacute;dition</h2>
       <p style="color:var(--charcoal);font-size:.98rem;">Entrez votre courriel et choisissez votre arrondissement. Nous ne partagerons jamais votre adresse.</p>
     </div>
@@ -1051,14 +1057,14 @@
         <div class="lu-signup-box">
           <!-- Mailjet form: CJHQ Local Updates - Outremont & Plateau-Mont-Royal (form ID 82281). Double opt-in ON. -->
           <div class="cjhq-mailjet-form">
-            <iframe title="CJHQ Local Updates signup" data-w-type="embedded" src="https://159pj.mjt.lu/wgt/159pj/sx5j/form?c=69dd03fb" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" style="height:0;"></iframe>
+            <iframe title="Inscription aux infolettres d’arrondissement du CJHQ" data-w-type="embedded" src="https://159pj.mjt.lu/wgt/159pj/sxt9/form?c=6f3a414a" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" width="100%" style="height:0;"></iframe>
           </div>
           <p class="lu-optin-note">Apr&egrave;s votre inscription, vous recevrez un courriel de confirmation du CJHQ (info@cjhq.org). Votre abonnement commence seulement apr&egrave;s avoir cliqu&eacute; le bouton de confirmation. Vous pouvez vous d&eacute;sabonner en tout temps en un clic.</p>
           <p class="lu-optin-note">Cet abonnement est distinct des infolettres communautaires r&eacute;guli&egrave;res du CJHQ&nbsp;: vous inscrire ici ne vous abonne pas aux autres courriels du CJHQ. Fourni par le Conseil des Juifs Hassidiques du Qu&eacute;bec (CJHQ).</p>
         </div>
         <div class="lu-fr-card">
           <span class="kicker">&Agrave; noter</span>
-          <p>Le formulaire d&rsquo;inscription ci-dessus est en anglais. Les infolettres sont r&eacute;dig&eacute;es en anglais, avec un pied de page en fran&ccedil;ais. <a href="/local-updates/" style="color:var(--c-green);font-weight:600;">English version of this page &rarr;</a></p>
+          <p>Les infolettres sont r&eacute;dig&eacute;es en anglais, avec un pied de page en fran&ccedil;ais. <a href="/local-updates/" style="color:var(--c-green);font-weight:600;">English version of this page &rarr;</a></p>
         </div>
       </div>
       <div class="email-card">
