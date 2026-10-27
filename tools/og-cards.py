@@ -45,6 +45,7 @@ CARDS = {
     'terms':                ('TERMS OF USE',                'CONDITIONS D’UTILISATION'),
     'accessibility':        ('ACCESSIBILITY STATEMENT',     'DÉCLARATION D’ACCESSIBILITÉ'),
     'child-travel-consent': ('CHILD TRAVEL CONSENT LETTER', 'LETTRE DE CONSENTEMENT AU VOYAGE'),
+    'borough-updates':      ('BOROUGH UPDATES',              'INFOLETTRES D’ARRONDISSEMENT'),
 }
 
 def lora(size, weight=600):
