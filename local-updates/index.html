@@ -670,12 +670,12 @@
      the clipped strip cannot paint over the card below it. */
   .cjhq-mailjet-form,
   .cjhq-mailjet-language{overflow:hidden;}
-  .cjhq-mailjet-form iframe{margin-bottom:-168px;}
+  .cjhq-mailjet-form iframe{margin-bottom:0;}
   /* On narrow screens the badge shrinks with the iframe. Keep the crop
      proportional so the signup button remains fully visible. */
   @media(max-width:600px){
     .cjhq-mailjet-language{container-type:inline-size;}
-    .cjhq-mailjet-form iframe{margin-bottom:calc(-80px - min(72px, 20.4545cqw - 10.227px));}
+    .cjhq-mailjet-form iframe{margin-bottom:0;}
   }
   /* The captcha opens inside the frame and can extend to its bottom edge, so
      the clip is lifted for as long as it is on screen (CAPTCHA_OPEN below). */
@@ -954,16 +954,11 @@
 .email-card img{display:block;width:100%;height:auto;}
 .email-card .cap{padding:12px 18px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted);}
 
-/* Mailjet badge crop - re-measured 2026-10-27 against the new CJHQ Borough Updates
-   embeds at 320-1200px (same technique as the main site form). The crop must
-   sit in a narrow window: below the Sign up button, above the "Powered by
-   Mailjet" badge. Both the badge height and the template's bottom padding
-   shrink with the frame width, so the crop tracks both via container-query
-   units: 27.5px fixed + scaled badge + scaled padding, landing ~6px above the
-   badge top and ~15px below the button at every width. Re-measure if Mailjet
-   changes the template. */
+/* Mailjet badge crop, removed 2026-10-29: the "Powered by Mailjet" badge is
+   gone from the Borough Updates embeds (removed inside Mailjet), so the frame
+   shows its full height. container-type stays for future measurement. */
 .cjhq-mailjet-form{width:100%;position:relative;overflow:hidden;container-type:inline-size;}
-.cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;margin-bottom:calc(-1 * min(151px, 68px + 20.67cqw));}
+.cjhq-mailjet-form iframe{display:block;width:100% !important;max-width:100%;border:0;margin-bottom:0;}
 .cjhq-mailjet-form.cjhq-captcha-open iframe{margin-bottom:0;}
 
 </style>
