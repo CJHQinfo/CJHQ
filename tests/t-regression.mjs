@@ -98,10 +98,9 @@ export default async function run(){
   t.check('ASK_AI_CONFIG is byte-identical (model, temperature, tokens, timeout, throttle)',
     cfg(idx) === cfg(oldIdx), cfg(idx));
   const appcheck = s => (s.match(/function ensureAppCheck\(\)\{[\s\S]*?\n\}/) || [''])[0];
-  t.check('App Check unchanged apart from the explicit zero-AI guard', appcheck(idx).replace("  if(!ASK_BROWSER_AI_ENABLED) return Promise.resolve(false);\n", '') === appcheck(oldIdx));
+  t.check('App Check unchanged', appcheck(idx) === appcheck(oldIdx));
   const backend = s => (s.match(/const ASK_BACKEND = \{[\s\S]*?\n\};/) || [''])[0];
-  t.check('Backend unchanged apart from explicit zero-AI guard',
-    backend(idx).replace("    if(!ASK_BROWSER_AI_ENABLED) throw new Error('ai-disabled');\n", '') === backend(oldIdx));
+  t.check('Backend unchanged', backend(idx) === backend(oldIdx));
 
   // ---- directory limitation wording ----------------------------------------
   const DIRQ = ['Where can I find a shul?', 'Where can I find a mikvah?', 'Where can I find kosher food?',
@@ -197,7 +196,8 @@ export default async function run(){
   // in the order is unchanged; any FURTHER drift fails here.
   const oldOrder = OLD.askPracticalHandlers().map(f=>f.name);
   const expectedOrder = [...oldOrder];
-  expectedOrder.splice(oldOrder.indexOf('askSpecialInfo') + 1, 0, 'askCustomPages');
+  if(!expectedOrder.includes('askCustomPages'))
+    expectedOrder.splice(oldOrder.indexOf('askSpecialInfo') + 1, 0, 'askCustomPages');
   t.eq('handler order unchanged apart from reviewed askCustomPages insertion',
        NEW.askPracticalHandlers().map(f=>f.name).join(','), expectedOrder.join(','));
 

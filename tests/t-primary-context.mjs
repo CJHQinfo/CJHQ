@@ -1,19 +1,14 @@
 /* PRIMARY RESOURCE CONTEXT.
 
-   The live smoke test of 2026-09-03 found that "What do I need to do for a
-   Hachnoses Sefer Torah?" produced an answer asserting that the event needs a
-   borough permit - the exact category claim the record was written to avoid.
-   The record was right; the model never saw it. askBuildContext built the
-   PRIMARY block from res.answer alone, and the deterministic answer is
-   selective: askResourceIntent chooses which list to render, tips appear only
-   for a steps or needs question, and answer_* is emitted only for intent
-   'right'. The record's caution lives in answer_en, so on this question it was
-   dropped before the context was assembled. askContextResource - the only
-   function that surfaces answer_* - ran only for RELATED siblings.
+   These assertions pin two behaviors:
 
-   These assertions pin the fix: the primary record's complete verified content,
-   including its own inline Q&A, reaches the context; the caution survives; and
-   the context no longer renders an internal action URL as '</contact>'.        */
+   1. The primary record's complete verified content, including its own inline
+      Q&A, reaches the AI context (the 2026-09-03 fix: askBuildContext used to
+      build the PRIMARY block from res.answer alone, which is selective), and
+      an internal action URL never renders as '</contact>'.
+   2. Since the 12 Oct 2026 removal of the events record's Hachnoses-specific
+      Q&A (kept by the owner on 29 Oct), Hachnoses Sefer Torah phrasings get no
+      match and no guessed answer.                                             */
 import { askRun, askBuildContext, askContextPrimary, askCjhqResources,
          askVerifyPhrasing } from '../ask-core.mjs';
 import { makeSuite } from './harness.mjs';
@@ -33,9 +28,9 @@ export default async function run(){
   // intent is NOT 'right' - which is precisely when the deterministic answer
   // omits answer_* and the old context therefore lost it.
   const inlineQA = [
-    { q:'What do I need to do for a Hachnoses Sefer Torah?',
-      slug:'outdoor-public-events-permits',
-      needle:'CJHQ cannot tell you which category applies' },
+    { q:'How do I contact the mayor of the Plateau?',
+      slug:'plateau-borough-services',
+      needle:'Not for a routine service problem' },
     { q:'How do I report a municipal service problem in Outremont?',
       slug:'report-a-problem-311',
       needle:'Start with 311 for a routine service problem' },
@@ -80,31 +75,26 @@ export default async function run(){
       t.check('tip item in context: ' + c.slug, ctx.includes(x));
   }
 
-  /* ---- 3. Hachnoses Sefer Torah: the caution, in full ---- */
+  /* ---- 3. Hachnoses Sefer Torah: no match, no guess ----
 
-  {
-    const { ctx } = await ctxFor('What do I need to do for a Hachnoses Sefer Torah?');
-    t.check('caution: CJHQ cannot determine the category',
-      /CJHQ cannot tell you which category applies/i.test(ctx));
-    t.check('caution: the parade/procession category is attributed to the City',
-      /lists a parade, march or procession among the activities a borough permit covers/i.test(ctx));
-    t.check('caution: the conflicting religious-ceremony exclusion is present',
-      /religious ceremony/i.test(ctx) && /does not cover/i.test(ctx));
-    t.check('caution: confirm the specific event with the borough',
-      /Confirm your specific event with your borough/i.test(ctx));
-    t.check('caution: the police-station caveat survives',
-      /neighbourhood police station/i.test(ctx));
-    // The bare what_en sentence alone is what misled the model. It may still be
-    // present - it is verified - but it must no longer be the only statement
-    // about which activities are covered.
-    t.check('the covering sentence is no longer unqualified',
-      ctx.indexOf('cannot tell you which category applies') > -1);
+     The events record's Hachnoses Q&A was removed on 12 Oct 2026 and the owner
+     kept that removal on 29 Oct. The engine must not guess: these phrasings
+     come back unhandled, with no primary block and no fabricated permit
+     guidance.                                                                  */
+  for(const q of ['What do I need to do for a Hachnoses Sefer Torah?',
+                  'How do I get a permit for a Hachnoses Sefer Torah procession?']){
+    const { res, ctx } = await ctxFor(q);
+    t.eq('Hachnoses phrasing is not handled: ' + JSON.stringify(q.slice(0,44)), !!res.handled, false);
+    t.check('answer declines to guess: ' + JSON.stringify(q.slice(0,44)),
+      /not going to guess/.test(res.answer || ''));
+    t.check('no primary detail block: ' + JSON.stringify(q.slice(0,44)),
+      !ctx.includes(PRIMARY_HEAD));
   }
 
   /* ---- 4. The '</contact>' rendering artifact is gone ---- */
 
   const artifactCases = ['How do I contact CJHQ?', 'What is the CJHQ contact information?',
-    'What do I need to do for a Hachnoses Sefer Torah?', 'Where do I apply for a passport?',
+    'How do I contact the mayor of the Plateau?', 'Where do I apply for a passport?',
     'How do I report a municipal service problem in Outremont?'];
   for(const q of artifactCases){
     const { res, ctx } = await ctxFor(q);
@@ -126,7 +116,7 @@ export default async function run(){
   /* ---- 5. PRIMARY and RELATED stay distinct ---- */
 
   {
-    const { ctx } = await ctxFor('What do I need to do for a Hachnoses Sefer Torah?');
+    const { ctx } = await ctxFor('Where do I apply for a passport?');
     const iP = ctx.indexOf(PRIMARY_HEAD), iR = ctx.indexOf('RELATED VERIFIED RESOURCES');
     t.check('both blocks present', iP > -1 && iR > -1);
     t.check('primary detail precedes related', iP < iR);
@@ -176,7 +166,7 @@ export default async function run(){
   t.eq('record with no renderable field renders nothing',
     askContextPrimary({ item:{ en:'X', slug:'x' } }, false), '');
   {
-    const r = await askRun('What do I need to do for a Hachnoses Sefer Torah?', { useAI:false });
+    const r = await askRun('How do I report a municipal service problem in Outremont?', { useAI:false });
     const fr = askContextPrimary(r.primary, true);
     t.check('French rendering uses the French fields',
       fr.includes(r.primary.item.answer_fr) && !fr.includes(r.primary.item.answer_en));
@@ -186,9 +176,8 @@ export default async function run(){
 
      askBuildContext is exercised directly above. This drives the real askRun
      path with a stub adapter and captures the context argument the model is
-     handed, which is the thing that was actually broken: the caution existed
-     in the record, the deterministic answer was correct, and the model still
-     never saw it.                                                            */
+     handed: the primary record's inline Q&A must be in it, and an answer built
+     from that context must survive the phrasing verifier.                    */
 
   const seen = [];
   const recorder = {
@@ -213,53 +202,37 @@ export default async function run(){
 
   {
     seen.length = 0;
-    const r = await askRun('What do I need to do for a Hachnoses Sefer Torah?',
+    const r = await askRun('How do I report a municipal service problem in Outremont?',
                            { useAI:true }, recorder);
     t.check('the adapter was called', seen.length > 0);
     const ctx = seen.length ? seen[0].context : '';
     t.check('adapter context carries the primary detail block',
       ctx.includes(PRIMARY_HEAD));
-    t.check('adapter context carries: CJHQ cannot determine the category',
-      /CJHQ cannot tell you which category applies/i.test(ctx));
-    t.check('adapter context carries: religious-ceremony exclusion',
-      /religious ceremony/i.test(ctx) && /does not cover/i.test(ctx));
-    t.check('adapter context carries: confirm with the borough',
-      /Confirm your specific event with your borough/i.test(ctx));
-    t.check('adapter context carries: police-station caveat',
-      /neighbourhood police station/i.test(ctx));
+    t.check('adapter context carries the inline Q&A label',
+      /This resource also answers a specific question about itself:/.test(ctx));
+    t.check('adapter context carries the routing caution',
+      /Start with 311 for a routine service problem/i.test(ctx));
 
-    // The answer a context-faithful model produces from that block preserves
-    // the uncertainty and asserts no category.
+    // The answer a context-faithful model produces from that block keeps the
+    // caution and the 311-first routing.
     const ans = String(r.answer || '');
-    t.check('answer preserves the uncertainty',
-      /cannot tell you which category applies/i.test(ans));
-    t.check('answer does not assert that a permit is required for this event',
-      !/\bhachnoses[^.]{0,80}\byou need a permit\b/i.test(ans));
-    t.check('answer keeps the borough-confirmation instruction',
-      /Confirm your specific event with your borough/i.test(ans));
+    t.check('answer keeps the 311-first routing',
+      /Start with 311 for a routine service problem/i.test(ans));
+    t.check('answer keeps the escalation path',
+      /borough office/i.test(ans) && /elected official/i.test(ans));
   }
 
   // The same faithful answer must survive the phrasing verifier - a fix that
   // delivered the caution but got it rejected would change nothing in practice.
   {
-    const r = await askRun('What do I need to do for a Hachnoses Sefer Torah?', { useAI:false });
+    const r = await askRun('How do I report a municipal service problem in Outremont?', { useAI:false });
     const ctx = askBuildContext(r);
-    const faithful = 'A permit is required to hold a public event on public property in '
-      + 'Montréal, and applications go to your borough. CJHQ cannot tell you which '
-      + 'category applies to a Hachnoses Sefer Torah. The City lists a parade, march or '
-      + 'procession among the activities a borough permit covers, and separately lists a '
-      + 'religious ceremony among the events the standard public-event permit does not '
-      + 'cover; a procession on a street may also involve your neighbourhood police '
-      + 'station. Confirm your specific event with your borough before you plan around a '
-      + 'date. The City generally requires a legally incorporated organization as the '
-      + 'applicant, proof of liability insurance, a site plan and the event programme, a '
-      + 'SOCAN permit if there will be music, and additional fees and conditions if a '
-      + 'street is closed. Deadlines differ by borough, so confirm the current deadline '
-      + 'with the borough itself. CJHQ is not the permitting authority and cannot obtain '
-      + 'or guarantee an approval, but can help you prepare a request and follow up. You '
-      + 'can copy info@cjhq.org when you write to the City or a borough.';
-    t.eq('a cautious, context-faithful answer is accepted by the verifier',
-      askVerifyPhrasing(faithful, 'What do I need to do for a Hachnoses Sefer Torah?', r, ctx),
+    const rec = r.primary.item;
+    const faithful = [rec.what_en, rec.question_en, rec.answer_en,
+      (rec.need_list_en||[]).join(' '), (rec.steps_list_en||[]).join(' '),
+      (rec.tips_list_en||[]).join(' ')].filter(Boolean).join(' ');
+    t.eq('a context-faithful answer is accepted by the verifier',
+      askVerifyPhrasing(faithful, 'How do I report a municipal service problem in Outremont?', r, ctx),
       null);
   }
 

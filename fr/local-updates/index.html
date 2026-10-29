@@ -1135,65 +1135,12 @@
   </div>
 </footer>
 
-<script>const searchIndex = [
-  { page:'home', en:'Home', fr:'Accueil',
-    body_en:'CJHQ is a central point of contact for Quebec\'s Hasidic Jewish communities, providing services, assistance, information, representation, and advocacy.',
-    body_fr:'Le CJHQ est un point de contact central pour les communautés juives hassidiques du Québec, offrant services, assistance, information, représentation et défense de leurs intérêts.' },
-  { page:'home', en:'Our Partners', fr:'Nos partenaires',
-    body_en:'CJHQ works alongside community organizations including Refuah V\'Chesed, Hatzolah Montreal, Chaverim Montreal, and others.',
-    body_fr:'Le CJHQ collabore avec des organismes communautaires, dont Refuah V\'Chesed, Hatzolah Montreal, Chaverim Montreal et d\'autres.' },
-  { page:'about', en:'About CJHQ', fr:'À propos du CJHQ',
-    body_en:'A community organization dedicated to serving, supporting, and representing Quebec\'s Hasidic Jewish communities.',
-    body_fr:'Un organisme communautaire qui se consacre à servir, soutenir et représenter les communautés juives hassidiques du Québec.' },
-  { page:'about', en:'Our Mission', fr:'Notre mission',
-    body_en:'To serve and strengthen Quebec\'s Hasidic Jewish communities through practical services, trusted information, and advocacy.',
-    body_fr:'Servir et renforcer les communautés juives hassidiques du Québec par des services pratiques, une information fiable et la défense de leurs intérêts.' },
-  { page:'about', en:'Our Approach', fr:'Notre approche',
-    body_en:'Effective advocacy combines strong relationships with a clear and responsible community voice.',
-    body_fr:'Une représentation efficace combine des relations solides avec une voix communautaire claire et responsable.' },
-  { page:'about', en:'Our Values', fr:'Nos valeurs',
-    body_en:'Service, professionalism, integrity, collaboration, respect, and non-partisanship.',
-    body_fr:'Service, professionnalisme, intégrité, collaboration, respect et non-partisanerie.' },
-  { page:'resources', en:'Community Resource Centre', fr:'Centre de ressources communautaires',
-    body_en:'Trusted government resources, applications, and services for Quebec\'s Hasidic Jewish communities.',
-    body_fr:'Ressources gouvernementales fiables, demandes et services pour les communautés juives hassidiques du Québec.' },
-  { page:'resources', en:'Visitor Parking — Outremont & Le Plateau-Mont-Royal', fr:'Stationnement pour visiteurs — Outremont et Le Plateau-Mont-Royal',
-    body_en:'How to get a visitor parking pass in Outremont and Le Plateau-Mont-Royal, including access codes and pay station instructions.',
-    body_fr:'Comment obtenir une vignette de stationnement pour visiteurs à Outremont et au Plateau-Mont-Royal, incluant les codes d\'accès et les instructions pour les bornes de paiement.' },
-  { page:'stay-informed', en:'Stay Informed', fr:'Restez informés',
-    body_en:'How to stay connected with CJHQ through Community Information Updates and public communications.',
-    body_fr:'Comment rester branché avec le CJHQ par les mises à jour d\'information communautaire et les communications publiques.' },
-  { page:'stay-informed', en:'Community Information Updates', fr:'Mises à jour d\'information communautaire',
-    body_en:'Subscribe for announcements, holiday information, travel and border updates, and public safety information.',
-    body_fr:'Abonnez-vous pour les annonces, l\'information sur les fêtes, les mises à jour de voyage et la sécurité publique.' },
-  { page:'stay-informed', en:'Public Statements & Announcements', fr:'Déclarations et annonces publiques',
-    body_en:'Official statements and announcements shared on Facebook and X.',
-    body_fr:'Déclarations et annonces officielles diffusées sur Facebook et X.' },
-  { page:'stay-informed', en:'Why Two Communication Channels?', fr:'Pourquoi deux canaux de communication?',
-    body_en:'Why CJHQ uses both Community Information Updates and public social media communications.',
-    body_fr:'Pourquoi le CJHQ utilise à la fois les mises à jour d\'information communautaire et les communications publiques.' },
-  { page:'contact', en:'Contact CJHQ', fr:'Contacter le CJHQ',
-    body_en:'Get in touch — community members, government officials, media, and organizations.',
-    body_fr:'Communiquez avec nous — membres de la communauté, représentants gouvernementaux, médias et organismes.' },
-  { page:'contact', en:'Community Organizations', fr:'Organismes communautaires',
-    body_en:'How community organizations and partners can connect with CJHQ.',
-    body_fr:'Comment les organismes communautaires et partenaires peuvent communiquer avec le CJHQ.' },
-  { page:'contact', en:'Response Times', fr:'Délais de réponse',
-    body_en:'What to expect when contacting CJHQ, and how to flag an urgent matter.',
-    body_fr:'À quoi s\'attendre en communiquant avec le CJHQ, et comment signaler une situation urgente.' },
-  { page:'contact', en:'Office Address & Phone', fr:'Adresse et téléphone du bureau',
-    body_en:'1040 Van Horne Ave, Outremont, QC, H2V 1J5, CANADA · (514) 844-2121 · info@cjhq.org',
-    body_fr:'1040, avenue Van Horne, Outremont (Québec) H2V 1J5, CANADA · (514) 844-2121 · info@cjhq.org' },
-  { page:'privacy', en:'Privacy Policy', fr:'Politique de confidentialité',
-    body_en:'What information CJHQ collects, how it is used, and how it is protected.',
-    body_fr:'Quels renseignements le CJHQ recueille, comment ils sont utilisés et protégés.' },
-  { page:'terms', en:'Terms of Use', fr:'Conditions d\'utilisation',
-    body_en:'The terms governing use of the CJHQ website.',
-    body_fr:'Les conditions régissant l\'utilisation du site Web du CJHQ.' },
-  { page:'accessibility', en:'Accessibility Statement', fr:'Déclaration d\'accessibilité',
-    body_en:'CJHQ\'s commitment to an accessible website for all visitors.',
-    body_fr:'L\'engagement du CJHQ envers un site Web accessible à tous les visiteurs.' },
-];
+<script src="/local-updates/search-data.js"></script>
+<script>// The header search uses the main site's dataset: the static page index
+// plus the resource categories, generated from assets/site-core.js by
+// tools/generate-search-data.mjs (single source, no second copy to drift).
+const searchIndex = window.CJHQ_SEARCH_PAGES || [];
+const searchResources = window.CJHQ_SEARCH_RESOURCES || [];
 const pageLabels = {
   'home':{en:'Home', fr:'Accueil'}, 'about':{en:'About', fr:'À propos'},
   'resources':{en:'Resources', fr:'Ressources'}, 'stay-informed':{en:'News & Updates', fr:'Actualités'},
@@ -1271,6 +1218,11 @@ function handleSearch(q, targetId){
   let matches = searchIndex
     .filter(item => cjhqNormalizeSearch(isFr ? item.fr : item.en).includes(qn) || cjhqNormalizeSearch(isFr ? item.body_fr : item.body_en).includes(qn))
     .map(item => ({ page:item.page, title: isFr ? item.fr : item.en, body: isFr ? item.body_fr : item.body_en }));
+  searchResources.forEach(r => {
+    if(cjhqNormalizeSearch(isFr ? r.fr : r.en).includes(qn) || cjhqNormalizeSearch(isFr ? r.body_fr : r.body_en).includes(qn)){
+      matches.push({ page:'resources', title: isFr ? r.fr : r.en, body: isFr ? r.body_fr : r.body_en });
+    }
+  });
   const seen = new Set();
   matches = matches.filter(m => {
     const key = m.page + '|' + m.title;

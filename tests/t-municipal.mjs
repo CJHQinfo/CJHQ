@@ -103,39 +103,49 @@ export default async function run(){
     t.check('no hard-coded elected official: ' + nm, !hit);
   }
 
-  // ---------- events / Hachnoses Sefer Torah -------------------------------
-  const EVENTS = ['How do I get a permit for an outdoor festival?',
-                  'How do I get a permit for a Hachnoses Sefer Torah?',
-                  'We want to hold a Hachnoses Sefer Torah outdoors.',
+  // ---------- events / processions -----------------------------------------
+  // Owner decision of 29 Oct 2026 (confirming the 12 Oct edit): the events
+  // record answers generic event/permit questions from its what_* sentence and
+  // links the official City page; it carries no Hachnoses-specific Q&A, no
+  // religious-ceremony caveat and no CJHQ disclaimer, and Hachnoses Sefer
+  // Torah phrasings deliberately get no match rather than a guessed answer.
+  const GENERIC_EVENTS = ['How do I get a permit for an outdoor festival?',
                   'Do I need a permit for an outdoor Jewish event?',
                   'How do I close a street for an event?',
                   'Who do I contact for a permit for a street event?'];
-  for(const q of EVENTS){
+  for(const q of GENERIC_EVENTS){
     const r = await askRun(q, { useAI:false });
     t.eq('event routing: ' + JSON.stringify(q.slice(0,44)), slugOf(r), 'outdoor-public-events-permits');
     t.check('offers the official City event page: ' + JSON.stringify(q.slice(0,44)),
       (r.actions||[]).some(a => a.url.indexOf('organize-public-event-your-borough') >= 0),
       JSON.stringify((r.actions||[]).map(a=>a.url)));
   }
+  for(const q of ['How do I get a permit for a Hachnoses Sefer Torah?',
+                  'We want to hold a Hachnoses Sefer Torah outdoors.']){
+    const r = await askRun(q, { useAI:false });
+    t.eq('Hachnoses phrasing is not handled: ' + JSON.stringify(q.slice(0,44)), !!r.handled, false);
+    t.eq('no Hachnoses resource offered: ' + JSON.stringify(q.slice(0,44)), slugOf(r), '');
+    t.check('no guessed answer: ' + JSON.stringify(q.slice(0,44)),
+      /not going to guess/.test(r.answer || ''));
+  }
   {
     const rec = bySlug.get('outdoor-public-events-permits');
     const blob = JSON.stringify(rec);
-    t.check('the event record does NOT assert a permit category for a Hachnoses Sefer Torah',
-      blob.indexOf('cannot tell you which category applies') >= 0);
-    t.check('it tells the person to confirm with the borough',
-      /[Cc]onfirm your specific event with your borough/.test(blob));
-    t.check('it states CJHQ is not the permitting authority',
-      blob.indexOf('CJHQ is not the permitting authority') >= 0);
-    t.check('it does NOT promise approval',
-      blob.indexOf('cannot obtain or guarantee an approval') >= 0);
+    t.check('the event record routes applications to the borough',
+      /[Aa]pplications go to your borough/.test(blob));
+    t.check('the record names a procession among covered activities',
+      blob.indexOf('procession') >= 0);
+    t.check('the record carries no Hachnoses-specific category guidance (removed 12 Oct, kept 29 Oct)',
+      blob.indexOf('cannot tell you which category applies') < 0);
     for(const bad of ['guarantee approval','we will obtain','CJHQ will get you','permit is guaranteed']){
       t.check('no promissory wording: ' + JSON.stringify(bad), blob.indexOf(bad) < 0);
     }
   }
 
   // ---------- the CJHQ CC guidance -----------------------------------------
+  const CC_SLUGS = ['report-a-problem-311','outremont-borough-services','plateau-borough-services'];
   let ccCount = 0;
-  for(const sl of NEW_SLUGS){
+  for(const sl of CC_SLUGS){
     const rec = bySlug.get(sl);
     t.check('new record exists: ' + sl, !!rec);
     if(!rec) continue;
@@ -147,9 +157,9 @@ export default async function run(){
       && !/will (?:follow up|intervene|resolve|represent)/.test(tips)
       && tips.indexOf('on your behalf') < 0, tips.slice(0,160));
   }
-  t.eq('CC guidance appears on all four new records', ccCount, NEW_SLUGS.length);
+  t.eq('CC guidance appears on all three borough records', ccCount, CC_SLUGS.length);
   // and NOWHERE else - it must not become a global instruction
-  const elsewhere = items.filter(it => NEW_SLUGS.indexOf(it.slug) < 0
+  const elsewhere = items.filter(it => CC_SLUGS.indexOf(it.slug) < 0
                                     && JSON.stringify(it).indexOf('info@cjhq.org') >= 0);
   t.eq('CC guidance is not attached to unrelated records', elsewhere.length, 0,
     JSON.stringify(elsewhere.map(x=>x.slug)));
@@ -166,7 +176,7 @@ export default async function run(){
       sl);
   }
   // no municipal URL may reach the user that the application did not choose
-  for(const q of MUST_NOT_BE_PARKING.concat(EVENTS)){
+  for(const q of MUST_NOT_BE_PARKING.concat(GENERIC_EVENTS)){
     const r = await askRun(q, { useAI:false });
     const allowed = new Set((r.actions||[]).map(a=>a.url).concat((r.sources||[]).map(s=>s.url||'')));
     t.eq('no ungrounded URL in the answer: ' + JSON.stringify(q.slice(0,40)),

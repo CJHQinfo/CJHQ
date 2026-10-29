@@ -127,7 +127,7 @@ const report = {
   broken: pick('broken'),
   unsure: pick('unsure')
 };
-// "Last reviewed by CJHQ" dates. A resource gets the current month only when
+// "Links checked by CJHQ" dates. A resource gets the current month only when
 // every outbound link it uses checked OK this run. A resource with a broken or
 // unconfirmed link keeps its old date (and shows in the Link Audit tab), and a
 // resource with no outbound links is left alone. Only assets/site-core.js is edited
