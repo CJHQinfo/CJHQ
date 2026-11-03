@@ -561,13 +561,19 @@
         <!-- ===== TAB: FORWARD LINKS ===== -->
         <div class="admin-tab-panel" id="tab-forwardlinks" style="display:none;">
           <h2 style="font-size:1.2rem;">Forward Links</h2>
-          <p style="font-size:.88rem; color:var(--muted);">Paste a destination and choose a short name. Your CJHQ link works as soon as you save it. New links use the generic CJHQ share preview.</p>
+          <p style="font-size:.88rem; color:var(--muted);">Paste a destination and choose a short name. Your CJHQ link works as soon as you save it. A custom preview is collected and built in the background; this may take several hours.</p>
           <form id="forwardLinkForm" class="card" style="margin:16px 0;">
             <label class="admin-label" for="forwardLinkSlug">Short name</label>
             <input id="forwardLinkSlug" class="admin-input" type="text" required maxlength="61" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. plateau-november" autocapitalize="none" spellcheck="false" aria-describedby="forwardLinkHelp">
             <p id="forwardLinkHelp" style="font-size:.82rem;color:var(--muted);">Use lowercase letters, numbers and single hyphens. Names cannot be reused while the link exists.</p>
             <label class="admin-label" for="forwardLinkDestination">Destination URL</label>
             <input id="forwardLinkDestination" class="admin-input" type="url" required maxlength="4096" placeholder="https://...">
+            <input type="hidden" id="forwardLinkEditId">
+            <details style="margin:12px 0;"><summary>Preview details (optional overrides)</summary><p>Leave blank to collect automatically. If collection fails, enter the details here.</p>
+            <label class="admin-label" for="forwardPreviewTitle">Preview title</label><input id="forwardPreviewTitle" class="admin-input" maxlength="180">
+            <label class="admin-label" for="forwardPreviewDescription">Description</label><textarea id="forwardPreviewDescription" class="admin-input" maxlength="240"></textarea>
+            <label class="admin-label" for="forwardPreviewImage">Image URL (optional)</label><input id="forwardPreviewImage" class="admin-input" type="url" maxlength="4096">
+            </details><button type="button" class="admin-small-btn" id="forwardLinkCancelBtn" hidden>Cancel Edit</button>
             <button type="submit" class="btn dark" id="forwardLinkSaveBtn" style="margin-top:14px;">Save Link</button>
             <p id="forwardLinkResult" role="status" style="overflow-wrap:anywhere;"></p>
           </form>

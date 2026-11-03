@@ -19,7 +19,7 @@ try{
   const snap=await getDoc(doc(getFirestore(app),'forward_links',slug));
   if(!snap.exists()||snap.data().active!==true){unavailable();}else{
     const u=new URL(snap.data().destination);
-    if(!['http:','https:'].includes(u.protocol)||u.username||u.password||(['cjhq.org','www.cjhq.org'].includes(u.hostname)&&/^\/go(?:\.html)?\/?$/.test(u.pathname)))throw new Error('invalid destination');
+    if(!['http:','https:'].includes(u.protocol)||u.username||u.password||(['cjhq.org','www.cjhq.org'].includes(u.hostname)&&/^\/go(?:\.html|\/.*)?\/?$/.test(u.pathname)))throw new Error('invalid destination');
     const a=document.createElement('a');a.href=u.href;a.textContent='Open it here if nothing happens';a.rel='noreferrer';document.getElementById('manual').append(a);
     message.textContent='Taking you to the shared destination.';
     let gone=false;const go=()=>{if(!gone){gone=true;location.replace(u.href);}};

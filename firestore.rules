@@ -78,17 +78,24 @@ service cloud.firestore {
               && request.resource.data[field].size() <= max);
     }
 
+    match /forward_link_settings/public_index {
+      allow read: if true;
+      allow write: if signedIn() && request.resource.data.keys().hasOnly(['slugs'])
+        && request.resource.data.slugs is list && request.resource.data.slugs.size() <= 1000;
+    }
     // Public forwarding destinations are fetched individually; staff manage the list.
     match /forward_links/{slug} {
       allow get: if signedIn() || resource.data.active == true;
       allow list: if signedIn();
       allow create, update: if signedIn()
         && slug.matches('[a-z0-9]+(-[a-z0-9]+)*') && slug.size() <= 61
-        && request.resource.data.keys().hasOnly(['destination','active','created_at','created_by','updated_at'])
+        && request.resource.data.keys().hasOnly(['destination','active','created_at','created_by','updated_at','preview_title','preview_description','preview_image','preview_revision'])
         && request.resource.data.destination is string
         && request.resource.data.destination.size() <= 4096
         && request.resource.data.destination.matches('https?://[^\\s]+')
-        && request.resource.data.active is bool;
+        && request.resource.data.active is bool
+        && str('preview_title',180) && str('preview_description',240)
+        && str('preview_image',4096) && str('preview_revision',64);
       allow delete: if signedIn();
     }
 

@@ -4370,7 +4370,8 @@ if (typeof window !== "undefined") {
 }
 
 /* ---------- Staff-managed forwarding links ---------- */
-function forwardShareUrl(slug){ return 'https://cjhq.org/go?l=' + encodeURIComponent(slug); }
+function forwardImmediateUrl(slug){ return 'https://cjhq.org/go?l=' + encodeURIComponent(slug); }
+function forwardShareUrl(slug){ return 'https://cjhq.org/go/' + encodeURIComponent(slug) + '/'; }
 function forwardDb(){
   if(!firebaseReady || !adminUser || !window.__fbFirestore) throw new Error('Sign in and check your connection before saving.');
   return window.__fbFirestore;
@@ -4378,7 +4379,7 @@ function forwardDb(){
 function forwardDestination(raw){
   const u = new URL(raw);
   if(!['https:','http:'].includes(u.protocol) || u.username || u.password) throw new Error('Use a full http or https URL without a username or password.');
-  if(['cjhq.org','www.cjhq.org'].includes(u.hostname) && /^\/go(?:\.html)?\/?$/.test(u.pathname)) throw new Error('Choose the final destination, not another CJHQ forwarding link.');
+  if(['cjhq.org','www.cjhq.org'].includes(u.hostname) && /^\/go(?:\.html|\/.*)?\/?$/.test(u.pathname)) throw new Error('Choose the final destination, not another CJHQ forwarding link.');
   return u.href;
 }
 async function renderForwardLinks(){
@@ -4387,19 +4388,28 @@ async function renderForwardLinks(){
   try{
     const fs = forwardDb();
     const snap = await fs.getDocs(fs.collection(fbDb,'forward_links'));
+    if(!snap.empty){await fs.runTransaction(fbDb,async tx=>{const ref=fs.doc(fbDb,'forward_link_settings','public_index'),index=await tx.get(ref);const before=index.exists()?index.data().slugs:[],slugs=[...new Set([...before,...snap.docs.map(d=>d.id)])];if(slugs.length<=1000&&slugs.length!==before.length)tx.set(ref,{slugs});});}
+    let previews={};try{const r=await fetch('/data/forward-previews.json',{cache:'no-store'});if(r.ok)previews=(await r.json()).links||{};}catch{}
     host.replaceChildren();
     if(snap.empty){ host.textContent = 'No forwarding links yet.'; return; }
     const docs = snap.docs.sort((a,b)=>a.id.localeCompare(b.id));
     for(const doc of docs){
-      const d = doc.data(), row = document.createElement('div'); row.className='card'; row.style.margin='12px 0';
+      const d = doc.data(), meta=previews[doc.id], ready=meta && meta.fingerprint===await forwardFingerprint(d), row = document.createElement('div'); row.className='card'; row.style.margin='12px 0';
       const title=document.createElement('h3'); title.style.fontSize='1rem'; title.textContent=doc.id + (d.active ? '' : ' (deactivated)'); row.append(title);
-      const share=document.createElement('a'); share.href=forwardShareUrl(doc.id); share.textContent=share.href; share.target='_blank'; share.rel='noopener'; share.style.overflowWrap='anywhere'; row.append(share);
+      const share=document.createElement('a'); share.href=ready?forwardShareUrl(doc.id):forwardImmediateUrl(doc.id); share.textContent=share.href; share.target='_blank'; share.rel='noopener'; share.style.overflowWrap='anywhere'; row.append(share);
       const dest=document.createElement('p'); dest.textContent='Destination: ' + d.destination; dest.style.cssText='font-size:.85rem;overflow-wrap:anywhere;'; row.append(dest);
+      const status=document.createElement('p');status.style.fontSize='.85rem';status.textContent=ready?(meta.status==='ready'?'Custom preview ready':'Preview ready - check collected details. '+meta.note):'Preview pending. The forwarding link works now; custom cards may take several hours.';row.append(status);
+      if(meta){const img=document.createElement('img');img.src=meta.image;img.alt=meta.title;img.style.cssText='width:100%;max-width:480px;height:auto;border:1px solid var(--line);';row.append(img);const t=document.createElement('p');t.textContent=meta.title;row.append(t);const summary=document.createElement('p');summary.textContent=meta.description;row.append(summary);}
       const buttons=document.createElement('div'); buttons.style.cssText='display:flex;flex-wrap:wrap;gap:8px;';
       const action=(label,fn)=>{ const b=document.createElement('button'); b.type='button';b.className='admin-small-btn';b.textContent=label;b.addEventListener('click',async()=>{ b.disabled=true;try{await fn();}catch(e){admToast(e.message,'error');}finally{b.disabled=false;} });buttons.append(b); };
-      action('Copy Link',async()=>{ if(await cjhqCopyText(share.href)) admToast('Link copied'); else admToast('Could not copy. Select and copy the link above.','error'); });
+      action(ready?'Copy Share Link':'Copy Forwarding Link',async()=>{ if(await cjhqCopyText(share.href)) admToast('Link copied'); else admToast('Could not copy. Select and copy the link above.','error'); });
+      action('Open',()=>window.open(share.href,'_blank','noopener'));
+      action('WhatsApp',()=>window.open('https://wa.me/?text='+encodeURIComponent((d.preview_title||meta?.title||doc.id)+' '+share.href),'_blank','noopener'));
+      action('Email',()=>{location.href='mailto:?subject='+encodeURIComponent(d.preview_title||meta?.title||doc.id)+'&body='+encodeURIComponent(share.href);});
+      if(navigator.share)action('Share',async()=>{try{await navigator.share({title:d.preview_title||meta?.title||doc.id,url:share.href});}catch(e){if(e.name!=='AbortError')throw e;}});
+      action('Edit Preview',()=>{document.getElementById('forwardLinkEditId').value=doc.id;document.getElementById('forwardLinkSlug').value=doc.id;document.getElementById('forwardLinkSlug').readOnly=true;document.getElementById('forwardLinkDestination').value=d.destination;document.getElementById('forwardLinkDestination').readOnly=true;document.getElementById('forwardPreviewTitle').value=d.preview_title||meta?.title||'';document.getElementById('forwardPreviewDescription').value=d.preview_description||meta?.description||'';document.getElementById('forwardPreviewImage').value=d.preview_image||meta?.image_source||'';document.getElementById('forwardLinkForm').querySelector('details').open=true;document.getElementById('forwardLinkCancelBtn').hidden=false;document.getElementById('forwardLinkSaveBtn').textContent='Save Preview';document.getElementById('forwardLinkForm').scrollIntoView({behavior:'smooth',block:'start'});});
       action(d.active?'Deactivate':'Reactivate',async()=>{ await fs.updateDoc(fs.doc(fbDb,'forward_links',doc.id),{active:!d.active,updated_at:new Date().toISOString()}); await renderForwardLinks(); });
-      action('Delete',async()=>{ if(!await admConfirm('Delete '+doc.id+'? Its shared link will stop working. Deactivate instead if you may need it again.'))return; await fs.deleteDoc(fs.doc(fbDb,'forward_links',doc.id));await renderForwardLinks(); });
+      action('Delete',async()=>{ if(!await admConfirm('Delete '+doc.id+'? Its shared link will stop working. Deactivate instead if you may need it again.'))return; await fs.runTransaction(fbDb,async tx=>{const ix=fs.doc(fbDb,'forward_link_settings','public_index'),snap=await tx.get(ix);tx.delete(fs.doc(fbDb,'forward_links',doc.id));tx.set(ix,{slugs:(snap.exists()?snap.data().slugs:[]).filter(s=>s!==doc.id)});});await renderForwardLinks(); });
       row.append(buttons);host.append(row);
     }
   }catch(e){ host.textContent='Could not load forwarding links. '+e.message; }
@@ -4412,8 +4422,14 @@ document.getElementById('forwardLinkForm')?.addEventListener('submit',async e=>{
     if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length>61) throw new Error('Use up to 61 lowercase letters, numbers and single hyphens.');
     const destination=forwardDestination(document.getElementById('forwardLinkDestination').value.trim());
     const ref=fs.doc(fbDb,'forward_links',slug);
-    await fs.runTransaction(fbDb,async tx=>{ const existing=await tx.get(ref);if(existing.exists())throw new Error('That short name is already in use. Choose another name.'); tx.set(ref,{destination,active:true,created_at:new Date().toISOString(),created_by:adminUser.uid}); });
-    result.replaceChildren(); const a=document.createElement('a');a.href=forwardShareUrl(slug);a.textContent=a.href;a.target='_blank';a.rel='noopener';result.append('Saved: ',a);
-    document.getElementById('forwardLinkDestination').value='';document.getElementById('forwardLinkSlug').value='';await renderForwardLinks();
+    const editing=document.getElementById('forwardLinkEditId').value===slug;
+    const preview_title=document.getElementById('forwardPreviewTitle').value.trim(),preview_description=document.getElementById('forwardPreviewDescription').value.trim(),preview_image=document.getElementById('forwardPreviewImage').value.trim();if(preview_image)forwardDestination(preview_image);
+    await fs.runTransaction(fbDb,async tx=>{const ix=fs.doc(fbDb,'forward_link_settings','public_index'),existing=await tx.get(ref),index=await tx.get(ix);if(existing.exists()&&!editing)throw new Error('That short name is already in use. Choose another name.');if(editing&&!existing.exists())throw new Error('Link was deleted. Reload the list.');const data=editing?existing.data():{destination,active:true,created_at:new Date().toISOString(),created_by:adminUser.uid};tx.set(ref,{...data,preview_title,preview_description,preview_image,preview_revision:new Date().toISOString()});const slugs=index.exists()?index.data().slugs:[];if(!slugs.includes(slug)){if(slugs.length>=1000)throw new Error('Link limit reached.');tx.set(ix,{slugs:[...slugs,slug]});}});
+    result.replaceChildren(); const a=document.createElement('a');a.href=forwardImmediateUrl(slug);a.textContent=a.href;a.target='_blank';a.rel='noopener';result.append('Saved: ',a);
+    forwardResetForm();await renderForwardLinks();
   }catch(e){result.textContent='Not saved: '+e.message;admToast(e.message,'error');}finally{btn.disabled=false;}
 });
+
+function forwardResetForm(){document.getElementById('forwardLinkForm').reset();document.getElementById('forwardLinkEditId').value='';document.getElementById('forwardLinkSlug').readOnly=false;document.getElementById('forwardLinkDestination').readOnly=false;document.getElementById('forwardLinkCancelBtn').hidden=true;document.getElementById('forwardLinkSaveBtn').textContent='Save Link';}
+document.getElementById('forwardLinkCancelBtn')?.addEventListener('click',forwardResetForm);
+async function forwardFingerprint(d){const raw=JSON.stringify(Object.fromEntries(['destination','preview_description','preview_image','preview_revision','preview_title'].map(k=>[k,d[k]||''])));return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw)))].map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,16);}
