@@ -78,6 +78,20 @@ service cloud.firestore {
               && request.resource.data[field].size() <= max);
     }
 
+    // Public forwarding destinations are fetched individually; staff manage the list.
+    match /forward_links/{slug} {
+      allow get: if signedIn() || resource.data.active == true;
+      allow list: if signedIn();
+      allow create, update: if signedIn()
+        && slug.matches('[a-z0-9]+(-[a-z0-9]+)*') && slug.size() <= 61
+        && request.resource.data.keys().hasOnly(['destination','active','created_at','created_by','updated_at'])
+        && request.resource.data.destination is string
+        && request.resource.data.destination.size() <= 4096
+        && request.resource.data.destination.matches('https?://[^\\s]+')
+        && request.resource.data.active is bool;
+      allow delete: if signedIn();
+    }
+
     match /notices/{doc}            { allow read: if true; allow write: if signedIn(); }
     match /partners/{doc}           { allow read: if true; allow write: if signedIn(); }
     match /partner_overrides/{doc}  { allow read: if true; allow write: if signedIn(); }

@@ -644,6 +644,7 @@ function switchAdminTab(tab){
   if(tab === 'home') renderAdminDashboard();
   if(tab === 'history') renderAdminHistory();
   if(tab === 'analytics') renderAnalytics();
+  if(tab === 'forwardlinks') renderForwardLinks();
   // Read the staff list when the tab is opened rather than on every panel
   // load: it is one collection read, and most sessions never look at it.
   if(tab === 'staff'){ showStaffMsg('', false); renderStaffList(); }
@@ -4367,3 +4368,52 @@ if (typeof window !== "undefined") {
   window.cjhqSyncRepublishAll = syncRepublishAll;
   window.addEventListener("load", () => { setTimeout(syncDrain, 3000); setInterval(syncDrain, 30000); });
 }
+
+/* ---------- Staff-managed forwarding links ---------- */
+function forwardShareUrl(slug){ return 'https://cjhq.org/go?l=' + encodeURIComponent(slug); }
+function forwardDb(){
+  if(!firebaseReady || !adminUser || !window.__fbFirestore) throw new Error('Sign in and check your connection before saving.');
+  return window.__fbFirestore;
+}
+function forwardDestination(raw){
+  const u = new URL(raw);
+  if(!['https:','http:'].includes(u.protocol) || u.username || u.password) throw new Error('Use a full http or https URL without a username or password.');
+  if(['cjhq.org','www.cjhq.org'].includes(u.hostname) && /^\/go(?:\.html)?\/?$/.test(u.pathname)) throw new Error('Choose the final destination, not another CJHQ forwarding link.');
+  return u.href;
+}
+async function renderForwardLinks(){
+  const host = document.getElementById('forwardLinksList'); if(!host) return;
+  host.textContent = 'Loading links...';
+  try{
+    const fs = forwardDb();
+    const snap = await fs.getDocs(fs.collection(fbDb,'forward_links'));
+    host.replaceChildren();
+    if(snap.empty){ host.textContent = 'No forwarding links yet.'; return; }
+    const docs = snap.docs.sort((a,b)=>a.id.localeCompare(b.id));
+    for(const doc of docs){
+      const d = doc.data(), row = document.createElement('div'); row.className='card'; row.style.margin='12px 0';
+      const title=document.createElement('h3'); title.style.fontSize='1rem'; title.textContent=doc.id + (d.active ? '' : ' (deactivated)'); row.append(title);
+      const share=document.createElement('a'); share.href=forwardShareUrl(doc.id); share.textContent=share.href; share.target='_blank'; share.rel='noopener'; share.style.overflowWrap='anywhere'; row.append(share);
+      const dest=document.createElement('p'); dest.textContent='Destination: ' + d.destination; dest.style.cssText='font-size:.85rem;overflow-wrap:anywhere;'; row.append(dest);
+      const buttons=document.createElement('div'); buttons.style.cssText='display:flex;flex-wrap:wrap;gap:8px;';
+      const action=(label,fn)=>{ const b=document.createElement('button'); b.type='button';b.className='admin-small-btn';b.textContent=label;b.addEventListener('click',async()=>{ b.disabled=true;try{await fn();}catch(e){admToast(e.message,'error');}finally{b.disabled=false;} });buttons.append(b); };
+      action('Copy Link',async()=>{ if(await cjhqCopyText(share.href)) admToast('Link copied'); else admToast('Could not copy. Select and copy the link above.','error'); });
+      action(d.active?'Deactivate':'Reactivate',async()=>{ await fs.updateDoc(fs.doc(fbDb,'forward_links',doc.id),{active:!d.active,updated_at:new Date().toISOString()}); await renderForwardLinks(); });
+      action('Delete',async()=>{ if(!await admConfirm('Delete '+doc.id+'? Its shared link will stop working. Deactivate instead if you may need it again.'))return; await fs.deleteDoc(fs.doc(fbDb,'forward_links',doc.id));await renderForwardLinks(); });
+      row.append(buttons);host.append(row);
+    }
+  }catch(e){ host.textContent='Could not load forwarding links. '+e.message; }
+}
+document.getElementById('forwardLinkForm')?.addEventListener('submit',async e=>{
+  e.preventDefault(); const btn=document.getElementById('forwardLinkSaveBtn'), result=document.getElementById('forwardLinkResult');
+  btn.disabled=true;result.textContent='Saving...';
+  try{
+    const fs=forwardDb(), slug=document.getElementById('forwardLinkSlug').value.trim();
+    if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length>61) throw new Error('Use up to 61 lowercase letters, numbers and single hyphens.');
+    const destination=forwardDestination(document.getElementById('forwardLinkDestination').value.trim());
+    const ref=fs.doc(fbDb,'forward_links',slug);
+    await fs.runTransaction(fbDb,async tx=>{ const existing=await tx.get(ref);if(existing.exists())throw new Error('That short name is already in use. Choose another name.'); tx.set(ref,{destination,active:true,created_at:new Date().toISOString(),created_by:adminUser.uid}); });
+    result.replaceChildren(); const a=document.createElement('a');a.href=forwardShareUrl(slug);a.textContent=a.href;a.target='_blank';a.rel='noopener';result.append('Saved: ',a);
+    document.getElementById('forwardLinkDestination').value='';document.getElementById('forwardLinkSlug').value='';await renderForwardLinks();
+  }catch(e){result.textContent='Not saved: '+e.message;admToast(e.message,'error');}finally{btn.disabled=false;}
+});

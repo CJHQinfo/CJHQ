@@ -143,6 +143,7 @@
             <button class="admin-tab-btn" data-tab="content">Page Content</button>
             <button class="admin-tab-btn" data-tab="notices">Notices &amp; Popups</button>
             <button class="admin-tab-btn" data-tab="resources">Resource Links</button>
+            <button class="admin-tab-btn" data-tab="forwardlinks">Forward Links</button>
             <button class="admin-tab-btn" data-tab="partners">Partners</button>
             <p class="adm-group">Community</p>
             <button class="admin-tab-btn" data-tab="calendar">Calendar</button>
@@ -555,6 +556,23 @@
           <p style="font-size:.82rem; color:var(--muted);">These are the resources already built into the Resource Centre. You can edit their title, summary, and link, or hide one from the public site without deleting it.</p>
           <input type="text" id="existingResourceSearch" class="admin-input" placeholder="Search existing resources…" style="margin:10px 0;">
           <div id="existingResourcesList" style="max-height:480px; overflow-y:auto;"></div>
+        </div>
+
+        <!-- ===== TAB: FORWARD LINKS ===== -->
+        <div class="admin-tab-panel" id="tab-forwardlinks" style="display:none;">
+          <h2 style="font-size:1.2rem;">Forward Links</h2>
+          <p style="font-size:.88rem; color:var(--muted);">Paste a destination and choose a short name. Your CJHQ link works as soon as you save it. New links use the generic CJHQ share preview.</p>
+          <form id="forwardLinkForm" class="card" style="margin:16px 0;">
+            <label class="admin-label" for="forwardLinkSlug">Short name</label>
+            <input id="forwardLinkSlug" class="admin-input" type="text" required maxlength="61" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. plateau-november" autocapitalize="none" spellcheck="false" aria-describedby="forwardLinkHelp">
+            <p id="forwardLinkHelp" style="font-size:.82rem;color:var(--muted);">Use lowercase letters, numbers and single hyphens. Names cannot be reused while the link exists.</p>
+            <label class="admin-label" for="forwardLinkDestination">Destination URL</label>
+            <input id="forwardLinkDestination" class="admin-input" type="url" required maxlength="4096" placeholder="https://...">
+            <button type="submit" class="btn dark" id="forwardLinkSaveBtn" style="margin-top:14px;">Save Link</button>
+            <p id="forwardLinkResult" role="status" style="overflow-wrap:anywhere;"></p>
+          </form>
+          <p style="font-size:.82rem;color:var(--muted);">Recorded visits appear in Google Analytics under /go?l=your-name. Tracker blockers can prevent visits from being recorded. Do not use these public links for confidential destinations.</p>
+          <div id="forwardLinksList" aria-live="polite"></div>
         </div>
 
         <!-- ===== TAB: CALENDAR ===== -->
