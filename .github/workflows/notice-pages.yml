@@ -13,6 +13,10 @@ on:
   schedule:
     - cron: '7,22,37,52 * * * *'   # every 15 min; a newly published page previews within ~15-30 min
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'data/forward-links-trigger.json'   # bumped by the forward-link-dispatch function when a forward link changes
 
 permissions:
   contents: write
