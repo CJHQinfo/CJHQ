@@ -2,6 +2,8 @@ name: Publish public-only Pages artifact
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'data/forward-links-trigger.json'   # forward-link bumps publish via notice-pages.yml's own generate+deploy (avoids a stale-content deploy race)
   workflow_dispatch:
 permissions:
   contents: read
