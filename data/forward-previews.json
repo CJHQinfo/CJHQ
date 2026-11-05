@@ -8,6 +8,15 @@
       "status": "ready",
       "note": "",
       "image": "/assets/og-forward-outremont-recap-classic1.png"
+    },
+    "tmp-auto-test": {
+      "title": "Example Domain",
+      "description": "This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.",
+      "image_source": "",
+      "fingerprint": "c3d432525f2564a8",
+      "status": "ready",
+      "note": "",
+      "image": "/assets/og-forward-tmp-auto-test-c3d432525f2564a8.png"
     }
   }
 }
