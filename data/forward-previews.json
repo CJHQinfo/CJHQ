@@ -10,13 +10,13 @@
       "image": "/assets/og-forward-outremont-recap-classic1.png"
     },
     "tmp-auto-test2": {
-      "title": "Example Domain",
+      "title": "AUTOTEST LIVE PROOF",
       "description": "This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.",
       "image_source": "",
-      "fingerprint": "f8218399c1be1fd6",
+      "fingerprint": "03da60da1f0dbb81",
       "status": "ready",
       "note": "",
-      "image": "/assets/og-forward-tmp-auto-test2-f8218399c1be1fd6.png"
+      "image": "/assets/og-forward-tmp-auto-test2-03da60da1f0dbb81.png"
     }
   }
 }
