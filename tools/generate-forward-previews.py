@@ -94,31 +94,60 @@ def fields(doc):
     return out
 
 def card(title,description,dest,image_url,path):
+    # Classic CJHQ share-card layout: large centered logo, thin rule, centered
+    # serif title, navy footer band - matching the approved site cards.
     font=ROOT/'tools/fonts/Lora-Variable.ttf';im=Image.new('RGB',(1200,630),'white');draw=ImageDraw.Draw(im)
+    NAVY='#0e2149'
     used=''
+    img_src=None
     if image_url:
         try:
             raw,typ,_=safe_fetch(image_url,MAX_IMAGE)
             if not typ.startswith('image/') or 'svg' in typ:raise ValueError('Unsupported image')
             Image.MAX_IMAGE_PIXELS=16000000
-            with Image.open(io.BytesIO(raw)) as src:
-                if src.width<200 or src.height<100 or src.width*src.height>16000000:raise ValueError('Image dimensions not suitable')
-                im.paste(ImageOps.fit(src.convert('RGB'),(480,500)),(720,0));used=image_url
-        except Exception:pass
-    logo=Image.open(ROOT/'cjhq-logo.png').convert('RGBA');logo.thumbnail((200,130));im.paste(logo,(55,30),logo)
-    width=620 if used else 1050
-    size=44
-    while True:
-        f=ImageFont.truetype(str(font),size);words=title.split();lines=[];line=''
-        for w in words:
-            trial=(line+' '+w).strip()
-            if draw.textlength(trial,font=f)>width and line:lines.append(line);line=w
-            else:line=trial
-        if line:lines.append(line)
-        if len(lines)<=4 or size<=24:break
-        size-=2
-    for i,line in enumerate(lines[:4]):draw.text((55,190+i*(size+12)),line,font=f,fill='#0e2149')
-    draw.rectangle((0,530,1200,630),fill='#0e2149');draw.text((55,555),'CJHQ | '+urlsplit(dest).hostname,font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',25),fill='white');im.save(path,optimize=True)
+            src=Image.open(io.BytesIO(raw))
+            if src.width<200 or src.height<100 or src.width*src.height>16000000:raise ValueError('Image dimensions not suitable')
+            img_src=src.convert('RGB');used=image_url
+        except Exception:img_src=None
+    if img_src is not None:
+        # Custom preview image supplied: keep the previous split layout.
+        im.paste(ImageOps.fit(img_src,(480,500)),(720,0))
+        logo=Image.open(ROOT/'cjhq-logo.png').convert('RGBA');logo.thumbnail((200,130));im.paste(logo,(55,30),logo)
+        width=620
+        size=44
+        while True:
+            f=ImageFont.truetype(str(font),size);words=title.split();lines=[];line=''
+            for w in words:
+                trial=(line+' '+w).strip()
+                if draw.textlength(trial,font=f)>width and line:lines.append(line);line=w
+                else:line=trial
+            if line:lines.append(line)
+            if len(lines)<=4 or size<=24:break
+            size-=2
+        for i,line in enumerate(lines[:4]):draw.text((55,190+i*(size+12)),line,font=f,fill=NAVY)
+    else:
+        logo=Image.open(ROOT/'cjhq-logo.png').convert('RGBA')
+        sc=161/logo.height;logo=logo.resize((max(1,int(logo.width*sc)),161),Image.LANCZOS)
+        im.paste(logo,((1200-logo.width)//2,27),logo)
+        draw.rectangle((520,236,680,238),fill=NAVY)
+        size=52
+        while True:
+            f=ImageFont.truetype(str(font),size);words=title.split();lines=[];line=''
+            for w in words:
+                trial=(line+' '+w).strip()
+                if draw.textlength(trial,font=f)>1000 and line:lines.append(line);line=w
+                else:line=trial
+            if line:lines.append(line)
+            if len(lines)<=3 or size<=24:break
+            size-=2
+        lines=lines[:3];block=len(lines)*(size+16)-16;top=277+((531-277)-block)//2
+        for i,line in enumerate(lines):
+            f=ImageFont.truetype(str(font),size);tw=draw.textlength(line,font=f)
+            draw.text(((1200-tw)/2,top+i*(size+16)),line,font=f,fill=NAVY)
+    draw.rectangle((0,530,1200,630),fill=NAVY)
+    bf=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',26)
+    bw=draw.textlength('cjhq.org',font=bf);draw.text(((1200-bw)/2,562),'cjhq.org',font=bf,fill='white')
+    im.save(path,optimize=True)
     return used
 
 def build_one(slug,d,previous=None,fetcher=safe_fetch):
