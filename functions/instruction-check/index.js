@@ -183,7 +183,8 @@ async function askCloudflare(rec, pageText) {
   const body = await r.json().catch(() => ({}));
   if (!r.ok || body.success === false) throw new Error('cloudflare ' + r.status + ': ' + JSON.stringify(body).slice(0, 300));
   const result = body.result || {};
-  const text = typeof result.response === 'string' ? result.response : '';
+  const raw = result.response;
+  const text = typeof raw === 'string' ? raw : (raw != null ? JSON.stringify(raw) : '');
   return parseVerdict(text, 'cloudflare');
 }
 
