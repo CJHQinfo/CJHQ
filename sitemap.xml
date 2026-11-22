@@ -30,6 +30,7 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Public statement page, opened to search and AI crawlers 2026-11-22. -->
   <url>
     <loc>https://cjhq.org/brit-milah-belgium</loc>
     <lastmod>2026-11-22</lastmod>
