@@ -230,7 +230,7 @@ def bake_page(slug, doc, title, desc, lang='en'):
               '(function(p){\n'
               '  function esc(v){ return String(v == null ? "" : v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\'/g,"&#39;"); }\n'
               '  function body(b){ b = String(b == null ? "" : b);\n'
-              '    if(p.body_format !== "text"){ return (window.DOMPurify && DOMPurify.sanitize) ? DOMPurify.sanitize(b) : esc(b); }\n'
+              '    if(p.body_format !== "text"){ return (window.DOMPurify && DOMPurify.sanitize) ? DOMPurify.sanitize(b, {ADD_ATTR: ['target']}) : esc(b); }\n'
               '    return b.replace(/\\r\\n?/g, "\\n").split(/\\n{2,}/).map(function(x){ return x.trim(); }).filter(Boolean)\n'
               '      .map(function(x){ return "<p>" + esc(x).replace(/\\n/g, "<br>") + "</p>"; }).join(""); }\n'
               '  document.getElementById("customPageBody").innerHTML =\n'
