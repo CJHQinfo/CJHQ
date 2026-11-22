@@ -5350,6 +5350,18 @@ function chooseLang(lang){
     const nextPath = pathForPage(pageName, lang);
     if(location.pathname !== nextPath) history.pushState({page:pageName}, '', nextPath);
     updatePageMeta(pageName);
+  } else if(pageName === 'custom'){
+    // Admin-created pages have both languages baked into one view, so the
+    // toggle only flipped text and left the URL on the other language's
+    // address. Because /fr/<slug> always declares French on load, a visitor
+    // who switched to English and then reloaded or shared the link landed
+    // back in French - the switch looked broken. Move the address to the
+    // chosen language's URL, the same convention as the static pages above.
+    const m = /^\/(?:fr\/)?([a-z0-9][a-z0-9-]*)\/?$/i.exec(location.pathname);
+    if(m){
+      const nextPath = lang === 'fr' ? '/fr/' + m[1] : '/' + m[1];
+      if(location.pathname !== nextPath) history.pushState({page:pageName}, '', nextPath);
+    }
   }
 }
 document.getElementById('btnEN').addEventListener('click', ()=>chooseLang('en'));
