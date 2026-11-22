@@ -1611,6 +1611,16 @@ async function applyPartnerOverrides(){
 // ---------- NAVIGATION ----------
 function goPage(name, opts){
   opts = opts || {};
+  // Opening the Child Travel Consent Letter tool loads that page fresh (full
+  // navigation, not an in-place SPA swap), so no statistics scripts a visitor
+  // accepted elsewhere are active while the tool is open.
+  if(name === 'child-travel-consent' && typeof pathForPage === 'function'){
+    const freshTarget = pathForPage(name);
+    if(location.pathname.replace(/\/+$/, '') !== freshTarget.replace(/\/+$/, '')){
+      location.assign(freshTarget);
+      return;
+    }
+  }
   // Deactivated built-in page -> show 404 instead
   if(HIDDEN_PAGES_CACHE[name] && HIDDEN_PAGES_CACHE[name].hidden){
     if(typeof show404 === 'function'){ show404(name, opts); return; }
@@ -1710,6 +1720,9 @@ function trackedLocation(){
 }
 function trackPageView(){
   try{
+    // Statistics fire only for visitors who accepted, and never for the
+    // Child Travel Consent Letter page or the admin panel.
+    if(window.cjhqStats && !window.cjhqStats.trackAllowed()) return;
     if(typeof gtag !== 'function') return;
     gtag('event', 'page_view', {
       page_title: document.title,

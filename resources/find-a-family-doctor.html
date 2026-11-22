@@ -17,41 +17,89 @@
      from the site root automatically, so this works even without these tags. -->
 <link rel="icon" href="/favicon.ico" sizes="any">
 
-<!-- Google Analytics 4. The measurement ID is public by design (it appears in
-     page source on every GA site) and is not a credential.
+<!-- Visit statistics: Google Analytics 4 and Microsoft Clarity. Both load ONLY
+     after the visitor accepts them in the statistics banner, and never on the
+     admin panel or the Child Travel Consent Letter page. Until the visitor
+     chooses, nothing statistics-related loads. The choice is remembered in the
+     visitor's own browser (localStorage 'cjhq-stats-consent') and can be
+     changed anytime through the "Statistics choice" link in the Privacy
+     Policy. The measurement/project IDs are public by design (they appear in
+     page source on every GA/Clarity site) and are not credentials.
 
-     send_page_view is false because this is a single-page app: the initial
+     send_page_view stays false because this is a single-page app: the initial
      automatic page_view would fire before the router has resolved the path and
      before updatePageMeta() has set the title, recording the wrong page. Views
      are sent explicitly from trackPageView() instead, after the title is set.
      Turn OFF Enhanced Measurement > "Page changes based on browser history
-     events" in the GA console, or every navigation is counted twice. -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W"></script>
+     events" in the GA console, or every navigation is counted twice.
+
+     Clarity: heatmaps, scroll depth, session replays, disclosed in the Privacy
+     Policy (privacy-analytics-5). The project is set to Strict masking in the
+     Clarity console, so on-screen text and anything typed into forms is masked
+     before it leaves the browser. -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  gtag('js', new Date());
-  gtag('config', 'G-902DMP2V4W', {
-    send_page_view: false,
-    // Stated in the Privacy Policy: advertising features and cross-site
-    // profiling are off. These flags enforce that from the page itself, so the
-    // policy stays true even if a console setting is changed later.
-    allow_google_signals: false,
-    allow_ad_personalization_signals: false,
-    anonymize_ip: true
-  });
-</script>
-<!-- Microsoft Clarity (heatmaps, scroll depth, session replays). Disclosed in
-     the Privacy Policy (privacy-analytics-5). The project is set to Strict
-     masking in the Clarity console, so on-screen text and anything typed into
-     forms is masked before it leaves the browser. Not loaded on the admin
-     panel: staff screens are not analytics. The project ID is public by design. -->
-<script>
-  if(!/^\/admin(\.html)?\/?$/i.test(location.pathname)){
+(function(){
+  var KEY = 'cjhq-stats-consent';
+  // Routes where statistics never load and the banner never shows: the admin
+  // panel and the Child Travel Consent Letter tool (EN and FR).
+  function isExcludedPath(){
+    var p = location.pathname.toLowerCase().replace(/\/+$/, '');
+    p = p.replace(/\.html$/, '');
+    if(p.indexOf('/fr/') === 0) p = p.slice(3);
+    return p === '/admin' || p === '/child-travel-consent' || p === '/consentement-voyage-enfant';
+  }
+  function getChoice(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
+  function setChoice(v){ try{ if(v === null){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY, v); } }catch(e){} }
+  var loaded = false;
+  function loadStats(){
+    if(loaded || isExcludedPath() || getChoice() !== 'accept') return;
+    loaded = true;
+    // Google Analytics 4
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W';
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){ dataLayer.push(arguments); };
+    gtag('js', new Date());
+    gtag('config', 'G-902DMP2V4W', {
+      send_page_view: false,
+      // Stated in the Privacy Policy: advertising features and cross-site
+      // profiling are off. These flags enforce that from the page itself, so
+      // the policy stays true even if a console setting is changed later.
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      anonymize_ip: true
+    });
+    // Microsoft Clarity
     (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
     t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","yn69ejs5t6");
   }
+  function bannerEl(){ return document.getElementById('cjhq-stats-banner'); }
+  function hideBanner(){ var b = bannerEl(); if(b) b.style.display = 'none'; }
+  function showBanner(){
+    if(isExcludedPath() || getChoice()) return;
+    var b = bannerEl();
+    if(b) b.style.display = 'flex';
+  }
+  window.cjhqStats = {
+    isExcluded: isExcludedPath,
+    choice: getChoice,
+    accepted: function(){ return getChoice() === 'accept'; },
+    accept: function(){ setChoice('accept'); hideBanner(); loadStats(); },
+    decline: function(){ setChoice('decline'); hideBanner(); },
+    askAgain: function(){ setChoice(null); showBanner(); },
+    trackAllowed: function(){ return !isExcludedPath() && getChoice() === 'accept' && typeof window.gtag === 'function'; }
+  };
+  // A visitor who already accepted keeps their choice on later visits.
+  if(getChoice() === 'accept') loadStats();
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', showBanner);
+  } else {
+    showBanner();
+  }
+})();
 </script>
 <link rel="apple-touch-icon" href="/favicon.ico">
 
@@ -999,6 +1047,62 @@
   /* .btn.outline is designed for the dark hero: white text on transparent.
      On this white page that renders as an invisible button, so give the
      outline variant readable colours inside the tool only. */
+  /* Visit statistics consent banner (fix 5). Hidden by default; the consent
+     script shows it until the visitor chooses, never on excluded routes. */
+  #cjhq-stats-banner{
+    display:none;
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:16px;
+    z-index:9000;
+    width:min(680px, calc(100% - 32px));
+    background:#fff;
+    color:var(--charcoal);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 20px;
+    box-shadow:0 8px 30px rgba(14,33,73,.18);
+    align-items:center;
+    gap:12px 16px;
+    flex-wrap:wrap;
+    font-size:.92rem;
+    line-height:1.45;
+  }
+  #cjhq-stats-banner p{
+    margin:0;
+    flex:1 1 300px;
+    min-width:240px;
+  }
+  #cjhq-stats-banner .cjhq-stats-btns{
+    display:flex;
+    gap:10px;
+    flex:0 0 auto;
+  }
+  #cjhq-stats-banner button{
+    font:inherit;
+    font-weight:600;
+    border-radius:999px;
+    padding:9px 18px;
+    cursor:pointer;
+  }
+  #cjhq-stats-banner .cjhq-stats-accept{
+    background:var(--ink);
+    color:#fff;
+    border:1px solid var(--ink);
+  }
+  #cjhq-stats-banner .cjhq-stats-accept:hover{
+    background:var(--ink-soft);
+  }
+  #cjhq-stats-banner .cjhq-stats-decline{
+    background:transparent;
+    color:var(--charcoal);
+    border:1px solid var(--line);
+  }
+  #cjhq-stats-banner .cjhq-stats-decline:hover{
+    background:var(--bg-alt);
+  }
+
   #page-child-travel-consent .btn.outline{
     color:var(--ink); border-color:var(--line); background:var(--paper);
   }
@@ -1795,8 +1899,8 @@
         <span data-fr>Politique de confidentialité</span>
       </h1>
       <p data-cid="privacy-2" style="font-size:.85rem; color:var(--muted);">
-        <span data-en><strong>Effective Date:</strong> September 24, 2026</span>
-        <span data-fr><strong>Date d'entrée en vigueur :</strong> 24 septembre 2026</span>
+        <span data-en><strong>Effective Date:</strong> November 22, 2026</span>
+        <span data-fr><strong>Date d'entrée en vigueur :</strong> 22 novembre 2026</span>
       </p>
       <p data-cid="privacy-3">
         <span data-en>The Jewish Hasidic Council of Quebec (CJHQ) is committed to protecting the privacy of all individuals who visit our website or communicate with us.</span>
@@ -1882,6 +1986,15 @@
         <span data-fr>Les visiteurs peuvent ajuster les paramètres de leur navigateur afin de gérer ou de désactiver les témoins.</span>
       </p>
 
+      <h2 data-cid="privacy-childtravel-1" style="font-size:1.2rem; margin-top:36px;">
+        <span data-en>Website Tools: Child Travel Consent Letter</span>
+        <span data-fr>Outils du site Web : Lettre de consentement au voyage d'un enfant</span>
+      </h2>
+      <p data-cid="privacy-childtravel-2">
+        <span data-en>The Child Travel Consent Letter tool works entirely in your browser. The names, dates of birth, passport numbers and other details you enter are used only to build the letter on your own device. They are not sent to CJHQ and are not stored by this website. The letter you download or print stays with you. This page is excluded from the visit statistics described below.</span>
+        <span data-fr>L'outil de lettre de consentement au voyage d'un enfant fonctionne entièrement dans votre navigateur. Les noms, dates de naissance, numéros de passeport et autres renseignements que vous saisissez servent uniquement à composer la lettre sur votre propre appareil. Ils ne sont pas transmis au CJHQ et ne sont pas conservés par ce site Web. La lettre que vous téléchargez ou imprimez demeure en votre possession. Cette page est exclue des statistiques de fréquentation décrites ci-dessous.</span>
+      </p>
+
       <h2 data-cid="privacy-analytics-1" style="font-size:1.2rem; margin-top:36px;">
         <span data-en>Website Analytics</span>
         <span data-fr>Statistiques de fréquentation du site Web</span>
@@ -1901,6 +2014,14 @@
       <p data-cid="privacy-analytics-5">
         <span data-en>This website also uses Microsoft Clarity, a service provided by Microsoft, to understand how visitors use each page: where they click, how far they scroll and how long they stay. Clarity produces heatmaps and replays of visits that help us find parts of the site that are hard to use. Anything typed into forms is hidden and never recorded. Clarity uses cookies, and its information is processed by Microsoft and may be stored outside Quebec and Canada. Visitors who prefer not to be included can block it through their browser settings.</span>
         <span data-fr>Ce site Web utilise également Microsoft Clarity, un service fourni par Microsoft, afin de comprendre comment les visiteurs utilisent chaque page : où ils cliquent, jusqu'où ils font défiler la page et combien de temps ils y restent. Clarity produit des cartes de chaleur et des reprises de visites qui nous aident à repérer les parties du site difficiles à utiliser. Tout ce qui est saisi dans les formulaires est masqué et n'est jamais enregistré. Clarity utilise des témoins; ses renseignements sont traités par Microsoft et peuvent être conservés à l'extérieur du Québec et du Canada. Les visiteurs qui préfèrent ne pas y être inclus peuvent le bloquer au moyen des paramètres de leur navigateur.</span>
+      </p>
+
+      <p data-cid="privacy-analytics-6">
+        <span data-en>These tools load only after you accept them in the site's statistics notice. You can change your choice at any time through the Statistics choice link on this page. They never run on the Child Travel Consent Letter page.</span>
+        <span data-fr>Ces outils ne sont chargés qu'après que vous les avez acceptés dans l'avis sur les statistiques du site. Vous pouvez modifier votre choix en tout temps au moyen du lien Choix des statistiques sur cette page. Ils ne sont jamais actifs sur la page de la lettre de consentement au voyage d'un enfant.</span>
+      </p>
+      <p data-cid="privacy-analytics-7">
+        <a href="#" onclick="cjhqStats.askAgain(); return false;"><span data-en>Statistics choice</span><span data-fr>Choix des statistiques</span></a>
       </p>
 
       <h2 data-cid="privacy-16" style="font-size:1.2rem; margin-top:36px;">
@@ -3954,5 +4075,19 @@ function requestResourceBackend(){
 })();
 </script>
 
+
+<!-- Visit statistics consent banner (fix 5). Text is the approved wording;
+     shown until the visitor chooses, never on the admin panel or the Child
+     Travel Consent Letter page. -->
+<div id="cjhq-stats-banner" role="dialog" aria-label="Visit statistics choice">
+  <p>
+    <span data-en>This site uses optional visit statistics (Google Analytics and Microsoft Clarity) to see which pages help the community and to find parts that are hard to use. The site works the same whatever you choose.</span>
+    <span data-fr>Ce site utilise des statistiques de visite facultatives (Google Analytics et Microsoft Clarity) pour savoir quelles pages aident la communauté et repérer celles qui sont difficiles à utiliser. Le site fonctionne de la même façon, quel que soit votre choix.</span>
+  </p>
+  <div class="cjhq-stats-btns">
+    <button type="button" class="cjhq-stats-accept" onclick="cjhqStats.accept()"><span data-en>Accept statistics</span><span data-fr>Accepter les statistiques</span></button>
+    <button type="button" class="cjhq-stats-decline" onclick="cjhqStats.decline()"><span data-en>Decline</span><span data-fr>Refuser</span></button>
+  </div>
+</div>
 </body>
 </html>
