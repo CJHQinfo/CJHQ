@@ -30,16 +30,27 @@
   h1{font-size:1.15rem;font-weight:600;margin:0 0 8px;}
   a{color:#0E2149;}
 </style>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W"></script>
 <script>
+// Visit statistics only for a visitor who already accepted them on the main
+// site (choice stored in their own browser). This page never asks and never
+// loads anything otherwise.
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-902DMP2V4W', { 'send_page_view': false });
+var cjhqStatsOk = false;
+try { cjhqStatsOk = localStorage.getItem('cjhq-stats-consent') === 'accept'; } catch(e){}
 var gone = false;
 function go(){ if (gone) return; gone = true; location.replace("https://159pj.mjt.lu/nl3/8foITyRlpTz0gEdhu8CtPg"); }
-gtag('event', 'page_view', { 'event_callback': go, 'event_timeout': 700 });
-setTimeout(go, 1600);
+if (cjhqStatsOk) {
+  var ga = document.createElement('script'); ga.async = true;
+  ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W';
+  document.head.appendChild(ga);
+  gtag('js', new Date());
+  gtag('config', 'G-902DMP2V4W', { 'send_page_view': false });
+  gtag('event', 'page_view', { 'event_callback': go, 'event_timeout': 700 });
+  setTimeout(go, 1600);
+} else {
+  go();
+}
 </script>
 </head>
 <body>

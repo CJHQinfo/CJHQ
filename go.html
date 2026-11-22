@@ -4,8 +4,14 @@
 <meta name="description" content="A shared link from the Jewish Hasidic Council of Quebec.">
 <meta property="og:title" content="CJHQ Link"><meta property="og:description" content="A shared link from the Jewish Hasidic Council of Quebec."><meta property="og:type" content="website"><meta property="og:image" content="https://cjhq.org/assets/og-notice-v2.png"><meta name="twitter:card" content="summary_large_image"><link rel="icon" href="/favicon.ico">
 <style>body{box-sizing:border-box;margin:0;padding:24px;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;color:#0e2149;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.box{max-width:32rem;text-align:center}img{width:110px;height:auto}h1{font-size:1.35rem}a{color:inherit}#manual{overflow-wrap:anywhere}</style>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-902DMP2V4W',{send_page_view:false});</script>
+<script>
+// Visit statistics only for a visitor who already accepted them on the main
+// site (choice stored in their own browser). This redirect page never asks
+// and never loads anything otherwise.
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+var cjhqStatsOk=false;try{cjhqStatsOk=localStorage.getItem('cjhq-stats-consent')==='accept';}catch(e){}
+if(cjhqStatsOk){var ga=document.createElement('script');ga.async=true;ga.src='https://www.googletagmanager.com/gtag/js?id=G-902DMP2V4W';document.head.appendChild(ga);gtag('js',new Date());gtag('config','G-902DMP2V4W',{send_page_view:false});}
+</script>
 </head><body><main class="box"><img src="/cjhq-logo.png" alt="CJHQ"><h1 id="title">Opening your link...</h1><p id="message">Please wait a moment.</p><p id="manual"></p><noscript>JavaScript is needed to open this link.</noscript></main>
 <script type="module">
 const title=document.getElementById('title'),message=document.getElementById('message');
@@ -23,7 +29,7 @@ try{
     const a=document.createElement('a');a.href=u.href;a.textContent='Open it here if nothing happens';a.rel='noreferrer';document.getElementById('manual').append(a);
     message.textContent='Taking you to the shared destination.';
     let gone=false;const go=()=>{if(!gone){gone=true;location.replace(u.href);}};
-    gtag('event','page_view',{page_path:'/go?l='+encodeURIComponent(slug),page_location:location.origin+'/go?l='+encodeURIComponent(slug),event_callback:go,event_timeout:700});setTimeout(go,1600);
+    if(cjhqStatsOk){gtag('event','page_view',{page_path:'/go?l='+encodeURIComponent(slug),page_location:location.origin+'/go?l='+encodeURIComponent(slug),event_callback:go,event_timeout:700});setTimeout(go,1600);}else{go();}
   }
 }catch(e){unavailable('This link is unavailable right now. Please check the address or try again later.');}
 }
