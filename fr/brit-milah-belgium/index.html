@@ -2475,7 +2475,7 @@ window.__CJHQ_PRERENDER = {"slug": "brit-milah-belgium", "title_en": "Protecting
 (function(p){
   function esc(v){ return String(v == null ? "" : v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
   function body(b){ b = String(b == null ? "" : b);
-    if(p.body_format !== "text"){ return (window.DOMPurify && DOMPurify.sanitize) ? DOMPurify.sanitize(b) : esc(b); }
+    if(p.body_format !== "text"){ return (window.DOMPurify && DOMPurify.sanitize) ? DOMPurify.sanitize(b, {ADD_ATTR: ["target"]}) : esc(b); }
     return b.replace(/\r\n?/g, "\n").split(/\n{2,}/).map(function(x){ return x.trim(); }).filter(Boolean)
       .map(function(x){ return "<p>" + esc(x).replace(/\n/g, "<br>") + "</p>"; }).join(""); }
   document.getElementById("customPageBody").innerHTML =
