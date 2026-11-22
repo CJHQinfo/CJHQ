@@ -705,9 +705,9 @@ function cjhqWireOnThisPage(root){
   // Published November 22 releases supersede these stored download targets.
   // Keep the database record untouched while avoiding old browser PDF caches.
   const releaseFiles = {
-    '/local-updates/cjhq-statement-brit-milah-belgium-en.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-en-20261122-r2.pdf',
-    '/local-updates/cjhq-statement-brit-milah-belgium-fr-20261122.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-fr-20261122-r2.pdf',
-    '/local-updates/cjhq-statement-brit-milah-belgium-nl.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-nl-20261122-r2.pdf'
+    '/local-updates/cjhq-statement-brit-milah-belgium-en.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-en-20261122-r3.pdf',
+    '/local-updates/cjhq-statement-brit-milah-belgium-fr-20261122.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-fr-20261122-r3.pdf',
+    '/local-updates/cjhq-statement-brit-milah-belgium-nl.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-nl-20261122-r3.pdf'
   };
   root.querySelectorAll('a[href]').forEach(a=>{
     const url = new URL(a.href, location.href);
@@ -1859,10 +1859,13 @@ function updatePageMeta(name){
     }
     const cCanon = document.getElementById('canonicalTag');
     if(cCanon) cCanon.setAttribute('href', cUrl);
-    // Temporary notice pages stay out of the index by design; the baked file
-    // says noindex and the live page now keeps it that way.
+    // Temporary notice pages stay out of the index by design, and the live
+    // page keeps the baked robots value. Exception: the Belgium brit milah
+    // notice is a public statement page the owner asked search engines and AI
+    // crawlers to see (2026-11-22), matching the generator's INDEXABLE_SLUGS.
     const cRobots = document.querySelector('meta[name="robots"]');
-    if(cRobots) cRobots.setAttribute('content', 'noindex, follow');
+    if(cRobots) cRobots.setAttribute('content',
+      customSlug === 'brit-milah-belgium' ? 'index, follow' : 'noindex, follow');
     document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', cDesc));
     return;
   }

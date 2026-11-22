@@ -31,6 +31,19 @@
   </url>
 
   <url>
+    <loc>https://cjhq.org/brit-milah-belgium</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cjhq.org/fr/brit-milah-belgium</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://cjhq.org/child-travel-consent</loc>
     <lastmod>2026-08-30</lastmod>
     <changefreq>yearly</changefreq>

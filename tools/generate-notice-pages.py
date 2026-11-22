@@ -125,6 +125,14 @@ def make_card(en_short, fr_short, out_path):
     m.build(en_short, fr_short, out_path)
 
 
+# The Belgium brit milah notice is a public statement page: the owner asked
+# (2026-11-22) for search engines and AI crawlers to be able to see it. Other
+# temporary notices stay noindex.
+INDEXABLE_SLUGS = {'brit-milah-belgium'}
+
+def robots_meta(slug):
+    return 'index, follow' if slug in INDEXABLE_SLUGS else 'noindex, follow'
+
 HTML_TMPL = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -140,7 +148,7 @@ HTML_TMPL = """<!DOCTYPE html>
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{origin}/{slug}">
-<meta name="robots" content="noindex, follow">
+<meta name="robots" content="{robots}">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CJHQ">
 <meta property="og:title" content="{title}">
@@ -219,7 +227,7 @@ def bake_page(slug, doc, title, desc, lang='en'):
     subs = [
         (r'<title id="pageTitle">[^<]*</title>', f'<title id="pageTitle">{e(title)}</title>'),
         (r'<meta name="description" content="[^"]*">', f'<meta name="description" content="{e(desc)}">'),
-        (r'<meta name="robots" content="[^"]*">', '<meta name="robots" content="noindex, follow">'),
+        (r'<meta name="robots" content="[^"]*">', f'<meta name="robots" content="{robots_meta(slug)}">'),
         (r'<link rel="canonical" id="canonicalTag" href="[^"]*">', f'<link rel="canonical" id="canonicalTag" href="{url}">'),
         (r'<meta property="og:type" content="[^"]*">', '<meta property="og:type" content="article">'),
         (r'<meta property="og:title" id="ogTitle" content="[^"]*">', f'<meta property="og:title" id="ogTitle" content="{e(title)}">'),
@@ -263,14 +271,14 @@ def bake_page(slug, doc, title, desc, lang='en'):
         # Website-only release replacement: never writes the stored record.
         # All three current releases have seven pages, including the final notes.
         replacements = {
-            'cjhq-statement-brit-milah-belgium-en.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-en-20261122-r2.pdf',
-            'cjhq-statement-brit-milah-belgium-fr-20261122.pdf': 'cjhq-statement-brit-milah-belgium-fr-20261122-r2.pdf',
-            'cjhq-statement-brit-milah-belgium-nl.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-nl-20261122-r2.pdf',
+            'cjhq-statement-brit-milah-belgium-en.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-en-20261122-r3.pdf',
+            'cjhq-statement-brit-milah-belgium-fr-20261122.pdf': 'cjhq-statement-brit-milah-belgium-fr-20261122-r3.pdf',
+            'cjhq-statement-brit-milah-belgium-nl.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-nl-20261122-r3.pdf',
         }
         for key in ('body_en', 'body_fr'):
             for old, new in replacements.items():
                 data[key] = data[key].replace(old, new)
-        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r2"')
+        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r3"')
     # Carried into the prerender block so updatePageMeta() can restore the
     # exact baked descriptions at runtime, even before the backend answers.
     data['desc_en'] = page_desc_en(doc, data['title_en'] or 'CJHQ Community Notice')
@@ -332,6 +340,7 @@ def main():
         desc = page_desc_en(doc, title)
         short = title.split('·')[0].strip() or 'CJHQ Community Notice'
         page_html = HTML_TMPL.format(slug=slug, origin=ORIGIN, target=slug + '/',
+                                     robots=robots_meta(slug),
                                      title=html.escape(title, quote=True),
                                      title_h1=html.escape(title),
                                      desc=html.escape(desc, quote=True))
@@ -343,6 +352,7 @@ def main():
         # the SPA (never the /<slug>/ target, which would loop onto itself).
         baked = bake_page(slug, doc, title, desc) or HTML_TMPL.format(
             slug=slug, origin=ORIGIN, target='?/' + slug,
+            robots=robots_meta(slug),
             title=html.escape(title, quote=True), title_h1=html.escape(title),
             desc=html.escape(desc, quote=True))
         # The direct address /<slug> is the link people actually type and
