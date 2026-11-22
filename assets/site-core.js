@@ -617,10 +617,13 @@ let RESOURCE_OVERRIDES_CACHE = {};
 // This fails closed instead: with no DOMPurify the content is escaped and
 // renders as visible text. Formatting is lost for that visitor, nothing
 // executes, and no content silently disappears.
+// ADD_ATTR target: the default allowlist drops target, which silently
+// rewrites admin-set PDF buttons that must open in a new tab. rel is
+// already allowed, so rel="noopener" on those links is preserved.
 function cjhqSanitizeHtml(v){
   const raw = (v == null) ? '' : String(v);
   if(typeof DOMPurify !== 'undefined' && DOMPurify && typeof DOMPurify.sanitize === 'function'){
-    return DOMPurify.sanitize(raw);
+    return DOMPurify.sanitize(raw, {ADD_ATTR: ['target']});
   }
   console.warn('[CJHQ] DOMPurify unavailable - rendering admin HTML as escaped text.');
   return cjhqEscapeHtml(raw);
