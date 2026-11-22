@@ -272,7 +272,7 @@ export const SPECIAL_INFO_COUNTRIES = [
 export const PARTNERS_DATA = [
   {type:'img', src:"/assets/renewal-canada.webp", w:320, h:111, alt:"Renewal Canada", url:"https://www.renewalcanada.org/"},
   {type:'img', src:"/assets/yaldei.webp", w:320, h:213, alt:"Yaldei", url:"https://www.yaldei.org/"},
-  {type:'img', src:"/assets/optimized/refuah-v-chesed.webp", w:505, h:220, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
+  {type:'img', src:"/assets/optimized/refuah-v-chesed-friedman-bilingual.webp", w:1200, h:371, alt:"Refuah V'Chesed", url:"https://refuahvchesed.org/"},
   {type:'img', src:"/assets/hatzolah-montreal.webp", w:184, h:220, alt:"Hatzolah Montreal", url:"https://www.hatzoloh.ca/en/"},
   {type:'img', src:"/assets/optimized/chavivim.webp", w:220, h:220, alt:"Chavivim", url:"https://chavivim.org/montreal"},
   {type:'img', src:"/assets/optimized/chaverim-montreal.webp", w:220, h:220, alt:"Chaverim Montreal", url:"https://chaverim.ca/"},
