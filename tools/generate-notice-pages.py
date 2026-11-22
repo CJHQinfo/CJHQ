@@ -261,6 +261,7 @@ def bake_page(slug, doc, title, desc, lang='en'):
             'body_format': field(doc, 'body_format') or None}
     if slug == 'brit-milah-belgium':
         # Website-only release replacement: never writes the stored record.
+        # All three current releases have seven pages, including the final notes.
         replacements = {
             'cjhq-statement-brit-milah-belgium-en.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-en-20261122-r2.pdf',
             'cjhq-statement-brit-milah-belgium-fr-20261122.pdf': 'cjhq-statement-brit-milah-belgium-fr-20261122-r2.pdf',
