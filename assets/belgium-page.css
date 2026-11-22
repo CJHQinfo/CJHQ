@@ -1,0 +1,16 @@
+/* Scoped editorial hierarchy for the Belgium statement page, both languages. */
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) { --belgium-ink: #181242; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageTitle { font-size:clamp(2.1rem,4.8vw,3rem) !important;line-height:1.14;letter-spacing:-.025em;color:#181242;margin:8px 0 28px;max-width:850px; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody { color:#343645 !important;font-size:1.0625rem !important;line-height:1.8 !important; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody > div > p { margin:0 0 22px; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody > div > p:first-child { font-size:1.25rem !important;line-height:1.65 !important;color:#414054 !important;border-left:4px solid #b4b0cb;padding:0 0 0 24px;margin:0 0 32px; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody h2 { font-size:1.85rem;line-height:1.25;color:#181242;margin:50px 0 18px;padding-top:26px;border-top:1px solid #dedde8; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody h3 { font-size:1.35rem !important;line-height:1.35 !important; }
+#page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody > div > div { margin-top:36px !important;margin-bottom:36px !important; }
+@media(max-width:600px){
+ #page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) section { padding-top:26px; }
+ #page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageTitle{font-size:2rem !important;margin-bottom:24px;}
+ #page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody > div > p:first-child{font-size:1.15rem !important;padding-left:17px;}
+ #page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody h2{font-size:1.6rem;margin-top:38px;}
+ #page-custom:has(a[href*="cjhq-statement-brit-milah-belgium"]) #customPageBody a[href$=".pdf"]{min-height:44px;box-sizing:border-box;}
+}
