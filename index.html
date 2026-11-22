@@ -3484,6 +3484,13 @@ function checkCurrentPath(opts){
     if(pageName){
       setLang('fr');
       goPage(pageName, {skipHistory:true, skipScroll:opts.skipScroll});
+    } else if(/^[a-z0-9][a-z0-9-]*$/i.test(frPath)){
+      // A live admin-created page can have a baked French address (/fr/<slug>,
+      // generated beside /<slug>): show the same custom page in French instead
+      // of 404ing. Unknown names still fall through to the normal 404 once the
+      // backend confirms no such page is live.
+      setLang('fr');
+      goPage(frPath, {skipHistory:true, skipScroll:opts.skipScroll, deferUnknown:opts.deferUnknown});
     } else show404(path, {skipHistory:true});
     return;
   }

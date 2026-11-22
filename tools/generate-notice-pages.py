@@ -165,7 +165,7 @@ def _js_json(obj):
              .replace('\u2028', '\\u2028').replace('\u2029', '\\u2029'))
 
 
-def bake_page(slug, doc, title, desc):
+def bake_page(slug, doc, title, desc, lang='en'):
     """The full site (index.html) with this notice already on screen.
 
     The visitor gets the page itself at /<slug>/ - no bounce through the
@@ -181,7 +181,7 @@ def bake_page(slug, doc, title, desc):
     except OSError:
         return None
     e = lambda v: html.escape(v, quote=True)
-    url = f'{ORIGIN}/{slug}'
+    url = f'{ORIGIN}/{slug}' if lang == 'en' else f'{ORIGIN}/fr/{slug}'
     img = f'{ORIGIN}/assets/og-notice-{slug}.png'
     subs = [
         (r'<title id="pageTitle">[^<]*</title>', f'<title id="pageTitle">{e(title)}</title>'),
@@ -205,8 +205,21 @@ def bake_page(slug, doc, title, desc):
         src, n = re.subn(pat, lambda m, r=rep: r, src, count=1)
         if n != 1:
             return None
-    # hreflang alternates point at the homepage; they do not apply here.
-    src = re.sub(r'<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?', '', src)
+    if lang == 'fr':
+        src, n = re.subn(r'<html lang="en">',
+                         '<html lang="fr" class="lang-fr" data-force-lang="fr">', src, count=1)
+        if n != 1:
+            return None
+        src = src.replace('<meta property="og:locale" content="en_CA">',
+                          '<meta property="og:locale" content="fr_CA">', 1)
+        src = src.replace('<meta property="og:locale:alternate" content="fr_CA">',
+                          '<meta property="og:locale:alternate" content="en_CA">', 1)
+    # Reciprocal hreflang alternates: the English address, its French
+    # counterpart at /fr/<slug>, and the English address as the default.
+    alt = (f'<link rel="alternate" hreflang="en" href="{ORIGIN}/{slug}">\n'
+           f'<link rel="alternate" hreflang="fr" href="{ORIGIN}/fr/{slug}">\n'
+           f'<link rel="alternate" hreflang="x-default" href="{ORIGIN}/{slug}">\n')
+    src = re.sub(r'(<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?)+', alt, src, count=1)
     data = {'slug': slug, 'title_en': field(doc, 'title_en'), 'title_fr': field(doc, 'title_fr'),
             'body_en': field(doc, 'body_en'), 'body_fr': field(doc, 'body_fr'),
             'body_format': field(doc, 'body_format') or None}
@@ -301,6 +314,29 @@ def main():
             # the 301 to /<slug>/ that a directory alone gets.
             with open(direct_html, 'w', encoding='utf-8') as f:
                 f.write(baked)
+            # French address /fr/<slug>: same baked page with French meta and
+            # data-force-lang="fr", so the link opens directly in French.
+            title_fr = field(doc, 'title_fr') or title
+            fr_body_txt = strip_html(field(doc, 'body_fr'))
+            desc_fr = (field(doc, 'home_blurb_fr') or fr_body_txt[:160]
+                       or 'Informations et nouvelles officielles du Conseil des Juifs Hassidiques du Qu\u00e9bec.')
+            fr_baked = bake_page(slug, doc, title_fr, desc_fr, lang='fr')
+            fr_dir = os.path.join(ROOT, 'fr', slug)
+            fr_index = os.path.join(fr_dir, 'index.html')
+            fr_html = os.path.join(ROOT, 'fr', f'{slug}.html')
+            if not fr_baked:
+                collisions.append(slug + '(fr)')
+            elif (os.path.exists(fr_html)
+                    and MARKER not in open(fr_html, encoding='utf-8', errors='ignore').read(4096)) \
+                 or (os.path.isdir(fr_dir)
+                    and not (os.path.isfile(fr_index) and MARKER in open(fr_index, encoding='utf-8', errors='ignore').read(4096))):
+                collisions.append(slug + '(fr)')
+            else:
+                os.makedirs(fr_dir, exist_ok=True)
+                with open(fr_index, 'w', encoding='utf-8') as f:
+                    f.write(fr_baked)
+                with open(fr_html, 'w', encoding='utf-8') as f:
+                    f.write(fr_baked)
         fr_short = (field(doc, 'title_fr').split('\u00b7')[0].strip()
                     or 'AVIS COMMUNAUTAIRE').upper()
         if fr_short == short.upper():
@@ -329,6 +365,21 @@ def main():
         if (m and m.group(1) not in live and os.path.isfile(p)
                 and marker in open(p, encoding='utf-8', errors='ignore').read(4096)):
             os.remove(p); removed.append(name)
+    fr_root = os.path.join(ROOT, 'fr')
+    if os.path.isdir(fr_root):
+        for name in os.listdir(fr_root):
+            d = os.path.join(fr_root, name)
+            idxp = os.path.join(d, 'index.html')
+            if (os.path.isdir(d) and re.fullmatch(r'[a-z0-9][a-z0-9-]{0,60}', name)
+                    and name not in live and os.path.isfile(idxp)
+                    and marker in open(idxp, encoding='utf-8', errors='ignore').read(4096)):
+                shutil.rmtree(d); removed.append('fr/' + name + '/')
+        for name in os.listdir(fr_root):
+            m = re.fullmatch(r'([a-z0-9][a-z0-9-]{0,60})\.html', name)
+            p = os.path.join(fr_root, name)
+            if (m and m.group(1) not in live and os.path.isfile(p)
+                    and marker in open(p, encoding='utf-8', errors='ignore').read(4096)):
+                os.remove(p); removed.append('fr/' + name)
     assets = os.path.join(ROOT, 'assets')
     for name in os.listdir(assets):
         m = re.fullmatch(r'og-notice-([a-z0-9][a-z0-9-]{0,60})\.png', name)
