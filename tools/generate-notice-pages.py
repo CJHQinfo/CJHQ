@@ -259,6 +259,17 @@ def bake_page(slug, doc, title, desc, lang='en'):
     data = {'slug': slug, 'title_en': field(doc, 'title_en'), 'title_fr': field(doc, 'title_fr'),
             'body_en': field(doc, 'body_en'), 'body_fr': field(doc, 'body_fr'),
             'body_format': field(doc, 'body_format') or None}
+    if slug == 'brit-milah-belgium':
+        # Website-only release replacement: never writes the stored record.
+        replacements = {
+            'cjhq-statement-brit-milah-belgium-en.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-en-20261122-r2.pdf',
+            'cjhq-statement-brit-milah-belgium-fr-20261122.pdf': 'cjhq-statement-brit-milah-belgium-fr-20261122-r2.pdf',
+            'cjhq-statement-brit-milah-belgium-nl.pdf?v=20261122b': 'cjhq-statement-brit-milah-belgium-nl-20261122-r2.pdf',
+        }
+        for key in ('body_en', 'body_fr'):
+            for old, new in replacements.items():
+                data[key] = data[key].replace(old, new)
+        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r2"')
     # Carried into the prerender block so updatePageMeta() can restore the
     # exact baked descriptions at runtime, even before the backend answers.
     data['desc_en'] = page_desc_en(doc, data['title_en'] or 'CJHQ Community Notice')

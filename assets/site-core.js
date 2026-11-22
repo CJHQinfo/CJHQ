@@ -702,6 +702,17 @@ function cjhqPageIsPublic(p){ return cjhqPageLifecycle(p) === 'live'; }
 // stored page changes; a box that doesn't line up is left exactly as it was.
 function cjhqWireOnThisPage(root){
   if(!root) return;
+  // Published November 22 releases supersede these stored download targets.
+  // Keep the database record untouched while avoiding old browser PDF caches.
+  const releaseFiles = {
+    '/local-updates/cjhq-statement-brit-milah-belgium-en.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-en-20261122-r2.pdf',
+    '/local-updates/cjhq-statement-brit-milah-belgium-fr-20261122.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-fr-20261122-r2.pdf',
+    '/local-updates/cjhq-statement-brit-milah-belgium-nl.pdf': '/local-updates/cjhq-statement-brit-milah-belgium-nl-20261122-r2.pdf'
+  };
+  root.querySelectorAll('a[href]').forEach(a=>{
+    const url = new URL(a.href, location.href);
+    if(url.origin === location.origin && releaseFiles[url.pathname]) a.href = releaseFiles[url.pathname];
+  });
   root.querySelectorAll('[data-en], [data-fr]').forEach(scope=>{
     const heads = [...scope.querySelectorAll('h2')];
     const label = [...scope.querySelectorAll('p, div, span, strong')].find(el =>
