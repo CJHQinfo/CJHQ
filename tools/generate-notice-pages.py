@@ -82,6 +82,38 @@ def strip_html(s):
     return re.sub(r'\s+', ' ', html.unescape(s)).strip()
 
 
+def page_desc_en(doc, title):
+    """English share description: the homepage blurb, else the start of the
+    body (a leading repeat of the title trimmed), else the site default.
+    updatePageMeta() in assets/site-core.js recomputes this the same way for
+    the live page, so raw HTML and post-load metadata agree."""
+    body_txt = strip_html(field(doc, 'body_en'))
+    if title and body_txt.lower().startswith(title.lower()):
+        body_txt = body_txt[len(title):].lstrip(' .·')
+    return (field(doc, 'home_blurb_en') or body_txt[:160]
+            or 'Official community information and updates from the Jewish Hasidic Council of Quebec.')
+
+
+def page_desc_fr(doc):
+    fr_body_txt = strip_html(field(doc, 'body_fr'))
+    return (field(doc, 'home_blurb_fr') or fr_body_txt[:160]
+            or 'Informations et nouvelles officielles du Conseil des Juifs Hassidiques du Québec.')
+
+
+def bake_body_html(body, fmt):
+    """Static copy of what the inline render script puts on screen, so the
+    notice is also readable without JavaScript (plain-text extraction, some
+    crawlers). HTML bodies are admin-authored - the Firestore rules let only
+    staff write them - and the script still re-renders through DOMPurify in
+    the browser, so the live page is sanitised exactly as before. Text bodies
+    are escaped here the same way the script escapes them."""
+    b = str(body or '')
+    if fmt != 'text':
+        return b
+    paras = [x.strip() for x in re.split(r'\n{2,}', b.replace('\r\n', '\n').replace('\r', '\n'))]
+    return ''.join('<p>' + html.escape(x).replace('\n', '<br>') + '</p>' for x in paras if x)
+
+
 def make_card(en_short, fr_short, out_path):
     """Same classic treatment as the static pages' cards: og-cards.py's build()
        (logo lockup + footer strip lifted from og-image.png, Lora labels)."""
@@ -126,6 +158,7 @@ HTML_TMPL = """<!DOCTYPE html>
 <meta name="twitter:title" content="{title}">
 <meta name="twitter:description" content="{desc}">
 <meta name="twitter:image" content="{origin}/assets/og-notice-{slug}.png">
+<meta name="twitter:image:alt" content="{title} — CJHQ">
 <link rel="icon" href="/favicon.ico">
 <style>
   body{{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -197,6 +230,9 @@ def bake_page(slug, doc, title, desc, lang='en'):
         (r'<meta name="twitter:title" id="twitterTitle" content="[^"]*">', f'<meta name="twitter:title" id="twitterTitle" content="{e(title)}">'),
         (r'<meta name="twitter:description" id="twitterDescription" content="[^"]*">', f'<meta name="twitter:description" id="twitterDescription" content="{e(desc)}">'),
         (r'<meta name="twitter:image" id="twitterImage" content="[^"]*">', f'<meta name="twitter:image" id="twitterImage" content="{img}">'),
+        # Twitter alt matched the generic CJHQ brand line while og:image:alt
+        # carried the notice title; both now name the notice, per the audit.
+        (r'<meta name="twitter:image:alt" id="twitterImageAlt" content="[^"]*">', f'<meta name="twitter:image:alt" id="twitterImageAlt" content="{e(title)} — CJHQ">'),
         (r'<script defer src="/assets/purify\.min\.js"></script>', '<script src="/assets/purify.min.js"></script>'),
         (r'<div class="page active" id="page-home">', '<div class="page" id="page-home">'),
         (r'<div class="page" id="page-custom">', '<div class="page active" id="page-custom">'),
@@ -223,6 +259,10 @@ def bake_page(slug, doc, title, desc, lang='en'):
     data = {'slug': slug, 'title_en': field(doc, 'title_en'), 'title_fr': field(doc, 'title_fr'),
             'body_en': field(doc, 'body_en'), 'body_fr': field(doc, 'body_fr'),
             'body_format': field(doc, 'body_format') or None}
+    # Carried into the prerender block so updatePageMeta() can restore the
+    # exact baked descriptions at runtime, even before the backend answers.
+    data['desc_en'] = page_desc_en(doc, data['title_en'] or 'CJHQ Community Notice')
+    data['desc_fr'] = page_desc_fr(doc)
     t_en, t_fr = html.escape(data['title_en']), html.escape(data['title_fr'])
     title_html = f'<span data-en>{t_en}</span><span data-fr>{t_fr}</span>'
     render = ('<script>\n'
@@ -241,7 +281,11 @@ def bake_page(slug, doc, title, desc, lang='en'):
     m = pat.search(src)
     if not m:
         return None
-    src = src[:m.start()] + m.group(1) + title_html + m.group(2) + m.group(3) + '\n' + render + src[m.end():]
+    # The approved body is baked into the container itself (same text, no new
+    # words); the script below re-renders it sanitised when JavaScript runs.
+    body_html = ('<div data-en>' + bake_body_html(data['body_en'], data['body_format']) + '</div>'
+                 '<div data-fr>' + bake_body_html(data['body_fr'] or data['body_en'], data['body_format']) + '</div>')
+    src = src[:m.start()] + m.group(1) + title_html + m.group(2) + body_html + m.group(3) + '\n' + render + src[m.end():]
     note = (f'<!-- {MARKER} - do not edit by hand. Baked copy of index.html with the '
             f'temporary page "{slug}" already rendered; rewritten every run, deleted '
             'when the page leaves its live window. -->\n')
@@ -273,11 +317,7 @@ def main():
             skipped.append(slug)
             continue
         title = field(doc, 'title_en') or 'CJHQ Community Notice'
-        body_txt = strip_html(field(doc, 'body_en'))
-        if title and body_txt.lower().startswith(title.lower()):
-            body_txt = body_txt[len(title):].lstrip(' .·')
-        desc = field(doc, 'home_blurb_en') or body_txt[:160] \
-               or 'Official community information and updates from the Jewish Hasidic Council of Quebec.'
+        desc = page_desc_en(doc, title)
         short = title.split('·')[0].strip() or 'CJHQ Community Notice'
         page_html = HTML_TMPL.format(slug=slug, origin=ORIGIN, target=slug + '/',
                                      title=html.escape(title, quote=True),
@@ -317,9 +357,7 @@ def main():
             # French address /fr/<slug>: same baked page with French meta and
             # data-force-lang="fr", so the link opens directly in French.
             title_fr = field(doc, 'title_fr') or title
-            fr_body_txt = strip_html(field(doc, 'body_fr'))
-            desc_fr = (field(doc, 'home_blurb_fr') or fr_body_txt[:160]
-                       or 'Informations et nouvelles officielles du Conseil des Juifs Hassidiques du Qu\u00e9bec.')
+            desc_fr = page_desc_fr(doc)
             fr_baked = bake_page(slug, doc, title_fr, desc_fr, lang='fr')
             fr_dir = os.path.join(ROOT, 'fr', slug)
             fr_index = os.path.join(fr_dir, 'index.html')

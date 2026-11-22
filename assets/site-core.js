@@ -1772,6 +1772,76 @@ const PAGE_META = {
 };
 function updatePageMeta(name){
   const isFr = document.documentElement.classList.contains('lang-fr');
+  // Custom (admin-created) notice pages carry their own metadata, baked by
+  // tools/generate-notice-pages.py. The router passes the slug here, while
+  // setLang() only knows the container id and passes "custom"; both resolve
+  // to the slug from the address. Without this branch these pages fell
+  // through to the homepage meta below: generic title and description, a
+  // /custom canonical and og:url, and "index, follow" in place of the baked
+  // "noindex, follow".
+  const preMeta = window.__CJHQ_PRERENDER;
+  let customSlug = null;
+  if(name === 'custom'){
+    const m = /^\/(?:fr\/)?([a-z0-9][a-z0-9-]*)\/?$/i.exec(location.pathname);
+    customSlug = m ? m[1].toLowerCase() : (preMeta ? preMeta.slug : null);
+  } else if(CUSTOM_PAGES_PUBLIC[name] || (preMeta && preMeta.slug === name)){
+    customSlug = name;
+  }
+  const customPage = customSlug
+    ? (CUSTOM_PAGES_PUBLIC[customSlug]
+       || (preMeta && preMeta.slug === customSlug ? preMeta : null))
+    : null;
+  if(customPage){
+    const cTitle = (isFr ? (customPage.title_fr || customPage.title_en)
+                         : (customPage.title_en || customPage.title_fr)) || 'CJHQ Community Notice';
+    // Same description rule as the generator: homepage blurb, else the first
+    // 160 characters of the plain-text body (a leading repeat of the title
+    // trimmed, English only), else the site default. The prerender block
+    // carries the generator's own values, so raw HTML and post-load metadata
+    // agree exactly while the baked copy is current.
+    const stripTags = (s) => {
+      const t = document.createElement('textarea');
+      t.innerHTML = String(s || '').replace(/<[^>]+>/g, ' ');
+      return t.value.replace(/\s+/g, ' ').trim();
+    };
+    let bodyEn = stripTags(customPage.body_en);
+    const titleEn = customPage.title_en || 'CJHQ Community Notice';
+    if(titleEn && bodyEn.toLowerCase().startsWith(titleEn.toLowerCase())){
+      bodyEn = bodyEn.slice(titleEn.length).replace(/^[ .·]+/, '');
+    }
+    const cDesc = isFr
+      ? (customPage.desc_fr || customPage.home_blurb_fr || stripTags(customPage.body_fr).slice(0, 160)
+         || 'Informations et nouvelles officielles du Conseil des Juifs Hassidiques du Québec.')
+      : (customPage.desc_en || customPage.home_blurb_en || bodyEn.slice(0, 160)
+         || 'Official community information and updates from the Jewish Hasidic Council of Quebec.');
+    // Self-reference the address actually being viewed (EN or FR), normalized
+    // to the canonical no-trailing-slash form the generator bakes.
+    const cUrl = location.origin + location.pathname.replace(/\/+$/, '');
+    document.getElementById('pageTitle').textContent = cTitle;
+    document.title = cTitle;
+    const setCustomMeta = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
+    setCustomMeta('ogTitle', cTitle);
+    setCustomMeta('ogDescription', cDesc);
+    setCustomMeta('ogUrl', cUrl);
+    setCustomMeta('twitterTitle', cTitle);
+    setCustomMeta('twitterDescription', cDesc);
+    if(preMeta && preMeta.slug === customSlug){
+      // The page's own share card exists whenever the page is baked.
+      const cImg = location.origin + '/assets/og-notice-' + customSlug + '.png';
+      setCustomMeta('ogImage', cImg);
+      setCustomMeta('twitterImage', cImg);
+      setCustomMeta('ogImageAlt', cTitle + ' — CJHQ');
+      setCustomMeta('twitterImageAlt', cTitle + ' — CJHQ');
+    }
+    const cCanon = document.getElementById('canonicalTag');
+    if(cCanon) cCanon.setAttribute('href', cUrl);
+    // Temporary notice pages stay out of the index by design; the baked file
+    // says noindex and the live page now keeps it that way.
+    const cRobots = document.querySelector('meta[name="robots"]');
+    if(cRobots) cRobots.setAttribute('content', 'noindex, follow');
+    document.querySelectorAll('meta[name="description"]').forEach(m => m.setAttribute('content', cDesc));
+    return;
+  }
   const meta = PAGE_META[name] || PAGE_META['home'];
   const title = isFr ? meta.fr : meta.en;
   const desc  = isFr ? meta.desc_fr : meta.desc_en;
@@ -1981,6 +2051,9 @@ function chooseLang(lang){
       const nextPath = lang === 'fr' ? '/fr/' + m[1] : '/' + m[1];
       if(location.pathname !== nextPath) history.pushState({page:pageName}, '', nextPath);
     }
+    // setLang() already refreshed title/description above, but before the
+    // address moved; refresh again so canonical and og:url match the new URL.
+    updatePageMeta(pageName);
   }
 }
 document.getElementById('btnEN').addEventListener('click', ()=>chooseLang('en'));
