@@ -305,7 +305,7 @@ def bake_page(slug, doc, title, desc, lang='en'):
         for key in ('body_en', 'body_fr'):
             for old, new in replacements.items():
                 data[key] = data[key].replace(old, new)
-        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r4"')
+        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r5"')
     # Carried into the prerender block so updatePageMeta() can restore the
     # exact baked descriptions at runtime, even before the backend answers.
     data['desc_en'] = page_desc_en(doc, data['title_en'] or 'CJHQ Community Notice')
