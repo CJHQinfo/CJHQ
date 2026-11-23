@@ -1639,6 +1639,13 @@ function goPage(name, opts){
     if(typeof show404 === 'function'){ show404(name, opts); return; }
   }
   const builtIn = document.getElementById('page-'+name);
+  // Lean baked notice pages (tools/generate-notice-pages.py) ship only the
+  // custom, resources and 404 views. A built-in route whose view isn't in this
+  // document must load as a real page, not fall through to the 404 below.
+  if(!builtIn && Object.prototype.hasOwnProperty.call(FRENCH_ROUTE_BY_PAGE, name)){
+    location.assign(pathForPage(name));
+    return;
+  }
   if(builtIn){
     document.documentElement.classList.remove('route-pending');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
