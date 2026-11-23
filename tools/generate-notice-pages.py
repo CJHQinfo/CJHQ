@@ -258,6 +258,33 @@ def bake_page(slug, doc, title, desc, lang='en'):
                           '<meta property="og:locale" content="fr_CA">', 1)
         src = src.replace('<meta property="og:locale:alternate" content="fr_CA">',
                           '<meta property="og:locale:alternate" content="en_CA">', 1)
+    # Per-page WebPage structured data. The raw copy of index.html carries the
+    # HOMEPAGE pageSchema (url cjhq.org, English name/description) on every
+    # notice page - including inLanguage "en-CA" on the French one - and
+    # updatePageMeta() never touches pageSchema, so it stayed wrong after
+    # render too. Bake this page's own URL, title, description and language.
+    schema = {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        '@id': url + '#webpage',
+        'url': url,
+        'name': field(doc, 'title_' + lang) or title,
+        'description': desc,
+        'inLanguage': 'fr-CA' if lang == 'fr' else 'en-CA',
+        'isPartOf': {'@id': ORIGIN + '/#website'},
+        'about': {'@id': ORIGIN + '/#organization'},
+        'primaryImageOfPage': img,
+    }
+    schema_json = json.dumps(schema, ensure_ascii=False, indent=2)
+    schema_json = (schema_json.replace('<', '\\u003c').replace('>', '\\u003e')
+                   .replace('&', '\\u0026'))
+    schema_block = ('<script type="application/ld+json" id="pageSchema">\n'
+                    + schema_json + '\n</script>')
+    src, n = re.subn(r'<script type="application/ld\+json" id="pageSchema">.*?</script>',
+                     lambda m: schema_block, src, count=1, flags=re.S)
+    if n != 1:
+        return None
+
     # Reciprocal hreflang alternates: the English address, its French
     # counterpart at /fr/<slug>, and the English address as the default.
     alt = (f'<link rel="alternate" hreflang="en" href="{ORIGIN}/{slug}">\n'
@@ -278,7 +305,7 @@ def bake_page(slug, doc, title, desc, lang='en'):
         for key in ('body_en', 'body_fr'):
             for old, new in replacements.items():
                 data[key] = data[key].replace(old, new)
-        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r3"')
+        src = src.replace('/assets/site-core.js"', '/assets/site-core.js?v=20261122r4"')
     # Carried into the prerender block so updatePageMeta() can restore the
     # exact baked descriptions at runtime, even before the backend answers.
     data['desc_en'] = page_desc_en(doc, data['title_en'] or 'CJHQ Community Notice')
@@ -306,6 +333,47 @@ def bake_page(slug, doc, title, desc, lang='en'):
     body_html = ('<div data-en>' + bake_body_html(data['body_en'], data['body_format']) + '</div>'
                  '<div data-fr>' + bake_body_html(data['body_fr'] or data['body_en'], data['body_format']) + '</div>')
     src = src[:m.start()] + m.group(1) + title_html + m.group(2) + body_html + m.group(3) + '\n' + render + src[m.end():]
+    # A baked notice used to ship the ENTIRE site: every hidden route view
+    # (home, about, privacy, terms, 404, the consent-letter form, ...), both
+    # languages, 12 h1s in one DOM. Rendering crawlers apply the CSS and see
+    # only the notice, but raw-HTML readers (AI crawlers, text extractors)
+    # got the whole site with the notice buried in it. Keep only what this
+    # page's own function needs:
+    #   page-custom    - the notice itself (baked active)
+    #   page-resources - header site search opens its results in this view
+    #   page-404       - the router's target if the page expires or is unpublished
+    # The views are flat siblings inside <main>, so each removal runs from one
+    # view's opening tag to the next one's.
+    KEEP_VIEWS = {'page-custom', 'page-resources', 'page-404'}
+    main_start = src.find('<main id="mainContent"')
+    main_end = src.find('</main>', main_start)
+    if main_start == -1 or main_end == -1:
+        return None
+    marks = [(main_start + m.start(), m.group(1)) for m in
+             re.finditer(r'<div class="page[^"]*" id="(page-[a-z0-9-]+)"[^>]*>',
+                         src[main_start:main_end])]
+    bounds = marks + [(main_end, None)]
+    cuts = [(s, e) for (s, name), (e, _) in zip(bounds, bounds[1:]) if name not in KEEP_VIEWS]
+    for s, e in reversed(cuts):
+        src = src[:s] + src[e:]
+
+    # With the SPA views gone, in-place routing has nowhere to swap to: the
+    # static links must be plain hyperlinks again. Dropping data-page makes
+    # the delegated click handler ignore them (their hrefs are already real
+    # addresses), and on the French page each points at the French route so a
+    # French visitor stays in French. Runtime-rendered links (search results,
+    # nav additions) keep their own data-page and still route in place.
+    if lang == 'fr':
+        fr_routes = {'home': '/fr/', 'resources': '/fr/ressources',
+                     'stay-informed': '/fr/actualites', 'about': '/fr/a-propos',
+                     'contact': '/fr/contact', 'privacy': '/fr/politique-de-confidentialite',
+                     'terms': '/fr/conditions-utilisation', 'accessibility': '/fr/accessibilite',
+                     'child-travel-consent': '/fr/consentement-voyage-enfant'}
+        src = re.sub(r'href="([^"]*)" data-page="([a-z0-9-]+)"',
+                     lambda m: 'href="%s" data-page="%s"' % (fr_routes.get(m.group(2), m.group(1)), m.group(2)),
+                     src)
+    src = re.sub(r'\sdata-page="[^"]*"', '', src)
+
     note = (f'<!-- {MARKER} - do not edit by hand. Baked copy of index.html with the '
             f'temporary page "{slug}" already rendered; rewritten every run, deleted '
             'when the page leaves its live window. -->\n')
