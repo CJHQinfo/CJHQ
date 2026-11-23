@@ -1185,6 +1185,7 @@ function continueToInsuranceProvider(){
 
 function renderContactCats(){
   const wrap = document.getElementById('catToggle');
+  if(!wrap) return;
   contactCats.forEach((c,i)=>{
     wrap.innerHTML += `<button class="${i===0?'active':''}" onclick="selectCat(this,${i})"><span data-en>${c.en}</span><span data-fr>${c.fr}</span></button>`;
   });
@@ -1233,6 +1234,7 @@ function renderInitiatives(){
 
 function renderNewsTopics(){
   const wrap = document.getElementById('topicList');
+  if(!wrap) return;
   newsTopics.forEach(t=>{
     wrap.innerHTML += `<div class="topic-item">${iconSVG(t.icon)}<span><span data-en>${t.en}</span><span data-fr>${t.fr}</span></span></div>`;
   });
