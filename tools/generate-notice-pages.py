@@ -206,6 +206,38 @@ def _js_json(obj):
              .replace('\u2028', '\\u2028').replace('\u2029', '\\u2029'))
 
 
+def inline_support_views(src):
+    # The two support views kept above are invisible to visitors (display:none
+    # until the router needs them), but raw-HTML readers - AI crawlers, link
+    # previewers, text extractors - read them as page content: a second and
+    # third <h1> ("Trusted Government Resources", "We couldn't find that
+    # page") and "No resources match your search" next to the notice. Ship
+    # each one as a string inside an inline script that writes it back in the
+    # same place while the page is parsed. Anything that runs JavaScript gets
+    # the identical DOM, before site-core.js runs; text extractors skip script
+    # contents. '<' is escaped so the markup cannot close the script early.
+    for view in ('page-resources', 'page-404'):
+        main_start = src.find('<main id="mainContent"')
+        main_end = src.find('</main>', main_start)
+        marks = [(main_start + m.start(), m.group(1)) for m in
+                 re.finditer(r'<div class="page[^"]*" id="(page-[a-z0-9-]+)"[^>]*>',
+                             src[main_start:main_end])]
+        bounds = marks + [(main_end, None)]
+        seg = next(((s, e) for (s, name), (e, _) in zip(bounds, bounds[1:]) if name == view), None)
+        if seg is None:
+            return None
+        s, e = seg
+        html = src[s:e]
+        if '<script' in html:
+            return None
+        payload = json.dumps(html, ensure_ascii=False).replace('<', '\\u003c')
+        src = (src[:s]
+               + '<script>document.currentScript.insertAdjacentHTML("beforebegin",'
+               + payload + ');document.currentScript.remove();</script>\n'
+               + src[e:])
+    return src
+
+
 def bake_page(slug, doc, title, desc, lang='en'):
     """The full site (index.html) with this notice already on screen.
 
@@ -356,6 +388,10 @@ def bake_page(slug, doc, title, desc, lang='en'):
     cuts = [(s, e) for (s, name), (e, _) in zip(bounds, bounds[1:]) if name not in KEEP_VIEWS]
     for s, e in reversed(cuts):
         src = src[:s] + src[e:]
+
+    src = inline_support_views(src)
+    if src is None:
+        return None
 
     # With the SPA views gone, in-place routing has nowhere to swap to: the
     # static links must be plain hyperlinks again. Dropping data-page makes
