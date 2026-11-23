@@ -3630,6 +3630,9 @@ async function renderAiCheckSummary(){
  * clarity.microsoft.com (project yn69ejs5t6).
  * ================================================================ */
 const ANALYTICS_URL = 'https://analyticssummary-158970385688.us-east1.run.app/';
+// Cookieless all-visits count (Counterscale on Cloudflare). Read by the
+// counterscalestats Cloud Function with the same staff-only sign-in rule.
+const COUNTERSTATS_URL = 'https://counterscalestats-158970385688.us-east1.run.app/';
 let ANALYTICS_BUSY = false;
 
 function anaFmtSecs(s){
@@ -3675,6 +3678,57 @@ const ANALYTICS_EVENT_LABELS = {
 
 let ANA_LAST = null;
 let ANA_LINKS = [];
+
+/* ---------- Counterscale: cookieless count of every visit ---------- */
+// GA4 and Clarity only count visitors who tapped "Accept statistics".
+// Counterscale sets no cookies and stores nothing personal, so it counts
+// every visit. This card sits above the GA cards; if the counterscalestats
+// function is not deployed yet or errors, it degrades to one quiet line.
+function counterstatsCardHtml(cs, customRange){
+  const esc = cjhqEscapeHtml;
+  if(!cs || !cs.totals){
+    return '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section><h3>All visits (cookieless count)</h3>'
+      + '<p class="adm-muted" style="margin:0;">Not available right now. The Google Analytics cards below are unaffected.</p></section></section>';
+  }
+  const t = cs.totals;
+  const kpi = (v, l) => `<div class="ana-kpi"><b>${v}</b><span>${l}</span></div>`;
+  const daily = cs.daily || [];
+  const maxDay = Math.max(1, ...daily.map(d => d.views));
+  const tbl = (title, head, list, cells) => {
+    if(!list || !list.length) return '';
+    return '<section><h3>' + esc(title) + '</h3><table class="ana-table"><tr>' + head.map(h => '<th' + (h.r ? ' style="text-align:right"' : '') + '>' + esc(h.t) + '</th>').join('') + '</tr>'
+      + list.map(x => '<tr>' + cells.map(c => `<td class="${c.cls||''}">${c.f(x)}</td>`).join('') + '</tr>').join('') + '</table></section>';
+  };
+  let html = '<section class="adm-dash" style="display:block; margin-bottom:18px;"><section>'
+    + '<h3>All visits (cookieless count)</h3>'
+    + '<p class="adm-muted" style="margin:0 0 10px;">' + esc(cs.label || '') + (customRange ? ' - custom dates are not supported here yet, showing a standard period.' : '')
+    + ' Counts every visit with no cookies, including visitors who did not tap Accept statistics. The Google Analytics cards below only count visitors who accepted.</p>'
+    + '<div class="ana-kpis">'
+    + kpi(anaFmtNum(t.visitors), 'Visitors')
+    + kpi(anaFmtNum(t.views), 'Page views')
+    + kpi(anaFmtNum(t.viewsPerVisitor), 'Views per visitor')
+    + (t.bounceRate == null ? '' : kpi(Math.round(t.bounceRate) + '%', 'Bounce rate'))
+    + '</div>';
+  if(daily.length){
+    html += '<h3 style="margin-top:6px;">Views per day</h3><div class="ana-chart">'
+      + daily.map(d => `<div title="${esc(d.date)}: ${d.views} views, ${d.visitors} visitors" style="height:${Math.max(2, Math.round(d.views / maxDay * 100))}%"></div>`).join('')
+      + '</div>';
+  }
+  html += '</section></section>';
+  const pages = tbl('Pages (all visits)', [{t:'Page'},{t:'Views',r:1}], cs.pages, [
+    { cls:'p', f: x => `<a href="${esc(location.origin + x.path)}" target="_blank" rel="noopener">${esc(x.path)}</a>` },
+    { cls:'n', f: x => anaFmtNum(x.views) },
+  ]);
+  const refs = tbl('Came from (all visits)', [{t:'Referrer'},{t:'Views',r:1}], cs.referrers, [
+    { f: x => esc(x.referrer) }, { cls:'n', f: x => anaFmtNum(x.views) },
+  ]);
+  const countries = tbl('Countries (all visits)', [{t:'Country'},{t:'Views',r:1}], cs.countries, [
+    { f: x => esc(x.country) }, { cls:'n', f: x => anaFmtNum(x.views) },
+  ]);
+  const extra = [pages, refs, countries].filter(Boolean);
+  if(extra.length) html += '<div class="adm-dash" style="margin-bottom:18px;">' + extra.join('') + '</div>';
+  return html;
+}
 
 // "20260924" -> 2026-09-24, "2026092414" -> 2026-09-24 14:00
 function anaFmtBucket(k){
@@ -3862,9 +3916,18 @@ async function renderAnalytics(){
   const esc = cjhqEscapeHtml;
   try{
     const token = await adminUser.getIdToken();
-    const r = await fetch(ANALYTICS_URL + qs, { headers: { authorization: 'Bearer ' + token } });
+    // The cookieless count is fetched alongside GA; its failure never takes
+    // the GA cards down with it. Custom date ranges are a GA-only feature -
+    // the Counterscale card keeps the standard periods and says so.
+    const csQs = range === 'custom' ? '' : qs;
+    const [r, csRes] = await Promise.all([
+      fetch(ANALYTICS_URL + qs, { headers: { authorization: 'Bearer ' + token } }),
+      fetch(COUNTERSTATS_URL + csQs, { headers: { authorization: 'Bearer ' + token } }).catch(() => null),
+    ]);
     const data = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    let cs = null;
+    if(csRes && csRes.ok) cs = await csRes.json().catch(() => null);
     const g = data.ga, t = g.totals;
     ANA_LAST = data;
     anaRenderTrackingList();
@@ -3872,6 +3935,7 @@ async function renderAnalytics(){
     const kpi = (v, l) => `<div class="ana-kpi"><b>${v}</b><span>${l}</span></div>`;
     const rows = (list, cols) => list.length ? list.map(x => '<tr>' + cols.map(c => `<td class="${c.cls||''}">${c.f(x)}</td>`).join('') + '</tr>').join('') : `<tr><td colspan="${cols.length}" class="adm-muted">Nothing recorded yet.</td></tr>`;
     let html = '';
+    html += counterstatsCardHtml(cs, range === 'custom');
     html += '<div class="ana-kpis">'
       + kpi(anaFmtNum(t.visitors), 'Visitors')
       + kpi(anaFmtNum(t.visits), 'Visits')
