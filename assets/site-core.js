@@ -1754,6 +1754,9 @@ function trackedLocation(){
   }catch(e){ return href; }
 }
 function trackPageView(){
+  // Counterscale (cookieless, totals only) counts every view, with the
+  // same admin / consent-letter exclusions; GA4 below stays consent-gated.
+  counterscalePageview();
   try{
     // Statistics fire only for visitors who accepted, and never for the
     // Child Travel Consent Letter page or the admin panel.
@@ -1766,6 +1769,67 @@ function trackPageView(){
     });
   }catch(e){ /* analytics is never allowed to break routing */ }
 }
+
+// ---------- COUNTERSCALE (cookieless visit counts) ----------
+// Counterscale counts visits with no cookies, no fingerprinting and no
+// personal data - totals only. Nothing is stored on the visitor's device,
+// so it does not wait for the statistics banner: it counts every visit,
+// including the ones GA4 and Clarity only see after "Accept statistics".
+// The banner, GA4 and Clarity are untouched by this block.
+//
+// OFF until the Cloudflare worker exists: set enabled to true and
+// reporterUrl to the deployed worker's collect address. With
+// enabled = false this block does nothing at all.
+//
+// The tracker is the Counterscale package's own code, vendored at
+// assets/counterscale-tracker.js (auto-start disabled): page views are
+// reported from trackPageView() below, after the router has settled the
+// URL and the title, so client-side navigation is counted under the right
+// path. The worker's own /tracker.js loader is not used: its auto mode
+// reads the canonical link before the router updates it.
+const CJHQ_COUNTERSCALE = {
+  enabled: true,
+  siteId: 'cjhq',
+  reporterUrl: 'https://counterscale.hartstein-portal.workers.dev/collect'
+};
+function counterscaleAllowedHere(){
+  // The admin panel and the Child Travel Consent Letter stay
+  // statistics-free, the same rule GA4 and Clarity follow. Checked on
+  // every view, so client-side navigation onto those pages is covered.
+  return !(window.cjhqStats && window.cjhqStats.isExcluded && window.cjhqStats.isExcluded());
+}
+function loadCounterscale(){
+  try{
+    if(!CJHQ_COUNTERSCALE.enabled || !CJHQ_COUNTERSCALE.reporterUrl) return;
+    if(!counterscaleAllowedHere()) return;
+    if(document.getElementById('cjhq-counterscale-tracker')) return;
+    const s = document.createElement('script');
+    s.id = 'cjhq-counterscale-tracker';
+    s.async = true;
+    s.src = SITE_BASE_PATH + '/assets/counterscale-tracker.js';
+    s.onload = function(){
+      try{
+        if(window.CSTrack && CSTrack.init && !CSTrack.isInitialized()){
+          CSTrack.init({
+            siteId: CJHQ_COUNTERSCALE.siteId,
+            reporterUrl: CJHQ_COUNTERSCALE.reporterUrl,
+            autoTrackPageviews: false
+          });
+          counterscalePageview(); // the page already loaded before the tracker arrived
+        }
+      }catch(e){ /* analytics is never allowed to break the site */ }
+    };
+    document.head.appendChild(s);
+  }catch(e){ /* analytics is never allowed to break the site */ }
+}
+function counterscalePageview(){
+  try{
+    if(!window.CSTrack || !CSTrack.isInitialized || !CSTrack.isInitialized()) return;
+    if(!counterscaleAllowedHere()) return;
+    CSTrack.trackPageview({ url: location.pathname + location.search });
+  }catch(e){ /* analytics is never allowed to break routing */ }
+}
+loadCounterscale();
 
 function updateUrlForPage(name){
   const path = pathForPage(name);
