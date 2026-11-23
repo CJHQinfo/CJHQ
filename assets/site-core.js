@@ -1713,6 +1713,21 @@ function goPage(name, opts){
     document.getElementById('page-custom').classList.add('active');
     return;
   }
+  // The backend could not answer (see fetchPublicCustomPages). A baked notice
+  // page cannot be proven expired, so keep it - with its own title, canonical
+  // and robots - rather than show a 404 marked "noindex". The generator
+  // deletes a baked page once it leaves its live window, so an expired notice
+  // does not reach this branch.
+  const preKeep = window.__CJHQ_PRERENDER;
+  if(window.__cjhqPagesUnavailable && preKeep && preKeep.slug === name){
+    document.documentElement.classList.remove('route-pending');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-custom').classList.add('active');
+    cjhqWireOnThisPage(document.getElementById('customPageBody'));
+    highlightActiveNav(name);
+    updatePageMeta(name);
+    return;
+  }
   if(typeof show404 === 'function') show404(name, opts);
 }
 // Report a view to GA4 after the URL and the title are both settled. Wrapped
