@@ -1661,7 +1661,7 @@ window.__CJHQ_PRERENDER = {"slug": "brit-milah-belgium", "title_en": "Protecting
 </div>
 
 
-<script src="/assets/site-core.js?v=20261122r4"></script>
+<script src="/assets/site-core.js?v=20261122r5"></script>
 
 <script>
 
@@ -2373,6 +2373,12 @@ const CJHQ_PUBLIC_INDEX_DOC = 'public_pages';   // page_settings/public_pages
 const CJHQ_PUBLIC_INDEX_MAX = 40;               // a sane ceiling on the fan-out
 
 async function fetchPublicCustomPages(){
+  // __cjhqPagesUnavailable: the backend could not answer at all (Firebase did
+  // not load, network or App Check refused the read - e.g. a search-engine
+  // renderer). goPage() then keeps a baked notice page on screen instead of
+  // turning it into a 404 with "noindex". A page the backend positively says
+  // is not live still 404s.
+  window.__cjhqPagesUnavailable = !firebaseReady;
   if(!firebaseReady) return Object.values(CUSTOM_PAGES_CACHE);
   const fs = window.__fbFirestore;
   let slugs = [];
@@ -2382,6 +2388,7 @@ async function fetchPublicCustomPages(){
   }catch(e){
     // Fail closed on custom pages only - never take the site's routing down.
     console.warn('[CJHQ] public page index unavailable:', e);
+    window.__cjhqPagesUnavailable = true;
     return [];
   }
   const wanted = slugs.filter(x => typeof x === 'string' && x.trim())
